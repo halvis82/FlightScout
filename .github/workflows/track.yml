@@ -27,4 +27,6 @@ jobs:
           FLIGHTSCOUT_TRACKER_KEY: ${{ secrets.FLIGHTSCOUT_TRACKER_KEY }}
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
           FLIGHTSCOUT_CACHE: ${{ runner.temp }}/fs-cache
-        run: uv run flightscout track -v --budget ${{ inputs.budget || '12' }}
+        run: |
+          uv run --extra browser playwright install --with-deps chromium
+          uv run --extra browser flightscout track -v --budget ${{ inputs.budget || '12' }}

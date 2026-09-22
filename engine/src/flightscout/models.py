@@ -69,6 +69,24 @@ class Slice(BaseModel):
         return sorted({s.carrier for s in self.segments})
 
 
+class Fare(BaseModel):
+    name: str | None = None  # "Saver", "Main Basic", ...
+    price: float
+    features: list[str] = Field(default_factory=list)  # bags, changes, refunds
+
+
+class Offer(BaseModel):
+    """One seller on Google's booking page for an itinerary."""
+
+    seller: str
+    is_airline: bool
+    fares: list[Fare]
+
+    @property
+    def cheapest(self) -> float:
+        return min(f.price for f in self.fares)
+
+
 class Itinerary(BaseModel):
     """A single bookable ticket (one price, one booking link)."""
 
@@ -81,6 +99,8 @@ class Itinerary(BaseModel):
     seller_kind: Literal["airline", "ota", "metasearch"] = "metasearch"
     self_transfer: bool = False  # connections inside this ticket are not protected
     baggage: dict | None = None
+    offers: list[Offer] | None = None  # seller breakdown, when fetched
+    price_insight: str | None = None  # e.g. "$461 is low, usually $680 to $2,850"
     warnings: list[str] = Field(default_factory=list)
     fetched_at: datetime = Field(default_factory=now_utc)
 
@@ -216,6 +236,7 @@ class SearchQuery(BaseModel):
     sources: list[Source] = Field(default_factory=lambda: ["google", "kiwi"])
     departure_flex_days: int = 0
     return_flex_days: int = 0
+    nearby_km: int = 0  # also search airports within this radius of each side
 
 
 class SearchResult(BaseModel):

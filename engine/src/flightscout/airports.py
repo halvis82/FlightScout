@@ -105,6 +105,47 @@ def expand(codes: list[str] | str) -> list[str]:
     return out
 
 
+# Airports that are closer in practice than the map suggests. TIJ is reachable
+# from San Diego through the Cross Border Xpress bridge (you walk across from
+# a terminal on the US side).
+LINKED: dict[str, list[str]] = {
+    "SAN": ["TIJ"],
+    "TIJ": ["SAN"],
+}
+
+
+def nearby(code: str, radius_km: float, include_medium: bool = True) -> list[str]:
+    """Airports with scheduled service within ``radius_km`` of ``code``,
+    nearest first, plus hand curated links like SAN and TIJ."""
+    base = get(code)
+    if not base or radius_km <= 0:
+        return []
+    hits = []
+    for a in _db().values():
+        if a.iata == base.iata or (a.size != "L" and not include_medium):
+            continue
+        d = haversine_km(base.iata, a.iata)
+        if d <= radius_km:
+            hits.append((d, a.iata))
+    hits.sort()
+    out = [c for _, c in hits]
+    for c in LINKED.get(base.iata, []):
+        if c not in out:
+            out.insert(0, c)
+    return out
+
+
+def expand_nearby(codes: list[str], radius_km: float, limit: int = 6) -> list[str]:
+    """Expand metros, then add nearby airports around each code (capped)."""
+    base = expand(codes)
+    out = list(base)
+    for c in base:
+        for n in nearby(c, radius_km):
+            if n not in out and len(out) < len(base) + limit:
+                out.append(n)
+    return out
+
+
 def haversine_km(a: str, b: str) -> float:
     pa, pb = get(a), get(b)
     if not pa or not pb:

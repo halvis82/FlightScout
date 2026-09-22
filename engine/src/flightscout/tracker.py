@@ -112,6 +112,26 @@ def check(watch: dict[str, Any], budget: int = 12) -> list[dict]:
     return out
 
 
+def _enrich_best(obs: list[dict]) -> None:
+    """Add Google's seller breakdown to the cheapest Google observation when a
+    browser is available (GitHub Actions installs one)."""
+    try:
+        from .sellers_live import enrich
+    except ImportError:
+        return
+    g = [o for o in obs if o.get("trip") and o["source"] == "google"]
+    if not g:
+        return
+    best = min(g, key=lambda o: o["price"])
+    trip = Trip(**best["trip"])
+    try:
+        enrich([trip], 1)
+    except Exception as e:
+        log.warning("seller breakdown failed: %s", e)
+        return
+    best["trip"] = trip.model_dump(mode="json")
+
+
 def run_all(client, only: str | None = None, budget: int = 12) -> dict[str, int]:
     """Tracker entry point: fetch every active watch, check it, push results."""
     watches = client.tracker_watches() if client.tracker_key and not client.token else client.watches()
@@ -123,6 +143,7 @@ def run_all(client, only: str | None = None, budget: int = 12) -> dict[str, int]
             continue
         obs = check(w, budget=budget)
         if obs:
+            _enrich_best(obs)
             if client.tracker_key and not client.token:
                 client.tracker_push(w["id"], obs)
             else:

@@ -106,6 +106,8 @@ def search(
     max_stops: Optional[int] = typer.Option(None, "--max-stops"),
     currency: Optional[str] = typer.Option(None, "--currency", "-c"),
     sources: str = typer.Option("google,kiwi", help="google,kiwi,serpapi"),
+    nearby: int = typer.Option(0, "--nearby", help="Also search airports within this many km"),
+    sellers: int = typer.Option(0, "--sellers", help="Fetch the seller breakdown for the top N Google results (needs a browser)"),
     limit: int = typer.Option(15),
     as_json: bool = JsonOpt,
     save: bool = SaveOpt,
@@ -117,13 +119,30 @@ def search(
     q = SearchQuery(origins=_codes(origin), destinations=_codes(destination), departure=_date(depart),
                     return_date=_date(ret) if ret else None, cabin=cabin, adults=adults, max_stops=max_stops,
                     currency=_cur(currency), sources=[s.strip().lower() for s in sources.split(",") if s.strip()],
-                    departure_flex_days=flex, return_flex_days=flex if ret else 0)
+                    departure_flex_days=flex, return_flex_days=flex if ret else 0, nearby_km=nearby)
     with con.status("searching..."):
         res = run(q)
+    if sellers:
+        from .sellers_live import enrich
+
+        with con.status("reading seller prices..."):
+            enrich(res.trips, sellers)
     _save("search", q.model_dump(mode="json"), res, save)
     if as_json:
         return _emit_json(res)
     out.print(_trips_table(res.trips, limit, f"{','.join(q.origins)} to {','.join(q.destinations)}"))
+    if sellers:
+        for i, tr in enumerate(res.trips, 1):
+            for tk in tr.tickets:
+                if not tk.offers:
+                    continue
+                out.print(f"[bold]#{i}[/bold] {'-'.join(tr.route)}  [dim]{tk.price_insight or ''}[/dim]")
+                for o in tk.offers:
+                    tag = "[green]airline[/green]" if o.is_airline else "[yellow]agency[/yellow]"
+                    fares = ", ".join(f"{f.name or 'fare'} {f.price:,.0f}" for f in o.fares)
+                    out.print(f"   {o.seller} ({tag}): {fares}")
+                for w in tk.warnings:
+                    out.print(f"   [yellow]! {w}[/yellow]")
     if res.errors:
         con.print(f"[yellow]source errors: {res.errors}[/yellow]")
     if res.google_url:

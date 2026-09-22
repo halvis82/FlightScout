@@ -36,8 +36,8 @@ def merge(items: list[Itinerary]) -> list[Itinerary]:
 
 def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> SearchResult:
     q = q.model_copy(update={
-        "origins": airports.expand(q.origins),
-        "destinations": airports.expand(q.destinations),
+        "origins": airports.expand_nearby(q.origins, q.nearby_km),
+        "destinations": airports.expand_nearby(q.destinations, q.nearby_km),
     })
     srcs = [s for s in q.sources if s in SOURCES and (s != "serpapi" or serpapi.enabled())]
     errors: dict[str, str] = {}

@@ -68,15 +68,17 @@ def search_flights(origins: list[str], destinations: list[str], departure: date,
                    return_date: date | None = None, currency: str | None = None,
                    cabin: Literal["economy", "premium", "business", "first"] = "economy",
                    adults: int = 1, max_stops: int | None = None, flex_days: int = 0,
-                   limit: int = 15) -> dict:
+                   nearby_km: int = 0, limit: int = 15) -> dict:
     """Search single ticket itineraries on Google Flights and Kiwi.com. Airports are IATA codes; metro codes
-    like NYC, LON, PAR, BAY (SFO/OAK/SJC) expand automatically. flex_days searches +/- days on Kiwi."""
+    like NYC, LON, PAR, BAY (SFO/OAK/SJC) expand automatically. flex_days searches +/- days on Kiwi.
+    nearby_km adds airports within that radius (SAN also adds TIJ via the Cross Border Xpress)."""
     from .models import SearchQuery
     from .search import search
 
     q = SearchQuery(origins=origins, destinations=destinations, departure=departure, return_date=return_date,
                     currency=_cur(currency), cabin=cabin, adults=adults, max_stops=max_stops,
-                    departure_flex_days=flex_days, return_flex_days=flex_days if return_date else 0)
+                    departure_flex_days=flex_days, return_flex_days=flex_days if return_date else 0,
+                    nearby_km=nearby_km)
     res = search(q).model_dump(mode="json")
     _save("search", q.model_dump(mode="json"), res)
     return {"trips": _compact(res["trips"], limit), "errors": res["errors"], "google_flights_url": res["google_url"],
