@@ -347,6 +347,52 @@ def open_cmd(page: str = typer.Argument("", help="search, explore, watchlist, pl
     webbrowser.open(f"{base}/{page}".rstrip("/"))
 
 
+PLIST = "com.flightscout.runner"
+
+
+@app.command()
+def serve(port: int = typer.Option(8787), install: bool = typer.Option(False, "--install", help="Start automatically at login (macOS)"),
+          uninstall: bool = typer.Option(False, "--uninstall")):
+    """Run the local runner: the website sends searches here so they come from your own IP."""
+    import os
+    import shutil
+    import subprocess
+    from pathlib import Path
+
+    plist = Path.home() / "Library" / "LaunchAgents" / f"{PLIST}.plist"
+    if uninstall:
+        subprocess.run(["launchctl", "unload", str(plist)], check=False)
+        plist.unlink(missing_ok=True)
+        out.print("Local runner removed from login items.")
+        return
+    if install:
+        exe = shutil.which("flightscout") or sys.argv[0]
+        log = Path.home() / "Library" / "Logs" / "flightscout-runner.log"
+        plist.parent.mkdir(parents=True, exist_ok=True)
+        plist.write_text(f"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>{PLIST}</string>
+  <key>ProgramArguments</key><array><string>{exe}</string><string>serve</string><string>--port</string><string>{port}</string></array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>{log}</string>
+  <key>StandardErrorPath</key><string>{log}</string>
+</dict></plist>
+""")
+        subprocess.run(["launchctl", "unload", str(plist)], check=False, capture_output=True)
+        subprocess.run(["launchctl", "load", str(plist)], check=True)
+        out.print(f"Local runner installed. It starts at login on http://127.0.0.1:{port} (log: {log}).")
+        return
+    import uvicorn
+
+    os.environ["FLIGHTSCOUT_LOCAL"] = "1"
+    from .api import app as api_app
+
+    out.print(f"FlightScout local runner on http://127.0.0.1:{port}. The website will use it automatically.")
+    uvicorn.run(api_app, host="127.0.0.1", port=port, log_level="warning")
+
+
 @app.command()
 def mcp():
     """Run the MCP server on stdio (add to Claude Code with `claude mcp add flightscout -- flightscout mcp`)."""

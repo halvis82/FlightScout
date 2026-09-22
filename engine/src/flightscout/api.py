@@ -17,8 +17,25 @@ from .sources import google
 
 app = FastAPI(title="FlightScout engine", version="0.1.0")
 
+# Local runner mode (`flightscout serve`): the website calls this engine from
+# the user's browser, so searches come from their home IP. Only the configured
+# site origins may read responses (CORS), and Chrome's Private Network Access
+# preflight is answered.
+LOCAL = os.environ.get("FLIGHTSCOUT_LOCAL") == "1"
+if LOCAL:
+    from fastapi.middleware.cors import CORSMiddleware
+
+    origins = [o for o in os.environ.get(
+        "FLIGHTSCOUT_ORIGINS", "https://flightscout-app.vercel.app,http://localhost:3000").split(",") if o]
+
+    app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST", "OPTIONS"],
+                       allow_headers=["*"], max_age=600,
+                       allow_private_network=True)
+
 
 def auth(x_engine_key: str | None = Header(default=None)) -> None:
+    if LOCAL:
+        return  # bound to 127.0.0.1 and CORS restricted
     key = os.environ.get("ENGINE_KEY")
     if key and x_engine_key != key:
         raise HTTPException(status_code=401, detail="bad engine key")
@@ -56,7 +73,9 @@ class ExploreResult(BaseModel):
 @app.get("/health")
 @app.get("/api/health")
 def health() -> dict:
-    return {"ok": True}
+    from . import __version__
+
+    return {"ok": True, "local": LOCAL, "version": __version__}
 
 
 @app.post("/search", dependencies=[Depends(auth)])

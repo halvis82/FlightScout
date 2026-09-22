@@ -93,7 +93,14 @@ def search(q: SearchQuery, top_n: int = 3) -> list[Itinerary]:
         sort_by=SortBy.CHEAPEST,
     )
     client = SearchFlights()
-    results = client.search(filters, top_n=top_n, currency=q.currency) or []
+    try:
+        results = client.search(filters, top_n=top_n, currency=q.currency) or []
+    except Exception as e:
+        msg = str(e)
+        if "429" in msg or "unusual traffic" in msg.lower() or "captcha" in msg.lower():
+            raise RuntimeError("rate_limited: Google is throttling this server. Try the local runner "
+                               "(`flightscout serve`) or again later.") from e
+        raise
     out: list[Itinerary] = []
     for r in results:
         parts = list(r) if isinstance(r, tuple) else [r]
