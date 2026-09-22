@@ -1,0 +1,180 @@
+@import "tailwindcss";
+
+/* Theme: system by default, overridable with data-theme on <html>. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  --bg: #f7f8fa;
+  --surface: #ffffff;
+  --surface-2: #f1f3f6;
+  --border: #e3e6eb;
+  --border-strong: #cfd4dc;
+  --fg: #0f1720;
+  --muted: #5b6573;
+  --faint: #8b94a1;
+  --accent: #1d5fd6;
+  --accent-fg: #ffffff;
+  --accent-soft: #e6eefc;
+  --good: #0f8a4f;
+  --good-soft: #e3f5ec;
+  --warn: #a86400;
+  --warn-soft: #fdf1dc;
+  --bad: #c2372b;
+  --bad-soft: #fbe7e5;
+  --info: #5b4bc4;
+  --info-soft: #ecebfb;
+  --ring: #1d5fd655;
+  --shadow: 0 1px 2px rgb(15 23 32 / 0.05), 0 1px 1px rgb(15 23 32 / 0.03);
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --seq-1: #cde2fb;
+  --seq-2: #9ec5f4;
+  --seq-3: #6da7ec;
+  --seq-4: #3987e5;
+  --seq-5: #256abf;
+  --seq-6: #184f95;
+  --seq-7: #0d366b;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c0f14;
+    --surface: #131820;
+    --surface-2: #1a2029;
+    --border: #252c37;
+    --border-strong: #343c49;
+    --fg: #e7ebf0;
+    --muted: #9aa4b2;
+    --faint: #6b7584;
+    --accent: #5b9bff;
+    --accent-fg: #0b1220;
+    --accent-soft: #16253d;
+    --good: #3ccf8e;
+    --good-soft: #10291e;
+    --warn: #f0b04a;
+    --warn-soft: #2d2311;
+    --bad: #ff7a6e;
+    --bad-soft: #321614;
+    --info: #a79bff;
+    --info-soft: #1f1b3a;
+    --ring: #5b9bff55;
+    --shadow: none;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --seq-1: #0d366b;
+    --seq-2: #104281;
+    --seq-3: #184f95;
+    --seq-4: #1c5cab;
+    --seq-5: #2a78d6;
+    --seq-6: #5598e7;
+    --seq-7: #9ec5f4;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0c0f14;
+  --surface: #131820;
+  --surface-2: #1a2029;
+  --border: #252c37;
+  --border-strong: #343c49;
+  --fg: #e7ebf0;
+  --muted: #9aa4b2;
+  --faint: #6b7584;
+  --accent: #5b9bff;
+  --accent-fg: #0b1220;
+  --accent-soft: #16253d;
+  --good: #3ccf8e;
+  --good-soft: #10291e;
+  --warn: #f0b04a;
+  --warn-soft: #2d2311;
+  --bad: #ff7a6e;
+  --bad-soft: #321614;
+  --info: #a79bff;
+  --info-soft: #1f1b3a;
+  --ring: #5b9bff55;
+  --shadow: none;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --seq-1: #0d366b;
+  --seq-2: #104281;
+  --seq-3: #184f95;
+  --seq-4: #1c5cab;
+  --seq-5: #2a78d6;
+  --seq-6: #5598e7;
+  --seq-7: #9ec5f4;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "tnum" 1, "cv11" 1;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+.maplibregl-popup-content {
+  background: var(--surface) !important;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px !important;
+  padding: 8px 10px !important;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.15) !important;
+  font-size: 12px;
+}
+.maplibregl-popup-tip {
+  display: none;
+}
+.maplibregl-ctrl-attrib {
+  font-size: 10px;
+}
+.maplibregl-ctrl-group {
+  background: var(--surface) !important;
+  border: 1px solid var(--border);
+}
+.maplibregl-ctrl-group button + button {
+  border-top-color: var(--border) !important;
+}
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: var(--map-icon-filter, none);
+}
+:root[data-theme="dark"] {
+  --map-icon-filter: invert(1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --map-icon-filter: invert(1);
+  }
+}

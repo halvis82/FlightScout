@@ -1,0 +1,53 @@
+import "server-only";
+import { db, schema } from "./db";
+import { engine } from "./engine";
+import { addDays } from "./format";
+import { watchToQuery } from "./watch-logic";
+import { recordObservations } from "./observations";
+import { tripsToObservations } from "./watch-logic";
+import { getSettings } from "./settings";
+import type { PlanResult, SearchResult, Trip } from "./types";
+
+type Watch = typeof schema.watches.$inferSelect;
+
+export async function checkWatch(w: Watch, userId: string) {
+  const q = watchToQuery(w);
+  const s = await getSettings(userId);
+  const blocked = s.sellerRules.filter((r) => r.mode === "block");
+  const res = await engine<SearchResult>("/search", {
+    ...q,
+    ...(blocked.length ? { seller_rules: Object.fromEntries(blocked.map((r) => [r.seller, r.mode])) } : {}),
+  });
+  let trips: Trip[] = res.trips;
+  const errors = { ...res.errors };
+  if (w.includeSplit) {
+    try {
+      const plan = await engine<PlanResult>("/plan", {
+        origins: w.origins,
+        destinations: w.destinations,
+        depart_start: w.departStart,
+        depart_end: w.departEnd,
+        return_start: q.return_date ? addDays(w.departStart, w.nightsMin ?? 7) : null,
+        return_end: q.return_date ? addDays(w.departEnd, w.nightsMax ?? w.nightsMin ?? 7) : null,
+        currency: w.currency,
+        cabin: w.cabin,
+        adults: w.adults,
+        ...s.planner,
+      });
+      trips = [...trips, ...plan.trips.filter((t) => t.tickets.length > 1)];
+      Object.assign(errors, plan.errors);
+    } catch (e) {
+      errors.plan = (e as Error).message;
+    }
+  }
+  const result = await recordObservations(w, tripsToObservations(trips, w.destinations));
+  await db.insert(schema.searches).values({
+    userId,
+    kind: "search",
+    origin: "web",
+    summary: `Watch check: ${w.name}`,
+    query: q,
+    payload: { ...res, trips, errors },
+  });
+  return { ...result, trips: trips.length, errors };
+}
