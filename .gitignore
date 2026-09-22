@@ -1,0 +1,20 @@
+# reference repos cloned for research
+_reference/
+
+# deps and builds
+node_modules/
+.next/
+dist/
+.venv/
+__pycache__/
+*.pyc
+
+# env and local data
+.env
+.env.*
+!.env.example
+.vercel/
+*.sqlite
+*.db
+
+.DS_Store
