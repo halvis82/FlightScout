@@ -5,17 +5,19 @@ type In = {
   kind: "search" | "plan" | "explore" | "dates" | "trip";
   query: Record<string, unknown>;
   payload: unknown;
-  origin?: "web" | "cli" | "mcp";
+  origin?: "web" | "cli" | "mcp" | "local";
 };
 
-// Results found elsewhere (CLI, MCP, agents) pushed into the user's history.
+// Results found elsewhere (CLI, MCP, agents, the browser's local runner) pushed
+// into the user's history. Search and plan results also feed matching watches.
 export const POST = route(async (req) => {
   const userId = await requireUser(req);
   const p = await body<In>(req);
   if (!["search", "plan", "explore", "dates", "trip"].includes(p.kind)) throw new HttpError(400, "bad kind");
   if (!p.query || typeof p.query !== "object") throw new HttpError(400, "query is required");
   const payload = Array.isArray(p.payload) ? { items: p.payload } : p.payload;
-  const saved = await saveSearch(userId, p.kind, p.origin ?? "cli", p.query, payload);
+  const origin = ["web", "cli", "mcp", "local"].includes(p.origin ?? "") ? p.origin! : "cli";
+  const saved = await saveSearch(userId, p.kind, origin, p.query, payload);
   const base = process.env.BETTER_AUTH_URL ?? new URL(req.url).origin;
   return json({ ...saved, url: `${base}/history/${saved.id}` }, 201);
 });

@@ -14,6 +14,10 @@ const LIMITS: Record<EngineKind, { guest: number; user: number }> = {
   dates: { guest: 20, user: 200 },
 };
 
+// Follow up explore batches (1 and 2) of the same interaction have their own
+// looser bucket so one explore counts as one unit against the explore limit.
+const EXPLORE_MORE = { guest: 60, user: 600 };
+
 const WINDOW_MS = 3600_000;
 
 // In memory fallback when the database is unreachable.
@@ -29,9 +33,10 @@ export function clientIp(req: Request) {
   );
 }
 
-export async function enforceRateLimit(req: Request, kind: EngineKind, userId: string | null) {
-  const limit = userId ? LIMITS[kind].user : LIMITS[kind].guest;
-  const key = `${kind}:${userId ? `u:${userId}` : `ip:${clientIp(req)}`}`;
+export async function enforceRateLimit(req: Request, kind: EngineKind, userId: string | null, followUp = false) {
+  const lim = followUp && kind === "explore" ? EXPLORE_MORE : LIMITS[kind];
+  const limit = userId ? lim.user : lim.guest;
+  const key = `${kind}${followUp ? "+" : ""}:${userId ? `u:${userId}` : `ip:${clientIp(req)}`}`;
   const windowStart = new Date(Math.floor(Date.now() / WINDOW_MS) * WINDOW_MS);
   let count: number;
   try {

@@ -2,9 +2,10 @@
 import { ArrowLeftRight, Search, Sparkles } from "lucide-react";
 import { AirportInput, PlaceChips } from "./airport-input";
 import { useApp } from "./app-context";
-import { Button, Field, Input, Segmented, Select, Switch } from "./ui";
-import { addDays, isoDate } from "@/lib/format";
-import { CURRENCIES, type Source } from "@/lib/types";
+import { DateRangeField } from "./date-picker";
+import { Button, Field, Segmented, Select, Switch } from "./ui";
+import { addDays, dayDiff, isoDate } from "@/lib/format";
+import type { Source } from "@/lib/types";
 
 export type SearchForm = {
   from: string[];
@@ -23,7 +24,7 @@ export type SearchForm = {
 };
 
 export function defaultForm(currency: string, origins: string[] = []): SearchForm {
-  const d = addDays(isoDate(new Date()), 30);
+  const d = addDays(isoDate(new Date()), 14);
   return {
     from: origins,
     to: [],
@@ -35,7 +36,7 @@ export function defaultForm(currency: string, origins: string[] = []): SearchFor
     adults: 1,
     stops: "any",
     currency,
-    sources: ["google", "kiwi"],
+    sources: ["google", "kiwi", "volaris"],
     smart: false,
     nearby: 0,
   };
@@ -80,6 +81,8 @@ export function paramsToForm(p: URLSearchParams, base: SearchForm): SearchForm {
   };
 }
 
+const OPT = "h-8 rounded-lg border-transparent bg-surface-2 text-xs hover:bg-surface-3";
+
 export function SearchFormView({
   value,
   onChange,
@@ -94,7 +97,8 @@ export function SearchFormView({
   const f = value;
   const set = (p: Partial<SearchForm>) => onChange({ ...f, ...p });
   const { currency } = useApp();
-  const today = isoDate(new Date());
+  const rt = f.tripType === "roundtrip";
+  const prices = f.from.length && f.to.length ? { from: f.from, to: f.to, tripDays: rt ? dayDiff(f.depart, f.ret) : null, currency } : null;
 
   return (
     <form
@@ -102,120 +106,92 @@ export function SearchFormView({
         e.preventDefault();
         onSubmit();
       }}
-      className="rounded-xl border border-border bg-surface p-3 shadow-[var(--shadow)] sm:p-4"
+      className="rounded-2xl border border-border bg-surface p-3 shadow-[var(--shadow)] sm:p-4"
     >
-      <div className="mb-3 flex flex-wrap items-center gap-2">
+      <div className="mb-3 flex flex-wrap items-center gap-1.5">
         <Segmented
           size="sm"
           value={f.tripType}
-          onChange={(tripType) => set({ tripType })}
+          onChange={(tripType) => set({ tripType, ret: tripType === "roundtrip" && f.ret <= f.depart ? addDays(f.depart, 7) : f.ret })}
           options={[
             { value: "roundtrip", label: "Round trip" },
             { value: "oneway", label: "One way" },
           ]}
         />
-        <Select className="h-7 text-xs" value={f.cabin} onChange={(e) => set({ cabin: e.target.value as SearchForm["cabin"] })}>
+        <Select className={OPT} value={f.adults} onChange={(e) => set({ adults: Number(e.target.value) })} aria-label="Passengers">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+            <option key={n} value={n}>
+              {n} {n > 1 ? "adults" : "adult"}
+            </option>
+          ))}
+        </Select>
+        <Select className={OPT} value={f.cabin} onChange={(e) => set({ cabin: e.target.value as SearchForm["cabin"] })} aria-label="Cabin">
           <option value="economy">Economy</option>
           <option value="premium">Premium economy</option>
           <option value="business">Business</option>
           <option value="first">First</option>
         </Select>
-        <Select className="h-7 text-xs" value={f.adults} onChange={(e) => set({ adults: Number(e.target.value) })}>
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
-            <option key={n} value={n}>
-              {n} adult{n > 1 ? "s" : ""}
-            </option>
-          ))}
-        </Select>
-        <Select className="h-7 text-xs" value={f.stops} onChange={(e) => set({ stops: e.target.value })}>
+        <Select className={OPT} value={f.stops} onChange={(e) => set({ stops: e.target.value })} aria-label="Stops">
           <option value="any">Any stops</option>
-          <option value="0">Nonstop only</option>
-          <option value="1">1 stop max</option>
-          <option value="2">2 stops max</option>
+          <option value="0">Nonstop</option>
+          <option value="1">1 stop or fewer</option>
+          <option value="2">2 stops or fewer</option>
         </Select>
-        <Select className="h-7 text-xs" value={f.nearby} onChange={(e) => set({ nearby: Number(e.target.value) })} title="Also search airports near your origin and destination">
+        <Select className={OPT} value={f.flex} onChange={(e) => set({ flex: Number(e.target.value) })} aria-label="Flexible dates">
+          <option value={0}>Exact dates</option>
+          <option value={1}>± 1 day</option>
+          <option value={3}>± 3 days</option>
+          <option value={7}>± 7 days</option>
+        </Select>
+        <Select className={OPT} value={f.nearby} onChange={(e) => set({ nearby: Number(e.target.value) })} aria-label="Nearby airports">
           <option value={0}>Exact airports</option>
-          <option value={50}>+ nearby 50 km</option>
-          <option value={100}>+ nearby 100 km</option>
-          <option value={150}>+ nearby 150 km</option>
-          <option value={250}>+ nearby 250 km</option>
+          <option value={50}>+ airports within 50 km</option>
+          <option value={100}>+ airports within 100 km</option>
+          <option value={150}>+ airports within 150 km</option>
+          <option value={250}>+ airports within 250 km</option>
         </Select>
-        <Select className="h-7 text-xs" value={f.currency} onChange={(e) => set({ currency: e.target.value })} title={`Display currency is ${currency}`}>
-          {CURRENCIES.map((c) => (
-            <option key={c}>{c}</option>
-          ))}
-        </Select>
-        <div className="ml-auto flex items-center gap-2 text-xs">
-          {(["google", "kiwi"] as Source[]).map((s) => (
-            <label key={s} className="flex items-center gap-1 text-muted">
-              <input
-                type="checkbox"
-                className="accent-[var(--accent)]"
-                checked={f.sources.includes(s)}
-                onChange={(e) => set({ sources: e.target.checked ? [...f.sources, s] : f.sources.filter((x) => x !== s) })}
-              />
-              {s === "google" ? "Google Flights" : "Kiwi.com"}
-            </label>
-          ))}
+        <div className="ml-auto">
+          <Switch
+            checked={f.smart}
+            onChange={(smart) => set({ smart })}
+            label={
+              <span className="flex items-center gap-1.5 text-xs" title="Also build cheaper routes from separate tickets through hubs (split tickets, stopovers, nested round trips)">
+                <Sparkles className="size-3.5 text-info" /> Smarter routes
+              </span>
+            }
+          />
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-[1fr_auto_1fr_150px_150px_110px]">
+      <div className="grid grid-cols-1 items-end gap-2 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_minmax(0,1.15fr)_auto]">
         <Field label="From">
           <AirportInput value={f.from} onChange={(from) => set({ from })} placeholder="Where from?" />
         </Field>
         <button
           type="button"
           onClick={() => set({ from: f.to, to: f.from })}
-          className="hidden self-end rounded-md p-2 text-muted hover:bg-surface-2 hover:text-fg md:block"
-          aria-label="Swap"
+          className="mb-1 hidden size-9 place-items-center rounded-full border border-border text-muted hover:bg-surface-2 hover:text-fg lg:grid"
+          aria-label="Swap origin and destination"
           title="Swap"
         >
           <ArrowLeftRight className="size-4" />
         </button>
         <Field label="To">
-          <AirportInput value={f.to} onChange={(to) => set({ to })} placeholder="Where to?" />
+          <AirportInput value={f.to} onChange={(to) => set({ to })} placeholder="Anywhere (explore)" />
         </Field>
-        <Field label="Depart">
-          <Input
-            type="date"
-            value={f.depart}
-            min={today}
-            onChange={(e) => set({ depart: e.target.value, ret: f.ret < e.target.value ? addDays(e.target.value, 7) : f.ret })}
-          />
-        </Field>
-        <Field label="Return">
-          <Input type="date" value={f.ret} min={f.depart} disabled={f.tripType === "oneway"} onChange={(e) => set({ ret: e.target.value })} />
-        </Field>
-        <Field label="Flexible">
-          <Select value={f.flex} onChange={(e) => set({ flex: Number(e.target.value) })}>
-            <option value={0}>Exact</option>
-            <option value={1}>± 1 day</option>
-            <option value={2}>± 2 days</option>
-            <option value={3}>± 3 days</option>
-            <option value={5}>± 5 days</option>
-            <option value={7}>± 7 days</option>
-          </Select>
-        </Field>
+        <DateRangeField
+          start={f.depart}
+          end={rt ? f.ret : undefined}
+          range={rt}
+          prices={prices}
+          onChange={(depart, ret) => set({ depart, ret: rt ? (ret ?? f.ret) : f.ret })}
+        />
+        <Button type="submit" variant="primary" className="h-11 px-5" loading={busy} disabled={!f.from.length || !f.to.length}>
+          <Search className="size-4" /> Search
+        </Button>
       </div>
-      <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
+      <div className="mt-2 grid grid-cols-1 gap-2 lg:grid-cols-2">
         <PlaceChips onPick={(c) => set({ from: [...new Set([...f.from, ...c])] })} />
         <PlaceChips onPick={(c) => set({ to: [...new Set([...f.to, ...c])] })} />
-      </div>
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
-        <Switch
-          checked={f.smart}
-          onChange={(smart) => set({ smart })}
-          label={
-            <span className="flex items-center gap-1.5">
-              <Sparkles className="size-3.5 text-info" />
-              Find smarter routes
-              <span className="hidden text-xs text-muted sm:inline">split tickets, stopovers and nested round trips through hubs</span>
-            </span>
-          }
-        />
-        <Button type="submit" variant="primary" loading={busy} disabled={!f.from.length || !f.to.length || !f.sources.length}>
-          <Search className="size-4" /> Search flights
-        </Button>
       </div>
     </form>
   );

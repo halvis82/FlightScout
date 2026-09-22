@@ -13,7 +13,7 @@ import { Badge, Button, Card, Empty, ErrorNote, PageHeader, Segmented, Spinner }
 import { api, fetcher } from "@/lib/client";
 import { dayDiff, formatDate, formatDuration, relativeTime } from "@/lib/format";
 import type { Trip } from "@/lib/types";
-import type { WatchRow } from "../page";
+import type { WatchRow } from "@/lib/watch-types";
 
 type Obs = {
   id: number;

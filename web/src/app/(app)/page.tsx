@@ -3,6 +3,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, Sparkles } from "lucide-react";
 import { useApp } from "@/components/app-context";
+import { ExplorePanel } from "@/components/explore-panel";
 import { ResultsView, mergeTrips } from "@/components/results-view";
 import { SearchFormView, defaultForm, formToParams, paramsToForm, type SearchForm } from "@/components/search-form";
 import { useWatchDialog } from "@/components/watch-dialog";
@@ -37,7 +38,9 @@ function SearchPage() {
   const watch = useWatchDialog();
 
   const run = useCallback(
-    async (f: SearchForm) => {
+    async (f0: SearchForm) => {
+      const f = { ...f0, currency };
+      lastRun.current = JSON.stringify([f.from, f.to, f.depart, f.ret, f.tripType]);
       setErr(null);
       setResult(null);
       setPlan(null);
@@ -89,8 +92,19 @@ function SearchPage() {
       await Promise.all([searchP, planP]);
       clearInterval(timer);
     },
-    [router, settings],
+    [router, settings, currency],
   );
+  const lastRun = useRef<string | null>(null);
+
+  // After a first search, changing dates (arrows or calendar) searches again.
+  useEffect(() => {
+    if (!form || !lastRun.current || !form.to.length || !form.from.length) return;
+    const k = JSON.stringify([form.from, form.to, form.depart, form.ret, form.tripType]);
+    if (k === lastRun.current) return;
+    const t = setTimeout(() => run(form), 700);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form?.depart, form?.ret, form?.tripType]);
 
   // Auto run when opened with a full query in the URL (links from watches, history, CLI).
   useEffect(() => {
@@ -154,6 +168,26 @@ function SearchPage() {
           </Button>
         </div>
       )}
+      {!form.to.length && form.from.length > 0 && !hasResults && (
+        <ExplorePanel
+          origins={form.from}
+          depart={form.depart}
+          ret={form.ret}
+          roundTrip={form.tripType === "roundtrip"}
+          flex={form.flex}
+          onPick={(d) => {
+            const next: SearchForm = {
+              ...form,
+              to: [d.destination],
+              depart: d.departure ?? form.depart,
+              ret: d.return_date ?? form.ret,
+              tripType: d.return_date ? "roundtrip" : form.tripType,
+            };
+            setForm(next);
+            run(next);
+          }}
+        />
+      )}
       {hasResults ? (
         <ResultsView
           trips={trips}
@@ -163,7 +197,7 @@ function SearchPage() {
           plan={plan}
         />
       ) : (
-        !busy && (
+        !busy && !(form.from.length && !form.to.length) && (
           <Empty title="Search every source at once">
             Pick where you&apos;re flying from and to. FlightScout checks Google Flights and Kiwi.com together, and with smart routes on it
             also builds cheaper combinations of separate tickets through hub airports.

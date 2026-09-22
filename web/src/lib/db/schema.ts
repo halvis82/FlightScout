@@ -209,7 +209,7 @@ export const searches = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     kind: text("kind").$type<"search" | "plan" | "explore" | "dates" | "trip">().notNull(),
-    origin: text("origin").$type<"web" | "cli" | "mcp" | "tracker">().notNull().default("web"),
+    origin: text("origin").$type<"web" | "cli" | "mcp" | "tracker" | "local">().notNull().default("web"),
     summary: text("summary"),
     query: jsonb("query").notNull(),
     payload: jsonb("payload"),

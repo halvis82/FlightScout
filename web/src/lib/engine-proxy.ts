@@ -23,8 +23,12 @@ function rulesToEngine(rules: SellerRule[]) {
 // matching watches).
 export async function proxyEngine(req: Request, kind: EngineKind) {
   const userId = await optionalUser(req);
-  await enforceRateLimit(req, kind, userId);
   const q = (await req.json().catch(() => ({}))) as Record<string, unknown>;
+  const followUp = kind === "explore" && typeof q.batch === "number" && q.batch > 0;
+  await enforceRateLimit(req, kind, userId, followUp);
+  // `quiet` requests (calendar prices, date strips) are not saved to history
+  const quiet = q.quiet === true;
+  delete q.quiet;
   const payload = { ...q };
   if ((kind === "search" || kind === "plan") && !payload.seller_rules) {
     // guests send their rules inline; signed in users use saved settings
@@ -38,7 +42,7 @@ export async function proxyEngine(req: Request, kind: EngineKind) {
   }
   delete payload.sellerRules;
   const result = normalize(kind, await engine<unknown>(`/${kind}`, payload));
-  if (!userId) return json({ ...result, search_id: null, watches_updated: 0 });
+  if (!userId || quiet) return json({ ...result, search_id: null, watches_updated: 0 });
   const saved = await saveSearch(userId, kind, "web", q, result);
   return json({ ...result, search_id: saved.id, watches_updated: saved.watchesUpdated });
 }

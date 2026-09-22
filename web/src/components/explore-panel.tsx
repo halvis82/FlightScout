@@ -1,0 +1,216 @@
+"use client";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ExternalLink, Info } from "lucide-react";
+import { useApp } from "./app-context";
+import { StarButton } from "./favorites";
+import { RouteMap, type MapPoint } from "./route-map";
+import { Segmented, Spinner } from "./ui";
+import { api } from "@/lib/client";
+import { airport, expandCodes } from "@/lib/airports-client";
+import { addDays, dayDiff, formatDate } from "@/lib/format";
+import { priceScale } from "@/lib/price-scale";
+import type { Destination } from "@/lib/types";
+import { cn } from "@/lib/utils";
+
+type Sort = "price" | "date";
+
+// Shown on the search page while no destination is picked: the cheapest places
+// to go from the chosen origins around the chosen dates. Updates by itself
+// (debounced) and fills in over three engine batches: broad first, then depth.
+export function ExplorePanel({
+  origins,
+  depart,
+  ret,
+  roundTrip,
+  flex,
+  onPick,
+}: {
+  origins: string[];
+  depart: string;
+  ret: string;
+  roundTrip: boolean;
+  flex: number;
+  onPick: (d: Destination) => void;
+}) {
+  const { currency, money, convert } = useApp();
+  const [items, setItems] = useState<Map<string, Destination>>(new Map());
+  const [loading, setLoading] = useState(0); // batches still running
+  const [failed, setFailed] = useState<string[]>([]);
+  const [sort, setSort] = useState<Sort>("price");
+  const [hover, setHover] = useState<string | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const nights = roundTrip ? Math.max(1, dayDiff(depart, ret)) : null;
+  const win = Math.max(3, flex);
+  const key = JSON.stringify([origins, depart, nights, win, currency]);
+
+  useEffect(() => {
+    const codes = expandCodes(origins).slice(0, 2);
+    if (!codes.length) return;
+    const ctl = new AbortController();
+    const t = setTimeout(async () => {
+      setItems(new Map());
+      setFailed([]);
+      const merged = new Map<string, Destination>();
+      const body = (origin: string, batch: number) => ({
+        origin,
+        start: addDays(depart, -win),
+        end: addDays(depart, win),
+        currency,
+        nights_min: nights ? Math.max(1, nights - 2) : null,
+        nights_max: nights ? nights + 2 : null,
+        batch,
+      });
+      for (const batch of [0, 1, 2]) {
+        if (ctl.signal.aborted) return;
+        setLoading(3 - batch);
+        const res = await Promise.allSettled(
+          codes.map((o) => api<{ items: Destination[]; errors?: Record<string, string> }>("/explore", { body: body(o, batch), signal: ctl.signal })),
+        );
+        if (ctl.signal.aborted) return;
+        for (const r of res) {
+          if (r.status === "rejected") {
+            setFailed((f) => [...f, (r.reason as Error).message]);
+            continue;
+          }
+          for (const [src, msg] of Object.entries(r.value.errors ?? {})) setFailed((f) => [...f, `${src}: ${msg}`]);
+          for (const d of r.value.items) {
+            const cur = merged.get(d.destination);
+            if (!cur || convert(d.price, d.currency, "USD") < convert(cur.price, cur.currency, "USD")) merged.set(d.destination, d);
+          }
+        }
+        setItems(new Map(merged));
+      }
+      setLoading(0);
+    }, 600);
+    return () => {
+      clearTimeout(t);
+      ctl.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+
+  const list = useMemo(() => {
+    const arr = [...items.values()].filter((d) => !origins.includes(d.destination));
+    return arr.sort((a, b) =>
+      sort === "price" ? convert(a.price, a.currency, "USD") - convert(b.price, b.currency, "USD") : (a.departure ?? "").localeCompare(b.departure ?? ""),
+    );
+  }, [items, sort, convert, origins]);
+
+  const scale = useMemo(() => priceScale(list.map((d) => convert(d.price, d.currency))), [list, convert]);
+  const city = (d: Destination) => d.city || airport(d.destination)?.city || d.destination;
+
+  const points = useMemo<MapPoint[]>(() => {
+    // Label the cheapest 25 (and the hovered one); the rest are colored dots.
+    const labeled = new Set(list.slice(0, 25).map((d) => d.destination));
+    const pts: MapPoint[] = list.map((d) => {
+      const p = convert(d.price, d.currency);
+      return {
+        code: d.destination,
+        lat: d.lat,
+        lon: d.lon,
+        label: `${city(d)} ${money(d.price, d.currency)}`,
+        title: `${city(d)} (${d.destination}) · ${money(d.price, d.currency)}`,
+        color: scale.solid(p),
+        dot: !labeled.has(d.destination) && hover !== d.destination,
+        onClick: () => onPick(d),
+      };
+    });
+    for (const o of expandCodes(origins)) pts.push({ code: o, tone: "origin", label: airport(o)?.city ?? o });
+    return pts;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [list, scale, hover, origins, money]);
+
+  if (!origins.length) return null;
+
+  return (
+    <section className="space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <h2 className="text-sm font-semibold">
+          Cheapest places from {origins.map((o) => airport(o)?.city ?? o).join(" or ")}
+        </h2>
+        <span className="text-xs text-muted">
+          around {formatDate(depart, false)}
+          {nights ? `, ${nights} nights` : ", one way"}
+        </span>
+        {loading > 0 && (
+          <span className="inline-flex items-center gap-1.5 text-xs text-muted">
+            <Spinner /> {list.length ? "finding more destinations" : "looking everywhere"}
+          </span>
+        )}
+        {failed.length > 0 && loading === 0 && (
+          <span className="inline-flex items-center gap-1 text-xs text-faint" title={[...new Set(failed)].join("\n")}>
+            <Info className="size-3.5" /> Some sources didn&apos;t respond, results may be incomplete
+          </span>
+        )}
+        <div className="ml-auto">
+          <Segmented
+            size="sm"
+            value={sort}
+            onChange={setSort}
+            options={[
+              { value: "price", label: "Cheapest" },
+              { value: "date", label: "Soonest" },
+            ]}
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <RouteMap points={points} className="h-72 rounded-2xl lg:h-[560px]" fitKey={key + (list.length > 0 ? "1" : "0")} />
+        <div ref={listRef} className="max-h-[560px] space-y-1 overflow-y-auto pr-1">
+          {!list.length &&
+            loading > 0 &&
+            Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-14 animate-pulse rounded-xl bg-surface-2" />)}
+          {!list.length && loading === 0 && <div className="p-6 text-center text-sm text-muted">No destinations found for these dates.</div>}
+          {list.map((d) => {
+            const p = convert(d.price, d.currency);
+            const n = d.departure && d.return_date ? dayDiff(d.departure, d.return_date) : null;
+            return (
+              <div
+                key={d.destination}
+                onMouseEnter={() => setHover(d.destination)}
+                onMouseLeave={() => setHover(null)}
+                className={cn(
+                  "group flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-surface px-3 py-2 transition-colors hover:border-border-strong",
+                  hover === d.destination && "border-border-strong",
+                )}
+                onClick={() => onPick(d)}
+              >
+                <span className="size-2.5 shrink-0 rounded-full" style={{ background: scale.solid(p) }} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 text-sm font-medium">
+                    <span className="truncate">{city(d)}</span>
+                    <span className="font-mono text-xs text-muted">{d.destination}</span>
+                    <span onClick={(e) => e.stopPropagation()}>
+                      <StarButton code={d.destination} />
+                    </span>
+                  </div>
+                  <div className="text-xs text-muted">
+                    {formatDate(d.departure)}
+                    {n != null && ` · ${n} nights`} · from {d.origin}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-semibold tabular-nums" style={{ color: scale.color(p) }}>
+                    {money(d.price, d.currency)}
+                  </div>
+                  {d.booking_url && (
+                    <a
+                      href={d.booking_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center gap-0.5 text-xs text-muted hover:text-fg"
+                    >
+                      Book <ExternalLink className="size-3" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}

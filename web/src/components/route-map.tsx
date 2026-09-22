@@ -15,6 +15,8 @@ export type MapPoint = {
   tone?: "origin" | "dest" | "hub" | "price" | "best";
   onClick?: () => void;
   title?: string;
+  color?: string; // background color (price scale), overrides tone colors
+  dot?: boolean; // render a small colored dot instead of a label (declutter)
 };
 
 // Served from public/maplibre (copied on postinstall), see scripts/copy-maplibre-worker.mjs.
@@ -175,10 +177,39 @@ export function RouteMap({
       ]
         .filter(Boolean)
         .join(" ");
-      node.textContent = p.label ?? p.code;
+      if (p.color) {
+        node.style.background = p.color;
+        node.style.color = "#0b0d10";
+        node.style.borderColor = "transparent";
+      }
+      if (p.dot) {
+        node.className = "size-2.5 rounded-full border border-white/70 shadow-sm transition-transform hover:scale-150";
+        node.style.padding = "0";
+      } else {
+        node.className += " font-sans";
+        node.textContent = p.label ?? p.code;
+      }
       if (p.onClick) node.addEventListener("click", p.onClick);
       else node.style.cursor = "default";
+      if (!p.dot && p.color) node.dataset.label = "1";
       markers.current.push(new maplibregl.Marker({ element: node }).setLngLat(c).addTo(m));
+    }
+    declutter();
+  }
+
+  // Hide price labels that overlap a more important one (earlier in the
+  // list = cheaper). Hidden ones become small dots. Runs after zoom and pan.
+  function declutter() {
+    const placed: DOMRect[] = [];
+    for (const mk of markers.current) {
+      const el = mk.getElement();
+      if (el.dataset.label !== "1") continue;
+      el.style.visibility = "";
+      el.classList.remove("fs-dot");
+      const r = el.getBoundingClientRect();
+      const hit = placed.some((q) => r.left < q.right + 2 && r.right > q.left - 2 && r.top < q.bottom + 2 && r.bottom > q.top - 2);
+      if (hit) el.classList.add("fs-dot");
+      else placed.push(r);
     }
   }
 
@@ -200,6 +231,19 @@ export function RouteMap({
     coords.forEach((c) => b.extend(c));
     m.fitBounds(b, { padding: 64, maxZoom: 6, duration: 600 });
   }
+
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !ready) return;
+    const h = () => declutter();
+    m.on("moveend", h);
+    m.on("zoomend", h);
+    return () => {
+      m.off("moveend", h);
+      m.off("zoomend", h);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready]);
 
   useEffect(() => {
     if (ready && airportsLoaded) sync();

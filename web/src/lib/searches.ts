@@ -4,7 +4,7 @@ import { feedMatchingWatches } from "./observations";
 import type { SearchQuery, Trip } from "./types";
 
 type Kind = "search" | "plan" | "explore" | "dates" | "trip";
-type Origin = "web" | "cli" | "mcp" | "tracker";
+type Origin = "web" | "cli" | "mcp" | "tracker" | "local";
 
 export function summarize(kind: Kind, q: Record<string, unknown>): string {
   const list = (v: unknown) => (Array.isArray(v) ? v.join("/") : typeof v === "string" ? v : "?");

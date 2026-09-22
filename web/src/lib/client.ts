@@ -1,5 +1,7 @@
 "use client";
 import { afterGuestEngineCall, guestApi, GuestError, guestSettings, isGuestRoute } from "./guest";
+import { localEngine, localRunnerActive } from "./local-runner";
+import type { SellerRule } from "./db/schema";
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -30,19 +32,70 @@ async function serverFetch<T = unknown>(path: string, init?: Init): Promise<T> {
 
 // Resolved once per page load: is this visitor signed in? Guests get their
 // data from localStorage through the guest router.
-let modePromise: Promise<boolean> | null = null;
+type MeLite = { user: unknown; settings?: { sellerRules?: SellerRule[] } };
+let mePromise: Promise<MeLite | null> | null = null;
+function loadMe() {
+  mePromise ??= serverFetch<MeLite>("/me").catch(() => null);
+  return mePromise;
+}
 export function isGuest(): Promise<boolean> {
-  modePromise ??= serverFetch<{ user: unknown }>("/me")
-    .then((m) => !m.user)
-    .catch(() => false);
-  return modePromise;
+  return loadMe().then((m) => (m ? !m.user : false));
 }
 
 const ENGINE_KINDS = new Set(["/search", "/plan", "/explore", "/dates", "/trip"]);
 
+function rulesToEngine(rules: SellerRule[]) {
+  const blocked = rules.filter((r) => r.mode === "block");
+  return blocked.length ? Object.fromEntries(blocked.map((r) => [r.seller, r.mode])) : undefined;
+}
+
+// Engine call through the user's local runner. Mirrors the server proxy:
+// seller rules become `seller_rules`, results are saved to history (and feed
+// watches) through /results for signed in users, or locally for guests.
+async function viaLocalRunner<T>(p: string, body: Record<string, unknown>, guest: boolean, signal?: AbortSignal): Promise<T> {
+  const kind = p.slice(1);
+  const quiet = body.quiet === true;
+  const query = { ...body };
+  delete query.quiet;
+  delete query.sellerRules;
+  const payload: Record<string, unknown> = { ...query };
+  if ((kind === "search" || kind === "plan") && !payload.seller_rules) {
+    const rules = guest ? guestSettings().sellerRules : ((await loadMe())?.settings?.sellerRules ?? []);
+    const sr = rulesToEngine(rules);
+    if (sr) payload.seller_rules = sr;
+  }
+  const result = await localEngine(kind, payload, signal);
+  if (quiet) return { ...result, search_id: null, watches_updated: 0, via: "local" } as T;
+  if (guest) {
+    try {
+      await afterGuestEngineCall(kind, query, result, serverFetch);
+    } catch {}
+    return { ...result, search_id: null, watches_updated: 0, via: "local" } as T;
+  }
+  let saved: { id?: number; watchesUpdated?: number } = {};
+  try {
+    saved = await serverFetch("/results", { body: { kind, query, payload: result, origin: "local" } });
+  } catch {}
+  return { ...result, search_id: saved.id ?? null, watches_updated: saved.watchesUpdated ?? 0, via: "local" } as T;
+}
+
 export async function api<T = unknown>(path: string, init?: Init): Promise<T> {
   const method = init?.method ?? (init?.body !== undefined ? "POST" : "GET");
-  if (!path.startsWith("/api") && (await isGuest())) {
+  const p = path.split("?")[0];
+  if (p === "/settings" && method !== "GET") mePromise = null;
+  const external = !path.startsWith("/api");
+  const guest = external && (await isGuest());
+
+  if (external && ENGINE_KINDS.has(p) && localRunnerActive()) {
+    try {
+      return await viaLocalRunner<T>(p, (init?.body ?? {}) as Record<string, unknown>, guest, init?.signal);
+    } catch (e) {
+      if ((e as Error).name === "AbortError") throw e;
+      // any local failure falls back to the server proxy below
+    }
+  }
+
+  if (guest) {
     if (isGuestRoute(path)) {
       try {
         return (await guestApi(path, method, init?.body, serverFetch)) as T;
@@ -51,16 +104,16 @@ export async function api<T = unknown>(path: string, init?: Init): Promise<T> {
         throw e;
       }
     }
-    const p = path.split("?")[0];
     // guests send their seller rules along, signed in users have them saved
     const body =
       (p === "/search" || p === "/plan") && init?.body && typeof init.body === "object"
         ? { sellerRules: guestSettings().sellerRules, ...(init.body as object) }
         : init?.body;
     const res = await serverFetch<T>(path, { ...init, body });
-    if (ENGINE_KINDS.has(p)) {
+    const b = (init?.body ?? {}) as Record<string, unknown>;
+    if (ENGINE_KINDS.has(p) && b.quiet !== true) {
       try {
-        await afterGuestEngineCall(p.slice(1), (init?.body ?? {}) as Record<string, unknown>, res as Record<string, unknown>, serverFetch);
+        await afterGuestEngineCall(p.slice(1), b, res as Record<string, unknown>, serverFetch);
       } catch {}
     }
     return res;

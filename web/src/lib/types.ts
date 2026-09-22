@@ -1,6 +1,6 @@
 // JSON shapes produced by the engine (engine/src/flightscout/models.py).
 
-export type Source = "google" | "kiwi" | "ryanair" | "serpapi";
+export type Source = "google" | "kiwi" | "ryanair" | "serpapi" | "volaris" | (string & {});
 export type Cabin = "economy" | "premium" | "business" | "first";
 
 export interface Segment {

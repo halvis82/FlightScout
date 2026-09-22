@@ -1,16 +1,17 @@
-export function formatPrice(amount: number | null | undefined, currency: string, opts?: { compact?: boolean }) {
+// Full amounts, never abbreviated: "$1,000", "NOK 12,450". The opts argument
+// is accepted for old call sites and ignored.
+export function formatPrice(amount: number | null | undefined, currency: string, _opts?: { compact?: boolean }) {
+  void _opts;
   if (amount == null || Number.isNaN(amount)) return "–";
-  const digits = currency === "NOK" || currency === "MXN" || amount >= 100 ? 0 : 2;
   try {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency,
-      maximumFractionDigits: digits,
+      maximumFractionDigits: 0,
       minimumFractionDigits: 0,
-      notation: opts?.compact ? "compact" : "standard",
-    }).format(amount);
+    }).format(Math.round(amount));
   } catch {
-    return `${Math.round(amount)} ${currency}`;
+    return `${currency} ${Math.round(amount).toLocaleString("en-US")}`;
   }
 }
 

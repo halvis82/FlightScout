@@ -4,27 +4,30 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 :root {
-  --bg: #f7f8fa;
+  --bg: #f5f7fa;
   --surface: #ffffff;
-  --surface-2: #f1f3f6;
-  --border: #e3e6eb;
-  --border-strong: #cfd4dc;
-  --fg: #0f1720;
-  --muted: #5b6573;
-  --faint: #8b94a1;
-  --accent: #1d5fd6;
+  --surface-2: #f0f3f7;
+  --surface-3: #e7ebf1;
+  --border: #e2e7ee;
+  --border-strong: #cbd3de;
+  --fg: #0d1522;
+  --muted: #566274;
+  --faint: #8993a3;
+  --accent: #2463eb;
   --accent-fg: #ffffff;
-  --accent-soft: #e6eefc;
-  --good: #0f8a4f;
-  --good-soft: #e3f5ec;
-  --warn: #a86400;
-  --warn-soft: #fdf1dc;
-  --bad: #c2372b;
-  --bad-soft: #fbe7e5;
-  --info: #5b4bc4;
-  --info-soft: #ecebfb;
-  --ring: #1d5fd655;
-  --shadow: 0 1px 2px rgb(15 23 32 / 0.05), 0 1px 1px rgb(15 23 32 / 0.03);
+  --accent-soft: #e8effe;
+  --good: #0b8a55;
+  --good-soft: #e1f5ea;
+  --warn: #9a5b00;
+  --warn-soft: #fdf2dc;
+  --bad: #c53427;
+  --bad-soft: #fce8e6;
+  --info: #5a45d6;
+  --info-soft: #eeebfd;
+  --ring: #2463eb40;
+  --shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.05);
+  --shadow-lg: 0 12px 32px -8px rgb(16 24 40 / 0.18), 0 4px 10px -4px rgb(16 24 40 / 0.08);
+  --hero: radial-gradient(1200px 300px at 50% -120px, #dbe6ff 0%, transparent 70%);
   --series-1: #2a78d6;
   --series-2: #eb6834;
   --series-3: #1baf7a;
@@ -40,27 +43,30 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0c0f14;
-    --surface: #131820;
-    --surface-2: #1a2029;
-    --border: #252c37;
-    --border-strong: #343c49;
-    --fg: #e7ebf0;
-    --muted: #9aa4b2;
-    --faint: #6b7584;
-    --accent: #5b9bff;
-    --accent-fg: #0b1220;
-    --accent-soft: #16253d;
-    --good: #3ccf8e;
-    --good-soft: #10291e;
-    --warn: #f0b04a;
+    --bg: #0a0d12;
+    --surface: #11151c;
+    --surface-2: #181d26;
+    --surface-3: #202632;
+    --border: #232a35;
+    --border-strong: #333c4a;
+    --fg: #e8ecf2;
+    --muted: #9ba5b4;
+    --faint: #6a7483;
+    --accent: #6d9eff;
+    --accent-fg: #07101f;
+    --accent-soft: #162440;
+    --good: #3fcf8e;
+    --good-soft: #0f2a1e;
+    --warn: #f2b24c;
     --warn-soft: #2d2311;
-    --bad: #ff7a6e;
-    --bad-soft: #321614;
-    --info: #a79bff;
+    --bad: #ff7b6f;
+    --bad-soft: #341614;
+    --info: #a99cff;
     --info-soft: #1f1b3a;
-    --ring: #5b9bff55;
-    --shadow: none;
+    --ring: #6d9eff55;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 16px 40px -8px rgb(0 0 0 / 0.6), 0 4px 12px -4px rgb(0 0 0 / 0.4);
+    --hero: radial-gradient(1200px 300px at 50% -120px, #15264a 0%, transparent 70%);
     --series-1: #3987e5;
     --series-2: #d95926;
     --series-3: #199e70;
@@ -76,27 +82,30 @@
 }
 
 :root[data-theme="dark"] {
-  --bg: #0c0f14;
-  --surface: #131820;
-  --surface-2: #1a2029;
-  --border: #252c37;
-  --border-strong: #343c49;
-  --fg: #e7ebf0;
-  --muted: #9aa4b2;
-  --faint: #6b7584;
-  --accent: #5b9bff;
-  --accent-fg: #0b1220;
-  --accent-soft: #16253d;
-  --good: #3ccf8e;
-  --good-soft: #10291e;
-  --warn: #f0b04a;
+  --bg: #0a0d12;
+  --surface: #11151c;
+  --surface-2: #181d26;
+  --surface-3: #202632;
+  --border: #232a35;
+  --border-strong: #333c4a;
+  --fg: #e8ecf2;
+  --muted: #9ba5b4;
+  --faint: #6a7483;
+  --accent: #6d9eff;
+  --accent-fg: #07101f;
+  --accent-soft: #162440;
+  --good: #3fcf8e;
+  --good-soft: #0f2a1e;
+  --warn: #f2b24c;
   --warn-soft: #2d2311;
-  --bad: #ff7a6e;
-  --bad-soft: #321614;
-  --info: #a79bff;
+  --bad: #ff7b6f;
+  --bad-soft: #341614;
+  --info: #a99cff;
   --info-soft: #1f1b3a;
-  --ring: #5b9bff55;
-  --shadow: none;
+  --ring: #6d9eff55;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 16px 40px -8px rgb(0 0 0 / 0.6), 0 4px 12px -4px rgb(0 0 0 / 0.4);
+  --hero: radial-gradient(1200px 300px at 50% -120px, #15264a 0%, transparent 70%);
   --series-1: #3987e5;
   --series-2: #d95926;
   --series-3: #199e70;
@@ -114,6 +123,7 @@
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-fg: var(--fg);
@@ -130,15 +140,16 @@
   --color-bad-soft: var(--bad-soft);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--bg);
   color: var(--fg);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  font-feature-settings: "tnum" 1, "cv11" 1;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "cv11" 1, "ss01" 1;
+  -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
@@ -177,4 +188,99 @@ body {
   :root:not([data-theme="light"]) {
     --map-icon-filter: invert(1);
   }
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Loading shimmer for skeletons and calendar prices. */
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 45%, var(--surface-2) 65%);
+  background-size: 300% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 6px;
+}
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+.pop-in {
+  animation: pop-in 140ms ease-out;
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.slide-up {
+  animation: slide-up 180ms ease-out;
+}
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+@media (prefers-reduced-motion: reduce) {
+  .skeleton, .pop-in, .slide-up { animation: none; }
+}
+
+/* Continuous price scale (green cheapest to red priciest). Hue comes from
+   JS per value, lightness and chroma per theme so text stays readable. */
+:root {
+  --price-l: 0.56;
+  --price-c: 0.16;
+  --price-bg-l: 0.95;
+  --price-bg-c: 0.05;
+}
+:root[data-theme="dark"] {
+  --price-l: 0.8;
+  --price-c: 0.15;
+  --price-bg-l: 0.3;
+  --price-bg-c: 0.07;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --price-l: 0.8;
+    --price-c: 0.15;
+    --price-bg-l: 0.3;
+    --price-bg-c: 0.07;
+  }
+}
+
+/* Calendar range styling (react-day-picker cells) */
+.rdp-rm > button {
+  background: var(--accent-soft);
+  border-radius: 0;
+}
+.rdp-rs > button,
+.rdp-re > button {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+.rdp-rs > button:hover,
+.rdp-re > button:hover {
+  background: var(--accent);
+  filter: brightness(1.08);
+}
+.rdp-today > button > span:first-child {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 700;
+}
+
+/* map price label collapsed to a dot when it would overlap a cheaper one */
+.fs-dot {
+  width: 10px !important;
+  height: 10px !important;
+  padding: 0 !important;
+  font-size: 0 !important;
+  border: 1px solid rgb(255 255 255 / 0.7) !important;
+}
+.fs-dot:hover {
+  width: auto !important;
+  height: auto !important;
+  padding: 4px 6px !important;
+  font-size: 11px !important;
+  z-index: 20;
 }

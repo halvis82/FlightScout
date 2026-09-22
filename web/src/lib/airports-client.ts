@@ -54,24 +54,94 @@ export function useAirports() {
   return { rows, get: (c: string) => (rows ? airport(c) : undefined) };
 }
 
+// Accent and case insensitive: "cancun" finds Cancún.
+export function fold(s: string) {
+  return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+
+const folded = new WeakMap<AirportRow, { city: string; name: string }>();
+function f(r: AirportRow) {
+  let v = folded.get(r);
+  if (!v) folded.set(r, (v = { city: fold(r.city), name: fold(r.name) }));
+  return v;
+}
+
+// Exact code first, then city prefix matches, then large airports.
 export function searchAirports(rows: AirportRow[], q: string, limit = 8) {
-  const s = q.trim().toLowerCase();
+  const s = fold(q);
   if (!s) return [];
   const scored: [number, AirportRow][] = [];
   for (const r of rows) {
-    let score = -1;
     const code = r.iata.toLowerCase();
-    if (code === s) score = 100;
-    else if (code.startsWith(s)) score = 60;
-    else if (r.city.toLowerCase().startsWith(s)) score = 50;
-    else if (r.city.toLowerCase().includes(s)) score = 30;
-    else if (r.name.toLowerCase().includes(s)) score = 20;
-    if (score >= 0) scored.push([score + (r.size === "L" ? 5 : 0), r]);
+    const { city, name } = f(r);
+    let score = -1;
+    if (code === s) score = 1000;
+    else if (city === s || city.startsWith(s + " (") || city.startsWith(s + "(")) score = 600;
+    else if (city.startsWith(s)) score = 500;
+    else if (code.startsWith(s) && s.length >= 2) score = 400;
+    else if (city.split(/[\s(/-]+/).some((w) => w.startsWith(s))) score = 300;
+    else if (name.includes(s)) score = 200;
+    else if (city.includes(s)) score = 150;
+    if (score >= 0) scored.push([score + (r.size === "L" ? 50 : 0), r]);
   }
-  scored.sort((a, b) => b[0] - a[0]);
+  scored.sort((a, b) => b[0] - a[0] || a[1].city.localeCompare(b[1].city));
   return scored.slice(0, limit).map((x) => x[1]);
 }
 
 export function expandCodes(codes: string[]) {
   return [...new Set(codes.flatMap((c) => METROS[c]?.codes ?? [c]))];
+}
+
+// ---------------------------------------------------------------------------
+// display helpers: every code or airport name is shown with its city
+// ---------------------------------------------------------------------------
+
+// "Oslo (Gardermoen)" -> "Oslo", "Sandefjord(Torp)" -> "Sandefjord"
+function cleanCity(c: string) {
+  return c.replace(/\s*\(.*\)\s*$/, "").trim();
+}
+
+let regionNames: Intl.DisplayNames | null = null;
+export function countryName(cc: string) {
+  try {
+    regionNames ??= new Intl.DisplayNames(["en"], { type: "region" });
+    return regionNames.of(cc) ?? cc;
+  } catch {
+    return cc;
+  }
+}
+
+// City for an airport or metro code, or undefined while airports load.
+export function cityOf(code: string): string | undefined {
+  const m = METROS[code];
+  if (m) return m.label.replace(/\s*\(.*\)$/, "").replace(/ area$/, "");
+  const a = airport(code);
+  return a ? cleanCity(a.city || a.name) : undefined;
+}
+
+// "OSL (Oslo)"
+export function codeWithCity(code: string) {
+  const c = cityOf(code);
+  return c ? `${code} (${c})` : code;
+}
+
+// "Oslo-Gardermoen" from "Oslo-Gardermoen International Airport"
+export function shortAirportName(name: string) {
+  return (
+    name
+      .replace(/\b(International|Intl\.?|Regional|Municipal)\b/g, "")
+      .replace(/\bAirport\b/g, "")
+      .replace(/\s*,\s*$/, "")
+      .replace(/\s{2,}/g, " ")
+      .trim() || name
+  );
+}
+
+// "Oslo-Gardermoen (Oslo)", falls back to the code
+export function airportWithCity(code: string) {
+  const a = airport(code);
+  if (!a) return METROS[code]?.label ?? code;
+  const city = cleanCity(a.city || "");
+  const short = shortAirportName(a.name);
+  return city && short !== city ? `${short} (${city})` : short;
 }

@@ -1,0 +1,116 @@
+"use client";
+// The "local runner": `flightscout serve` on the user's own machine serves the
+// engine API at http://127.0.0.1:8787 in local mode (no key, CORS for this
+// app). When it is up, engine calls go straight from the browser to it, so
+// searches use the user's home IP and skip the server's rate limits.
+
+import { useSyncExternalStore } from "react";
+
+export const LOCAL_RUNNER_URL = "http://127.0.0.1:8787";
+const OFF_KEY = "fs.localRunner.off";
+
+type State = { available: boolean; version: string | null; checked: boolean; disabled: boolean };
+
+let state: State = { available: false, version: null, checked: false, disabled: false };
+const SERVER_STATE: State = state;
+const listeners = new Set<() => void>();
+
+function emit(next: Partial<State>) {
+  state = { ...state, ...next };
+  listeners.forEach((l) => l());
+}
+
+function readDisabled() {
+  try {
+    return localStorage.getItem(OFF_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function setLocalRunnerDisabled(off: boolean) {
+  try {
+    if (off) localStorage.setItem(OFF_KEY, "1");
+    else localStorage.removeItem(OFF_KEY);
+  } catch {}
+  emit({ disabled: off });
+}
+
+export function localRunnerActive() {
+  return state.available && !state.disabled;
+}
+
+let inflight: Promise<boolean> | null = null;
+
+// Available only when /health says local === true. The dev engine on the same
+// port answers {ok:true} without `local`, or 401, and is ignored.
+export function probeLocalRunner(): Promise<boolean> {
+  if (typeof window === "undefined") return Promise.resolve(false);
+  inflight ??= (async () => {
+    const disabled = readDisabled();
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 1500);
+      const res = await fetch(`${LOCAL_RUNNER_URL}/health`, { signal: ctrl.signal, cache: "no-store", mode: "cors" }).finally(() => clearTimeout(t));
+      const j = res.ok ? ((await res.json()) as { ok?: boolean; local?: boolean; version?: string }) : null;
+      const ok = j?.local === true;
+      emit({ available: ok, version: ok ? (j?.version ?? null) : null, checked: true, disabled });
+      return ok;
+    } catch {
+      emit({ available: false, version: null, checked: true, disabled });
+      return false;
+    } finally {
+      inflight = null;
+    }
+  })();
+  return inflight;
+}
+
+let started = false;
+// Probe now and every 60 s while the tab is visible.
+export function startLocalRunnerProbe() {
+  if (started || typeof window === "undefined") return;
+  started = true;
+  probeLocalRunner();
+  setInterval(() => {
+    if (document.visibilityState === "visible") probeLocalRunner();
+  }, 60_000);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") probeLocalRunner();
+  });
+}
+
+export function useLocalRunner() {
+  const s = useSyncExternalStore(
+    (cb) => {
+      listeners.add(cb);
+      return () => listeners.delete(cb);
+    },
+    () => state,
+    () => SERVER_STATE,
+  );
+  return { ...s, active: s.available && !s.disabled };
+}
+
+// Same response mapping as the server proxy (src/lib/engine-proxy.ts).
+export function normalizeEngine(kind: string, raw: unknown): Record<string, unknown> {
+  if (Array.isArray(raw)) return { items: raw, errors: {} };
+  const r = raw as Record<string, unknown>;
+  if (kind === "explore" && Array.isArray(r.destinations)) return { items: r.destinations, errors: r.errors ?? {} };
+  return r;
+}
+
+// POST an engine call to the local runner. Throws on any failure so callers
+// can fall back to the server.
+export async function localEngine(kind: string, payload: Record<string, unknown>, signal?: AbortSignal) {
+  const res = await fetch(`${LOCAL_RUNNER_URL}/${kind}`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(payload),
+    signal,
+    cache: "no-store",
+  });
+  const text = await res.text();
+  if (!res.ok) throw new Error(`local runner ${res.status}: ${text.slice(0, 200)}`);
+  return normalizeEngine(kind, JSON.parse(text));
+}
