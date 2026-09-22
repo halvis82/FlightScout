@@ -5,6 +5,9 @@ date ranges and "anywhere" exploration."""
 from __future__ import annotations
 
 import json
+import random
+import threading
+import time
 from datetime import date, datetime
 
 import httpx
@@ -29,10 +32,37 @@ def _parse_sse(text: str) -> dict:
     return json.loads(text)
 
 
+# Kiwi answers bursts with 503s, so cap concurrency and retry with backoff.
+_slots = threading.BoundedSemaphore(4)
+_RETRY = {429, 500, 502, 503, 504}
+
+
+class KiwiUnavailable(RuntimeError):
+    pass
+
+
 def _call(args: dict) -> dict:
     key = "kiwi:" + json.dumps(args, sort_keys=True)
     if (hit := cache.get(key)) is not None:
         return hit
+    last: Exception | None = None
+    for attempt in range(4):
+        try:
+            with _slots:
+                data = _call_once(args)
+            cache.put(key, data)
+            return data
+        except httpx.HTTPStatusError as e:
+            last = e
+            if e.response.status_code not in _RETRY:
+                raise
+        except (httpx.TransportError, json.JSONDecodeError) as e:
+            last = e
+        time.sleep(min(8, 0.8 * 2 ** attempt) + random.random() * 0.5)
+    raise KiwiUnavailable(f"Kiwi.com did not respond ({type(last).__name__})")
+
+
+def _call_once(args: dict) -> dict:
     with httpx.Client(timeout=90) as c:
         init = c.post(URL, headers=_HEADERS, json={
             "jsonrpc": "2.0", "id": 1, "method": "initialize",
@@ -55,9 +85,7 @@ def _call(args: dict) -> dict:
     res = msg["result"]
     if res.get("isError"):
         raise RuntimeError("kiwi: " + " ".join(c.get("text", "") for c in res.get("content", []))[:300])
-    data = json.loads(res["content"][0]["text"])
-    cache.put(key, data)
-    return data
+    return json.loads(res["content"][0]["text"])
 
 
 def _d(x: date) -> str:

@@ -8,9 +8,22 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 
+import logging
+
 from . import airports, fx
 from .models import Destination
 from .sources import kiwi, ryanair
+
+# Batches the web UI requests one after another so the map fills in quickly:
+# broad first, then depth.
+BATCHES = [
+    ["anywhere", "Europe", "North America", "Asia", "South America", "Mexico", "United States"],
+    ["Africa", "Oceania", "Central America", "Caribbean", "Middle East", "Canada", "Japan", "Thailand"],
+    ["Spain", "Italy", "Portugal", "Greece", "France", "United Kingdom", "Germany", "Poland",
+     "Croatia", "Turkey", "Iceland", "Morocco"],
+]
+
+log = logging.getLogger(__name__)
 
 DEFAULT_REGIONS = [
     "anywhere", "Europe", "North America", "South America", "Asia", "Africa", "Oceania",
@@ -30,18 +43,25 @@ def explore(origin: str, start: date, end: date, currency: str = "USD",
     jobs = []
     with ThreadPoolExecutor(max_workers=8) as ex:
         if "kiwi" in sources:
-            # Kiwi resolves an airport to its city, so one origin is enough.
-            for r in regions:
-                jobs.append((f"kiwi:{r}", ex.submit(kiwi.explore, origins[0], start, end, currency, nights, r)))
+            # Kiwi takes one place per call (a comma list gets misread), and it
+            # resolves an airport to its city, so query each origin up to two.
+            for o in origins[:2]:
+                for r in regions:
+                    jobs.append((f"kiwi:{o}:{r}", ex.submit(kiwi.explore, o, start, end, currency, nights, r)))
         if "ryanair" in sources and not nights:
             for o in origins[:3]:
                 jobs.append((f"ryanair:{o}", ex.submit(ryanair.explore, o, start, end, currency)))
-        found, errors = [], {}
+        found, failed = [], {}
         for name, f in jobs:
             try:
                 found.extend(f.result())
             except Exception as e:
-                errors[name] = str(e)[:200]
+                src = name.split(":")[0]
+                failed.setdefault(src, []).append(name.split(":", 1)[1])
+                log.debug("explore %s failed: %s", name, e)
+    # One short line per source instead of a wall of raw errors.
+    errors = {src: f"{len(parts)} of {sum(1 for n, _ in jobs if n.startswith(src))} lookups failed"
+              for src, parts in failed.items()}
     best: dict[str, Destination] = {}
     for d in found:
         if d.destination in origins:

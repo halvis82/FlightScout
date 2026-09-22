@@ -63,6 +63,7 @@ class ExploreBody(BaseModel):
     nights_max: int | None = None
     sources: list[str] | None = None
     regions: list[str] | None = None
+    batch: int | None = None  # 0, 1, 2: request explore.BATCHES[batch] only
 
 
 class ExploreResult(BaseModel):
@@ -119,5 +120,9 @@ def dates(body: DatesBody) -> list[DatePrice]:
 @app.post("/api/explore", dependencies=[Depends(auth)], include_in_schema=False)
 def explore(body: ExploreBody) -> ExploreResult:
     nights = (body.nights_min or 1, body.nights_max or body.nights_min or 7) if (body.nights_min or body.nights_max) else None
-    d, errs = explore_mod.explore(body.origin, body.start, body.end, body.currency, nights, body.sources, body.regions)
+    regions = body.regions
+    if body.batch is not None and 0 <= body.batch < len(explore_mod.BATCHES):
+        regions = explore_mod.BATCHES[body.batch]
+    sources = body.sources or (["kiwi"] if body.batch not in (None, 0) else None)
+    d, errs = explore_mod.explore(body.origin, body.start, body.end, body.currency, nights, sources, regions)
     return ExploreResult(destinations=d, errors=errs)
