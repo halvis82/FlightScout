@@ -132,9 +132,11 @@ def search_range(origin: str, destination: str, start: date, end: date, currency
 
 
 def explore(origin: str, start: date, end: date, currency: str,
-            nights: tuple[int, int] | None = None) -> list[Destination]:
+            nights: tuple[int, int] | None = None, to: str = "anywhere") -> list[Destination]:
+    """``to`` may be "anywhere", a region ("Europe", "North America") or a
+    country ("Mexico"). Each call returns up to 15 itineraries."""
     out = []
-    for it in search_range(origin, "anywhere", start, end, currency, nights):
+    for it in search_range(origin, to, start, end, currency, nights):
         dest = it.slices[0].destination
         ap = airports.get(dest)
         out.append(Destination(
