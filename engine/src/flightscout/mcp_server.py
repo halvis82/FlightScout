@@ -150,9 +150,7 @@ def price_calendar(origin: str, destination: str, earliest: date, latest: date, 
 @mcp.tool()
 def find_airports(query: str) -> list[dict]:
     """Look up airport codes by city, name or code."""
-    ql = query.lower()
-    hits = [a for a in airports.all_airports() if ql == a.iata.lower() or ql in a.city.lower() or ql in a.name.lower()]
-    hits.sort(key=lambda a: (a.iata.lower() != ql, a.size != "L"))
+    hits = airports.find(query)
     return [a.model_dump() for a in hits[:15]]
 
 

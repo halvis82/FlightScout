@@ -92,6 +92,22 @@ def all_airports() -> list[Airport]:
     return list(_db().values())
 
 
+def _fold(s: str) -> str:
+    import unicodedata
+
+    return "".join(c for c in unicodedata.normalize("NFKD", s.lower()) if not unicodedata.combining(c))
+
+
+def find(query: str, limit: int = 25) -> list[Airport]:
+    """Airports matching a code, city or name, accent insensitive
+    ("cancun" finds Cancún). Exact codes first, then large airports."""
+    q = _fold(query.strip())
+    hits = [a for a in _db().values()
+            if q == a.iata.lower() or q in _fold(a.city) or q in _fold(a.name)]
+    hits.sort(key=lambda a: (a.iata.lower() != q, not _fold(a.city).startswith(q), a.size != "L"))
+    return hits[:limit]
+
+
 def expand(codes: list[str] | str) -> list[str]:
     """Turn "NYC,OSL" or ["NYC","OSL"] into concrete airport codes."""
     if isinstance(codes, str):

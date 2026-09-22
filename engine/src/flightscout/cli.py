@@ -303,10 +303,7 @@ def dates(
 @app.command("airports")
 def airports_cmd(query: str, as_json: bool = JsonOpt):
     """Look up airports by code, city or name."""
-    ql = query.lower()
-    hits = [a for a in airports.all_airports()
-            if ql == a.iata.lower() or ql in a.city.lower() or ql in a.name.lower()]
-    hits.sort(key=lambda a: (a.iata.lower() != ql, a.size != "L"))
+    hits = airports.find(query)
     if as_json:
         return _emit_json([a.model_dump() for a in hits[:25]])
     for a in hits[:25]:
