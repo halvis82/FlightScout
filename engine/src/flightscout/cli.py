@@ -347,6 +347,21 @@ def open_cmd(page: str = typer.Argument("", help="search, explore, watchlist, pl
     webbrowser.open(f"{base}/{page}".rstrip("/"))
 
 
+@app.command("setup-browser")
+def setup_browser():
+    """Install the headless Chromium used for seller and fare breakdowns (--sellers)."""
+    import subprocess
+
+    try:
+        import playwright  # noqa: F401
+    except ImportError:
+        con.print("[red]Playwright is missing. Reinstall with the browser extra: "
+                  "uv tool install 'flightscout[browser] @ git+https://github.com/halvis82/FlightScout#subdirectory=engine'[/red]")
+        raise typer.Exit(1)
+    subprocess.run([sys.executable, "-m", "playwright", "install", "chromium"], check=True)
+    out.print("Browser installed. Try: flightscout search JFK LAX +30 --sellers 3")
+
+
 PLIST = "com.flightscout.runner"
 
 
