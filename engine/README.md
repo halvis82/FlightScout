@@ -44,6 +44,7 @@ Tools: `search_flights`, `plan_routes`, `build_trip`, `explore_destinations`, `p
 | Google Flights | [fli](https://github.com/punitarani/fli) (page embedded data) | Per itinerary booking links; rate limited from datacenter IPs |
 | Kiwi.com | public MCP endpoint `https://mcp.kiwi.com` | Self transfer fares, date ranges, region explore; 15 results per call |
 | Ryanair | fare finder API | Explore from Ryanair bases |
+| Volaris | volaris.com backend (Navitaire), Chrome TLS impersonation | Google has no Volaris prices for most Mexican routes. Prices include the TUA airport fee |
 | SerpApi | optional, `SERPAPI_KEY` | Paid fallback (250 free searches/month) |
 
 ## HTTP API

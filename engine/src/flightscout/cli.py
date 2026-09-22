@@ -273,8 +273,20 @@ def dates(
     """Cheapest price per departure date (Google Flights, one request per date)."""
     from .sources import google
 
+    from .sources import volaris
+
+    o, d = origin.upper(), destination.upper()
     with con.status("pricing dates..."):
-        res = google.dates(origin.upper(), destination.upper(), _date(earliest), _date(latest), _cur(currency), trip_days)
+        res = google.dates(o, d, _date(earliest), _date(latest), _cur(currency), trip_days)
+        if not trip_days and volaris.relevant([o], [d]):
+            try:
+                best = {r.departure: r for r in res}
+                for v in volaris.dates(o, d, _date(earliest), _date(latest), _cur(currency)):
+                    if v.departure not in best or v.price < best[v.departure].price:
+                        best[v.departure] = v
+                res = list(best.values())
+            except Exception as e:
+                con.print(f"[yellow]volaris calendar failed: {e}[/yellow]")
     if as_json:
         return _emit_json([r.model_dump(mode="json") for r in res])
     lo = min((r.price for r in res), default=0)

@@ -10,7 +10,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, computed_field
 
-Source = Literal["google", "kiwi", "ryanair", "serpapi"]
+Source = Literal["google", "kiwi", "ryanair", "serpapi", "volaris"]
 Cabin = Literal["economy", "premium", "business", "first"]
 
 
@@ -233,7 +233,7 @@ class SearchQuery(BaseModel):
     cabin: Cabin = "economy"
     max_stops: int | None = None
     currency: str = "USD"
-    sources: list[Source] = Field(default_factory=lambda: ["google", "kiwi"])
+    sources: list[Source] = Field(default_factory=lambda: ["google", "kiwi", "volaris"])
     departure_flex_days: int = 0
     return_flex_days: int = 0
     nearby_km: int = 0  # also search airports within this radius of each side

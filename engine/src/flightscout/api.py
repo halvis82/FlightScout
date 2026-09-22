@@ -81,7 +81,19 @@ def trip(body: TripRequest) -> PlanResult:
 @app.post("/dates", dependencies=[Depends(auth)])
 @app.post("/api/dates", dependencies=[Depends(auth)], include_in_schema=False)
 def dates(body: DatesBody) -> list[DatePrice]:
-    return google.dates(body.origin, body.destination, body.start, body.end, body.currency, body.trip_days)
+    from .sources import volaris
+
+    res = google.dates(body.origin, body.destination, body.start, body.end, body.currency, body.trip_days)
+    if not body.trip_days and volaris.relevant([body.origin], [body.destination]):
+        try:
+            best = {r.departure: r for r in res}
+            for v in volaris.dates(body.origin, body.destination, body.start, body.end, body.currency):
+                if v.departure not in best or v.price < best[v.departure].price:
+                    best[v.departure] = v
+            res = sorted(best.values(), key=lambda r: r.departure)
+        except Exception:
+            pass
+    return res
 
 
 @app.post("/explore", dependencies=[Depends(auth)])

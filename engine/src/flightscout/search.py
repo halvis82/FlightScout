@@ -8,11 +8,11 @@ from concurrent.futures import ThreadPoolExecutor
 
 from . import airports, fx, sellers
 from .models import Itinerary, SearchQuery, SearchResult, Trip
-from .sources import google, kiwi, serpapi
+from .sources import google, kiwi, serpapi, volaris
 
 log = logging.getLogger(__name__)
 
-SOURCES = {"google": google.search, "kiwi": kiwi.search, "serpapi": serpapi.search}
+SOURCES = {"google": google.search, "kiwi": kiwi.search, "serpapi": serpapi.search, "volaris": volaris.search}
 
 
 def to_currency(it: Itinerary, cur: str) -> Itinerary:
