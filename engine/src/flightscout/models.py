@@ -1,0 +1,226 @@
+"""Normalized data model shared by every source, the planner, the CLI, the MCP
+server and the web API. Anything that leaves the engine is one of these, dumped
+to JSON with ``model_dump(mode="json")``."""
+
+from __future__ import annotations
+
+import hashlib
+from datetime import date, datetime, timezone
+from typing import Literal
+
+from pydantic import BaseModel, Field, computed_field
+
+Source = Literal["google", "kiwi", "ryanair", "serpapi"]
+Cabin = Literal["economy", "premium", "business", "first"]
+
+
+def now_utc() -> datetime:
+    return datetime.now(timezone.utc).replace(microsecond=0)
+
+
+class Segment(BaseModel):
+    """One physical flight."""
+
+    origin: str
+    destination: str
+    departure: datetime  # local time at origin, naive
+    arrival: datetime  # local time at destination, naive
+    carrier: str  # IATA airline code, e.g. "KL"
+    carrier_name: str | None = None
+    flight_number: str | None = None
+    duration_min: int | None = None
+    aircraft: str | None = None
+
+
+class Slice(BaseModel):
+    """A directional journey (outbound or inbound) made of segments."""
+
+    segments: list[Segment]
+    duration_min: int
+
+    @computed_field
+    @property
+    def origin(self) -> str:
+        return self.segments[0].origin
+
+    @computed_field
+    @property
+    def destination(self) -> str:
+        return self.segments[-1].destination
+
+    @computed_field
+    @property
+    def departure(self) -> datetime:
+        return self.segments[0].departure
+
+    @computed_field
+    @property
+    def arrival(self) -> datetime:
+        return self.segments[-1].arrival
+
+    @computed_field
+    @property
+    def stops(self) -> int:
+        return len(self.segments) - 1
+
+    @computed_field
+    @property
+    def carriers(self) -> list[str]:
+        return sorted({s.carrier for s in self.segments})
+
+
+class Itinerary(BaseModel):
+    """A single bookable ticket (one price, one booking link)."""
+
+    source: Source
+    price: float
+    currency: str
+    slices: list[Slice]
+    booking_url: str
+    seller: str | None = None  # "Kiwi.com", "Google Flights", airline name...
+    seller_kind: Literal["airline", "ota", "metasearch"] = "metasearch"
+    self_transfer: bool = False  # connections inside this ticket are not protected
+    baggage: dict | None = None
+    warnings: list[str] = Field(default_factory=list)
+    fetched_at: datetime = Field(default_factory=now_utc)
+
+    @computed_field
+    @property
+    def id(self) -> str:
+        key = "|".join(
+            f"{s.origin}{s.destination}{s.departure:%Y%m%d%H%M}{s.carrier}{s.flight_number}"
+            for sl in self.slices
+            for s in sl.segments
+        )
+        return hashlib.sha1(f"{self.source}:{key}".encode()).hexdigest()[:16]
+
+    @computed_field
+    @property
+    def trip_type(self) -> Literal["oneway", "roundtrip", "multi"]:
+        if len(self.slices) == 1:
+            return "oneway"
+        if len(self.slices) == 2 and self.slices[0].origin == self.slices[1].destination:
+            return "roundtrip"
+        return "multi"
+
+    @property
+    def duration_min(self) -> int:
+        return sum(s.duration_min for s in self.slices)
+
+    @property
+    def flight_key(self) -> str:
+        """Source independent identity, used to merge the same flights found
+        on several sources."""
+        return "|".join(
+            f"{s.carrier}{s.flight_number}@{s.departure:%Y%m%d}"
+            for sl in self.slices
+            for s in sl.segments
+        )
+
+
+class Stopover(BaseModel):
+    airport: str
+    hours: float
+
+
+class Trip(BaseModel):
+    """One or more tickets combined into a door to door plan. A trip with a
+    single ticket is a normal search result. Several tickets means a split
+    ticket or stopover plan built by the planner."""
+
+    tickets: list[Itinerary]
+    total_price: float
+    currency: str
+    kind: Literal["single", "split", "stopover", "nested", "multicity"] = "single"
+    stopovers: list[Stopover] = Field(default_factory=list)
+    risks: list[str] = Field(default_factory=list)
+    savings_vs_direct: float | None = None
+    score: float | None = None
+
+    @computed_field
+    @property
+    def id(self) -> str:
+        return hashlib.sha1("+".join(t.id for t in self.tickets).encode()).hexdigest()[:16]
+
+    @computed_field
+    @property
+    def route(self) -> list[str]:
+        """Airports in travel order across all tickets."""
+        legs = sorted(
+            (sl for t in self.tickets for sl in t.slices), key=lambda sl: sl.departure
+        )
+        out: list[str] = []
+        for sl in legs:
+            for s in sl.segments:
+                if not out or out[-1] != s.origin:
+                    out.append(s.origin)
+                out.append(s.destination)
+        return out
+
+    @computed_field
+    @property
+    def departure(self) -> datetime:
+        return min(sl.departure for t in self.tickets for sl in t.slices)
+
+    @computed_field
+    @property
+    def arrival(self) -> datetime:
+        return max(sl.arrival for t in self.tickets for sl in t.slices)
+
+    @computed_field
+    @property
+    def travel_min(self) -> int:
+        """Time spent in transit for the outbound journey (first slice chain)."""
+        return sum(t.slices[0].duration_min for t in self.tickets)
+
+
+class DatePrice(BaseModel):
+    """Cheapest known price for a date (or date pair) on a route."""
+
+    origin: str
+    destination: str
+    departure: date
+    return_date: date | None = None
+    price: float
+    currency: str
+    source: Source
+    booking_url: str | None = None
+
+
+class Destination(BaseModel):
+    """An explore result: a cheap place to go from an origin."""
+
+    origin: str
+    destination: str
+    city: str | None = None
+    country: str | None = None
+    price: float
+    currency: str
+    departure: date | None = None
+    return_date: date | None = None
+    source: Source
+    booking_url: str | None = None
+    lat: float | None = None
+    lon: float | None = None
+
+
+class SearchQuery(BaseModel):
+    origins: list[str]
+    destinations: list[str]
+    departure: date
+    return_date: date | None = None
+    adults: int = 1
+    cabin: Cabin = "economy"
+    max_stops: int | None = None
+    currency: str = "USD"
+    sources: list[Source] = Field(default_factory=lambda: ["google", "kiwi"])
+    departure_flex_days: int = 0
+    return_flex_days: int = 0
+
+
+class SearchResult(BaseModel):
+    query: SearchQuery
+    trips: list[Trip]
+    errors: dict[str, str] = Field(default_factory=dict)
+    searched_at: datetime = Field(default_factory=now_utc)
+    google_url: str | None = None

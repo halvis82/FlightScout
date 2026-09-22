@@ -1,0 +1,28 @@
+[project]
+name = "flightscout"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "halvis82", email = "hhafnor@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.141.1",
+    "flights",
+    "httpx>=0.28.1",
+    "mcp[cli]>=2.2.0",
+    "pydantic>=2.13.5",
+    "rich>=15.0.0",
+    "typer>=0.27.2",
+]
+
+[project.scripts]
+flightscout = "flightscout:main"
+
+[build-system]
+requires = ["uv_build>=0.11.8,<0.12.0"]
+build-backend = "uv_build"
+
+[tool.uv.sources]
+flights = { git = "https://github.com/punitarani/fli", rev = "main" }
