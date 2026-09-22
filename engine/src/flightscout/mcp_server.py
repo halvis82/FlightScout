@@ -7,12 +7,12 @@ from __future__ import annotations
 from datetime import date
 from typing import Literal
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 from . import airports, config
 from .client import Client
 
-mcp = FastMCP(
+mcp = MCPServer(
     "flightscout",
     instructions=(
         "Flight search and planning. Use `search_flights` for normal itineraries, `plan_routes` to find "

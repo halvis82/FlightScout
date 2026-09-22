@@ -1,7 +1,7 @@
 [project]
 name = "flightscout"
 version = "0.1.0"
-description = "Add your description here"
+description = "FlightScout engine: flight search, route planning, price tracking, CLI and MCP server"
 readme = "README.md"
 authors = [
     { name = "halvis82", email = "hhafnor@gmail.com" }
