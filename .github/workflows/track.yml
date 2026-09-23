@@ -26,6 +26,9 @@ jobs:
           FLIGHTSCOUT_API_URL: ${{ secrets.FLIGHTSCOUT_API_URL }}
           FLIGHTSCOUT_TRACKER_KEY: ${{ secrets.FLIGHTSCOUT_TRACKER_KEY }}
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
+          FLIGHTSCOUT_SKY_KEYS: ${{ secrets.FLIGHTSCOUT_SKY_KEYS }}
+          FLIGHTSCOUT_VIVA_KEY: ${{ secrets.FLIGHTSCOUT_VIVA_KEY }}
+          FLIGHTSCOUT_VOLOTEA_KEY: ${{ secrets.FLIGHTSCOUT_VOLOTEA_KEY }}
           FLIGHTSCOUT_CACHE: ${{ runner.temp }}/fs-cache
         run: |
           uv run --extra browser playwright install --with-deps chromium

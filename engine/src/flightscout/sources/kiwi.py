@@ -92,6 +92,15 @@ def _d(x: date) -> str:
     return x.strftime("%d/%m/%Y")
 
 
+def _flight_no(num, carrier: str | None) -> str | None:
+    """Kiwi sometimes prefixes the carrier ("H2H2270"); keep just the number
+    so the same flight matches across sources."""
+    n = str(num or "").strip()
+    if carrier and n.upper().startswith(carrier.upper()):
+        n = n[len(carrier):]
+    return n or None
+
+
 def _slice(leg: dict) -> Slice:
     segs = [
         Segment(
@@ -99,7 +108,7 @@ def _slice(leg: dict) -> Slice:
             departure=datetime.fromisoformat(s["departureTime"]) if s.get("departureTime") else datetime.fromisoformat(leg["departureTime"]),
             arrival=datetime.fromisoformat(s["arrivalTime"]) if s.get("arrivalTime") else datetime.fromisoformat(leg["arrivalTime"]),
             carrier=s.get("carrier") or "??", carrier_name=s.get("carrierName"),
-            flight_number=str(s.get("flightNumber") or "") or None,
+            flight_number=_flight_no(s.get("flightNumber"), s.get("carrier")),
             duration_min=(s["durationSeconds"] // 60) if s.get("durationSeconds") else None,
         )
         for s in leg["segments"]

@@ -8,11 +8,49 @@ from concurrent.futures import ThreadPoolExecutor
 
 from . import airports, fx, sellers
 from .models import Itinerary, SearchQuery, SearchResult, Trip
-from .sources import google, kiwi, serpapi, volaris
+from .models import DatePrice
+from .sources import (condor, flair, google, kiwi, norse, serpapi, skyairline, vivaaerobus, volaris, volotea,
+                      wideroe, wizzair)
 
 log = logging.getLogger(__name__)
 
-SOURCES = {"google": google.search, "kiwi": kiwi.search, "serpapi": serpapi.search, "volaris": volaris.search}
+SOURCES = {
+    "google": google.search, "kiwi": kiwi.search, "serpapi": serpapi.search, "volaris": volaris.search,
+    "wideroe": wideroe.search, "skyairline": skyairline.search, "norse": norse.search,
+    "volotea": volotea.search, "condor": condor.search, "flair": flair.search,
+}
+
+# Airline low fare calendars (one way, cheapest fare per day). Each module
+# gates itself with relevant(), so only carriers that fly the market are asked.
+CALENDARS = {
+    "volaris": volaris, "vivaaerobus": vivaaerobus, "wizzair": wizzair, "volotea": volotea,
+    "skyairline": skyairline, "flair": flair, "norse": norse,
+}
+
+
+def direct_dates(origin: str, dest: str, start, end, currency: str) -> tuple[list[DatePrice], dict[str, str]]:
+    """Every relevant airline calendar for a route, plus per source errors."""
+    mods = {n: m for n, m in CALENDARS.items() if m.relevant([origin], [dest])}
+    out: list[DatePrice] = []
+    errors: dict[str, str] = {}
+    with ThreadPoolExecutor(max_workers=len(mods) or 1) as ex:
+        futs = {n: ex.submit(m.dates, origin, dest, start, end, currency) for n, m in mods.items()}
+        for n, f in futs.items():
+            try:
+                out.extend(f.result())
+            except Exception as e:
+                log.warning("calendar %s failed: %s", n, e)
+                errors[n] = str(e)[:300]
+    return out, errors
+
+
+def cheapest_per_day(rows: list[DatePrice]) -> list[DatePrice]:
+    best: dict = {}
+    for r in rows:
+        k = (r.departure, r.return_date)
+        if k not in best or r.price < best[k].price:
+            best[k] = r
+    return sorted(best.values(), key=lambda r: r.departure)
 
 
 def to_currency(it: Itinerary, cur: str) -> Itinerary:

@@ -105,7 +105,8 @@ def search(
     adults: int = typer.Option(1),
     max_stops: Optional[int] = typer.Option(None, "--max-stops"),
     currency: Optional[str] = typer.Option(None, "--currency", "-c"),
-    sources: str = typer.Option("google,kiwi", help="google,kiwi,serpapi"),
+    sources: str = typer.Option("default", help="default (google, kiwi and the airline direct sources) or a list: "
+                                "google,kiwi,serpapi,volaris,wideroe,skyairline,norse,volotea,condor,flair"),
     nearby: int = typer.Option(0, "--nearby", help="Also search airports within this many km"),
     sellers: int = typer.Option(0, "--sellers", help="Fetch the seller breakdown for the top N Google results (needs a browser)"),
     limit: int = typer.Option(15),
@@ -116,10 +117,12 @@ def search(
     from .models import SearchQuery
     from .search import search as run
 
+    src = {} if sources.strip().lower() == "default" else {
+        "sources": [s.strip().lower() for s in sources.split(",") if s.strip()]}
     q = SearchQuery(origins=_codes(origin), destinations=_codes(destination), departure=_date(depart),
                     return_date=_date(ret) if ret else None, cabin=cabin, adults=adults, max_stops=max_stops,
-                    currency=_cur(currency), sources=[s.strip().lower() for s in sources.split(",") if s.strip()],
-                    departure_flex_days=flex, return_flex_days=flex if ret else 0, nearby_km=nearby)
+                    currency=_cur(currency), departure_flex_days=flex, return_flex_days=flex if ret else 0,
+                    nearby_km=nearby, **src)
     with con.status("searching..."):
         res = run(q)
     if sellers:
@@ -273,20 +276,16 @@ def dates(
     """Cheapest price per departure date (Google Flights, one request per date)."""
     from .sources import google
 
-    from .sources import volaris
+    from .search import cheapest_per_day, direct_dates
 
     o, d = origin.upper(), destination.upper()
     with con.status("pricing dates..."):
         res = google.dates(o, d, _date(earliest), _date(latest), _cur(currency), trip_days)
-        if not trip_days and volaris.relevant([o], [d]):
-            try:
-                best = {r.departure: r for r in res}
-                for v in volaris.dates(o, d, _date(earliest), _date(latest), _cur(currency)):
-                    if v.departure not in best or v.price < best[v.departure].price:
-                        best[v.departure] = v
-                res = list(best.values())
-            except Exception as e:
-                con.print(f"[yellow]volaris calendar failed: {e}[/yellow]")
+        if not trip_days:  # airline calendars are one way only
+            extra, errs = direct_dates(o, d, _date(earliest), _date(latest), _cur(currency))
+            for n, e in errs.items():
+                con.print(f"[yellow]{n} calendar failed: {e}[/yellow]")
+            res = cheapest_per_day(res + extra)
     if as_json:
         return _emit_json([r.model_dump(mode="json") for r in res])
     lo = min((r.price for r in res), default=0)

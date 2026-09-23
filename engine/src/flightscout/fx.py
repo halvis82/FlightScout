@@ -23,9 +23,25 @@ def rates(base: str = "EUR") -> dict[str, float]:
     return data
 
 
+def _wide_rates() -> dict[str, float]:
+    """EUR based rates for currencies the ECB does not publish (CLP, PEN,
+    ARS, COP...), from open.er-api.com (free, no key, daily)."""
+    key = "fx-wide:EUR"
+    hit = cache.get(key, ttl=12 * 3600)
+    if hit:
+        return hit
+    r = httpx.get("https://open.er-api.com/v6/latest/EUR", timeout=15)
+    r.raise_for_status()
+    data = r.json()["rates"]
+    cache.put(key, data)
+    return data
+
+
 def convert(amount: float, frm: str, to: str) -> float:
     frm, to = frm.upper(), to.upper()
     if frm == to:
         return amount
     rt = rates("EUR")
+    if frm not in rt or to not in rt:
+        rt = {**_wide_rates(), **rt}
     return amount / rt[frm] * rt[to]
