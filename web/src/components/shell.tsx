@@ -14,7 +14,10 @@ import { openPanel, toastStore } from "./stores";
 import { Tip, useDismiss } from "./ui";
 import { WatchlistButton, WatchlistPanel } from "./watchlist-panel";
 
-const NAV = [{ href: "/", label: "Search" }];
+const NAV = [
+  { href: "/", label: "Search" },
+  { href: "/airlines", label: "Airlines" },
+];
 
 export function Shell({ children }: { children: ReactNode }) {
   const path = usePathname();

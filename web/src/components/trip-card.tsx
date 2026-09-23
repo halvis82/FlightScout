@@ -4,6 +4,7 @@ import { ArrowRight, ChevronDown, ExternalLink, Eye, Moon, TriangleAlert } from 
 import { Badge, Button } from "./ui";
 import { Code } from "./place";
 import { airport } from "@/lib/airports-client";
+import { airlineByCode, airlineLink, useAirlines, type Airline } from "@/lib/airlines";
 import { useApp } from "./app-context";
 import { cn } from "@/lib/utils";
 import { dayDiff, formatDate, formatDuration, formatTime, parseLocal } from "@/lib/format";
@@ -163,9 +164,53 @@ export function TripCard({
   );
 }
 
+// "Check on <airline>" links: each airline in the ticket, opened on its own
+// site with this ticket's route and dates pre-filled when the airline supports it.
+function AirlineLinks({ it }: { it: Itinerary }) {
+  const list = useAirlines();
+  if (!list) return null;
+  const out = it.slices[0];
+  const back = it.trip_type === "roundtrip" ? it.slices[1] : null;
+  const codes = [...new Set(it.slices.flatMap((s) => s.segments.map((x) => x.carrier)))];
+  const links = codes
+    .map((c) => airlineByCode(list, c))
+    .filter((a): a is Airline => Boolean(a))
+    .map((a) => {
+      // if the airline only flies part of the trip, prefill its own legs
+      const segs = it.slices.flatMap((s) => s.segments).filter((x) => x.carrier === a.iata);
+      const whole = segs.length === it.slices.reduce((n, s) => n + s.segments.length, 0);
+      const q = whole
+        ? { origin: out.origin, destination: out.destination, depart: out.departure, ret: back?.departure ?? null }
+        : { origin: segs[0].origin, destination: segs[0].destination, depart: segs[0].departure, ret: null };
+      const [url] = airlineLink(a, q);
+      return { a, url };
+    });
+  if (!links.length) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 border-t border-border px-3 py-2 text-xs">
+      <span className="text-muted">Check on the airline:</span>
+      {links.map(({ a, url }) => (
+        <a
+          key={a.iata}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-0.5 hover:bg-surface-2"
+        >
+          <AirlineLogo code={a.iata} name={a.name} className="size-4 rounded" />
+          {a.name}
+          <ExternalLink className="size-3 text-muted" />
+        </a>
+      ))}
+    </div>
+  );
+}
+
 export function AirlineLogo({ code, name, className }: { code: string; name?: string | null; className?: string }) {
-  const [broken, setBroken] = useState(false);
-  if (broken)
+  // Kiwi's CDN first, then avs.io, then the code as a badge.
+  const [attempt, setAttempt] = useState(0);
+  const srcs = [`https://images.kiwi.com/airlines/64/${code}.png`, `https://pics.avs.io/64/64/${code}.png`];
+  if (attempt >= srcs.length)
     return (
       <span className={cn("grid size-8 place-items-center rounded-lg bg-surface-2 text-[10px] font-semibold text-muted", className)} title={name ?? code}>
         {code}
@@ -174,10 +219,10 @@ export function AirlineLogo({ code, name, className }: { code: string; name?: st
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={`https://images.kiwi.com/airlines/64/${code}.png`}
+      src={srcs[attempt]}
       alt={name ?? code}
       title={name ?? code}
-      onError={() => setBroken(true)}
+      onError={() => setAttempt((n) => n + 1)}
       className={cn("size-8 rounded-lg bg-white object-contain p-0.5", className)}
       loading="lazy"
     />
@@ -271,6 +316,7 @@ function TicketBlock({ it, index }: { it: Itinerary; index?: number }) {
         ))}
       </div>
       <OffersPanel it={it} />
+      <AirlineLinks it={it} />
       {it.warnings.length > 0 && (
         <ul className="space-y-0.5 border-t border-border px-3 py-2 text-xs text-muted">
           {it.warnings.map((w) => (

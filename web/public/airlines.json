@@ -1,0 +1,3710 @@
+{
+ "updated": "2026-09-22",
+ "airlines": [
+  {
+   "iata": "EI",
+   "icao": "EIN",
+   "name": "Aer Lingus",
+   "country": "IE",
+   "regions": [
+    "global",
+    "europe"
+   ],
+   "category": "hybrid",
+   "tags": [
+    "US preclearance",
+    "bags extra",
+    "lie-flat business"
+   ],
+   "alliance": null,
+   "hubs": [
+    "DUB"
+   ],
+   "website": "https://www.aerlingus.com",
+   "search_url": "https://www.aerlingus.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/EI.png",
+   "notes": "Irish IAG airline where Dublin US preclearance lets transatlantic passengers arrive as domestic travelers."
+  },
+  {
+   "iata": "AR",
+   "icao": "ARG",
+   "name": "Aerolineas Argentinas",
+   "country": "AR",
+   "regions": [
+    "global",
+    "south_america",
+    "north_america",
+    "us_domestic",
+    "central_america_caribbean"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free checked bags",
+    "comfort"
+   ],
+   "alliance": "skyteam",
+   "hubs": [
+    "AEP",
+    "EZE",
+    "COR"
+   ],
+   "website": "https://www.aerolineas.com.ar",
+   "search_url": "https://www.aerolineas.com.ar/en-us",
+   "deeplink": null,
+   "date_format": "YYYYMMDD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/AR.png",
+   "notes": "Argentina's flag carrier and the main way to reach Patagonia and Iguazu, flying domestic routes from Aeroparque."
+  },
+  {
+   "iata": "AM",
+   "icao": "AMX",
+   "name": "Aeromexico",
+   "country": "MX",
+   "regions": [
+    "global",
+    "mexico",
+    "north_america",
+    "us_domestic",
+    "central_america_caribbean",
+    "south_america"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "free carry-on"
+   ],
+   "alliance": "skyteam",
+   "hubs": [
+    "MEX",
+    "GDL",
+    "MTY"
+   ],
+   "website": "https://www.aeromexico.com",
+   "search_url": "https://www.aeromexico.com/en-us",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/AM.png",
+   "notes": "Mexico's flag carrier with a joint venture with Delta, and Basica fares include only a carry-on.",
+   "verify_note": "Site returned an error page to headless Chromium"
+  },
+  {
+   "iata": "AC",
+   "icao": "ACA",
+   "name": "Air Canada",
+   "country": "CA",
+   "regions": [
+    "global",
+    "north_america",
+    "us_domestic",
+    "mexico",
+    "central_america_caribbean",
+    "south_america"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "free wifi"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "YYZ",
+    "YUL",
+    "YVR",
+    "YYC"
+   ],
+   "website": "https://www.aircanada.com",
+   "search_url": "https://www.aircanada.com/ca/en/aco/home.html",
+   "deeplink": "https://www.aircanada.com/booking/ca/en/aco/search?org0={origin}&dest0={destination}&departureDate0={depart}&org1={destination}&dest1={origin}&departureDate1={return}&ADT={adults}&YTH=0&CHD=0&INF=0&INS=0&lang=en-CA&tripType=R&marketCode=TNB",
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/AC.png",
+   "notes": "Canada's flag carrier with free Wi-Fi for Aeroplan members and a large transborder US network.",
+   "verify_note": "Homepage 403 and deep link lands on a session expired error page in headless Chromium"
+  },
+  {
+   "iata": "CA",
+   "icao": "CCA",
+   "name": "Air China",
+   "country": "CN",
+   "regions": [
+    "global",
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free carry-on",
+    "lie-flat business"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "PEK",
+    "CTU"
+   ],
+   "website": "https://www.airchina.us",
+   "search_url": "https://www.airchina.us/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/CA.png",
+   "notes": "Beijing based Star Alliance flag carrier of China."
+  },
+  {
+   "iata": "UX",
+   "icao": "AEA",
+   "name": "Air Europa",
+   "country": "ES",
+   "regions": [
+    "global",
+    "europe"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free carry-on",
+    "787 Dreamliner",
+    "Latin America network"
+   ],
+   "alliance": "skyteam",
+   "hubs": [
+    "MAD"
+   ],
+   "website": "https://www.aireuropa.com",
+   "search_url": "https://www.aireuropa.com/us/en/home",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/UX.png",
+   "notes": "Spanish SkyTeam airline flying an all Dreamliner long haul fleet from Madrid to the Americas, with Turkish Airlines taking a stake."
+  },
+  {
+   "iata": "AF",
+   "icao": "AFR",
+   "name": "Air France",
+   "country": "FR",
+   "regions": [
+    "global",
+    "europe"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "free carry-on",
+    "lie-flat business",
+    "free wifi messaging"
+   ],
+   "alliance": "skyteam",
+   "hubs": [
+    "CDG",
+    "ORY"
+   ],
+   "website": "https://wwws.airfrance.us",
+   "search_url": "https://wwws.airfrance.us/",
+   "deeplink": "https://wwws.airfrance.us/search/offers?pax={adults}:0:0:0:0:0:0:0&cabinClass=ECONOMY&activeConnection=0&connections={origin}:A:{depart}%3E{destination}:A-{destination}:A:{return}%3E{origin}:A&bookingFlow=LEISURE",
+   "date_format": "YYYYMMDD",
+   "oneway_deeplink": "https://wwws.airfrance.us/search/offers?pax={adults}:0:0:0:0:0:0:0&cabinClass=ECONOMY&activeConnection=0&connections={origin}:A:{depart}%3E{destination}:A&bookingFlow=LEISURE",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/AF.png",
+   "notes": "French flag carrier hubbed at Paris CDG, rolling out free fleetwide wifi for Flying Blue members.",
+   "verify_note": "Verified 2026-09-22 CDG-BCN: redirects to /search/advanced with route, dates and pax prefilled (user clicks search). Akamai blocks bundled headless Chromium."
+  },
+  {
+   "iata": "AI",
+   "icao": "AIC",
+   "name": "Air India",
+   "country": "IN",
+   "regions": [
+    "global",
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free carry-on",
+    "lie-flat business"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "DEL",
+    "BOM"
+   ],
+   "website": "https://www.airindia.com",
+   "search_url": "https://www.airindia.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/AI.png",
+   "notes": "Tata owned flag carrier with many nonstops from India to North America and Europe."
+  },
+  {
+   "iata": "NZ",
+   "icao": "ANZ",
+   "name": "Air New Zealand",
+   "country": "NZ",
+   "regions": [
+    "global",
+    "oceania"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "great service"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "AKL"
+   ],
+   "website": "https://www.airnewzealand.com",
+   "search_url": "https://www.airnewzealand.com/",
+   "deeplink": "https://flightbookings.airnewzealand.co.nz/vbook/actions/ext-search?searchLegs%5B0%5D.originPoint={origin}&searchLegs%5B0%5D.destinationPoint={destination}&searchLegs%5B0%5D.tripStartMonth={depart_mon}&searchLegs%5B0%5D.tripStartDate={depart_day}&searchLegs%5B1%5D.originPoint={destination}&searchLegs%5B1%5D.destinationPoint={origin}&searchLegs%5B1%5D.tripStartMonth={return_mon}&searchLegs%5B1%5D.tripStartDate={return_day}&tripType=return&adults={adults}&children=0&infants=0&bookingClass=ECONOMY&searchType=flexible&doSearch=search",
+   "date_format": "MMM_DD_SPLIT",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/NZ.png",
+   "notes": "New Zealand flag carrier with Skycouch economy and Pacific wide network.",
+   "oneway_deeplink": "https://flightbookings.airnewzealand.co.nz/vbook/actions/ext-search?searchLegs%5B0%5D.originPoint={origin}&searchLegs%5B0%5D.destinationPoint={destination}&searchLegs%5B0%5D.tripStartMonth={depart_mon}&searchLegs%5B0%5D.tripStartDate={depart_day}&tripType=oneway&adults={adults}&children=0&infants=0&bookingClass=ECONOMY&searchType=flexible&doSearch=search",
+   "verify_note": "Verified AKL-MEL 2026-11-20/30 (return and one way) cold in headless Chrome: lands on select-flights with route, both dates and pax prefilled. Format captured from the airnewzealand.co.nz home widget. NOTE: dates are split, not a single {depart}: {depart_mon} = uppercase 3 letter English month (NOV), {depart_day} = day of month without year (20), same for {return_mon}/{return_day}. The year is inferred, so dates must be within about 12 months."
+  },
+  {
+   "iata": "TS",
+   "icao": "TSC",
+   "name": "Air Transat",
+   "country": "CA",
+   "regions": [
+    "global",
+    "north_america",
+    "mexico",
+    "central_america_caribbean",
+    "south_america"
+   ],
+   "category": "hybrid",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "YUL",
+    "YYZ",
+    "YQB"
+   ],
+   "website": "https://www.airtransat.com",
+   "search_url": "https://www.airtransat.com/en-CA/home",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/TS.png",
+   "notes": "Leisure carrier from Montreal and Toronto to Europe, Mexico and the Caribbean with Club Class, and it dropped all US flights in June 2026."
+  },
+  {
+   "iata": "AS",
+   "icao": "ASA",
+   "name": "Alaska Airlines",
+   "country": "US",
+   "regions": [
+    "global",
+    "us_domestic",
+    "north_america",
+    "mexico",
+    "central_america_caribbean"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "extra legroom",
+    "free wifi"
+   ],
+   "alliance": "oneworld",
+   "hubs": [
+    "SEA",
+    "PDX",
+    "SFO",
+    "LAX",
+    "ANC",
+    "HNL"
+   ],
+   "website": "https://www.alaskaair.com",
+   "search_url": "https://www.alaskaair.com/",
+   "deeplink": "https://www.alaskaair.com/search/results?A={adults}&O={origin}&D={destination}&OD={depart}&DD={return}&RT=true",
+   "date_format": "YYYY-MM-DD",
+   "oneway_deeplink": "https://www.alaskaair.com/search/results?A={adults}&O={origin}&D={destination}&OD={depart}&RT=false",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/AS.png",
+   "notes": "Now includes Hawaiian Airlines, whose flights moved to the AS code in April 2026, and flies long haul from Seattle with strong West Coast and Mexico coverage.",
+   "verify_note": "Headless Chromium got a CAPTCHA page, not verifiable"
+  },
+  {
+   "iata": "AA",
+   "icao": "AAL",
+   "name": "American Airlines",
+   "country": "US",
+   "regions": [
+    "global",
+    "us_domestic",
+    "north_america",
+    "mexico",
+    "central_america_caribbean",
+    "south_america"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "free wifi",
+    "extra legroom"
+   ],
+   "alliance": "oneworld",
+   "hubs": [
+    "DFW",
+    "CLT",
+    "MIA",
+    "ORD",
+    "PHX",
+    "PHL",
+    "DCA",
+    "LAX",
+    "JFK"
+   ],
+   "website": "https://www.aa.com",
+   "search_url": "https://www.aa.com/booking/find-flights",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/AA.png",
+   "notes": "Largest airline network into Latin America via Miami, with free Wi-Fi for AAdvantage members from 2026.",
+   "verify_note": "Akamai Access Denied (403) to headless Chromium"
+  },
+  {
+   "iata": "NH",
+   "icao": "ANA",
+   "name": "ANA All Nippon Airways",
+   "country": "JP",
+   "regions": [
+    "global",
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "great service"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "HND",
+    "NRT"
+   ],
+   "website": "https://www.ana.co.jp",
+   "search_url": "https://www.ana.co.jp/en/us/",
+   "deeplink": null,
+   "date_format": "YYYYMMDD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/NH.png",
+   "notes": "Japan's largest airline with The Room business class on long haul."
+  },
+  {
+   "iata": "AV",
+   "icao": "AVA",
+   "name": "Avianca",
+   "country": "CO",
+   "regions": [
+    "global",
+    "south_america",
+    "central_america_caribbean",
+    "north_america",
+    "us_domestic",
+    "mexico"
+   ],
+   "category": "hybrid",
+   "tags": [
+    "bags extra",
+    "cheap"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "BOG",
+    "SAL",
+    "MDE",
+    "LIM"
+   ],
+   "website": "https://www.avianca.com",
+   "search_url": "https://www.avianca.com/en/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/AV.png",
+   "notes": "Colombia's largest airline runs a low cost style fare model with a paid carry-on on the cheapest fare, plus a Business Class on key routes.",
+   "verify_note": "Akamai Access Denied (403) to headless Chromium on booking URL"
+  },
+  {
+   "iata": "AD",
+   "icao": "AZU",
+   "name": "Azul",
+   "country": "BR",
+   "regions": [
+    "global",
+    "south_america",
+    "north_america",
+    "us_domestic"
+   ],
+   "category": "hybrid",
+   "tags": [
+    "comfort",
+    "free wifi",
+    "extra legroom"
+   ],
+   "alliance": null,
+   "hubs": [
+    "VCP",
+    "CNF",
+    "REC",
+    "BEL"
+   ],
+   "website": "https://www.voeazul.com.br",
+   "search_url": "https://www.voeazul.com.br/us/en/home",
+   "deeplink": null,
+   "date_format": "MM/DD/YYYY",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/AD.png",
+   "notes": "Brazil's widest domestic network centered on Campinas, with free snacks and flights to Florida and Lisbon."
+  },
+  {
+   "iata": "BA",
+   "icao": "BAW",
+   "name": "British Airways",
+   "country": "GB",
+   "regions": [
+    "global",
+    "europe"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "free carry-on",
+    "lie-flat business"
+   ],
+   "alliance": "oneworld",
+   "hubs": [
+    "LHR",
+    "LGW"
+   ],
+   "website": "https://www.britishairways.com",
+   "search_url": "https://www.britishairways.com/travel/home/public/en_us/",
+   "deeplink": "https://www.britishairways.com/travel/book/public/en_gb/flightList?onds={origin}-{destination}_{depart},{destination}-{origin}_{return}&ad={adults}&yad=0&ch=0&inf=0&cabin=M&flex=LOWEST",
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/BA.png",
+   "notes": "UK flag carrier hubbed at Heathrow, with Basic fares on short haul that exclude checked bags.",
+   "oneway_deeplink": "https://www.britishairways.com/travel/book/public/en_gb/flightList?onds={origin}-{destination}_{depart}&ad={adults}&yad=0&ch=0&inf=0&cabin=M&flex=LOWEST",
+   "verify_note": "Tested 2026-09-22 LHR-BCN: URL is accepted and opens the Outbound Flight page, but results stayed on a loading skeleton in headless Chrome (likely bot protection), so the prefill could not be confirmed."
+  },
+  {
+   "iata": "CX",
+   "icao": "CPA",
+   "name": "Cathay Pacific",
+   "country": "HK",
+   "regions": [
+    "global",
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "great service",
+    "free wifi"
+   ],
+   "alliance": "oneworld",
+   "hubs": [
+    "HKG"
+   ],
+   "website": "https://www.cathaypacific.com",
+   "search_url": "https://www.cathaypacific.com/cx/en_US.html",
+   "deeplink": "https://www.cathaypacific.com/wdsibe/IBEFacade?ACTION=SINGLECITY_SEARCH&ENTRYLANGUAGE=en&ENTRYCOUNTRY=US&BOOKING_FLOW=REVENUE&ORIGIN={origin}&DESTINATION={destination}&DEPARTUREDATE={depart}&ARRIVALDATE={return}&TRIPTYPE=R&CABINCLASS=Y&ADULT={adults}&YOUNGADULT=0&CHILD=0&INFANT=0",
+   "date_format": "YYYYMMDD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/CX.png",
+   "notes": "Hong Kong hub carrier with strong transpacific and Europe to Asia service.",
+   "oneway_deeplink": "https://www.cathaypacific.com/wdsibe/IBEFacade?ACTION=SINGLECITY_SEARCH&ENTRYLANGUAGE=en&ENTRYCOUNTRY=US&BOOKING_FLOW=REVENUE&ORIGIN={origin}&DESTINATION={destination}&DEPARTUREDATE={depart}&TRIPTYPE=O&CABINCLASS=Y&ADULT={adults}&YOUNGADULT=0&CHILD=0&INFANT=0",
+   "verify_note": "URL captured from the real cathaypacific.com search form, which issues this exact GET. Loaded directly it redirects to book.cathaypacific.com/tsp/en_US/flight-selection with route and dates in the URL, but the results page showed An error occurred in headless Chrome (cold and warmed). The same results page loaded fine via the form, so this looks like bot scoring, not a bad URL."
+  },
+  {
+   "iata": "MU",
+   "icao": "CES",
+   "name": "China Eastern Airlines",
+   "country": "CN",
+   "regions": [
+    "global",
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "cheap",
+    "free carry-on"
+   ],
+   "alliance": "skyteam",
+   "hubs": [
+    "PVG",
+    "SHA",
+    "KMG"
+   ],
+   "website": "https://us.ceair.com",
+   "search_url": "https://us.ceair.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/MU.png",
+   "notes": "Shanghai based carrier often among the cheapest options from Europe to Asia via China."
+  },
+  {
+   "iata": "CZ",
+   "icao": "CSN",
+   "name": "China Southern Airlines",
+   "country": "CN",
+   "regions": [
+    "global",
+    "asia",
+    "oceania"
+   ],
+   "category": "full_service",
+   "tags": [
+    "cheap",
+    "free carry-on"
+   ],
+   "alliance": null,
+   "hubs": [
+    "CAN",
+    "PKX"
+   ],
+   "website": "https://www.csair.com",
+   "search_url": "https://www.csair.com/en/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/CZ.png",
+   "notes": "China's largest airline by fleet, with a big Guangzhou hub for Australia and Southeast Asia."
+  },
+  {
+   "iata": "DE",
+   "icao": "CFG",
+   "name": "Condor",
+   "country": "DE",
+   "regions": [
+    "global",
+    "europe"
+   ],
+   "category": "premium_leisure",
+   "tags": [
+    "leisure routes",
+    "long haul low cost",
+    "lie-flat business"
+   ],
+   "alliance": null,
+   "hubs": [
+    "FRA",
+    "DUS",
+    "MUC",
+    "HAM"
+   ],
+   "website": "https://www.condor.com",
+   "search_url": "https://www.condor.com/us",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/DE.png",
+   "notes": "German leisure airline with striped A330neos to North America and many holiday routes."
+  },
+  {
+   "iata": "DL",
+   "icao": "DAL",
+   "name": "Delta Air Lines",
+   "country": "US",
+   "regions": [
+    "global",
+    "us_domestic",
+    "north_america",
+    "mexico",
+    "central_america_caribbean",
+    "south_america"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "free wifi",
+    "lie-flat business",
+    "extra legroom"
+   ],
+   "alliance": "skyteam",
+   "hubs": [
+    "ATL",
+    "DTW",
+    "MSP",
+    "SLC",
+    "SEA",
+    "LAX",
+    "JFK",
+    "BOS",
+    "LGA"
+   ],
+   "website": "https://www.delta.com",
+   "search_url": "https://www.delta.com/flight-search/book-a-flight",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/DL.png",
+   "notes": "Free fast Wi-Fi for SkyMiles members on most mainline jets and Basic Economy is the cheapest but most restrictive fare.",
+   "verify_note": "Akamai Access Denied (444) to headless Chromium, no public deep link format confirmed"
+  },
+  {
+   "iata": "EK",
+   "icao": "UAE",
+   "name": "Emirates",
+   "country": "AE",
+   "regions": [
+    "global",
+    "middle_east"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "great service",
+    "free wifi"
+   ],
+   "alliance": null,
+   "hubs": [
+    "DXB"
+   ],
+   "website": "https://www.emirates.com",
+   "search_url": "https://www.emirates.com/english/book/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/EK.png",
+   "notes": "Largest A380 operator with a vast one-stop network via Dubai.",
+   "verify_note": "No deeplink: emirates.com returned an Akamai access restricted page to headless Chrome for both the homepage and the legacy sessionhandler.aspx IBE link, so no format could be discovered or verified."
+  },
+  {
+   "iata": "ET",
+   "icao": "ETH",
+   "name": "Ethiopian Airlines",
+   "country": "ET",
+   "regions": [
+    "global",
+    "africa"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free carry-on",
+    "lie-flat business"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "ADD"
+   ],
+   "website": "https://www.ethiopianairlines.com",
+   "search_url": "https://www.ethiopianairlines.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/ET.png",
+   "notes": "Africa's largest network, connecting most of the continent via Addis Ababa."
+  },
+  {
+   "iata": "EY",
+   "icao": "ETD",
+   "name": "Etihad Airways",
+   "country": "AE",
+   "regions": [
+    "global",
+    "middle_east"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "great service"
+   ],
+   "alliance": null,
+   "hubs": [
+    "AUH"
+   ],
+   "website": "https://www.etihad.com",
+   "search_url": "https://www.etihad.com/en-us/book",
+   "deeplink": "https://digital.etihad.com/book/search?LANGUAGE=EN&CHANNEL=DESKTOP&B_LOCATION={origin}&E_LOCATION={destination}&TRIP_TYPE=R&CABIN=E&TRAVELERS=ADT&TRIP_FLOW_TYPE=AVAILABILITY&SITE_EDITION=EN-US&DATE_1={depart}0000&DATE_2={return}0000&FLOW=REVENUE",
+   "date_format": "YYYYMMDD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/EY.png",
+   "notes": "Abu Dhabi flag carrier often priced below Emirates and Qatar on Europe to Asia routes.",
+   "oneway_deeplink": "https://digital.etihad.com/book/search?LANGUAGE=EN&CHANNEL=DESKTOP&B_LOCATION={origin}&E_LOCATION={destination}&TRIP_TYPE=O&CABIN=E&TRAVELERS=ADT&TRIP_FLOW_TYPE=AVAILABILITY&SITE_EDITION=EN-US&DATE_1={depart}0000&FLOW=REVENUE",
+   "verify_note": "Format captured from the real etihad.com search form (it navigates to this exact URL). Incapsula blocked the results page (error code 15) for headless Chrome even via the form, so prefill was not confirmed. TRAVELERS is one ADT token per adult (ADT,ADT for 2), so {adults} is not directly usable: the template is fixed at 1 adult."
+  },
+  {
+   "iata": "BR",
+   "icao": "EVA",
+   "name": "EVA Air",
+   "country": "TW",
+   "regions": [
+    "global",
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "great service"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "TPE"
+   ],
+   "website": "https://www.evaair.com",
+   "search_url": "https://www.evaair.com/en-global/index.html",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/BR.png",
+   "notes": "Taipei carrier with strong transpacific service and premium economy."
+  },
+  {
+   "iata": "AY",
+   "icao": "FIN",
+   "name": "Finnair",
+   "country": "FI",
+   "regions": [
+    "global",
+    "europe",
+    "nordics"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "free carry-on"
+   ],
+   "alliance": "oneworld",
+   "hubs": [
+    "HEL"
+   ],
+   "website": "https://www.finnair.com",
+   "search_url": "https://www.finnair.com/en",
+   "deeplink": "https://www.finnair.com/us-en/booking/flight-selection?json=%7B%22flights%22%3A%5B%7B%22origin%22%3A%22{origin}%22%2C%22destination%22%3A%22{destination}%22%2C%22departureDate%22%3A%22{depart}%22%7D%2C%7B%22origin%22%3A%22{destination}%22%2C%22destination%22%3A%22{origin}%22%2C%22departureDate%22%3A%22{return}%22%7D%5D%2C%22cabin%22%3A%22MIXED%22%2C%22adults%22%3A{adults}%2C%22c15s%22%3A0%2C%22children%22%3A0%2C%22infants%22%3A0%2C%22isAward%22%3Afalse%7D",
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/AY.png",
+   "notes": "Finnish flag carrier connecting Europe and Asia via Helsinki, with Light fares that exclude checked bags.",
+   "oneway_deeplink": "https://www.finnair.com/us-en/booking/flight-selection?json=%7B%22flights%22%3A%5B%7B%22origin%22%3A%22{origin}%22%2C%22destination%22%3A%22{destination}%22%2C%22departureDate%22%3A%22{depart}%22%7D%5D%2C%22cabin%22%3A%22MIXED%22%2C%22adults%22%3A{adults}%2C%22c15s%22%3A0%2C%22children%22%3A0%2C%22infants%22%3A0%2C%22isAward%22%3Afalse%7D",
+   "verify_note": "Verified 2026-09-22 HEL-CPH shows flight selection Fri Nov 20 to Fri Nov 27."
+  },
+  {
+   "iata": "BF",
+   "icao": "FBU",
+   "name": "French bee",
+   "country": "FR",
+   "regions": [
+    "global",
+    "europe"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "long haul low cost",
+    "bags extra",
+    "A350"
+   ],
+   "alliance": null,
+   "hubs": [
+    "ORY"
+   ],
+   "website": "https://www.frenchbee.com",
+   "search_url": "https://www.frenchbee.com/en",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/BF.png",
+   "notes": "Long haul low cost A350 airline from Paris Orly to the US, Tahiti and Reunion."
+  },
+  {
+   "iata": "IB",
+   "icao": "IBE",
+   "name": "Iberia",
+   "country": "ES",
+   "regions": [
+    "global",
+    "europe"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "free carry-on",
+    "lie-flat business",
+    "Latin America network"
+   ],
+   "alliance": "oneworld",
+   "hubs": [
+    "MAD"
+   ],
+   "website": "https://www.iberia.com",
+   "search_url": "https://www.iberia.com/us/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/IB.png",
+   "notes": "Spanish flag carrier and the leading European airline to Latin America via Madrid.",
+   "verify_note": "Tested 2026-09-22: legacy dispatchSearchFormFlights.do (split day and month params) timed out twice in headless Chrome, probably bot protection."
+  },
+  {
+   "iata": "FI",
+   "icao": "ICE",
+   "name": "Icelandair",
+   "country": "IS",
+   "regions": [
+    "global",
+    "europe",
+    "nordics"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free stopover",
+    "free carry-on",
+    "transatlantic"
+   ],
+   "alliance": null,
+   "hubs": [
+    "KEF"
+   ],
+   "website": "https://www.icelandair.com",
+   "search_url": "https://www.icelandair.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/FI.png",
+   "notes": "Links Europe and North America via Keflavik and lets travelers add an Iceland stopover of up to 7 days at no extra airfare.",
+   "verify_note": "Tested 2026-09-22: /search/results/?from=&to=&depDate=&retDate= redirects to the homepage, no working deeplink found."
+  },
+  {
+   "iata": "AZ",
+   "icao": "ITY",
+   "name": "ITA Airways",
+   "country": "IT",
+   "regions": [
+    "global",
+    "europe"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "free carry-on",
+    "lie-flat business"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "FCO",
+    "LIN"
+   ],
+   "website": "https://www.ita-airways.com",
+   "search_url": "https://www.ita-airways.com/en_us",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/AZ.png",
+   "notes": "Italy's flag carrier, now part owned by Lufthansa and moving from SkyTeam to Star Alliance in 2026."
+  },
+  {
+   "iata": "JL",
+   "icao": "JAL",
+   "name": "Japan Airlines",
+   "country": "JP",
+   "regions": [
+    "global",
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "great service",
+    "free wifi"
+   ],
+   "alliance": "oneworld",
+   "hubs": [
+    "HND",
+    "NRT"
+   ],
+   "website": "https://www.jal.co.jp",
+   "search_url": "https://www.jal.co.jp/jp/en/",
+   "deeplink": null,
+   "date_format": "YYYYMMDD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/JL.png",
+   "notes": "Tokyo based oneworld carrier known for roomy economy seats."
+  },
+  {
+   "iata": "KL",
+   "icao": "KLM",
+   "name": "KLM Royal Dutch Airlines",
+   "country": "NL",
+   "regions": [
+    "global",
+    "europe"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "free carry-on",
+    "lie-flat business",
+    "free snacks"
+   ],
+   "alliance": "skyteam",
+   "hubs": [
+    "AMS"
+   ],
+   "website": "https://www.klm.com",
+   "search_url": "https://www.klm.com/",
+   "deeplink": "https://www.klm.com/search/offers?pax={adults}:0:0:0:0:0:0:0&cabinClass=ECONOMY&activeConnection=0&connections={origin}:A:{depart}%3E{destination}:A-{destination}:A:{return}%3E{origin}:A&bookingFlow=LEISURE",
+   "date_format": "YYYYMMDD",
+   "oneway_deeplink": "https://www.klm.com/search/offers?pax={adults}:0:0:0:0:0:0:0&cabinClass=ECONOMY&activeConnection=0&connections={origin}:A:{depart}%3E{destination}:A&bookingFlow=LEISURE",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/KL.png",
+   "notes": "Dutch flag carrier with a huge Amsterdam Schiphol network, sharing booking tech with Air France.",
+   "verify_note": "Verified 2026-09-22 AMS-BCN: redirects to /search/advanced with route, dates and pax prefilled (user clicks search). Akamai blocks bundled headless Chromium."
+  },
+  {
+   "iata": "KE",
+   "icao": "KAL",
+   "name": "Korean Air",
+   "country": "KR",
+   "regions": [
+    "global",
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "great service"
+   ],
+   "alliance": "skyteam",
+   "hubs": [
+    "ICN"
+   ],
+   "website": "https://www.koreanair.com",
+   "search_url": "https://www.koreanair.com/",
+   "deeplink": null,
+   "date_format": "YYYYMMDD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/KE.png",
+   "notes": "Seoul Incheon hub carrier now merging with Asiana."
+  },
+  {
+   "iata": "LA",
+   "icao": "LAN",
+   "name": "LATAM Airlines",
+   "country": "CL",
+   "regions": [
+    "global",
+    "south_america",
+    "north_america",
+    "us_domestic",
+    "central_america_caribbean",
+    "mexico"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "SCL",
+    "LIM",
+    "GRU",
+    "BOG",
+    "BSB"
+   ],
+   "website": "https://www.latamairlines.com",
+   "search_url": "https://www.latamairlines.com/us/en",
+   "deeplink": "https://www.latamairlines.com/us/en/flight-offers?origin={origin}&destination={destination}&outbound={depart}T12%3A00%3A00.000Z&inbound={return}T12%3A00%3A00.000Z&adt={adults}&chd=0&inf=0&trip=RT&cabin=Economy&redemption=false&sort=RECOMMENDED",
+   "date_format": "YYYY-MM-DD",
+   "oneway_deeplink": "https://www.latamairlines.com/us/en/flight-offers?origin={origin}&destination={destination}&outbound={depart}T12%3A00%3A00.000Z&adt={adults}&chd=0&inf=0&trip=OW&cabin=Economy&redemption=false&sort=RECOMMENDED",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/LA.png",
+   "notes": "Largest South American airline group (LA, JJ Brazil, 4M, XL) with no alliance but partnerships with Delta.",
+   "verify_note": "Bot protection page (403) in headless Chromium, format is the public flight-offers URL"
+  },
+  {
+   "iata": "LO",
+   "icao": "LOT",
+   "name": "LOT Polish Airlines",
+   "country": "PL",
+   "regions": [
+    "global",
+    "europe"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free carry-on",
+    "787 Dreamliner",
+    "lie-flat business"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "WAW"
+   ],
+   "website": "https://www.lot.com",
+   "search_url": "https://www.lot.com/us/en",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/LO.png",
+   "notes": "Polish flag carrier with good value connections via Warsaw to North America and Asia."
+  },
+  {
+   "iata": "LH",
+   "icao": "DLH",
+   "name": "Lufthansa",
+   "country": "DE",
+   "regions": [
+    "global",
+    "europe"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "free carry-on",
+    "lie-flat business"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "FRA",
+    "MUC"
+   ],
+   "website": "https://www.lufthansa.com",
+   "search_url": "https://www.lufthansa.com/us/en/homepage",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/LH.png",
+   "notes": "Germany's flag carrier with hubs in Frankfurt and Munich and the new Allegris long haul cabins.",
+   "verify_note": "Tested 2026-09-22: /flight-search?OriginCode=&DestinationCode=&DepartureDate= loads the search page but ignores the params."
+  },
+  {
+   "iata": "N0",
+   "icao": "NBT",
+   "name": "Norse Atlantic Airways",
+   "country": "NO",
+   "regions": [
+    "global",
+    "europe",
+    "nordics"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "long haul low cost",
+    "bags extra",
+    "787 Dreamliner"
+   ],
+   "alliance": null,
+   "hubs": [
+    "OSL",
+    "LGW"
+   ],
+   "website": "https://flynorse.com",
+   "search_url": "https://flynorse.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/N0.png",
+   "notes": "Long haul low cost airline flying 787s between Europe and the US, with Light fares that exclude meals and bags.",
+   "verify_note": "Tested 2026-09-22: guessed /select?originStationCode=&departDate= URL returns Not Found. The site is an Angular SPA and no public deeplink format was found."
+  },
+  {
+   "iata": "QF",
+   "icao": "QFA",
+   "name": "Qantas",
+   "country": "AU",
+   "regions": [
+    "global",
+    "oceania"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "free carry-on",
+    "free wifi"
+   ],
+   "alliance": "oneworld",
+   "hubs": [
+    "SYD",
+    "MEL",
+    "BNE",
+    "PER"
+   ],
+   "website": "https://www.qantas.com",
+   "search_url": "https://www.qantas.com/us/en.html",
+   "deeplink": "https://book.qantas.com/qf-booking/dyn/air/tripflow.redirect?depAirports={origin}%2C{destination}&destAirports={destination}%2C{origin}&travelDates={depart}0000%2C{return}0000&numberOfAdults={adults}&numberOfYoungAdults=0&numberOfChildren=0&numberOfInfants=0&searchOption=F&USER_LANG=EN&USER_LOCALE=EN_AU",
+   "date_format": "YYYYMMDD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/QF.png",
+   "notes": "Australia's flag carrier with nonstops from Perth to London and Paris.",
+   "oneway_deeplink": "https://book.qantas.com/qf-booking/dyn/air/tripflow.redirect?depAirports={origin}&destAirports={destination}&travelDates={depart}0000&numberOfAdults={adults}&numberOfYoungAdults=0&numberOfChildren=0&numberOfInfants=0&searchOption=F&USER_LANG=EN&USER_LOCALE=EN_AU",
+   "verify_note": "Params captured from the real qantas.com search form (it POSTs these fields to tripflow.redirect). Akamai returned Access Denied to headless Chrome for both the form POST and the GET version, so prefill was not confirmed and GET acceptance is unproven."
+  },
+  {
+   "iata": "QR",
+   "icao": "QTR",
+   "name": "Qatar Airways",
+   "country": "QA",
+   "regions": [
+    "global",
+    "middle_east"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "great service",
+    "free wifi"
+   ],
+   "alliance": "oneworld",
+   "hubs": [
+    "DOH"
+   ],
+   "website": "https://www.qatarairways.com",
+   "search_url": "https://www.qatarairways.com/en/homepage.html",
+   "deeplink": "https://booking.qatarairways.com/nsp/views/showBooking.action?widget=QR&searchType=F&addTaxToFare=Y&minPurTime=0&selLang=en&tripType=R&fromStation={origin}&toStation={destination}&departing={depart}&returning={return}&bookingClass=E&adults={adults}&children=0&infants=0&isMultiCity=false",
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/QR.png",
+   "notes": "Qsuite business class and a dense one-stop network via Doha.",
+   "oneway_deeplink": "https://booking.qatarairways.com/nsp/views/showBooking.action?widget=QR&searchType=F&addTaxToFare=Y&minPurTime=0&selLang=en&tripType=O&fromStation={origin}&toStation={destination}&departing={depart}&bookingClass=E&adults={adults}&children=0&infants=0&isMultiCity=false",
+   "verify_note": "Verified LHR-BKK 2026-11-20/30 with headless Chrome: redirects to qatarairways.com/app/booking/flight-selection with route, dates and pax prefilled. Akamai blocks bundled headless Chromium."
+  },
+  {
+   "iata": "SK",
+   "icao": "SAS",
+   "name": "SAS Scandinavian Airlines",
+   "country": "SE",
+   "regions": [
+    "global",
+    "europe",
+    "nordics"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "free carry-on",
+    "lie-flat business",
+    "free wifi (EuroBonus)"
+   ],
+   "alliance": "skyteam",
+   "hubs": [
+    "CPH",
+    "OSL",
+    "ARN"
+   ],
+   "website": "https://www.flysas.com",
+   "search_url": "https://www.flysas.com/en/",
+   "deeplink": "https://www.flysas.com/en/book/flights/?search=RT_{origin}-{destination}-{depart}-{return}_a{adults}c0i0y0&view=upsell&bookingFlow=revenue",
+   "date_format": "YYYYMMDD",
+   "oneway_deeplink": "https://www.flysas.com/en/book/flights/?search=OW_{origin}-{destination}-{depart}_a{adults}c0i0y0&view=upsell&bookingFlow=revenue",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/SK.png",
+   "notes": "Scandinavia's flag carrier, moved from Star Alliance to SkyTeam in 2024, with SAS Go Light fares excluding checked bags.",
+   "verify_note": "Verified 2026-09-22 OSL-CPH 20-27 Nov shows results. Headless Chromium got a blocked API error, real Chrome channel works."
+  },
+  {
+   "iata": "SQ",
+   "icao": "SIA",
+   "name": "Singapore Airlines",
+   "country": "SG",
+   "regions": [
+    "global",
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "great service",
+    "free wifi"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "SIN"
+   ],
+   "website": "https://www.singaporeair.com",
+   "search_url": "https://www.singaporeair.com/en_UK/us/home",
+   "deeplink": null,
+   "date_format": "DD/MM/YYYY",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/SQ.png",
+   "notes": "Premium carrier running the world's longest nonstops from Singapore.",
+   "verify_note": "POST only. The real form POSTs to https://www.singaporeair.com/flightsearch/searchFlight.form with fromHomePage=true&origin={origin}&destination={destination}&tripType=R (O for one way)&departureMonth=DD/MM/YYYY&returnMonth=DD/MM/YYYY&cabinClass=Y&numOfAdults={adults}&numOfChildren=0&numOfInfants=0&_eventId_flightSearchEvent=&isLoggedInUser=false&numOfChildNominees=0&numOfAdultNominees=1. Via the form this reached real results (SIN-LGW) in headless Chrome. The same fields sent as a GET redirected to the homepage, so a plain URL deeplink is not possible. An auto-submitting POST form would work."
+  },
+  {
+   "iata": "LX",
+   "icao": "SWR",
+   "name": "Swiss International Air Lines",
+   "country": "CH",
+   "regions": [
+    "global",
+    "europe"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "free carry-on",
+    "lie-flat business",
+    "free snacks"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "ZRH",
+    "GVA"
+   ],
+   "website": "https://www.swiss.com",
+   "search_url": "https://www.swiss.com/us/en/homepage",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/LX.png",
+   "notes": "Lufthansa Group premium carrier hubbed in Zurich, known for Swiss chocolate on board."
+  },
+  {
+   "iata": "TP",
+   "icao": "TAP",
+   "name": "TAP Air Portugal",
+   "country": "PT",
+   "regions": [
+    "global",
+    "europe"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free stopover",
+    "free carry-on",
+    "lie-flat business",
+    "Brazil network"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "LIS",
+    "OPO"
+   ],
+   "website": "https://www.flytap.com",
+   "search_url": "https://www.flytap.com/en-us/",
+   "deeplink": "https://booking.flytap.com/booking/flights/deeplink?origin={origin}&destination={destination}&depDate={depart}&retDate={return}&adt={adults}&chd=0&inf=0&yth=0&cabinClass=Economy&tripType=R&market=US&language=en-us",
+   "date_format": "DD.MM.YYYY",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/TP.png",
+   "notes": "Portuguese flag carrier with the biggest Europe to Brazil network and a free Lisbon or Porto stopover program.",
+   "oneway_deeplink": "https://booking.flytap.com/booking/flights/deeplink?origin={origin}&destination={destination}&depDate={depart}&adt={adults}&chd=0&inf=0&yth=0&cabinClass=Economy&tripType=O&market=US&language=en-us",
+   "verify_note": "Verified 2026-09-22 LIS-OPO 20.11.2026 shows outbound results for Nov 20 (return leg is picked on the next step). YYYY-MM-DD and MM/DD/YYYY are misparsed, YYYYMMDD errors."
+  },
+  {
+   "iata": "TK",
+   "icao": "THY",
+   "name": "Turkish Airlines",
+   "country": "TR",
+   "regions": [
+    "global",
+    "europe"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "free carry-on",
+    "lie-flat business",
+    "free meals",
+    "huge network"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "IST"
+   ],
+   "website": "https://www.turkishairlines.com",
+   "search_url": "https://www.turkishairlines.com/en-int/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/TK.png",
+   "notes": "Flies to more countries than any other airline via Istanbul, with checked bags and meals included even in economy.",
+   "verify_note": "Tested 2026-09-22: guessed availability-international URL redirects to the homepage, no public deeplink found."
+  },
+  {
+   "iata": "UA",
+   "icao": "UAL",
+   "name": "United Airlines",
+   "country": "US",
+   "regions": [
+    "global",
+    "us_domestic",
+    "north_america",
+    "mexico",
+    "central_america_caribbean",
+    "south_america"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "good wifi",
+    "extra legroom"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "ORD",
+    "DEN",
+    "IAH",
+    "EWR",
+    "SFO",
+    "IAD",
+    "LAX"
+   ],
+   "website": "https://www.united.com",
+   "search_url": "https://www.united.com/en/us/book-flight",
+   "deeplink": "https://www.united.com/en/us/fsr/choose-flights?f={origin}&t={destination}&d={depart}&r={return}&px={adults}&tt=1&sc=7",
+   "date_format": "YYYY-MM-DD",
+   "oneway_deeplink": "https://www.united.com/en/us/fsr/choose-flights?f={origin}&t={destination}&d={depart}&px={adults}&tt=0&sc=7",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/UA.png",
+   "notes": "Starlink Wi-Fi is rolling out fleetwide and Basic Economy on domestic routes excludes a full-size carry-on.",
+   "verify_note": "Headless Chromium blocked by Akamai (HTTP2 protocol error), format is the widely used public FSR link"
+  },
+  {
+   "iata": "VS",
+   "icao": "VIR",
+   "name": "Virgin Atlantic",
+   "country": "GB",
+   "regions": [
+    "global",
+    "europe"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "free wifi messaging"
+   ],
+   "alliance": "skyteam",
+   "hubs": [
+    "LHR",
+    "MAN"
+   ],
+   "website": "https://www.virginatlantic.com",
+   "search_url": "https://www.virginatlantic.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/VS.png",
+   "notes": "UK long haul airline flying mainly transatlantic from Heathrow, in SkyTeam since 2023."
+  },
+  {
+   "iata": "BT",
+   "icao": "BTI",
+   "name": "airBaltic",
+   "country": "LV",
+   "regions": [
+    "europe",
+    "nordics"
+   ],
+   "category": "hybrid",
+   "tags": [
+    "free starlink wifi",
+    "A220",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "RIX",
+    "TLL",
+    "VNO",
+    "TMP"
+   ],
+   "website": "https://www.airbaltic.com",
+   "search_url": "https://www.airbaltic.com/en",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/BT.png",
+   "notes": "Latvian airline with an all A220 fleet and free Starlink wifi, based in Riga with bases in Tallinn, Vilnius and Tampere."
+  },
+  {
+   "iata": "TF",
+   "icao": "BRX",
+   "name": "Braathens Regional Airlines (BRA)",
+   "country": "SE",
+   "regions": [
+    "nordics"
+   ],
+   "category": "regional",
+   "tags": [
+    "regional",
+    "domestic Sweden"
+   ],
+   "alliance": null,
+   "hubs": [
+    "BMA",
+    "ARN",
+    "GOT"
+   ],
+   "website": "https://www.flygbra.se",
+   "search_url": "https://www.flygbra.se/en/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "verify_note": "BRA filed for reorganization in 2024 and now mostly flies ACMI, verify codes and schedule.",
+   "logo": "https://images.kiwi.com/airlines/64/TF.png",
+   "notes": "Swedish regional airline that has shifted much of its flying to wet lease work for other carriers."
+  },
+  {
+   "iata": "DY",
+   "icao": "NOZ",
+   "name": "Norwegian",
+   "country": "NO",
+   "regions": [
+    "europe",
+    "nordics"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra",
+    "free wifi"
+   ],
+   "alliance": null,
+   "hubs": [
+    "OSL",
+    "BGO",
+    "CPH",
+    "ARN",
+    "HEL"
+   ],
+   "website": "https://www.norwegian.com",
+   "search_url": "https://www.norwegian.com/en/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/DY.png",
+   "notes": "Nordic low cost carrier focused on short haul Europe since dropping long haul in 2021, LowFare tickets include only a small personal item.",
+   "verify_note": "Tested 2026-09-22: select-flight URL with D_City/A_City/D_Day=DD/D_Month=YYYYMM redirects to the Low Fare Calendar with only the route kept. Route-only link that works: https://www.norwegian.com/en/low-fare-calendar/?D_City={origin}&A_City={destination}&TripType=2"
+  },
+  {
+   "iata": "OG",
+   "icao": "FPY",
+   "name": "Play",
+   "country": "IS",
+   "regions": [
+    "europe",
+    "nordics"
+   ],
+   "category": "ultra_low_cost",
+   "tags": [
+    "cheap",
+    "bags extra",
+    "carry-on extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "KEF"
+   ],
+   "website": "https://www.flyplay.com",
+   "search_url": "https://www.flyplay.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "verify_note": "Not tested. Play announced a pivot to a Malta based charter and leisure model in 2025, check current schedule before relying on it.",
+   "logo": "https://images.kiwi.com/airlines/64/OG.png",
+   "notes": "Icelandic ultra low cost carrier where everything beyond a small personal item costs extra."
+  },
+  {
+   "iata": "WF",
+   "icao": "WIF",
+   "name": "Widerøe",
+   "country": "NO",
+   "regions": [
+    "nordics"
+   ],
+   "category": "regional",
+   "tags": [
+    "regional",
+    "free carry-on",
+    "short runways"
+   ],
+   "alliance": null,
+   "hubs": [
+    "BGO",
+    "BOO",
+    "TOS",
+    "OSL"
+   ],
+   "website": "https://www.wideroe.no",
+   "search_url": "https://www.wideroe.no/en/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/WF.png",
+   "notes": "Norway's largest regional airline, serving small coastal and Arctic airports with Dash 8 and E2 jets.",
+   "verify_note": "Not tested, no known public deeplink format."
+  },
+  {
+   "iata": "A3",
+   "icao": "AEE",
+   "name": "Aegean Airlines",
+   "country": "GR",
+   "regions": [
+    "europe"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free carry-on",
+    "free snacks",
+    "Greek islands"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "ATH",
+    "SKG"
+   ],
+   "website": "https://en.aegeanair.com",
+   "search_url": "https://en.aegeanair.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/A3.png",
+   "notes": "Greece's largest airline, with Olympic Air covering many Greek islands from Athens."
+  },
+  {
+   "iata": "OS",
+   "icao": "AUA",
+   "name": "Austrian Airlines",
+   "country": "AT",
+   "regions": [
+    "europe"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "free carry-on",
+    "lie-flat business"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "VIE"
+   ],
+   "website": "https://www.austrian.com",
+   "search_url": "https://www.austrian.com/us/en/homepage",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/OS.png",
+   "notes": "Lufthansa Group carrier with a strong Eastern Europe network out of Vienna."
+  },
+  {
+   "iata": "SN",
+   "icao": "BEL",
+   "name": "Brussels Airlines",
+   "country": "BE",
+   "regions": [
+    "europe"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free carry-on",
+    "Africa network"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "BRU"
+   ],
+   "website": "https://www.brusselsairlines.com",
+   "search_url": "https://www.brusselsairlines.com/be/en/homepage",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/SN.png",
+   "notes": "Belgian Lufthansa Group airline with one of Europe's largest networks into sub Saharan Africa."
+  },
+  {
+   "iata": "OU",
+   "icao": "CTN",
+   "name": "Croatia Airlines",
+   "country": "HR",
+   "regions": [
+    "europe"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free carry-on",
+    "A220"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "ZAG",
+    "SPU",
+    "DBV"
+   ],
+   "website": "https://www.croatiaairlines.com",
+   "search_url": "https://www.croatiaairlines.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/OU.png",
+   "notes": "Croatian flag carrier with mostly seasonal flights to Split and Dubrovnik and a new A220 fleet."
+  },
+  {
+   "iata": "4Y",
+   "icao": "OCN",
+   "name": "Discover Airlines",
+   "country": "DE",
+   "regions": [
+    "europe"
+   ],
+   "category": "premium_leisure",
+   "tags": [
+    "leisure routes",
+    "free carry-on"
+   ],
+   "alliance": null,
+   "hubs": [
+    "FRA",
+    "MUC"
+   ],
+   "website": "https://www.discover-airlines.com",
+   "search_url": "https://www.discover-airlines.com/us/en/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/4Y.png",
+   "notes": "Lufthansa Group leisure airline, bookable through Lufthansa, flying from Frankfurt and Munich to holiday spots."
+  },
+  {
+   "iata": "U2",
+   "icao": "EZY",
+   "name": "easyJet",
+   "country": "GB",
+   "regions": [
+    "europe"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra",
+    "big network"
+   ],
+   "alliance": null,
+   "hubs": [
+    "LGW",
+    "LTN",
+    "BRS",
+    "MXP",
+    "GVA",
+    "BER"
+   ],
+   "website": "https://www.easyjet.com",
+   "search_url": "https://www.easyjet.com/en/",
+   "deeplink": "https://www.easyjet.com/deeplink?lang=EN&dep={origin}&dest={destination}&dd={depart}&rd={return}&apax={adults}&cpax=0&ipax=0",
+   "date_format": "YYYY-MM-DD",
+   "oneway_deeplink": "https://www.easyjet.com/deeplink?lang=EN&dep={origin}&dest={destination}&dd={depart}&apax={adults}&cpax=0&ipax=0",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/U2.png",
+   "notes": "Europe's second largest low cost airline, using primary airports more than Ryanair, only an under seat bag included.",
+   "verify_note": "Not verifiable 2026-09-22: Akamai returns Access Denied to headless Chromium and headless Chrome. Format is the long standing public easyJet deeplink."
+  },
+  {
+   "iata": "EW",
+   "icao": "EWG",
+   "name": "Eurowings",
+   "country": "DE",
+   "regions": [
+    "europe"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "DUS",
+    "CGN",
+    "HAM",
+    "STR",
+    "BER"
+   ],
+   "website": "https://www.eurowings.com",
+   "search_url": "https://www.eurowings.com/en.html",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/EW.png",
+   "notes": "Lufthansa Group's point to point low cost airline, with SMART and BIZclass bundles for bags and seats."
+  },
+  {
+   "iata": "I2",
+   "icao": "IBS",
+   "name": "Iberia Express",
+   "country": "ES",
+   "regions": [
+    "europe"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": "oneworld",
+   "hubs": [
+    "MAD"
+   ],
+   "website": "https://www.iberiaexpress.com",
+   "search_url": "https://www.iberiaexpress.com/en",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/I2.png",
+   "notes": "Iberia's short haul low cost subsidiary flying from Madrid to Spanish islands and European cities."
+  },
+  {
+   "iata": "LS",
+   "icao": "EXS",
+   "name": "Jet2",
+   "country": "GB",
+   "regions": [
+    "europe"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "leisure routes",
+    "22kg bag option"
+   ],
+   "alliance": null,
+   "hubs": [
+    "MAN",
+    "LBA",
+    "BHX",
+    "STN",
+    "BRS"
+   ],
+   "website": "https://www.jet2.com",
+   "search_url": "https://www.jet2.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/LS.png",
+   "notes": "UK leisure airline flying from regional UK airports to sun destinations, fares include a 10kg cabin bag."
+  },
+  {
+   "iata": "LM",
+   "icao": "LOG",
+   "name": "Loganair",
+   "country": "GB",
+   "regions": [
+    "europe"
+   ],
+   "category": "regional",
+   "tags": [
+    "regional",
+    "islands",
+    "free carry-on"
+   ],
+   "alliance": null,
+   "hubs": [
+    "GLA",
+    "EDI",
+    "ABZ",
+    "KOI",
+    "LSI"
+   ],
+   "website": "https://www.loganair.co.uk",
+   "search_url": "https://www.loganair.co.uk/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/LM.png",
+   "notes": "Scottish regional airline serving the Highlands and Islands, including the famous Barra beach runway."
+  },
+  {
+   "iata": "PC",
+   "icao": "PGT",
+   "name": "Pegasus Airlines",
+   "country": "TR",
+   "regions": [
+    "europe"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "SAW",
+    "ADB",
+    "AYT"
+   ],
+   "website": "https://www.flypgs.com",
+   "search_url": "https://www.flypgs.com/en",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/PC.png",
+   "notes": "Turkish low cost airline hubbed at Istanbul Sabiha Gokcen, useful for cheap connections to the Middle East and Central Asia.",
+   "verify_note": "Tested 2026-09-22: web.flypgs.com/booking?departurePort=&arrivalPort=&departureDate= returned a WAF access block page for headless Chrome."
+  },
+  {
+   "iata": "FR",
+   "icao": "RYR",
+   "name": "Ryanair",
+   "country": "IE",
+   "regions": [
+    "europe"
+   ],
+   "category": "ultra_low_cost",
+   "tags": [
+    "cheap",
+    "bags extra",
+    "carry-on extra",
+    "big network"
+   ],
+   "alliance": null,
+   "hubs": [
+    "DUB",
+    "STN",
+    "BGY",
+    "CRL"
+   ],
+   "website": "https://www.ryanair.com",
+   "search_url": "https://www.ryanair.com/gb/en",
+   "deeplink": "https://www.ryanair.com/gb/en/trip/flights/select?adults={adults}&teens=0&children=0&infants=0&dateOut={depart}&dateIn={return}&isConnectedFlight=false&isReturn=true&discount=0&originIata={origin}&destinationIata={destination}",
+   "date_format": "YYYY-MM-DD",
+   "oneway_deeplink": "https://www.ryanair.com/gb/en/trip/flights/select?adults={adults}&teens=0&children=0&infants=0&dateOut={depart}&dateIn=&isConnectedFlight=false&isReturn=false&discount=0&originIata={origin}&destinationIata={destination}",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/FR.png",
+   "notes": "Europe's largest airline by passengers, often using secondary airports, with only a small under seat bag included.",
+   "verify_note": "Verified 2026-09-22 STN-BCN 20-27 Nov shows fares. Client parses dates in local timezone, west of UTC it may display one day early."
+  },
+  {
+   "iata": "QS",
+   "icao": "TVS",
+   "name": "Smartwings",
+   "country": "CZ",
+   "regions": [
+    "europe"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "leisure routes",
+    "cheap"
+   ],
+   "alliance": null,
+   "hubs": [
+    "PRG",
+    "BRQ",
+    "OSR"
+   ],
+   "website": "https://www.smartwings.com",
+   "search_url": "https://www.smartwings.com/en",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/QS.png",
+   "notes": "Czech airline mixing scheduled and charter flying from Prague, and the owner of the former Czech Airlines."
+  },
+  {
+   "iata": "XQ",
+   "icao": "SXS",
+   "name": "SunExpress",
+   "country": "TR",
+   "regions": [
+    "europe"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "leisure routes",
+    "cheap"
+   ],
+   "alliance": null,
+   "hubs": [
+    "AYT",
+    "ADB"
+   ],
+   "website": "https://www.sunexpress.com",
+   "search_url": "https://www.sunexpress.com/en-gb/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/XQ.png",
+   "notes": "Turkish Airlines and Lufthansa joint venture linking Germany and Northern Europe with Turkish beach resorts."
+  },
+  {
+   "iata": "HV",
+   "icao": "TRA",
+   "name": "Transavia",
+   "country": "NL",
+   "regions": [
+    "europe"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra",
+    "leisure routes"
+   ],
+   "alliance": null,
+   "hubs": [
+    "AMS",
+    "ORY",
+    "RTM",
+    "EIN"
+   ],
+   "website": "https://www.transavia.com",
+   "search_url": "https://www.transavia.com/en-EU/home/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/HV.png",
+   "notes": "Air France KLM group low cost airline flying from the Netherlands and Paris Orly to sun destinations.",
+   "verify_note": "Tested 2026-09-22: /book-a-flight/flights/search/ loads an empty search form (it uses separate day and month fields), so params were ignored."
+  },
+  {
+   "iata": "V7",
+   "icao": "VOE",
+   "name": "Volotea",
+   "country": "ES",
+   "regions": [
+    "europe"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra",
+    "small city routes"
+   ],
+   "alliance": null,
+   "hubs": [
+    "NTE",
+    "BOD",
+    "VCE",
+    "BIO",
+    "MRS"
+   ],
+   "website": "https://www.volotea.com",
+   "search_url": "https://www.volotea.com/en/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/V7.png",
+   "notes": "Low cost airline connecting mid sized European cities, especially in France, Italy and Spain, often with only a few weekly flights."
+  },
+  {
+   "iata": "VY",
+   "icao": "VLG",
+   "name": "Vueling",
+   "country": "ES",
+   "regions": [
+    "europe"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "BCN",
+    "FCO",
+    "ORY"
+   ],
+   "website": "https://www.vueling.com",
+   "search_url": "https://www.vueling.com/en",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/VY.png",
+   "notes": "IAG's Barcelona based low cost airline with a big network across Spain and Europe.",
+   "verify_note": "Tested 2026-09-22 BCN-MAD: selectFlight URL redirects to flightSearch with only origin kept, with both YYYY-MM-DD and DD/MM/YYYY dates."
+  },
+  {
+   "iata": "W6",
+   "icao": "WZZ",
+   "name": "Wizz Air",
+   "country": "HU",
+   "regions": [
+    "europe"
+   ],
+   "category": "ultra_low_cost",
+   "tags": [
+    "cheap",
+    "bags extra",
+    "carry-on extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "BUD",
+    "OTP",
+    "WAW",
+    "LTN",
+    "KTW"
+   ],
+   "website": "https://wizzair.com",
+   "search_url": "https://wizzair.com/en-gb",
+   "deeplink": "https://wizzair.com/en-gb/booking/select-flight/{origin}/{destination}/{depart}/{return}/{adults}/0/0/null",
+   "date_format": "YYYY-MM-DD",
+   "oneway_deeplink": "https://wizzair.com/en-gb/booking/select-flight/{origin}/{destination}/{depart}/null/{adults}/0/0/null",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/W6.png",
+   "notes": "Hungarian ultra low cost carrier strongest in Central and Eastern Europe, the Wizz Discount Club lowers fares.",
+   "verify_note": "Verified 2026-09-22 LTN-BUD shows 20 NOV 2026 - 27 NOV 2026 flight selection."
+  },
+  {
+   "iata": "RV",
+   "icao": "ROU",
+   "name": "Air Canada Rouge",
+   "country": "CA",
+   "regions": [
+    "north_america",
+    "us_domestic",
+    "mexico",
+    "central_america_caribbean",
+    "south_america"
+   ],
+   "category": "hybrid",
+   "tags": [
+    "bags extra",
+    "cheap"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "YYZ",
+    "YUL",
+    "YVR"
+   ],
+   "website": "https://www.aircanada.com",
+   "search_url": "https://www.aircanada.com/ca/en/aco/home.html",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/RV.png",
+   "notes": "Air Canada's leisure arm, booked on aircanada.com, with tighter seating on sun and US leisure routes."
+  },
+  {
+   "iata": "G4",
+   "icao": "AAY",
+   "name": "Allegiant Air",
+   "country": "US",
+   "regions": [
+    "us_domestic",
+    "north_america",
+    "mexico"
+   ],
+   "category": "ultra_low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "LAS",
+    "SFB",
+    "PIE",
+    "AZA",
+    "BLI",
+    "CVG"
+   ],
+   "website": "https://www.allegiantair.com",
+   "search_url": "https://www.allegiantair.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/G4.png",
+   "notes": "Flies mostly nonstop leisure routes from small cities a few times a week and has owned Sun Country since May 2026.",
+   "verify_note": "Cloudflare bot challenge (403) on homepage"
+  },
+  {
+   "iata": "DM",
+   "icao": "DWI",
+   "name": "Arajet",
+   "country": "DO",
+   "regions": [
+    "central_america_caribbean",
+    "north_america",
+    "us_domestic",
+    "south_america",
+    "mexico"
+   ],
+   "category": "ultra_low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "SDQ"
+   ],
+   "website": "https://www.arajet.com",
+   "search_url": "https://www.arajet.com/en",
+   "deeplink": "https://www.arajet.com/en-us/booking?origin={origin}&destination={destination}&from={depart}&to={return}&adt={adults}&chd=0&inf=0&currency=USD",
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/DM.png",
+   "notes": "Dominican ultra low cost airline connecting the US, Canada and Latin America through Santo Domingo.",
+   "oneway_deeplink": "https://www.arajet.com/en-us/booking?origin={origin}&destination={destination}&from={depart}&adt={adults}&chd=0&inf=0&currency=USD",
+   "verify_note": "Params read from the site's search code, SDQ to MIA round trip with 2 adults and SDQ to BOG one way both loaded flight results for Nov 20"
+  },
+  {
+   "iata": "XP",
+   "icao": "VXP",
+   "name": "Avelo Airlines",
+   "country": "US",
+   "regions": [
+    "us_domestic",
+    "north_america",
+    "central_america_caribbean"
+   ],
+   "category": "ultra_low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "HVN",
+    "ILG",
+    "MCO",
+    "RDU",
+    "CLT"
+   ],
+   "website": "https://www.aveloair.com",
+   "search_url": "https://www.aveloair.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/XP.png",
+   "notes": "Low fares from smaller East Coast airports like New Haven, after exiting its West Coast base in 2025."
+  },
+  {
+   "iata": "UP",
+   "icao": "BHS",
+   "name": "Bahamasair",
+   "country": "BS",
+   "regions": [
+    "central_america_caribbean",
+    "north_america",
+    "us_domestic"
+   ],
+   "category": "regional",
+   "tags": [
+    "free checked bags"
+   ],
+   "alliance": null,
+   "hubs": [
+    "NAS"
+   ],
+   "website": "https://www.bahamasair.com",
+   "search_url": "https://www.bahamasair.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/UP.png",
+   "notes": "The Bahamas flag carrier, the main way to reach the Out Islands from Nassau, with short hops to Florida."
+  },
+  {
+   "iata": "MX",
+   "icao": "MXY",
+   "name": "Breeze Airways",
+   "country": "US",
+   "regions": [
+    "us_domestic",
+    "north_america",
+    "central_america_caribbean"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra",
+    "extra legroom",
+    "free wifi"
+   ],
+   "alliance": null,
+   "hubs": [
+    "TPA",
+    "CHS",
+    "PVD",
+    "ORF",
+    "MCO",
+    "SFB"
+   ],
+   "website": "https://www.flybreeze.com",
+   "search_url": "https://www.flybreeze.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/MX.png",
+   "notes": "Nonstop routes between underserved mid-size cities, with a Breeze Ascent first class cabin on its A220s."
+  },
+  {
+   "iata": "BW",
+   "icao": "BWA",
+   "name": "Caribbean Airlines",
+   "country": "TT",
+   "regions": [
+    "central_america_caribbean",
+    "north_america",
+    "us_domestic",
+    "south_america"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free checked bags",
+    "comfort"
+   ],
+   "alliance": null,
+   "hubs": [
+    "POS",
+    "KIN"
+   ],
+   "website": "https://www.caribbean-airlines.com",
+   "search_url": "https://www.caribbean-airlines.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/BW.png",
+   "notes": "Trinidad and Jamaica based carrier linking the Caribbean islands with New York, Miami, Fort Lauderdale, Orlando and Toronto."
+  },
+  {
+   "iata": "CM",
+   "icao": "CMP",
+   "name": "Copa Airlines",
+   "country": "PA",
+   "regions": [
+    "central_america_caribbean",
+    "south_america",
+    "north_america",
+    "us_domestic",
+    "mexico"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "free checked bags",
+    "free carry-on"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "PTY"
+   ],
+   "website": "https://www.copaair.com",
+   "search_url": "https://www.copaair.com/en-us/",
+   "deeplink": "https://shopping.copaair.com/?roundtrip=true&adults={adults}&children=0&infants=0&date1={depart}&date2={return}&area1={origin}&area2={destination}&flexible_dates_v2=false&language=en&point_of_sale=US",
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/CM.png",
+   "notes": "Panama City hub connects North and South America with a checked bag included on most fares outside Basic.",
+   "verify_note": "shopping.copaair.com returned 401 to headless Chromium, format is the widely shared public one"
+  },
+  {
+   "iata": "F8",
+   "icao": "FLE",
+   "name": "Flair Airlines",
+   "country": "CA",
+   "regions": [
+    "north_america",
+    "us_domestic",
+    "mexico",
+    "central_america_caribbean"
+   ],
+   "category": "ultra_low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "YYC",
+    "YEG",
+    "YYZ",
+    "YVR"
+   ],
+   "website": "https://www.flyflair.com",
+   "search_url": "https://www.flyflair.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/F8.png",
+   "notes": "Canada's main ultra low cost carrier, with only a small personal item included in the base fare.",
+   "verify_note": "Homepage loads but no deep link format found in page links, left null"
+  },
+  {
+   "iata": "F9",
+   "icao": "FFT",
+   "name": "Frontier Airlines",
+   "country": "US",
+   "regions": [
+    "us_domestic",
+    "north_america",
+    "mexico",
+    "central_america_caribbean"
+   ],
+   "category": "ultra_low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "DEN",
+    "MCO",
+    "LAS",
+    "PHL",
+    "ATL",
+    "DFW"
+   ],
+   "website": "https://www.flyfrontier.com",
+   "search_url": "https://www.flyfrontier.com/",
+   "deeplink": "https://booking.flyfrontier.com/Flight/InternalSelect?o1={origin}&d1={destination}&dd1={depart}&dd2={return}&ADT={adults}&mon=true&ftype=GW",
+   "date_format": "MMM DD, YYYY",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/F9.png",
+   "notes": "Ultra low fares with every extra sold separately, and bundles often beat buying a carry-on and seat alone.",
+   "verify_note": "Select page loaded with DEN to LAS prefilled for Nov 2026 dates"
+  },
+  {
+   "iata": "G3",
+   "icao": "GLO",
+   "name": "GOL",
+   "country": "BR",
+   "regions": [
+    "south_america",
+    "central_america_caribbean",
+    "north_america",
+    "us_domestic"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "GRU",
+    "CGH",
+    "GIG",
+    "BSB"
+   ],
+   "website": "https://www.voegol.com.br",
+   "search_url": "https://www.voegol.com.br/en",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/G3.png",
+   "notes": "Major Brazilian domestic carrier in the Abra Group with Avianca, flying an all Boeing 737 fleet."
+  },
+  {
+   "iata": "B6",
+   "icao": "JBU",
+   "name": "JetBlue",
+   "country": "US",
+   "regions": [
+    "us_domestic",
+    "north_america",
+    "mexico",
+    "central_america_caribbean",
+    "south_america"
+   ],
+   "category": "hybrid",
+   "tags": [
+    "free wifi",
+    "extra legroom",
+    "bags extra",
+    "comfort"
+   ],
+   "alliance": null,
+   "hubs": [
+    "JFK",
+    "BOS",
+    "FLL",
+    "MCO",
+    "SJU",
+    "EWR"
+   ],
+   "website": "https://www.jetblue.com",
+   "search_url": "https://www.jetblue.com/booking/flights",
+   "deeplink": "https://www.jetblue.com/booking/flights?from={origin}&to={destination}&depart={depart}&return={return}&isMultiCity=false&noOfRoute=1&adults={adults}&children=0&infants=0&sharedMarket=false&roundTripFaresFlag=false&usePoints=false",
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/B6.png",
+   "notes": "Free fast Wi-Fi and the most legroom in US economy, plus Mint lie-flat seats on transcon and transatlantic routes.",
+   "verify_note": "Headless Chromium got a CAPTCHA page, not verifiable"
+  },
+  {
+   "iata": "PD",
+   "icao": "POE",
+   "name": "Porter Airlines",
+   "country": "CA",
+   "regions": [
+    "north_america",
+    "us_domestic",
+    "mexico",
+    "central_america_caribbean"
+   ],
+   "category": "hybrid",
+   "tags": [
+    "comfort",
+    "free wifi",
+    "extra legroom"
+   ],
+   "alliance": null,
+   "hubs": [
+    "YTZ",
+    "YYZ",
+    "YOW",
+    "YUL",
+    "YVR"
+   ],
+   "website": "https://www.flyporter.com",
+   "search_url": "https://www.flyporter.com/en-ca/",
+   "deeplink": "https://www.flyporter.com/en-ca/flight/tickets/Select_BAF?departStation={origin}&destination={destination}&depDate={depart}&rtnDate={return}&paxADT={adults}&paxCHD=0&paxINF=0&trpType=RoundTrip&fareClass=R&bookWithPoints=0",
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/PD.png",
+   "notes": "No middle seats on its E195-E2 jets plus free beer, wine, snacks and Wi-Fi, flying from Toronto Pearson and Billy Bishop.",
+   "verify_note": "Format taken from the site's booking widget code, YTZ to YOW Nov 20 to 24 with 2 passengers shown prefilled on the flight select page",
+   "oneway_deeplink": "https://www.flyporter.com/en-ca/flight/tickets/Select_BAF?departStation={origin}&destination={destination}&depDate={depart}&paxADT={adults}&paxCHD=0&paxINF=0&trpType=OneWay&fareClass=R&bookWithPoints=0"
+  },
+  {
+   "iata": "WN",
+   "icao": "SWA",
+   "name": "Southwest Airlines",
+   "country": "US",
+   "regions": [
+    "us_domestic",
+    "north_america",
+    "mexico",
+    "central_america_caribbean"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "free carry-on",
+    "bags extra",
+    "extra legroom"
+   ],
+   "alliance": null,
+   "hubs": [
+    "DAL",
+    "MDW",
+    "DEN",
+    "LAS",
+    "BWI",
+    "PHX",
+    "HOU",
+    "OAK",
+    "ATL"
+   ],
+   "website": "https://www.southwest.com",
+   "search_url": "https://www.southwest.com/air/booking/",
+   "deeplink": "https://www.southwest.com/air/booking/select-depart.html?adultPassengersCount={adults}&departureDate={depart}&destinationAirportCode={destination}&originationAirportCode={origin}&returnDate={return}&tripType=roundtrip&passengerType=ADULT",
+   "date_format": "YYYY-MM-DD",
+   "oneway_deeplink": "https://www.southwest.com/air/booking/select-depart.html?adultPassengersCount={adults}&departureDate={depart}&destinationAirportCode={destination}&originationAirportCode={origin}&tripType=oneway&passengerType=ADULT",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/WN.png",
+   "notes": "Since 2026 Southwest has assigned seats and charges for checked bags on most fares, and it does not appear on most online travel agencies.",
+   "verify_note": "Redirected to /air/booking/ with params kept but showed an error page, likely bot protection"
+  },
+  {
+   "iata": "SY",
+   "icao": "SCX",
+   "name": "Sun Country Airlines",
+   "country": "US",
+   "regions": [
+    "us_domestic",
+    "north_america",
+    "mexico",
+    "central_america_caribbean"
+   ],
+   "category": "ultra_low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "MSP"
+   ],
+   "website": "https://www.suncountry.com",
+   "search_url": "https://www.suncountry.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/SY.png",
+   "notes": "Minneapolis based leisure carrier with many seasonal sun routes, owned by Allegiant since May 2026 and still sold under its own brand until integration."
+  },
+  {
+   "iata": "VB",
+   "icao": "VIV",
+   "name": "Viva Aerobus",
+   "country": "MX",
+   "regions": [
+    "mexico",
+    "north_america",
+    "us_domestic",
+    "central_america_caribbean",
+    "south_america"
+   ],
+   "category": "ultra_low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "MTY",
+    "MEX",
+    "GDL",
+    "CUN",
+    "TIJ"
+   ],
+   "website": "https://www.vivaaerobus.com",
+   "search_url": "https://www.vivaaerobus.com/en-us",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/VB.png",
+   "notes": "Monterrey based ultra low cost carrier with often the cheapest domestic Mexico fares and a codeshare with American.",
+   "verify_note": "HTTP2 protocol error (bot block) in headless Chromium"
+  },
+  {
+   "iata": "Y4",
+   "icao": "VOI",
+   "name": "Volaris",
+   "country": "MX",
+   "regions": [
+    "mexico",
+    "north_america",
+    "us_domestic",
+    "central_america_caribbean",
+    "south_america"
+   ],
+   "category": "ultra_low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "TIJ",
+    "GDL",
+    "MEX",
+    "CUN",
+    "MTY",
+    "SJO",
+    "SAL"
+   ],
+   "website": "https://www.volaris.com",
+   "search_url": "https://www.volaris.com/en",
+   "deeplink": "https://www.volaris.com/flight/select?adt={adults}&chd=0&in1=0&rr=true&cc=USD&dd1={depart}&dd2={return}&culture=en-us&o1={origin}&d1={destination}",
+   "date_format": "MM/DD/YYYY",
+   "oneway_deeplink": "https://www.volaris.com/flight/select?adt={adults}&chd=0&in1=0&rr=false&cc=USD&dd1={depart}&culture=en-us&o1={origin}&d1={destination}",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/Y4.png",
+   "notes": "Biggest Mexican low cost airline with a large Tijuana base for Cross Border Xpress, and its Volaris Costa Rica and Volaris El Salvador affiliates (also Y4) sell on the same site."
+  },
+  {
+   "iata": "WS",
+   "icao": "WJA",
+   "name": "WestJet",
+   "country": "CA",
+   "regions": [
+    "north_america",
+    "us_domestic",
+    "mexico",
+    "central_america_caribbean"
+   ],
+   "category": "hybrid",
+   "tags": [
+    "free wifi",
+    "bags extra",
+    "comfort"
+   ],
+   "alliance": null,
+   "hubs": [
+    "YYC",
+    "YVR",
+    "YYZ",
+    "YEG",
+    "YWG"
+   ],
+   "website": "https://www.westjet.com",
+   "search_url": "https://www.westjet.com/en-ca",
+   "deeplink": "https://www.westjet.com/booking/Create.html?lang=en&type=search&origin={origin}&destination={destination}&adults={adults}&children=0&infants=0&outboundDate={depart}&returnDate={return}&companionvoucher=false&iswestjetdollars=false&promo=&currency=CAD",
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/WS.png",
+   "notes": "Calgary based carrier strong in Western Canada and sun destinations, with a UltraBasic fare that excludes a carry-on.",
+   "verify_note": "YYC to YVR Nov 20 to 24 with 2 adults loaded straight into flight results, one way variant not separately tested",
+   "oneway_deeplink": "https://www.westjet.com/booking/Create.html?lang=en&type=search&origin={origin}&destination={destination}&adults={adults}&children=0&infants=0&outboundDate={depart}&companionvoucher=false&iswestjetdollars=false&promo=&currency=CAD"
+  },
+  {
+   "iata": "P5",
+   "icao": "RPB",
+   "name": "Wingo",
+   "country": "CO",
+   "regions": [
+    "south_america",
+    "central_america_caribbean"
+   ],
+   "category": "ultra_low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "BOG",
+    "MDE",
+    "PTY"
+   ],
+   "website": "https://www.wingo.com",
+   "search_url": "https://www.wingo.com/en",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/P5.png",
+   "notes": "Copa owned low cost carrier from Bogota and Panama's Panama Pacifico airport to Colombia, the Caribbean and Central America."
+  },
+  {
+   "iata": "JA",
+   "icao": "JAT",
+   "name": "JetSMART",
+   "country": "CL",
+   "regions": [
+    "south_america"
+   ],
+   "category": "ultra_low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "SCL",
+    "LIM",
+    "AEP",
+    "MDE",
+    "BOG"
+   ],
+   "website": "https://jetsmart.com",
+   "search_url": "https://jetsmart.com/us/en/",
+   "deeplink": "https://booking.jetsmart.com/Flight/InternalSelect?c=true&mon=true&r=true&cur=USD&culture=en-US&o1={origin}&d1={destination}&dd1={depart}&dd2={return}",
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/JA.png",
+   "notes": "Ultra low cost group operating in Chile, Peru, Argentina and Colombia, partly owned by American Airlines.",
+   "oneway_deeplink": "https://booking.jetsmart.com/Flight/InternalSelect?c=true&mon=true&r=false&cur=USD&culture=en-US&o1={origin}&d1={destination}&dd1={depart}",
+   "verify_note": "Format copied from fare links on jetsmart.com itself, but booking.jetsmart.com returns 403 to headless Chromium, and no adult count param is known so it defaults to 1 adult"
+  },
+  {
+   "iata": "H2",
+   "icao": "SKU",
+   "name": "Sky Airline",
+   "country": "CL",
+   "regions": [
+    "south_america"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "SCL",
+    "LIM"
+   ],
+   "website": "https://www.skyairline.com",
+   "search_url": "https://www.skyairline.com/en/united-states",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/H2.png",
+   "notes": "Chilean low cost carrier covering Chile, Peru and nearby South American capitals plus Miami."
+  },
+  {
+   "iata": "G9",
+   "icao": "ABY",
+   "name": "Air Arabia",
+   "country": "AE",
+   "regions": [
+    "middle_east",
+    "africa",
+    "asia"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "SHJ"
+   ],
+   "website": "https://www.airarabia.com",
+   "search_url": "https://www.airarabia.com/en",
+   "deeplink": null,
+   "date_format": "DD/MM/YYYY",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/G9.png",
+   "notes": "Low cost carrier based in Sharjah, a short drive from Dubai."
+  },
+  {
+   "iata": "MS",
+   "icao": "MSR",
+   "name": "EgyptAir",
+   "country": "EG",
+   "regions": [
+    "africa",
+    "middle_east"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free carry-on"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "CAI"
+   ],
+   "website": "https://www.egyptair.com",
+   "search_url": "https://www.egyptair.com/en/Pages/HomePage.aspx",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/MS.png",
+   "notes": "Cairo based Star Alliance member linking Europe, Africa and the Middle East."
+  },
+  {
+   "iata": "LY",
+   "icao": "ELY",
+   "name": "El Al",
+   "country": "IL",
+   "regions": [
+    "middle_east"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business"
+   ],
+   "alliance": null,
+   "hubs": [
+    "TLV"
+   ],
+   "website": "https://www.elal.com",
+   "search_url": "https://www.elal.com/en/USA/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/LY.png",
+   "notes": "Israeli flag carrier with nonstops from Tel Aviv to Europe, North America and Asia."
+  },
+  {
+   "iata": "FZ",
+   "icao": "FDB",
+   "name": "flydubai",
+   "country": "AE",
+   "regions": [
+    "middle_east",
+    "africa",
+    "asia"
+   ],
+   "category": "hybrid",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "DXB"
+   ],
+   "website": "https://www.flydubai.com",
+   "search_url": "https://www.flydubai.com/en/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/FZ.png",
+   "notes": "Dubai based hybrid carrier codesharing with Emirates on many secondary cities.",
+   "verify_note": "Not verified. Guessed flights2.flydubai.com results URL redirected to an empty booking shell, and the homepage form could not be driven reliably in headless Chrome."
+  },
+  {
+   "iata": "XY",
+   "icao": "KNE",
+   "name": "flynas",
+   "country": "SA",
+   "regions": [
+    "middle_east",
+    "africa",
+    "asia"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "RUH",
+    "JED"
+   ],
+   "website": "https://www.flynas.com",
+   "search_url": "https://www.flynas.com/en",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/XY.png",
+   "notes": "Saudi low cost carrier with strong domestic and regional coverage."
+  },
+  {
+   "iata": "GF",
+   "icao": "GFA",
+   "name": "Gulf Air",
+   "country": "BH",
+   "regions": [
+    "middle_east",
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business"
+   ],
+   "alliance": null,
+   "hubs": [
+    "BAH"
+   ],
+   "website": "https://www.gulfair.com",
+   "search_url": "https://www.gulfair.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/GF.png",
+   "notes": "Bahrain flag carrier often cheap for Europe to South Asia connections."
+  },
+  {
+   "iata": "6E",
+   "icao": "IGO",
+   "name": "IndiGo",
+   "country": "IN",
+   "regions": [
+    "asia",
+    "middle_east"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "DEL",
+    "BOM",
+    "BLR"
+   ],
+   "website": "https://www.goindigo.in",
+   "search_url": "https://www.goindigo.in/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/6E.png",
+   "notes": "India's largest airline by far, now adding long haul routes to Europe."
+  },
+  {
+   "iata": "WY",
+   "icao": "OMA",
+   "name": "Oman Air",
+   "country": "OM",
+   "regions": [
+    "middle_east",
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "great service"
+   ],
+   "alliance": "oneworld",
+   "hubs": [
+    "MCT"
+   ],
+   "website": "https://www.omanair.com",
+   "search_url": "https://www.omanair.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/WY.png",
+   "notes": "Muscat based carrier that joined oneworld in 2025."
+  },
+  {
+   "iata": "RJ",
+   "icao": "RJA",
+   "name": "Royal Jordanian",
+   "country": "JO",
+   "regions": [
+    "middle_east"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free carry-on"
+   ],
+   "alliance": "oneworld",
+   "hubs": [
+    "AMM"
+   ],
+   "website": "https://www.rj.com",
+   "search_url": "https://www.rj.com/en",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/RJ.png",
+   "notes": "Amman based oneworld member useful for Levant connections."
+  },
+  {
+   "iata": "SV",
+   "icao": "SVA",
+   "name": "Saudia",
+   "country": "SA",
+   "regions": [
+    "middle_east",
+    "africa",
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "free carry-on"
+   ],
+   "alliance": "skyteam",
+   "hubs": [
+    "JED",
+    "RUH"
+   ],
+   "website": "https://www.saudia.com",
+   "search_url": "https://www.saudia.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/SV.png",
+   "notes": "Saudi flag carrier with no alcohol served onboard."
+  },
+  {
+   "iata": "4Z",
+   "icao": "LNK",
+   "name": "Airlink",
+   "country": "ZA",
+   "regions": [
+    "africa"
+   ],
+   "category": "regional",
+   "tags": [
+    "free carry-on"
+   ],
+   "alliance": null,
+   "hubs": [
+    "JNB",
+    "CPT"
+   ],
+   "website": "https://www.flyairlink.com",
+   "search_url": "https://www.flyairlink.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/4Z.png",
+   "notes": "Regional carrier serving smaller Southern African cities."
+  },
+  {
+   "iata": "FA",
+   "icao": "SFR",
+   "name": "FlySafair",
+   "country": "ZA",
+   "regions": [
+    "africa"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "JNB",
+    "CPT"
+   ],
+   "website": "https://www.flysafair.co.za",
+   "search_url": "https://www.flysafair.co.za/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/FA.png",
+   "notes": "South Africa's largest domestic low cost carrier."
+  },
+  {
+   "iata": "KQ",
+   "icao": "KQA",
+   "name": "Kenya Airways",
+   "country": "KE",
+   "regions": [
+    "africa"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free carry-on"
+   ],
+   "alliance": "skyteam",
+   "hubs": [
+    "NBO"
+   ],
+   "website": "https://www.kenya-airways.com",
+   "search_url": "https://www.kenya-airways.com/en/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/KQ.png",
+   "notes": "Nairobi hub carrier strong in East Africa."
+  },
+  {
+   "iata": "AT",
+   "icao": "RAM",
+   "name": "Royal Air Maroc",
+   "country": "MA",
+   "regions": [
+    "africa"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free carry-on"
+   ],
+   "alliance": "oneworld",
+   "hubs": [
+    "CMN"
+   ],
+   "website": "https://www.royalairmaroc.com",
+   "search_url": "https://www.royalairmaroc.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/AT.png",
+   "notes": "Casablanca hub connecting West Africa with Europe and the Americas."
+  },
+  {
+   "iata": "WB",
+   "icao": "RWD",
+   "name": "RwandAir",
+   "country": "RW",
+   "regions": [
+    "africa"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free carry-on"
+   ],
+   "alliance": null,
+   "hubs": [
+    "KGL"
+   ],
+   "website": "https://www.rwandair.com",
+   "search_url": "https://www.rwandair.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/WB.png",
+   "notes": "Kigali based carrier with a growing Central and East African network."
+  },
+  {
+   "iata": "SA",
+   "icao": "SAA",
+   "name": "South African Airways",
+   "country": "ZA",
+   "regions": [
+    "africa"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free carry-on",
+    "lie-flat business"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "JNB"
+   ],
+   "website": "https://www.flysaa.com",
+   "search_url": "https://www.flysaa.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/SA.png",
+   "notes": "Johannesburg flag carrier rebuilding its long haul network."
+  },
+  {
+   "iata": "AK",
+   "icao": "AXM",
+   "name": "AirAsia",
+   "country": "MY",
+   "regions": [
+    "asia"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "KUL"
+   ],
+   "website": "https://www.airasia.com",
+   "search_url": "https://www.airasia.com/flights",
+   "deeplink": "https://www.airasia.com/flights/search/?origin={origin}&destination={destination}&departDate={depart}&returnDate={return}&tripType=R&adult={adults}&child=0&infant=0&locale=en-gb&currency=MYR&cabinClass=economy",
+   "date_format": "DD/MM/YYYY",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/AK.png",
+   "notes": "Asia's largest low cost group, based at Kuala Lumpur KLIA Terminal 2.",
+   "verify_note": "Cloudflare challenge blocked headless browsers, so prefill was not confirmed."
+  },
+  {
+   "iata": "D7",
+   "icao": "XAX",
+   "name": "AirAsia X",
+   "country": "MY",
+   "regions": [
+    "asia",
+    "oceania"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra",
+    "long haul low cost"
+   ],
+   "alliance": null,
+   "hubs": [
+    "KUL"
+   ],
+   "website": "https://www.airasia.com",
+   "search_url": "https://www.airasia.com/flights",
+   "deeplink": "https://www.airasia.com/flights/search/?origin={origin}&destination={destination}&departDate={depart}&returnDate={return}&tripType=R&adult={adults}&child=0&infant=0&locale=en-gb&currency=MYR&cabinClass=economy",
+   "date_format": "DD/MM/YYYY",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/D7.png",
+   "notes": "Medium and long haul AirAsia arm flying A330s to Australia, Japan, Korea and beyond.",
+   "verify_note": "Same airasia.com search URL as AK. A Cloudflare challenge blocked headless browsers, so prefill was not confirmed."
+  },
+  {
+   "iata": "OZ",
+   "icao": "AAR",
+   "name": "Asiana Airlines",
+   "country": "KR",
+   "regions": [
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "great service"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "ICN"
+   ],
+   "website": "https://flyasiana.com",
+   "search_url": "https://flyasiana.com/C/US/EN/index",
+   "deeplink": null,
+   "date_format": "YYYYMMDD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/OZ.png",
+   "notes": "Being integrated into Korean Air and expected to leave Star Alliance."
+  },
+  {
+   "iata": "5J",
+   "icao": "CEB",
+   "name": "Cebu Pacific",
+   "country": "PH",
+   "regions": [
+    "asia"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "MNL",
+    "CEB"
+   ],
+   "website": "https://www.cebupacificair.com",
+   "search_url": "https://www.cebupacificair.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/5J.png",
+   "notes": "Largest Philippine low cost carrier with frequent seat sales."
+  },
+  {
+   "iata": "CI",
+   "icao": "CAL",
+   "name": "China Airlines",
+   "country": "TW",
+   "regions": [
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business"
+   ],
+   "alliance": "skyteam",
+   "hubs": [
+    "TPE"
+   ],
+   "website": "https://www.china-airlines.com",
+   "search_url": "https://www.china-airlines.com/us/en",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/CI.png",
+   "notes": "Taiwan's flag carrier, often cheaper than EVA across the Pacific."
+  },
+  {
+   "iata": "GA",
+   "icao": "GIA",
+   "name": "Garuda Indonesia",
+   "country": "ID",
+   "regions": [
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "great service"
+   ],
+   "alliance": "skyteam",
+   "hubs": [
+    "CGK",
+    "DPS"
+   ],
+   "website": "https://www.garuda-indonesia.com",
+   "search_url": "https://www.garuda-indonesia.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/GA.png",
+   "notes": "Indonesian flag carrier with good service between Jakarta, Bali and the region."
+  },
+  {
+   "iata": "UO",
+   "icao": "HKE",
+   "name": "HK Express",
+   "country": "HK",
+   "regions": [
+    "asia"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "HKG"
+   ],
+   "website": "https://www.hkexpress.com",
+   "search_url": "https://www.hkexpress.com/en-hk/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/UO.png",
+   "notes": "Cathay owned low cost carrier focused on Japan, Korea and Southeast Asia."
+  },
+  {
+   "iata": "7C",
+   "icao": "JJA",
+   "name": "Jeju Air",
+   "country": "KR",
+   "regions": [
+    "asia"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "ICN",
+    "GMP",
+    "CJU"
+   ],
+   "website": "https://www.jejuair.net",
+   "search_url": "https://www.jejuair.net/en/main/base/index.do",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/7C.png",
+   "notes": "Korea's largest low cost carrier with many Japan and Southeast Asia routes."
+  },
+  {
+   "iata": "JQ",
+   "icao": "JST",
+   "name": "Jetstar",
+   "country": "AU",
+   "regions": [
+    "oceania",
+    "asia"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "MEL",
+    "SYD",
+    "BNE",
+    "OOL"
+   ],
+   "website": "https://www.jetstar.com",
+   "search_url": "https://www.jetstar.com/au/en/home",
+   "deeplink": "https://booking.jetstar.com/au/en/booking/search-flights?origin1={origin}&destination1={destination}&departuredate1={depart}&origin2={destination}&destination2={origin}&departuredate2={return}&adults={adults}&children=0&infants=0&currency=AUD",
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/JQ.png",
+   "notes": "Qantas group low cost carrier across Australia, New Zealand and Asia.",
+   "verify_note": "www.jetstar.com/au/en/deeplinksv2 accepts these params and forwards to booking.jetstar.com, but the booking host returned an Akamai error page to headless browsers so prefill was not confirmed."
+  },
+  {
+   "iata": "MH",
+   "icao": "MAS",
+   "name": "Malaysia Airlines",
+   "country": "MY",
+   "regions": [
+    "asia",
+    "oceania"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "great service"
+   ],
+   "alliance": "oneworld",
+   "hubs": [
+    "KUL"
+   ],
+   "website": "https://www.malaysiaairlines.com",
+   "search_url": "https://www.malaysiaairlines.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/MH.png",
+   "notes": "Kuala Lumpur oneworld carrier often good value to Southeast Asia and Australia."
+  },
+  {
+   "iata": "MM",
+   "icao": "APJ",
+   "name": "Peach Aviation",
+   "country": "JP",
+   "regions": [
+    "asia"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "KIX",
+    "NRT"
+   ],
+   "website": "https://www.flypeach.com",
+   "search_url": "https://www.flypeach.com/en",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/MM.png",
+   "notes": "ANA owned low cost carrier based at Osaka Kansai."
+  },
+  {
+   "iata": "PR",
+   "icao": "PAL",
+   "name": "Philippine Airlines",
+   "country": "PH",
+   "regions": [
+    "asia",
+    "oceania"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free carry-on",
+    "lie-flat business"
+   ],
+   "alliance": null,
+   "hubs": [
+    "MNL",
+    "CEB"
+   ],
+   "website": "https://www.philippineairlines.com",
+   "search_url": "https://www.philippineairlines.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/PR.png",
+   "notes": "Manila flag carrier with transpacific routes to North America."
+  },
+  {
+   "iata": "TR",
+   "icao": "TGW",
+   "name": "Scoot",
+   "country": "SG",
+   "regions": [
+    "asia",
+    "oceania"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra",
+    "long haul low cost"
+   ],
+   "alliance": null,
+   "hubs": [
+    "SIN"
+   ],
+   "website": "https://www.flyscoot.com",
+   "search_url": "https://www.flyscoot.com/en",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/TR.png",
+   "notes": "Singapore Airlines' low cost arm flying 787s to Europe and Australia.",
+   "verify_note": "Not verified. flyscoot.com rendered a blank page for headless Chrome and a guessed booking.flyscoot.com Flight/Select URL redirected to an empty search page."
+  },
+  {
+   "iata": "JX",
+   "icao": "SJX",
+   "name": "Starlux Airlines",
+   "country": "TW",
+   "regions": [
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business",
+    "great service",
+    "free wifi"
+   ],
+   "alliance": null,
+   "hubs": [
+    "TPE"
+   ],
+   "website": "https://www.starlux-airlines.com",
+   "search_url": "https://www.starlux-airlines.com/en-US",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/JX.png",
+   "notes": "Young boutique Taipei carrier with a new A350 fleet."
+  },
+  {
+   "iata": "FD",
+   "icao": "AIQ",
+   "name": "Thai AirAsia",
+   "country": "TH",
+   "regions": [
+    "asia"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "DMK"
+   ],
+   "website": "https://www.airasia.com",
+   "search_url": "https://www.airasia.com/flights",
+   "deeplink": "https://www.airasia.com/flights/search/?origin={origin}&destination={destination}&departDate={depart}&returnDate={return}&tripType=R&adult={adults}&child=0&infant=0&locale=en-gb&currency=THB&cabinClass=economy",
+   "date_format": "DD/MM/YYYY",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/FD.png",
+   "notes": "Thai arm of AirAsia flying from Bangkok Don Mueang, booked on airasia.com.",
+   "verify_note": "Same airasia.com search URL as AK. A Cloudflare challenge blocked headless browsers, so prefill was not confirmed."
+  },
+  {
+   "iata": "TG",
+   "icao": "THA",
+   "name": "Thai Airways",
+   "country": "TH",
+   "regions": [
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business"
+   ],
+   "alliance": "star",
+   "hubs": [
+    "BKK"
+   ],
+   "website": "https://www.thaiairways.com",
+   "search_url": "https://www.thaiairways.com/en/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/TG.png",
+   "notes": "Bangkok Suvarnabhumi flag carrier with Europe and Asia network."
+  },
+  {
+   "iata": "VJ",
+   "icao": "VJC",
+   "name": "VietJet Air",
+   "country": "VN",
+   "regions": [
+    "asia"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "SGN",
+    "HAN"
+   ],
+   "website": "https://www.vietjetair.com",
+   "search_url": "https://www.vietjetair.com/en",
+   "deeplink": null,
+   "date_format": "DD/MM/YYYY",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/VJ.png",
+   "notes": "Vietnam's biggest low cost carrier with dense domestic and regional routes."
+  },
+  {
+   "iata": "VN",
+   "icao": "HVN",
+   "name": "Vietnam Airlines",
+   "country": "VN",
+   "regions": [
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "comfort",
+    "lie-flat business"
+   ],
+   "alliance": "skyteam",
+   "hubs": [
+    "HAN",
+    "SGN"
+   ],
+   "website": "https://www.vietnamairlines.com",
+   "search_url": "https://www.vietnamairlines.com/us/en/home",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/VN.png",
+   "notes": "Vietnamese flag carrier with 787 and A350 service to Europe and Australia."
+  },
+  {
+   "iata": "ZG",
+   "icao": "TZP",
+   "name": "Zipair",
+   "country": "JP",
+   "regions": [
+    "asia"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra",
+    "long haul low cost",
+    "free wifi"
+   ],
+   "alliance": null,
+   "hubs": [
+    "NRT"
+   ],
+   "website": "https://www.zipair.net",
+   "search_url": "https://www.zipair.net/en",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/ZG.png",
+   "notes": "JAL owned long haul low cost carrier flying 787s from Tokyo Narita to North America and Asia."
+  },
+  {
+   "iata": "FJ",
+   "icao": "FJI",
+   "name": "Fiji Airways",
+   "country": "FJ",
+   "regions": [
+    "oceania"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free carry-on",
+    "comfort"
+   ],
+   "alliance": null,
+   "hubs": [
+    "NAN"
+   ],
+   "website": "https://www.fijiairways.com",
+   "search_url": "https://www.fijiairways.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/FJ.png",
+   "notes": "oneworld connect member linking Nadi with the US, Australia and the Pacific."
+  },
+  {
+   "iata": "VA",
+   "icao": "VOZ",
+   "name": "Virgin Australia",
+   "country": "AU",
+   "regions": [
+    "oceania"
+   ],
+   "category": "hybrid",
+   "tags": [
+    "free carry-on",
+    "comfort"
+   ],
+   "alliance": null,
+   "hubs": [
+    "BNE",
+    "SYD",
+    "MEL"
+   ],
+   "website": "https://www.virginaustralia.com",
+   "search_url": "https://www.virginaustralia.com/au/en/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/VA.png",
+   "notes": "Australia's second major airline, partly owned by Qatar Airways."
+  }
+ ]
+}

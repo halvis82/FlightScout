@@ -2,7 +2,9 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { Check, Copy, Fingerprint, KeyRound, Plus, Trash2 } from "lucide-react";
+import { AirportInput } from "@/components/airport-input";
 import { useApp } from "@/components/app-context";
+import { cityOf } from "@/lib/airports-client";
 import { Badge, Button, Card, ErrorNote, Field, Input, PageHeader, Select, Switch } from "@/components/ui";
 import { api, fetcher } from "@/lib/client";
 import { authClient } from "@/lib/auth-client";
@@ -46,6 +48,7 @@ export default function SettingsPage() {
           </Select>
         </Field>
       </Section>
+      <FavoritesSection />
       <PlannerSection key={JSON.stringify(settings.planner)} planner={settings.planner} onSave={(planner) => patch({ planner })} />
       <SellerSection rules={settings.sellerRules} onSave={(sellerRules) => patch({ sellerRules })} />
       {me.user ? (
@@ -68,6 +71,70 @@ export default function SettingsPage() {
           </a>
         </Section>
       )}
+    </div>
+  );
+}
+
+function FavoritesSection() {
+  const { places, refreshPlaces } = useApp();
+  const [adding, setAdding] = useState<string[]>([]);
+  async function add(codes: string[]) {
+    for (const c of codes) {
+      if (places.some((p) => p.codes.includes(c))) continue;
+      await api("/places", { body: { label: cityOf(c) ?? c, codes: [c], kind: places.length ? "frequent" : "home" } });
+    }
+    setAdding([]);
+    refreshPlaces();
+  }
+  return (
+    <div id="places">
+      <Section
+        title="Favorite airports and cities"
+        sub="These show up as one click chips in From and To, and your homes prefill the search. Star any airport anywhere in the app to add it."
+      >
+        <div className="space-y-1.5">
+          {places.map((p) => (
+            <div key={p.id} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2">
+              <div className="min-w-0 flex-1">
+                <span className="font-medium">{p.label}</span>{" "}
+                <span className="font-mono text-xs text-muted">{p.codes.join(", ")}</span>
+              </div>
+              <Select
+                className="h-7 w-32 text-xs"
+                value={p.kind}
+                onChange={async (e) => {
+                  await api(`/places/${p.id}`, { method: "PATCH", body: { kind: e.target.value } });
+                  refreshPlaces();
+                }}
+              >
+                <option value="home">Home</option>
+                <option value="frequent">Favorite</option>
+                <option value="interested">Want to go</option>
+              </Select>
+              <Button
+                size="sm"
+                variant="ghost"
+                aria-label={`Remove ${p.label}`}
+                onClick={async () => {
+                  await api(`/places/${p.id}`, { method: "DELETE" });
+                  refreshPlaces();
+                }}
+              >
+                <Trash2 className="size-3.5" />
+              </Button>
+            </div>
+          ))}
+          {!places.length && <p className="text-sm text-muted">No favorites yet. Add your home airports first.</p>}
+          <div className="flex items-center gap-2 pt-1">
+            <div className="flex-1">
+              <AirportInput value={adding} onChange={setAdding} placeholder="Add an airport or city" />
+            </div>
+            <Button onClick={() => add(adding)} disabled={!adding.length}>
+              <Plus className="size-3.5" /> Add
+            </Button>
+          </div>
+        </div>
+      </Section>
     </div>
   );
 }
