@@ -21,15 +21,43 @@ export default function Page() {
   );
 }
 
+// The search page keeps its state when you switch tabs (module memory) and
+// across reloads of the same browser tab (sessionStorage).
+type Saved = { form: SearchForm | null; result: SearchResult | null; plan: PlanResult | null };
+const KEY = "fs.search.v1";
+let saved: Saved | null = null;
+function loadSaved(): Saved {
+  if (saved) return saved;
+  try {
+    const raw = typeof window !== "undefined" ? sessionStorage.getItem(KEY) : null;
+    saved = raw ? (JSON.parse(raw) as Saved) : { form: null, result: null, plan: null };
+  } catch {
+    saved = { form: null, result: null, plan: null };
+  }
+  return saved;
+}
+function persist(next: Saved) {
+  saved = next;
+  try {
+    sessionStorage.setItem(KEY, JSON.stringify(next));
+  } catch {
+    /* quota or private mode: memory copy is enough */
+  }
+}
+
 function SearchPage() {
   const { settings, currency } = useApp();
   const router = useRouter();
   const params = useSearchParams();
-  const [edited, setForm] = useState<SearchForm | null>(null);
+  const hasQuery = Boolean(params.get("from"));
+  const [edited, setForm] = useState<SearchForm | null>(() => (hasQuery ? null : loadSaved().form));
   // Until the user edits, the form comes from the URL (or their defaults).
   const form = edited ?? (settings ? paramsToForm(params, defaultForm(currency, settings.defaultOrigins)) : null);
-  const [result, setResult] = useState<SearchResult | null>(null);
-  const [plan, setPlan] = useState<PlanResult | null>(null);
+  const [result, setResult] = useState<SearchResult | null>(() => (hasQuery ? null : loadSaved().result));
+  const [plan, setPlan] = useState<PlanResult | null>(() => (hasQuery ? null : loadSaved().plan));
+  useEffect(() => {
+    if (edited || result || plan) persist({ form: edited, result, plan });
+  }, [edited, result, plan]);
   const [busy, setBusy] = useState(false);
   const [planBusy, setPlanBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -39,6 +67,7 @@ function SearchPage() {
 
   const run = useCallback(
     async (f0: SearchForm) => {
+      setForm(f0);
       const f = { ...f0, currency };
       lastRun.current = JSON.stringify([f.from, f.to, f.depart, f.ret, f.tripType]);
       setErr(null);

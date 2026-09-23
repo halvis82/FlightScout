@@ -74,11 +74,13 @@ export function Select({ className, children, ...rest }: SelectHTMLAttributes<HT
 
 export function Field({ label, hint, children, className }: { label: string; hint?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <label className={cn("flex min-w-0 flex-col gap-1.5", className)}>
+    // A div, not a <label>: a label forwards clicks to its first button, which
+    // broke picking from dropdowns that contain buttons (chip remove, stars).
+    <div role="group" aria-label={label} className={cn("flex min-w-0 flex-col gap-1.5", className)}>
       <span className="text-xs font-medium text-muted">{label}</span>
       {children}
       {hint && <span className="text-xs text-faint">{hint}</span>}
-    </label>
+    </div>
   );
 }
 

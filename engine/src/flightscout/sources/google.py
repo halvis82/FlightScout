@@ -34,6 +34,25 @@ _SEAT = {
 _STOPS = {None: MaxStops.ANY, 0: MaxStops.NON_STOP, 1: MaxStops.ONE_STOP_OR_FEWER, 2: MaxStops.TWO_OR_FEWER_STOPS}
 
 
+def _diverse(flights: list, n: int) -> list:
+    """Put the cheapest outbound of each airline first so round trip
+    expansion covers many carriers, not just the cheapest one."""
+    def key(f):
+        return f.price if f.price is not None else float("inf")
+    ordered = sorted(flights, key=key)
+    first, rest, seen = [], [], set()
+    for f in ordered:
+        carrier = tuple(sorted({leg.airline.name for leg in f.legs}))
+        (rest if carrier in seen else first).append(f)
+        seen.add(carrier)
+    return (first + rest)[: max(n, 1)] + (first + rest)[max(n, 1):]
+
+
+class _DiverseSearch(SearchFlights):
+    def _expand_multi_leg(self, flights, filters, *, top_n, **kw):
+        return super()._expand_multi_leg(_diverse(list(flights), top_n), filters, top_n=top_n, **kw)
+
+
 def _airports(codes: list[str]):
     out = []
     for c in codes:
@@ -64,7 +83,7 @@ def _slice(res) -> Slice:
     return Slice(segments=segs, duration_min=res.duration)
 
 
-def search(q: SearchQuery, top_n: int = 3) -> list[Itinerary]:
+def search(q: SearchQuery, top_n: int = 8) -> list[Itinerary]:
     key = f"google:{q.model_dump_json()}:{top_n}"
     if (hit := cache.get(key)) is not None:
         return [Itinerary(**x) for x in hit]
@@ -92,7 +111,7 @@ def search(q: SearchQuery, top_n: int = 3) -> list[Itinerary]:
         seat_type=_SEAT[q.cabin],
         sort_by=SortBy.CHEAPEST,
     )
-    client = SearchFlights()
+    client = _DiverseSearch()
     try:
         results = client.search(filters, top_n=top_n, currency=q.currency) or []
     except Exception as e:

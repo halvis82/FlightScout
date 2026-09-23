@@ -15,7 +15,7 @@ from .sources import (condor, flair, google, kiwi, norse, serpapi, skyairline, v
 log = logging.getLogger(__name__)
 
 SOURCES = {
-    "google": google.search, "kiwi": kiwi.search, "serpapi": serpapi.search, "volaris": volaris.search,
+    "google": lambda q: _google(q), "kiwi": kiwi.search, "serpapi": serpapi.search, "volaris": volaris.search,
     "wideroe": wideroe.search, "skyairline": skyairline.search, "norse": norse.search,
     "volotea": volotea.search, "condor": condor.search, "flair": flair.search,
 }
@@ -70,6 +70,46 @@ def merge(items: list[Itinerary]) -> list[Itinerary]:
         if k not in best or it.price < best[k].price:
             best[k] = it
     return sorted(best.values(), key=lambda i: i.price)
+
+
+def _google_flex(q: SearchQuery) -> list[Itinerary]:
+    """Flexible dates on Google: price every date in the window from the
+    calendar, then run full searches on the 3 cheapest date combinations."""
+    from datetime import date as _date, timedelta
+
+    df, rf = q.departure_flex_days, q.return_flex_days
+    tomorrow = _date.today() + timedelta(days=1)
+    lo, hi = max(tomorrow, q.departure - timedelta(days=df)), q.departure + timedelta(days=df)
+    o, d = q.origins[0], q.destinations[0]
+    pairs: list[tuple[float, _date, _date | None]] = []
+    if q.return_date:
+        base = (q.return_date - q.departure).days
+        rlo, rhi = q.return_date - timedelta(days=rf), q.return_date + timedelta(days=rf)
+        lengths = sorted({max(1, base + k) for k in range(-(df + rf), df + rf + 1)})
+        # keep it bounded: at most 5 trip lengths around the requested one
+        lengths = sorted(lengths, key=lambda n: abs(n - base))[:5]
+        for n in lengths:
+            for dp in google.dates(o, d, lo, hi, q.currency, trip_days=n, cabin=q.cabin):
+                r = dp.departure + timedelta(days=n)
+                if rlo <= r <= rhi:
+                    pairs.append((dp.price, dp.departure, r))
+    else:
+        pairs = [(dp.price, dp.departure, None) for dp in google.dates(o, d, lo, hi, q.currency, cabin=q.cabin)]
+    pairs.sort()
+    best = list(dict.fromkeys((p[1], p[2]) for p in pairs))[:3]
+    if (q.departure, q.return_date) not in best:
+        best.append((q.departure, q.return_date))
+    out: list[Itinerary] = []
+    with ThreadPoolExecutor(max_workers=4) as ex:
+        for res in ex.map(lambda dr: google.search(q.model_copy(update={"departure": dr[0], "return_date": dr[1]})), best):
+            out.extend(res)
+    return out
+
+
+def _google(q: SearchQuery) -> list[Itinerary]:
+    if q.departure_flex_days or q.return_flex_days:
+        return _google_flex(q)
+    return google.search(q)
 
 
 def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> SearchResult:
