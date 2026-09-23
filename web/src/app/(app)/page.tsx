@@ -74,6 +74,9 @@ function SearchPage() {
   const [err, setErr] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const autoRan = useRef(false);
+  const runSeq = useRef(0);
+  const [stale, setStale] = useState(false);
+  const [pending, setPending] = useState(0);
   const lastRun = useRef<string | null>(null);
   const watch = useWatchDialog();
 
@@ -83,7 +86,8 @@ function SearchPage() {
       const f = { ...f0, currency };
       lastRun.current = JSON.stringify([f.from, f.to, f.depart, f.ret, f.tripType, f.flex, f.retFlex]);
       setErr(null);
-      setResult(null);
+      setStale(true); // keep showing the previous results, dimmed
+      setPending(3);
       setPlan(null);
       setBusy(true);
       setElapsed(0);
@@ -126,10 +130,38 @@ function SearchPage() {
         return_flex_days: f.tripType === "roundtrip" ? f.retFlex : 0,
         nearby_km: f.nearby,
       };
-      const searchP = api<SearchResult>("/search", { body: q })
-        .then(setResult)
-        .catch((e) => setErr((e as Error).message))
-        .finally(() => setBusy(false));
+      // Stream: ask each group of sources separately and show results as each
+      // arrives. Earlier results stay on screen (dimmed) until the first part
+      // of the new search lands.
+      const PARTS: string[][] = [["google"], ["kiwi"], ["volaris", "wideroe", "skyairline", "norse", "volotea", "condor"]];
+      const runId = ++runSeq.current;
+      let first = true;
+      let pending = PARTS.length;
+      const searchP = Promise.all(
+        PARTS.map((sources, part) =>
+          api<SearchResult>("/search", { body: { ...q, sources, part } })
+            .then((r) => {
+              if (runSeq.current !== runId) return;
+              setResult((prev) => {
+                if (first || !prev) {
+                  first = false;
+                  return r;
+                }
+                const seen = new Set(prev.trips.map((t) => t.id));
+                return { ...prev, trips: [...prev.trips, ...r.trips.filter((t) => !seen.has(t.id))], errors: { ...prev.errors, ...r.errors } };
+              });
+              setStale(false);
+            })
+            .catch((e) => {
+              if (runSeq.current === runId && part === 0) setErr((e as Error).message);
+            })
+            .finally(() => {
+              pending -= 1;
+              if (runSeq.current === runId) setPending(pending);
+              if (pending === 0 && runSeq.current === runId) setBusy(false);
+            }),
+        ),
+      );
       let planP: Promise<void> = Promise.resolve();
       if (f.smart && settings) {
         setPlanBusy(true);
@@ -158,7 +190,14 @@ function SearchPage() {
     [router, settings, currency],
   );
   useEffect(() => {
-    if (fresh) router.replace("/", { scroll: false });
+    if (!fresh) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setForm(null);
+    setResult(null);
+    setPlan(null);
+    setErr(null);
+    lastRun.current = null;
+    router.replace("/", { scroll: false });
   }, [fresh, router]);
 
   // After a first search, changing dates (arrows or calendar) searches again.
@@ -217,7 +256,11 @@ function SearchPage() {
       {(busy || planBusy) && (
         <div className="flex items-center gap-2 text-sm text-muted">
           <Spinner />
-          {busy ? `Searching ${form.sources.join(" and ")}` : "Direct results ready."}
+          {busy
+            ? stale
+              ? "Searching Google Flights, Kiwi.com and airlines directly"
+              : `More results coming in (${pending} source group${pending === 1 ? "" : "s"} left)`
+            : "Direct results ready."}
           {planBusy && (
             <span className="inline-flex items-center gap-1">
               <Sparkles className="size-3.5 text-info" /> Building smart routes through hubs. This can take a minute or two.
@@ -280,6 +323,7 @@ function SearchPage() {
         />
       )}
       {hasResults ? (
+        <div className={stale && busy ? "pointer-events-none opacity-50 transition-opacity" : "transition-opacity"}>
         <ResultsView
           trips={trips}
           query={result?.query ?? { origins: form.from, destinations: form.to }}
@@ -287,6 +331,7 @@ function SearchPage() {
           googleUrl={result?.google_url}
           plan={plan}
         />
+        </div>
       ) : (
         !busy && !(form.from.length && !form.to.length) && (
           form.tripType === "multicity" && form.from.length && form.legs.some((l) => l.to.length) ? (

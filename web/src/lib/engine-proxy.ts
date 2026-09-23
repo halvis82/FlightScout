@@ -24,10 +24,14 @@ function rulesToEngine(rules: SellerRule[]) {
 export async function proxyEngine(req: Request, kind: EngineKind) {
   const userId = await optionalUser(req);
   const q = (await req.json().catch(() => ({}))) as Record<string, unknown>;
-  const followUp = kind === "explore" && typeof q.batch === "number" && q.batch > 0;
+  // Streamed searches send several parts; only the first counts toward rate
+  // limits and gets saved to history (it also feeds matching watches).
+  const part = typeof q.part === "number" ? q.part : 0;
+  delete q.part;
+  const followUp = (kind === "explore" && typeof q.batch === "number" && q.batch > 0) || part > 0;
   await enforceRateLimit(req, kind, userId, followUp);
   // `quiet` requests (calendar prices, date strips) are not saved to history
-  const quiet = q.quiet === true;
+  const quiet = q.quiet === true || part > 0;
   delete q.quiet;
   const payload = { ...q };
   if ((kind === "search" || kind === "plan") && !payload.seller_rules) {

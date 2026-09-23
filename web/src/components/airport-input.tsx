@@ -109,8 +109,14 @@ export function AirportInput({
                 )}
               >
                 <span className="truncate">
-                  <span className="font-semibold">{c}</span>
-                  {cityOf(c) && <span className="opacity-80"> ({cityOf(c)})</span>}
+                  {METROS[c] ? (
+                    <span className="font-semibold">{METROS[c].label}</span>
+                  ) : (
+                    <>
+                      <span className="font-semibold">{c}</span>
+                      {cityOf(c) && <span className="opacity-80"> ({cityOf(c)})</span>}
+                    </>
+                  )}
                 </span>
                 <button
                   type="button"

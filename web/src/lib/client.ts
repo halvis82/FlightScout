@@ -54,7 +54,7 @@ function rulesToEngine(rules: SellerRule[]) {
 // watches) through /results for signed in users, or locally for guests.
 async function viaLocalRunner<T>(p: string, body: Record<string, unknown>, guest: boolean, signal?: AbortSignal): Promise<T> {
   const kind = p.slice(1);
-  const quiet = body.quiet === true;
+  const quiet = body.quiet === true || (typeof body.part === "number" && body.part > 0);
   const query = { ...body };
   delete query.quiet;
   delete query.sellerRules;
@@ -111,7 +111,7 @@ export async function api<T = unknown>(path: string, init?: Init): Promise<T> {
         : init?.body;
     const res = await serverFetch<T>(path, { ...init, body });
     const b = (init?.body ?? {}) as Record<string, unknown>;
-    if (ENGINE_KINDS.has(p) && b.quiet !== true) {
+    if (ENGINE_KINDS.has(p) && b.quiet !== true && !(typeof b.part === "number" && b.part > 0)) {
       try {
         await afterGuestEngineCall(p.slice(1), b, res as Record<string, unknown>, serverFetch);
       } catch {}
