@@ -24,7 +24,7 @@ function Section({ title, sub, children }: { title: string; sub?: string; childr
 }
 
 export default function SettingsPage() {
-  const { me, settings, refreshMe } = useApp();
+  const { me, settings, refreshMe, places } = useApp();
   const [saved, setSaved] = useState(false);
 
   async function patch(body: Record<string, unknown>) {
@@ -40,6 +40,19 @@ export default function SettingsPage() {
     <div className="mx-auto max-w-3xl space-y-4">
       <PageHeader title="Settings" sub={me.user ? `Signed in as ${me.user.email}` : "Guest settings are saved in this browser."} actions={saved && <Badge tone="good"><Check className="size-3" /> Saved</Badge>} />
       <Section title="Display" sub="All prices are converted to this currency with daily ECB reference rates.">
+        <Field label="Start searches from" className="mb-3 w-72">
+          <Select
+            value={settings.defaultOrigins.join(",")}
+            onChange={(e) => patch({ defaultOrigins: e.target.value ? e.target.value.split(",") : [] })}
+          >
+            <option value="">Where I last searched from</option>
+            {places.map((p) => (
+              <option key={p.id} value={p.codes.join(",")}>
+                {p.label} ({p.codes.join(", ")})
+              </option>
+            ))}
+          </Select>
+        </Field>
         <Field label="Currency" className="w-40">
           <Select value={settings.currency} onChange={(e) => patch({ currency: e.target.value })}>
             {CURRENCIES.map((c) => (
@@ -233,7 +246,7 @@ function urlB64ToUint8Array(base64: string) {
 }
 
 function AlertsSection() {
-  const { me, settings, refreshMe } = useApp();
+  const { me, settings, refreshMe, places } = useApp();
   const [err, setErr] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   if (!me?.user || !settings) return null;

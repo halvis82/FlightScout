@@ -44,7 +44,7 @@ export function defaultForm(currency: string, origins: string[] = []): SearchFor
     stops: "any",
     currency,
     sources: ["google", "kiwi", "volaris"],
-    smart: false,
+    smart: true,
     nearby: 0,
   };
 }
@@ -65,7 +65,7 @@ export function formToParams(f: SearchForm) {
   });
   if (f.tripType === "roundtrip") p.set("r", f.ret);
   if (f.tripType === "multicity") p.set("ml", JSON.stringify(f.legs));
-  if (f.smart) p.set("smart", "1");
+  p.set("smart", f.smart ? "1" : "0");
   if (f.nearby) p.set("near", String(f.nearby));
   return p;
 }
@@ -86,7 +86,7 @@ export function paramsToForm(p: URLSearchParams, base: SearchForm): SearchForm {
     sources: (list("src") as Source[]) ?? base.sources,
     flex: Number(p.get("flex") ?? base.flex),
     retFlex: Number(p.get("rflex") ?? p.get("flex") ?? base.retFlex),
-    smart: p.get("smart") === "1",
+    smart: p.has("smart") ? p.get("smart") === "1" : base.smart,
     legs: (() => {
       try {
         return p.get("ml") ? (JSON.parse(p.get("ml")!) as MultiLeg[]) : base.legs;
@@ -221,14 +221,41 @@ export function SearchFormView({
       )}
       {f.tripType !== "multicity" && (
       <div className="mt-2 flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-xs text-muted">
-        <span className="mr-auto" />
+        <span className="mr-auto inline-flex items-center gap-1">
+          {[
+            { key: "oneway", label: "One flight" },
+            { key: "weekend", label: "Weekend" },
+            { key: "week", label: "1 week" },
+            { key: "twoweeks", label: "2 weeks" },
+          ].map((o) => {
+            const nights = rt ? dayDiff(f.depart, f.ret) : -1;
+            const on =
+              (o.key === "oneway" && !rt) ||
+              (o.key === "weekend" && rt && nights >= 2 && nights <= 3 && new Date(f.depart + "T12:00").getDay() >= 4) ||
+              (o.key === "week" && rt && nights === 7) ||
+              (o.key === "twoweeks" && rt && nights === 14);
+            return (
+              <button
+                key={o.key}
+                type="button"
+                onClick={() => set(preset(o.key, f))}
+                className={
+                  "h-6 rounded-full border px-2.5 transition-colors " +
+                  (on ? "border-accent bg-accent-soft text-accent" : "border-border hover:border-border-strong hover:text-fg")
+                }
+              >
+                {o.label}
+              </button>
+            );
+          })}
+        </span>
         <FlexPick label="Departure" value={f.flex} onChange={(flex) => set({ flex })} />
         {rt && <FlexPick label="Return" value={f.retFlex} onChange={(retFlex) => set({ retFlex })} />}
       </div>
       )}
       <div className="mt-2 grid grid-cols-1 gap-2 lg:grid-cols-2">
-        <PlaceChips onPick={(c) => set({ from: [...new Set([...f.from, ...c])] })} />
-        <PlaceChips onPick={(c) => set({ to: [...new Set([...f.to, ...c])] })} />
+        <PlaceChips current={f.from} onPick={(c) => set({ from: c })} />
+        <PlaceChips current={f.to} onPick={(c) => set({ to: c })} />
       </div>
     </form>
   );
@@ -332,4 +359,18 @@ function MultiCityLegs({ f, set, busy }: { f: SearchForm; set: (p: Partial<Searc
       </div>
     </div>
   );
+}
+
+// Quick trip lengths. Weekend moves departure to the next Friday (from the
+// currently chosen date) and returns Sunday, with a day of flexibility.
+function preset(key: string, f: SearchForm): Partial<SearchForm> {
+  if (key === "oneway") return { tripType: "oneway" };
+  if (key === "weekend") {
+    const d = new Date(f.depart + "T12:00");
+    const toFri = (5 - d.getDay() + 7) % 7;
+    const fri = addDays(f.depart, toFri);
+    return { tripType: "roundtrip", depart: fri, ret: addDays(fri, 2), flex: 1, retFlex: 1 };
+  }
+  const n = key === "week" ? 7 : 14;
+  return { tripType: "roundtrip", ret: addDays(f.depart, n) };
 }

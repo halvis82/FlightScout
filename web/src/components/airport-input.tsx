@@ -238,24 +238,44 @@ export function AirportInput({
 }
 
 // Quick pick chips for saved places, shown under route inputs.
-export function PlaceChips({ onPick, kinds, className, prefix }: { onPick: (codes: string[]) => void; kinds?: string[]; className?: string; prefix?: string }) {
+export function PlaceChips({
+  onPick,
+  kinds,
+  className,
+  prefix,
+  current,
+}: {
+  onPick: (codes: string[]) => void;
+  kinds?: string[];
+  className?: string;
+  prefix?: string;
+  current?: string[];
+}) {
   const { places } = useApp();
   const list = places.filter((p) => !kinds || kinds.includes(p.kind));
   if (!list.length) return null;
+  const same = (a: string[], b?: string[]) => !!b && a.length === b.length && a.every((x) => b.includes(x));
   return (
     <div className={cn("flex flex-wrap gap-1.5", className)}>
-      {list.map((p) => (
-        <button
-          key={p.id}
-          type="button"
-          onClick={() => onPick(p.codes)}
-          title={p.codes.map((c) => airportWithCity(c)).join(", ")}
-          className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-2.5 py-1 text-xs text-muted transition-colors hover:border-accent hover:text-accent"
-        >
-          {prefix && <span className="text-faint">{prefix}</span>}
-          {p.label}
-        </button>
-      ))}
+      {list.map((p) => {
+        const on = same(p.codes, current);
+        return (
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => onPick(p.codes)}
+            title={p.codes.map((c) => airportWithCity(c)).join(", ")}
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs transition-colors",
+              on ? "border-accent bg-accent-soft text-accent" : "border-border bg-surface text-muted hover:border-accent hover:text-accent",
+            )}
+          >
+            {prefix && <span className="text-faint">{prefix}</span>}
+            {p.label}
+            <span className="text-faint">{p.codes.length <= 2 ? p.codes.join(", ") : `${p.codes[0]} +${p.codes.length - 1}`}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }

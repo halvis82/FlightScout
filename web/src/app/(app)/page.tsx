@@ -54,8 +54,23 @@ function persist(next: Saved) {
   }
 }
 
+// Where a fresh search starts: the default chosen in Settings, else wherever
+// you last searched from, else your first home.
+const LAST_FROM = "fs.lastFrom";
+function startOrigin(defaults: string[], places: { kind: string; codes: string[] }[]): string[] {
+  if (defaults.length) return defaults;
+  try {
+    const last = typeof window !== "undefined" ? JSON.parse(localStorage.getItem(LAST_FROM) ?? "null") : null;
+    if (Array.isArray(last) && last.length) return last;
+  } catch {
+    /* ignore */
+  }
+  const home = places.find((p) => p.kind === "home");
+  return home ? home.codes.slice(0, 1) : [];
+}
+
 function SearchPage() {
-  const { settings, currency } = useApp();
+  const { settings, currency, places } = useApp();
   const router = useRouter();
   const params = useSearchParams();
   const fresh = params.get("new") === "1";
@@ -63,7 +78,7 @@ function SearchPage() {
   const hasQuery = Boolean(params.get("from")) || fresh;
   const [edited, setForm] = useState<SearchForm | null>(() => (hasQuery ? null : loadSaved().form));
   // Until the user edits, the form comes from the URL (or their defaults).
-  const form = edited ?? (settings ? paramsToForm(params, defaultForm(currency, settings.defaultOrigins)) : null);
+  const form = edited ?? (settings ? paramsToForm(params, defaultForm(currency, startOrigin(settings.defaultOrigins, places))) : null);
   const [result, setResult] = useState<SearchResult | null>(() => (hasQuery ? null : loadSaved().result));
   const [plan, setPlan] = useState<PlanResult | null>(() => (hasQuery ? null : loadSaved().plan));
   useEffect(() => {
@@ -83,6 +98,11 @@ function SearchPage() {
   const run = useCallback(
     async (f0: SearchForm) => {
       setForm(f0);
+      try {
+        localStorage.setItem(LAST_FROM, JSON.stringify(f0.from));
+      } catch {
+        /* ignore */
+      }
       const f = { ...f0, currency };
       lastRun.current = JSON.stringify([f.from, f.to, f.depart, f.ret, f.tripType, f.flex, f.retFlex]);
       setErr(null);
@@ -184,6 +204,9 @@ function SearchPage() {
             cabin: f.cabin,
             adults: f.adults,
             ...p,
+            // automatic on every search, so keep it light
+            max_hubs: Math.min(p.max_hubs ?? 6, 6),
+            max_stopover_days: Math.min(p.max_stopover_days ?? 2, 2),
           },
         })
           .then(setPlan)
@@ -269,7 +292,7 @@ function SearchPage() {
             : "Direct results ready."}
           {planBusy && (
             <span className="inline-flex items-center gap-1">
-              <Sparkles className="size-3.5 text-info" /> Building smart routes through hubs. This can take a minute or two.
+              <Sparkles className="size-3.5 text-info" /> Looking for cheaper combinations (separate tickets, nearby gateways, stopovers). About a minute.
             </span>
           )}
           <span className="tabular-nums text-faint">{elapsed}s</span>

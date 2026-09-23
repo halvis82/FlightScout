@@ -151,6 +151,17 @@ def nearby(code: str, radius_km: float, include_medium: bool = True) -> list[str
     return out
 
 
+def gateways_near(code: str, radius_km: float = 400, limit: int = 2) -> list[str]:
+    """Major hubs close to ``code`` (e.g. LAX for San Diego, CPH for Malmö),
+    nearest first. These are where cheap long haul fares usually start."""
+    base = get(code)
+    if not base:
+        return []
+    pool = [h for h in dict.fromkeys(list(GATEWAYS) + HUBS) if h != base.iata]
+    hits = sorted((haversine_km(base.iata, h), h) for h in pool)
+    return [h for d, h in hits if d <= radius_km][:limit]
+
+
 def expand_nearby(codes: list[str], radius_km: float, limit: int = 6) -> list[str]:
     """Expand metros, then add nearby airports around each code (capped)."""
     base = expand(codes)

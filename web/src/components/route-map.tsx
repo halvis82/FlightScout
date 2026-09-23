@@ -74,6 +74,8 @@ export function RouteMap({
 }) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MLMap | null>(null);
+  const keyed = useRef(new Map<string, { marker: maplibregl.Marker; node: HTMLButtonElement }>());
+  const handlers = useRef(new Map<string, (() => void) | undefined>());
   const markers = useRef<Marker[]>([]);
   const [ready, setReady] = useState(false);
   const [airportsLoaded, setAirportsLoaded] = useState(false);
@@ -158,17 +160,31 @@ export function RouteMap({
       });
     }
 
-    markers.current.forEach((mk) => mk.remove());
-    markers.current = [];
-    for (const p of points) {
+    // Markers are keyed by code and updated in place: rebuilding them on every
+    // update (explore streams results in) swallowed clicks mid-render.
+    const live = new Set<string>();
+    points.forEach((p, i) => {
       const c = coord(p);
-      if (!c) continue;
-      const node = document.createElement("button");
-      node.type = "button";
+      if (!c) return;
+      const key = `${p.tone ?? "price"}:${p.code}`;
+      live.add(key);
+      handlers.current.set(key, p.onClick);
+      let entry = keyed.current.get(key);
+      if (!entry) {
+        const node = document.createElement("button");
+        node.type = "button";
+        node.addEventListener("click", (e) => {
+          e.stopPropagation();
+          handlers.current.get(key)?.();
+        });
+        entry = { marker: new maplibregl.Marker({ element: node }).setLngLat(c).addTo(m), node };
+        keyed.current.set(key, entry);
+      } else entry.marker.setLngLat(c);
+      const node = entry.node;
       node.title = p.title ?? p.code;
       const tone = p.tone ?? "price";
       node.className = [
-        "rounded-full border font-mono text-[11px] font-semibold leading-none shadow-sm transition-transform hover:scale-110 hover:z-10",
+        "rounded-full border font-sans text-[11px] font-semibold leading-none shadow-sm transition-transform hover:scale-110 hover:z-10",
         tone === "origin" && "bg-fg text-bg border-transparent px-1.5 py-1",
         tone === "dest" && "bg-accent text-accent-fg border-transparent px-1.5 py-1",
         tone === "hub" && "bg-surface text-muted border-border px-1.5 py-1",
@@ -177,23 +193,25 @@ export function RouteMap({
       ]
         .filter(Boolean)
         .join(" ");
-      if (p.color) {
-        node.style.background = p.color;
-        node.style.color = "#0b0d10";
-        node.style.borderColor = "transparent";
+      node.style.background = p.color ?? "";
+      node.style.color = p.color ? "#0b0d10" : "";
+      node.style.borderColor = p.color ? "transparent" : "";
+      node.style.cursor = p.onClick ? "pointer" : "default";
+      node.textContent = p.label ?? p.code;
+      node.dataset.rank = String(i);
+      // price markers take part in collision handling (cheaper first)
+      if (p.color) node.dataset.label = "1";
+      else delete node.dataset.label;
+    });
+    for (const [key, entry] of keyed.current)
+      if (!live.has(key)) {
+        entry.marker.remove();
+        keyed.current.delete(key);
+        handlers.current.delete(key);
       }
-      if (p.dot) {
-        node.className = "size-2.5 rounded-full border border-white/70 shadow-sm transition-transform hover:scale-150";
-        node.style.padding = "0";
-      } else {
-        node.className += " font-sans";
-        node.textContent = p.label ?? p.code;
-      }
-      if (p.onClick) node.addEventListener("click", p.onClick);
-      else node.style.cursor = "default";
-      if (!p.dot && p.color) node.dataset.label = "1";
-      markers.current.push(new maplibregl.Marker({ element: node }).setLngLat(c).addTo(m));
-    }
+    markers.current = [...keyed.current.values()]
+      .map((e) => e.marker)
+      .sort((x, y) => Number(x.getElement().dataset.rank ?? 0) - Number(y.getElement().dataset.rank ?? 0));
     declutter();
   }
 

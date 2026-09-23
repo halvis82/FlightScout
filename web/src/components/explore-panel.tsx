@@ -127,18 +127,18 @@ export function ExplorePanel({
   const city = (d: Destination) => d.city || airport(d.destination)?.city || d.destination;
 
   const points = useMemo<MapPoint[]>(() => {
-    // Label the cheapest 25 (and the hovered one); the rest are colored dots.
-    const labeled = new Set(list.slice(0, 25).map((d) => d.destination));
-    const pts: MapPoint[] = list.map((d) => {
+    // Every destination gets a price label; overlapping ones collapse to dots
+    // (cheapest win) and reappear as you zoom in. The hovered row goes first.
+    const ordered = hover ? [...list.filter((d) => d.destination === hover), ...list.filter((d) => d.destination !== hover)] : list;
+    const pts: MapPoint[] = ordered.map((d) => {
       const p = convert(d.price, d.currency);
       return {
         code: d.destination,
         lat: d.lat,
         lon: d.lon,
         label: `${city(d)} ${money(d.price, d.currency)}`,
-        title: `${city(d)} (${d.destination}) · ${money(d.price, d.currency)}`,
+        title: `${city(d)} (${d.destination}) · ${money(d.price, d.currency)}${d.departure ? ` · ${formatDate(d.departure, false)}` : ""}. Click to search flights.`,
         color: scale.solid(p),
-        dot: !labeled.has(d.destination) && hover !== d.destination,
         onClick: () => onPick(d),
       };
     });

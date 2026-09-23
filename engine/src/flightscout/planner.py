@@ -253,8 +253,11 @@ def plan(req: PlanRequest) -> PlanResult:
     d = airports.expand(req.destinations)
     ctx = _Ctx(req)
     main_o, main_d = o[0], d[0]
-    hubs = airports.candidate_hubs(main_o, main_d, limit=req.max_hubs, extra=[h.upper() for h in req.hubs])
-    hubs = [h for h in hubs if h not in o and h not in d]
+    # Big airports near either end are always worth a try: positioning to
+    # LAX from San Diego, or ending at a gateway near the destination.
+    near = [g for g in airports.gateways_near(main_o) + airports.gateways_near(main_d) if g not in o and g not in d]
+    hubs = airports.candidate_hubs(main_o, main_d, limit=req.max_hubs, extra=[h.upper() for h in req.hubs] + near)
+    hubs = list(dict.fromkeys(near + [h for h in hubs if h not in o and h not in d]))[: max(req.max_hubs, len(near))]
     trips: list[Trip] = []
     dep_dates = _dates(req.depart_start, req.depart_end, cap=3)
     ret_dates = _dates(req.return_start, req.return_end, cap=3) if req.return_start else []
@@ -308,7 +311,7 @@ def plan(req: PlanRequest) -> PlanResult:
                 ))
             # 3. Nested round trips through the most promising hubs.
             if req.include_nested_roundtrips:
-                best_hubs = sorted(hub_rank, key=hub_rank.get)[:4] or hubs[:4]
+                best_hubs = list(dict.fromkeys(near + (sorted(hub_rank, key=hub_rank.get)[:4] or hubs[:4])))[:6]
                 trips += _nested(ctx, o, d, dep_dates[0], ret_dates[0], best_hubs)
 
     trips = [t for t in trips if _travel_ok(t, req)]

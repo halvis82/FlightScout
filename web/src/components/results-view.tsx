@@ -230,6 +230,24 @@ export function ResultsView({
             <Info className="size-3.5" /> Some sources didn&apos;t respond, results may be incomplete
           </div>
         )}
+        {(() => {
+          const singles = list.filter((t) => t.kind === "single");
+          const combos = list.filter((t) => t.kind !== "single");
+          if (!singles.length || !combos.length) return null;
+          const bestSingle = Math.min(...singles.map((t) => convert(t.total_price, t.currency)));
+          const best = combos.reduce((a, b) => (convert(a.total_price, a.currency) <= convert(b.total_price, b.currency) ? a : b));
+          const save = bestSingle - convert(best.total_price, best.currency);
+          if (save < 10) return null;
+          return (
+            <div className="rounded-2xl border border-good/40 bg-good-soft/40 p-2">
+              <div className="flex items-center gap-2 px-2 pb-2 pt-1 text-sm">
+                <span className="font-semibold text-good">Cheaper combination: save {money(save, settings?.currency ?? "USD")}</span>
+                <span className="text-muted">vs the cheapest single ticket, by booking {best.tickets.length} tickets separately</span>
+              </div>
+              <TripCard trip={best} highlight={hover?.id === best.id} onHover={setHover} />
+            </div>
+          );
+        })()}
         {!shown.length ? (
           <Empty title="No flights match">Try loosening the filters, adding nearby airports, or turning on smart routes.</Empty>
         ) : (
