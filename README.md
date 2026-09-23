@@ -31,7 +31,8 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [engine/README.md](engine
 |---|---|---|
 | Google Flights | [fli](https://github.com/punitarani/fli) reads the data embedded in the results page | Almost every airline. Booking link opens Google's page for the exact itinerary with the airline's own "Book" button |
 | Google booking page | headless browser (CLI and tracker only) | Every seller for an itinerary (airline or agency), fare families, bag fees, change and refund rules, Google's typical price range |
-| Kiwi.com | public MCP endpoint | Self transfer combinations, flexible date ranges, "anywhere" and region explore |
+| Kiwi.com | public MCP endpoint and the GraphQL backend of kiwi.com | Self transfer combinations, flexible date ranges, "anywhere" and region explore, per day calendar |
+| KAYAK Explore, Skyscanner calendar | the JSON behind kayak.com/explore and Skyscanner's month view | Fast "anywhere" leads and cached per day fares that Google often misses |
 | Volaris | volaris.com backend | Volaris fares Google doesn't price (most Mexican routes), fare calendar |
 | Ryanair | fare finder API | Cheap destinations from Ryanair bases |
 | Widerøe | wideroe.no booking page data | Real Widerøe fares (Google has none or badly overpriced ones) |

@@ -9,15 +9,15 @@ from concurrent.futures import ThreadPoolExecutor
 from . import airports, fx, sellers
 from .models import Itinerary, SearchQuery, SearchResult, Trip
 from .models import DatePrice
-from .sources import (condor, flair, google, kiwi, norse, serpapi, skyairline, vivaaerobus, volaris, volotea,
-                      wideroe, wizzair)
+from .sources import (condor, flair, google, kiwi, kiwiweb, norse, serpapi, skyairline, skyscanner, vivaaerobus,
+                      volaris, volotea, wideroe, wizzair)
 
 log = logging.getLogger(__name__)
 
 SOURCES = {
     "google": lambda q: _google(q), "kiwi": kiwi.search, "serpapi": serpapi.search, "volaris": volaris.search,
     "wideroe": wideroe.search, "skyairline": skyairline.search, "norse": norse.search,
-    "volotea": volotea.search, "condor": condor.search, "flair": flair.search,
+    "volotea": volotea.search, "condor": condor.search, "flair": flair.search, "kiwiweb": kiwiweb.search,
 }
 
 # Airline low fare calendars (one way, cheapest fare per day). Each module
@@ -25,6 +25,8 @@ SOURCES = {
 CALENDARS = {
     "volaris": volaris, "vivaaerobus": vivaaerobus, "wizzair": wizzair, "volotea": volotea,
     "skyairline": skyairline, "flair": flair, "norse": norse,
+    # Every route: Kiwi's own per day calendar and Skyscanner's cached month grid.
+    "kiwiweb": kiwiweb, "skyscanner": skyscanner,
 }
 
 

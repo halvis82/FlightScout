@@ -122,10 +122,12 @@ def dates(body: DatesBody) -> list[DatePrice]:
 def explore(body: ExploreBody) -> ExploreResult:
     nights = (body.nights_min or 1, body.nights_max or body.nights_min or 7) if (body.nights_min or body.nights_max) else None
     regions = body.regions
-    if body.batch is not None and 0 <= body.batch < len(explore_mod.BATCHES):
-        regions = explore_mod.BATCHES[body.batch]
-    sources = body.sources or (["kiwi"] if body.batch not in (None, 0) else None)
+    sources = body.sources
     if body.batch == 0:
-        regions = explore_mod.BATCHES[0]
+        # fast: sources that cover the whole world in one call each
+        regions, sources = ["anywhere"], sources or ["kiwiweb", "kayak", "ryanair", "google"]
+    elif body.batch is not None and 1 <= body.batch <= len(explore_mod.BATCHES):
+        # depth: the older Kiwi region by region lookups (slow)
+        regions, sources = explore_mod.BATCHES[body.batch - 1], sources or ["kiwi"]
     d, errs = explore_mod.explore(body.origin, body.start, body.end, body.currency, nights, sources, regions)
     return ExploreResult(destinations=d, errors=errs)

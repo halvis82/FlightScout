@@ -43,6 +43,9 @@ Tools: `search_flights`, `plan_routes`, `build_trip`, `explore_destinations`, `p
 |---|---|---|
 | Google Flights | [fli](https://github.com/punitarani/fli) (page embedded data) | Per itinerary booking links; rate limited from datacenter IPs |
 | Kiwi.com | public MCP endpoint `https://mcp.kiwi.com` | Self transfer fares, date ranges, region explore; 15 results per call |
+| Kiwi.com web backend (`kiwiweb`) | GraphQL behind kiwi.com (`api.skypicker.com/umbrella/v2/graphql`), keyless, Chrome TLS | Up to 100 itineraries per call, several airports per side, one call "anywhere" explore (one cheapest trip per city), per day calendar |
+| KAYAK Explore (`kayak`) | JSON behind kayak.com/explore, keyless | 100 to 400 destinations per call in under 2 s. Cached round trip fares, priced in the currency of the matching KAYAK domain |
+| Skyscanner calendar (`skyscanner`) | month view grid behind skyscanner.net, keyless | Cheapest cached one way fare per day for any route, often below Google (OTA quotes for Frontier, Volaris, Wizz). Cells older than 10 days dropped |
 | Ryanair | fare finder API | Explore from Ryanair bases |
 | Volaris | volaris.com backend (Navitaire), Chrome TLS impersonation | Google has no Volaris prices for most Mexican routes. Prices include the TUA airport fee |
 | SerpApi | optional, `SERPAPI_KEY` | Paid fallback (250 free searches/month) |

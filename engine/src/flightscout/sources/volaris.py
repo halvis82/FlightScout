@@ -83,7 +83,14 @@ def _flights(origin: str, dest: str, day: date, cur: str, adults: int) -> list[d
         "codes": {"currencyCode": cur, "promotionCode": ""},
         "taxesAndFees": 2, "shouldIncludeSoldOut": True, "shouldIncludeTua": True,
     }
-    d = _post("/api/v3/availability/search", body)
+    try:
+        d = _post("/api/v3/availability/search", body)
+    except Exception as e:
+        # Volaris answers 400 for routes it doesn't fly: that's "no flights"
+        if getattr(getattr(e, "response", None), "status_code", None) == 400 or "400" in str(e):
+            cache.put(key, [])
+            return []
+        raise
     fares = d.get("faresAvailable") or {}
     out = []
     for res in d.get("results") or []:

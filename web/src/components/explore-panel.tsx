@@ -79,9 +79,11 @@ export function ExplorePanel({
         nights_max: nights ? nights + spread : null,
         batch,
       });
-      for (const batch of [0, 1, 2, 3, 4, 5]) {
+      // batch 0: fast worldwide sources (Kiwi web, KAYAK, Ryanair) in ~3 s;
+      // batch 1: the slower Kiwi continent lookups for extra depth.
+      for (const batch of [0, 1]) {
         if (ctl.signal.aborted) return;
-        setLoading(6 - batch);
+        setLoading(2 - batch);
         const res = await Promise.allSettled(
           codes.map((o) => api<{ items: Destination[]; errors?: Record<string, string> }>("/explore", { body: body(o, batch), signal: ctl.signal })),
         );
