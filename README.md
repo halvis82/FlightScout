@@ -1,6 +1,6 @@
 # FlightScout
 
-End to end flight finder for people who fly a lot. It searches Google Flights, Kiwi.com, Volaris and Ryanair together, builds cheaper routes out of separate tickets (self transfers, stopovers, nested round trips, multi city trips), shows where you can go cheaply, and tracks the routes you care about twice a day so you get price history and alerts. Every result links straight to the page where you can book it.
+End to end flight finder for people who fly a lot. It searches Google Flights, Kiwi.com and airlines directly (Volaris, Widerøe, Sky Airline, Norse, Volotea, Condor, plus fare calendars from Wizz Air, VivaAerobus and Ryanair) together, builds cheaper routes out of separate tickets (self transfers, stopovers, nested round trips, multi city trips), shows where you can go cheaply, and tracks the routes you care about twice a day so you get price history and alerts. Every result links straight to the page where you can book it.
 
 Three ways to use it, all sharing one account and database:
 
@@ -34,6 +34,16 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [engine/README.md](engine
 | Kiwi.com | public MCP endpoint | Self transfer combinations, flexible date ranges, "anywhere" and region explore |
 | Volaris | volaris.com backend | Volaris fares Google doesn't price (most Mexican routes), fare calendar |
 | Ryanair | fare finder API | Cheap destinations from Ryanair bases |
+| Widerøe | wideroe.no booking page data | Real Widerøe fares (Google has none or badly overpriced ones) |
+| Sky Airline | Sky's web API (`FLIGHTSCOUT_SKY_KEYS`) | Chile and Peru; Google has no Sky prices |
+| Norse, Condor | their web APIs | Transatlantic low cost; not sold by Kiwi |
+| Volotea | Volotea's web API (`FLIGHTSCOUT_VOLOTEA_KEY`) + public schedule | Seasonal European routes |
+| Wizz Air, VivaAerobus (`FLIGHTSCOUT_VIVA_KEY`) | fare calendars | Cheapest fare per day in the date picker |
+| Flair (opt-in) | Flair's web API | Same prices as Google, enable with `--sources` |
+
+Some airline sources need the public key their own website sends to every browser. Those keys aren't kept in this repo; set the env vars shown (find them in your browser's dev tools on the airline's site). Without them those sources simply stay off.
+
+The Airlines tab lists 127 airlines by region with links into each airline's own search, pre-filled with your route where the airline supports it.
 | SerpApi (optional) | paid API, `SERPAPI_KEY` | Fallback if Google blocks the server |
 
 Scraping is unofficial and can break. Searches are cached, Kiwi is throttled, and the site can route searches through your own computer (local runner) so they come from a normal home IP instead of a datacenter.

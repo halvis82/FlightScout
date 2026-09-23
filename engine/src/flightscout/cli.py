@@ -380,11 +380,14 @@ def serve(port: int = typer.Option(8787), install: bool = typer.Option(False, "-
         exe = shutil.which("flightscout") or sys.argv[0]
         log = Path.home() / "Library" / "Logs" / "flightscout-runner.log"
         plist.parent.mkdir(parents=True, exist_ok=True)
+        keep = [k for k in os.environ if k.startswith("FLIGHTSCOUT_") or k == "SERPAPI_KEY"]
+        env = "".join(f"<key>{k}</key><string>{os.environ[k]}</string>" for k in keep)
         plist.write_text(f"""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>Label</key><string>{PLIST}</string>
   <key>ProgramArguments</key><array><string>{exe}</string><string>serve</string><string>--port</string><string>{port}</string></array>
+  <key>EnvironmentVariables</key><dict>{env}</dict>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>
   <key>StandardOutPath</key><string>{log}</string>
