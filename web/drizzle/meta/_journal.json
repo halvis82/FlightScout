@@ -15,6 +15,13 @@
       "when": 1790102193536,
       "tag": "0001_rate_limits",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790189514912,
+      "tag": "0002_explore_cache",
+      "breakpoints": true
     }
   ]
 }

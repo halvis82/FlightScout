@@ -37,6 +37,14 @@ function loadSaved(): Saved {
   }
   return saved;
 }
+function resetSaved() {
+  saved = { form: null, result: null, plan: null };
+  try {
+    sessionStorage.removeItem(KEY);
+  } catch {
+    /* ignore */
+  }
+}
 function persist(next: Saved) {
   saved = next;
   try {
@@ -50,7 +58,9 @@ function SearchPage() {
   const { settings, currency } = useApp();
   const router = useRouter();
   const params = useSearchParams();
-  const hasQuery = Boolean(params.get("from"));
+  const fresh = params.get("new") === "1";
+  if (fresh) resetSaved(); // logo click: start over as if the site was just opened
+  const hasQuery = Boolean(params.get("from")) || fresh;
   const [edited, setForm] = useState<SearchForm | null>(() => (hasQuery ? null : loadSaved().form));
   // Until the user edits, the form comes from the URL (or their defaults).
   const form = edited ?? (settings ? paramsToForm(params, defaultForm(currency, settings.defaultOrigins)) : null);
@@ -64,6 +74,7 @@ function SearchPage() {
   const [err, setErr] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const autoRan = useRef(false);
+  const lastRun = useRef<string | null>(null);
   const watch = useWatchDialog();
 
   const run = useCallback(
@@ -146,7 +157,9 @@ function SearchPage() {
     },
     [router, settings, currency],
   );
-  const lastRun = useRef<string | null>(null);
+  useEffect(() => {
+    if (fresh) router.replace("/", { scroll: false });
+  }, [fresh, router]);
 
   // After a first search, changing dates (arrows or calendar) searches again.
   useEffect(() => {
@@ -178,7 +191,29 @@ function SearchPage() {
 
   return (
     <div className="space-y-4">
-      <SearchFormView value={form} onChange={setForm} onSubmit={() => run(form)} busy={busy} />
+      <SearchFormView
+        value={form}
+        onChange={(next) => {
+          // clearing the destination goes back to exploring
+          if (!next.to.length && form.to.length && next.tripType !== "multicity") {
+            setResult(null);
+            setPlan(null);
+            lastRun.current = null;
+          }
+          setForm(next);
+        }}
+        onSubmit={() => {
+          if (form.tripType !== "multicity" && !form.to.length) {
+            setResult(null);
+            setPlan(null);
+            lastRun.current = null;
+            router.replace(`/?${formToParams(form).toString()}`, { scroll: false });
+            return;
+          }
+          run(form);
+        }}
+        busy={busy}
+      />
       {(busy || planBusy) && (
         <div className="flex items-center gap-2 text-sm text-muted">
           <Spinner />

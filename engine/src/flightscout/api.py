@@ -125,5 +125,7 @@ def explore(body: ExploreBody) -> ExploreResult:
     if body.batch is not None and 0 <= body.batch < len(explore_mod.BATCHES):
         regions = explore_mod.BATCHES[body.batch]
     sources = body.sources or (["kiwi"] if body.batch not in (None, 0) else None)
+    if body.batch == 0:
+        regions = explore_mod.BATCHES[0]
     d, errs = explore_mod.explore(body.origin, body.start, body.end, body.currency, nights, sources, regions)
     return ExploreResult(destinations=d, errors=errs)

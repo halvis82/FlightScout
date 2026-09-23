@@ -214,8 +214,8 @@ export function SearchFormView({
             onChange={(depart, ret) => set({ depart, ret: rt ? (ret ?? f.ret) : f.ret })}
           />
         </div>
-        <Button type="submit" variant="primary" className="h-11 px-5" loading={busy} disabled={!f.from.length || !f.to.length}>
-          <Search className="size-4" /> Search
+        <Button type="submit" variant="primary" className="h-11 px-5" loading={busy} disabled={!f.from.length}>
+          <Search className="size-4" /> {f.to.length ? "Search" : "Explore"}
         </Button>
       </div>
       )}

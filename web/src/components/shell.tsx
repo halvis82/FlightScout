@@ -40,7 +40,7 @@ export function Shell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b border-border bg-surface/85 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-1 px-3 sm:gap-2 sm:px-4">
-          <Link href="/" className="mr-2 flex shrink-0 items-center gap-2 text-[15px] font-semibold tracking-tight">
+          <Link href="/?new=1" className="mr-2 flex shrink-0 items-center gap-2 text-[15px] font-semibold tracking-tight">
             <span className="grid size-8 place-items-center rounded-xl bg-gradient-to-br from-accent to-[oklch(0.55_0.2_290)] text-white shadow-[var(--shadow)]">
               <Plane className="size-4 -rotate-45" />
             </span>

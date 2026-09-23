@@ -5,7 +5,7 @@ import { TripCard } from "./trip-card";
 import { RouteMap, type MapArc, type MapPoint } from "./route-map";
 import { useApp } from "./app-context";
 import { useWatchDialog } from "./watch-dialog";
-import { Badge, Empty, Segmented, Select, Switch } from "./ui";
+import { Empty, Segmented, Select, Switch } from "./ui";
 import { tripBlocked } from "@/lib/sellers";
 import { parseLocal, dayDiff } from "@/lib/format";
 import type { PlanResult, SearchQuery, SearchResult, Trip } from "@/lib/types";
@@ -52,6 +52,12 @@ export function ResultsView({
   const [timeOfDay, setTimeOfDay] = useState("any");
   const [sources, setSources] = useState<string[]>([]);
   const [hover, setHover] = useState<Trip | null>(null);
+  const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const { money } = useApp();
+  const priceRange = useMemo(() => {
+    const ps = trips.map((t) => convert(t.total_price, t.currency));
+    return ps.length ? [Math.floor(Math.min(...ps)), Math.ceil(Math.max(...ps))] : [0, 0];
+  }, [trips, convert]);
   const rules = useMemo(() => settings?.sellerRules ?? [], [settings]);
 
   const allSources = useMemo(() => [...new Set(trips.flatMap((t) => t.tickets.map((x) => x.source)))], [trips]);
@@ -62,6 +68,7 @@ export function ResultsView({
     const fastest = Math.min(...trips.map(tripDuration));
     const f = trips.filter((t) => {
       if (tripBlocked(rules, t)) return false;
+      if (maxPrice != null && convert(t.total_price, t.currency) > maxPrice) return false;
       if (!showSplit && t.tickets.length > 1) return false;
       if (hideSelfTransfer && t.tickets.some((x) => x.self_transfer)) return false;
       if (maxStops !== "any" && tripStops(t) > Number(maxStops)) return false;
@@ -85,9 +92,30 @@ export function ResultsView({
       if (sort === "departure") return a.departure.localeCompare(b.departure);
       return score(a) - score(b);
     });
-  }, [trips, rules, showSplit, hideSelfTransfer, maxStops, sources, timeOfDay, sort, convert]);
+  }, [trips, rules, showSplit, hideSelfTransfer, maxStops, sources, timeOfDay, sort, convert, maxPrice]);
 
-  const shown = list.slice(0, 80);
+  // One row per outbound flight (like Google): the same outbound paired with
+  // different returns collapses into its best pairing, the others become
+  // "other returns" inside the card.
+  const grouped = useMemo(() => {
+    const byOut = new Map<string, { trip: Trip; alts: Trip[] }>();
+    const order: string[] = [];
+    for (const t of list) {
+      const single = t.tickets.length === 1 && t.tickets[0].slices.length === 2 ? t.tickets[0] : null;
+      const key = single
+        ? single.slices[0].segments.map((x) => `${x.carrier}${x.flight_number}@${x.departure}`).join("|") + "#" + single.source
+        : t.id;
+      const g = byOut.get(key);
+      if (g) g.alts.push(t);
+      else {
+        byOut.set(key, { trip: t, alts: [] });
+        order.push(key);
+      }
+    }
+    return order.map((k) => byOut.get(k)!);
+  }, [list]);
+
+  const shown = grouped.slice(0, 80).map((g) => g.trip);
   const focus = hover ?? shown[0];
 
   const { arcs, points } = useMemo(() => {
@@ -148,6 +176,21 @@ export function ResultsView({
             <option value="afternoon">Afternoon departure</option>
             <option value="evening">Evening or night</option>
           </Select>
+          {priceRange[1] > priceRange[0] && (
+            <label className="flex h-7 items-center gap-2 rounded-md bg-surface-2 px-2 text-xs text-muted">
+              <span className="whitespace-nowrap">Under {money(maxPrice ?? priceRange[1], settings?.currency ?? "USD")}</span>
+              <input
+                type="range"
+                min={priceRange[0]}
+                max={priceRange[1]}
+                step={Math.max(1, Math.round((priceRange[1] - priceRange[0]) / 100))}
+                value={maxPrice ?? priceRange[1]}
+                onChange={(e) => setMaxPrice(Number(e.target.value) >= priceRange[1] ? null : Number(e.target.value))}
+                className="w-28 accent-[var(--accent)]"
+                aria-label="Maximum price"
+              />
+            </label>
+          )}
           {allSources.length > 1 &&
             allSources.map((s) => (
               <button
@@ -163,7 +206,7 @@ export function ResultsView({
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
           <span>
-            {list.length} of {trips.length} options
+            {grouped.length} flights{grouped.length !== trips.length ? ` (${trips.length} combinations)` : ""}
           </span>
           {blocked > 0 && <span>{blocked} hidden by your seller rules</span>}
           {direct && (
@@ -183,22 +226,19 @@ export function ResultsView({
           )}
         </div>
         {errors && Object.keys(errors).length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {Object.entries(errors).map(([k, v]) => (
-              <Badge key={k} tone="warn" title={v}>
-                <Info className="size-3" /> {k}: {v.length > 80 ? v.slice(0, 80) + "…" : v}
-              </Badge>
-            ))}
+          <div className="flex items-center gap-1 text-xs text-faint" title={Object.entries(errors).map(([k, v]) => `${k}: ${v}`).join("\n")}>
+            <Info className="size-3.5" /> Some sources didn&apos;t respond, results may be incomplete
           </div>
         )}
         {!shown.length ? (
           <Empty title="No flights match">Try loosening the filters, adding nearby airports, or turning on smart routes.</Empty>
         ) : (
           <div className="space-y-2">
-            {shown.map((t) => (
+            {grouped.slice(0, 80).map(({ trip: t, alts }) => (
               <TripCard
                 key={t.id}
                 trip={t}
+                alts={alts}
                 highlight={hover?.id === t.id}
                 onHover={setHover}
                 onWatch={(trip) => {

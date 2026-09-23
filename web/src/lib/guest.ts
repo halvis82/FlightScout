@@ -409,7 +409,7 @@ export async function afterGuestEngineCall(kind: string, query: Record<string, u
 
 export type ServerFetch = <T>(path: string, init?: { method?: string; body?: unknown }) => Promise<T>;
 
-const ENGINE = new Set(["/search", "/plan", "/explore", "/dates", "/trip", "/fx", "/me", "/results", "/multicity"]);
+const ENGINE = new Set(["/search", "/plan", "/explore", "/dates", "/trip", "/fx", "/me", "/results", "/multicity", "/explore/cached"]);
 
 export function isGuestRoute(path: string) {
   const p = path.split("?")[0];

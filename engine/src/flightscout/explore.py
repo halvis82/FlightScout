@@ -12,7 +12,7 @@ import logging
 
 from . import airports, fx
 from .models import Destination
-from .sources import kiwi, ryanair
+from .sources import google_explore, kiwi, ryanair
 
 # Batches the web UI requests one after another so the map fills in quickly:
 # broad first, then depth.
@@ -44,7 +44,7 @@ DEFAULT_REGIONS = [
 def explore(origin: str, start: date, end: date, currency: str = "USD",
             nights: tuple[int, int] | None = None, sources: list[str] | None = None,
             regions: list[str] | None = None) -> tuple[list[Destination], dict[str, str]]:
-    sources = sources or ["kiwi", "ryanair"]
+    sources = sources or ["google", "kiwi", "ryanair"]
     regions = regions or DEFAULT_REGIONS
     origins = airports.expand(origin)
     jobs = []
@@ -55,6 +55,11 @@ def explore(origin: str, start: date, end: date, currency: str = "USD",
             for o in origins[:2]:
                 for r in regions:
                     jobs.append((f"kiwi:{o}:{r}", ex.submit(kiwi.explore, o, start, end, currency, nights, r)))
+        # Google Explore (real browser): broad and fast when available. Only on
+        # the first batch; it picks its own dates (week long trips).
+        if "google" in sources and google_explore.available() and regions is BATCHES[0]:
+            for o in origins[:2]:
+                jobs.append((f"google:{o}", ex.submit(google_explore.explore, o, currency)))
         if "ryanair" in sources and not nights:
             for o in origins[:3]:
                 jobs.append((f"ryanair:{o}", ex.submit(ryanair.explore, o, start, end, currency)))

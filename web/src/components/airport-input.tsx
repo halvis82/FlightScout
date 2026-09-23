@@ -89,7 +89,7 @@ export function AirportInput({
     <div ref={boxRef} className={cn("relative min-w-0", className)}>
       <div
         className={cn(
-          "flex w-full cursor-text items-center gap-2 border border-border bg-surface transition-colors hover:border-border-strong",
+          "group/ai flex w-full cursor-text items-center gap-2 border border-border bg-surface transition-colors hover:border-border-strong",
           "focus-within:border-accent focus-within:ring-2 focus-within:ring-[var(--ring)]",
           lg ? "min-h-14 rounded-xl px-3 py-1.5" : "min-h-10 rounded-lg px-2 py-1",
         )}
@@ -170,6 +170,23 @@ export function AirportInput({
             />
           </div>
         </div>
+        {value.length > 0 && (
+          <button
+            type="button"
+            aria-label="Clear all"
+            title="Clear"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange([]);
+              setQ("");
+              inputRef.current?.focus();
+            }}
+            className="shrink-0 rounded-full p-1 text-faint opacity-0 transition-opacity hover:bg-surface-2 hover:text-fg group-hover/ai:opacity-100 focus-visible:opacity-100"
+          >
+            <X className="size-3.5" />
+          </button>
+        )}
       </div>
       {open && options.length > 0 && (
         <div

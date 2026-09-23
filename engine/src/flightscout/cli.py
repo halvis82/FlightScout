@@ -549,6 +549,29 @@ def places_rm(place_id: str):
 
 
 @app.command()
+def warm(currency: str = typer.Option("USD"), verbose: bool = typer.Option(False, "-v")):
+    """Pre-compute explore results for everyone's home airports (Google
+    Explore in a real browser + Kiwi) and store them in the web app's shared
+    cache, so explore on the site is instant. Run by the tracker workflow."""
+    from datetime import date as _d, timedelta
+
+    from .explore import BATCHES, explore as run_explore
+
+    logging.basicConfig(level=logging.INFO if verbose else logging.WARNING, format="%(message)s")
+    c = Client()
+    origins = c.tracker_origins()
+    for o in origins[:25]:
+        start = _d.today() + timedelta(days=7)
+        try:
+            dests, errors = run_explore(o, start, start + timedelta(days=60), currency, (4, 10), regions=BATCHES[0])
+        except Exception as e:
+            con.print(f"[yellow]{o}: {e}[/yellow]")
+            continue
+        c.tracker_explore(o, currency, [d.model_dump(mode="json") for d in dests])
+        out.print(f"{o}: {len(dests)} destinations {errors or ''}")
+
+
+@app.command()
 def track(budget: int = typer.Option(12), verbose: bool = typer.Option(False, "-v")):
     """Tracker entry point for cron (uses FLIGHTSCOUT_TRACKER_KEY for all users)."""
     from .tracker import run_all

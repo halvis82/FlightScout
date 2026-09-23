@@ -31,5 +31,6 @@ jobs:
           FLIGHTSCOUT_VOLOTEA_KEY: ${{ secrets.FLIGHTSCOUT_VOLOTEA_KEY }}
           FLIGHTSCOUT_CACHE: ${{ runner.temp }}/fs-cache
         run: |
-          uv run --extra browser playwright install --with-deps chromium
+          uv run --extra browser playwright install --with-deps chromium chrome
           uv run --extra browser flightscout track -v --budget ${{ inputs.budget || '12' }}
+          uv run --extra browser flightscout warm -v || echo "explore warm-up failed"

@@ -57,5 +57,8 @@ class Client:
 
     # tracker endpoints
     def tracker_watches(self): return self._req("GET", "/tracker/watches")
+    def tracker_origins(self): return self._req("GET", "/tracker/origins")
+    def tracker_explore(self, origin: str, currency: str, items: list[dict]):
+        return self._req("POST", "/tracker/explore", json={"origin": origin, "currency": currency, "items": items})
     def tracker_push(self, wid: str, obs: list[dict]):
         return self._req("POST", "/tracker/observations", json={"watch_id": wid, "observations": obs})

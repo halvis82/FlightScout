@@ -40,6 +40,7 @@ export function ExplorePanel({
   const [failed, setFailed] = useState<string[]>([]);
   const [sort, setSort] = useState<Sort>("price");
   const [hover, setHover] = useState<string | null>(null);
+  const [maxPrice, setMaxPrice] = useState<number | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   const nights = roundTrip ? Math.max(1, dayDiff(depart, ret)) : null;
@@ -56,6 +57,18 @@ export function ExplorePanel({
       setItems(new Map());
       setFailed([]);
       const merged = new Map<string, Destination>();
+      const keep = (d: Destination) => {
+        const cur = merged.get(d.destination);
+        if (!cur || convert(d.price, d.currency, "USD") < convert(cur.price, cur.currency, "USD")) merged.set(d.destination, d);
+      };
+      // Instant: destinations pre-computed by the tracker (Google Explore).
+      try {
+        const cached = await api<{ items: Destination[] }>(`/explore/cached?origins=${codes.join(",")}`, { signal: ctl.signal });
+        cached.items.forEach(keep);
+        if (merged.size) setItems(new Map(merged));
+      } catch {
+        /* no cache yet */
+      }
       const body = (origin: string, batch: number) => ({
         origin,
         start: addDays(depart, -win),
@@ -78,10 +91,7 @@ export function ExplorePanel({
             continue;
           }
           for (const [src, msg] of Object.entries(r.value.errors ?? {})) setFailed((f) => [...f, `${src}: ${msg}`]);
-          for (const d of r.value.items) {
-            const cur = merged.get(d.destination);
-            if (!cur || convert(d.price, d.currency, "USD") < convert(cur.price, cur.currency, "USD")) merged.set(d.destination, d);
-          }
+          r.value.items.forEach(keep);
         }
         setItems(new Map(merged));
       }
@@ -94,12 +104,17 @@ export function ExplorePanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
+  const all = useMemo(() => [...items.values()].filter((d) => !origins.includes(d.destination)), [items, origins]);
+  const range = useMemo(() => {
+    const ps = all.map((d) => convert(d.price, d.currency));
+    return ps.length ? [Math.floor(Math.min(...ps)), Math.ceil(Math.max(...ps))] : [0, 0];
+  }, [all, convert]);
   const list = useMemo(() => {
-    const arr = [...items.values()].filter((d) => !origins.includes(d.destination));
+    const arr = all.filter((d) => maxPrice == null || convert(d.price, d.currency) <= maxPrice);
     return arr.sort((a, b) =>
       sort === "price" ? convert(a.price, a.currency, "USD") - convert(b.price, b.currency, "USD") : (a.departure ?? "").localeCompare(b.departure ?? ""),
     );
-  }, [items, sort, convert, origins]);
+  }, [all, sort, convert, maxPrice]);
 
   const scale = useMemo(() => priceScale(list.map((d) => convert(d.price, d.currency))), [list, convert]);
   const city = (d: Destination) => d.city || airport(d.destination)?.city || d.destination;
@@ -147,7 +162,22 @@ export function ExplorePanel({
             <Info className="size-3.5" /> Some sources didn&apos;t respond, results may be incomplete
           </span>
         )}
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          {range[1] > range[0] && (
+            <label className="flex h-7 items-center gap-2 rounded-md bg-surface-2 px-2 text-xs text-muted">
+              <span className="whitespace-nowrap">Under {money(maxPrice ?? range[1], currency)}</span>
+              <input
+                type="range"
+                min={range[0]}
+                max={range[1]}
+                step={Math.max(1, Math.round((range[1] - range[0]) / 100))}
+                value={maxPrice ?? range[1]}
+                onChange={(e) => setMaxPrice(Number(e.target.value) >= range[1] ? null : Number(e.target.value))}
+                className="w-28 accent-[var(--accent)]"
+                aria-label="Maximum price"
+              />
+            </label>
+          )}
           <Segmented
             size="sm"
             value={sort}

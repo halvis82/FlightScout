@@ -32,11 +32,13 @@ export function sellerName(it: Itinerary) {
 
 export function TripCard({
   trip,
+  alts = [],
   onWatch,
   highlight,
   onHover,
 }: {
   trip: Trip;
+  alts?: Trip[];
   onWatch?: (t: Trip) => void;
   highlight?: boolean;
   onHover?: (t: Trip | null) => void;
@@ -100,6 +102,11 @@ export function TripCard({
               {money(trip.total_price, trip.currency)}
             </div>
             <div className="text-[11px] text-muted">{single ? (single.slices.length > 1 ? "round trip" : "one way") : `${trip.tickets.length} tickets total`}</div>
+            {alts.length > 0 && (
+              <button type="button" onClick={() => setOpen(true)} className="text-[11px] text-accent hover:underline">
+                +{alts.length} return option{alts.length > 1 ? "s" : ""}
+              </button>
+            )}
             {trip.savings_vs_direct != null && trip.savings_vs_direct > 0 && (
               <div className="text-xs font-medium text-good">saves {money(trip.savings_vs_direct, trip.currency)}</div>
             )}
@@ -146,6 +153,7 @@ export function TripCard({
               ))}
             </ul>
           )}
+          {alts.length > 0 && <OtherReturns trip={trip} alts={alts} />}
           <div className="space-y-3">
             {trip.tickets.map((t, i) => (
               <TicketBlock key={t.id + i} it={t} index={trip.tickets.length > 1 ? i + 1 : undefined} />
@@ -160,6 +168,42 @@ export function TripCard({
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+// Same outbound, different return flights (collapsed from the list).
+function OtherReturns({ trip, alts }: { trip: Trip; alts: Trip[] }) {
+  const { money } = useApp();
+  const rows = [trip, ...alts].slice(0, 12);
+  return (
+    <div className="mb-3 rounded-lg border border-border">
+      <div className="border-b border-border bg-surface-2 px-3 py-1.5 text-xs font-medium">Return options with this outbound</div>
+      <div className="divide-y divide-border">
+        {rows.map((t) => {
+          const r = t.tickets[0].slices[1];
+          return (
+            <a
+              key={t.id}
+              href={t.tickets[0].booking_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-3 py-2 text-sm hover:bg-surface-2"
+            >
+              <span className="w-28 tabular-nums">
+                {formatTime(r.departure)} – {formatTime(r.arrival)}
+              </span>
+              <span className="w-24 text-muted">{formatDate(r.departure)}</span>
+              <span className="w-20 text-muted">{formatDuration(r.duration_min)}</span>
+              <span className="flex-1 truncate text-muted">
+                {r.stops === 0 ? "Nonstop" : `${r.stops} stop${r.stops > 1 ? "s" : ""}`} · {[...new Set(r.segments.map((x) => x.carrier_name ?? x.carrier))].join(", ")}
+              </span>
+              <span className="font-semibold tabular-nums">{money(t.total_price, t.currency)}</span>
+              <ExternalLink className="size-3.5 text-muted" />
+            </a>
+          );
+        })}
+      </div>
     </div>
   );
 }

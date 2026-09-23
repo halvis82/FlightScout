@@ -278,3 +278,12 @@ export const rateLimits = pgTable(
   },
   (t) => [uniqueIndex("rate_limits_key_window_idx").on(t.key, t.windowStart)],
 );
+
+// Shared explore results per origin, warmed by the tracker (Google Explore in
+// a real browser + Kiwi) so explore on the site can show results instantly.
+export const exploreCache = pgTable("explore_cache", {
+  origin: text("origin").primaryKey(),
+  currency: text("currency").notNull(),
+  items: jsonb("items").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
