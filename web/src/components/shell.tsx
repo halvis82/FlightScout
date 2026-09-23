@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Check, ChevronDown, LogIn, LogOut, Monitor, Moon, Plane, Settings, Sun, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,13 +21,6 @@ const NAV = [
 
 export function Shell({ children }: { children: ReactNode }) {
   const path = usePathname();
-  const router = useRouter();
-  const { me } = useApp();
-
-  // First run: send new accounts through onboarding. Guests are never forced.
-  useEffect(() => {
-    if (me?.user && me.settings && !me.settings.onboarded && path !== "/onboarding") router.replace("/onboarding");
-  }, [me, path, router]);
 
   useEffect(() => {
     startLocalRunnerProbe();

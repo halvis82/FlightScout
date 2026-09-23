@@ -27,7 +27,7 @@ export function LoginForm({ social }: { social: string[] }) {
     setBusy(false);
     if (res.error) setErr(res.error.message ?? "Something went wrong");
     // full reload so the app leaves guest mode cleanly
-    else window.location.href = mode === "signup" ? "/onboarding" : next;
+    else window.location.href = next;
   }
 
   async function passkey() {

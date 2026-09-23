@@ -157,7 +157,8 @@ def find_airports(query: str) -> list[dict]:
 @mcp.tool()
 def list_watches() -> list[dict]:
     """The user's watchlist (tracked routes) with best price found so far."""
-    return Client().watches()
+    drop = {"best_trip", "user_id", "sparkline"}
+    return [{k: v for k, v in w.items() if k not in drop} for w in Client().watches()]
 
 
 @mcp.tool()
@@ -177,8 +178,8 @@ def add_watch(origins: list[str], destinations: list[str], depart_start: date, d
 
 @mcp.tool()
 def watch_history(watch_id: str) -> list[dict]:
-    """Price observations over time for a watch (for trends)."""
-    return Client().history(watch_id)
+    """Price observations over time for a watch (for trends), newest last."""
+    return [{k: v for k, v in o.items() if k != "trip"} for o in Client().history(watch_id)][-200:]
 
 
 @mcp.tool()

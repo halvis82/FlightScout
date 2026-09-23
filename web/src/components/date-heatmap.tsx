@@ -1,13 +1,12 @@
 "use client";
 import { useState } from "react";
 import { formatDate, parseLocal } from "@/lib/format";
+import { PRICE_GRADIENT, priceScale } from "@/lib/price-scale";
 
 export type Cell = { depart: string; nights: number | null; value: number; url?: string | null; observed: string };
 
-const STEPS = ["var(--seq-7)", "var(--seq-6)", "var(--seq-5)", "var(--seq-4)", "var(--seq-3)", "var(--seq-2)", "var(--seq-1)"];
-
-// Depart date (columns) by trip length (rows). Darker means cheaper. Latest
-// known price per cell.
+// Depart date (columns) by trip length (rows), colored green (cheapest) to
+// red like every other price in the app. Latest known price per cell.
 export function DateHeatmap({ cells, format }: { cells: Cell[]; format: (v: number) => string }) {
   const [hover, setHover] = useState<Cell | null>(null);
   if (!cells.length) return <div className="py-8 text-center text-sm text-muted">No date level prices yet.</div>;
@@ -15,7 +14,8 @@ export function DateHeatmap({ cells, format }: { cells: Cell[]; format: (v: numb
   const nights = [...new Set(cells.map((c) => c.nights ?? -1))].sort((a, b) => a - b);
   const min = Math.min(...cells.map((c) => c.value));
   const max = Math.max(...cells.map((c) => c.value));
-  const idx = (v: number) => (max === min ? 0 : Math.min(STEPS.length - 1, Math.floor(((v - min) / (max - min)) * STEPS.length)));
+  const scale = priceScale(cells.map((c) => c.value));
+  const short = (v: number) => format(v).replace(/[^0-9.,]/g, "").replace(/[.,]\d{2}$/, "");
   const map = new Map(cells.map((c) => [`${c.depart}|${c.nights ?? -1}`, c]));
   return (
     <div>
@@ -27,7 +27,7 @@ export function DateHeatmap({ cells, format }: { cells: Cell[]; format: (v: numb
               {departs.map((d) => {
                 const { da } = parseLocal(d);
                 return (
-                  <th key={d} className="w-8 min-w-8 font-normal text-muted" title={formatDate(d)}>
+                  <th key={d} className="min-w-11 font-normal text-muted" title={formatDate(d)}>
                     {da === 1 || d === departs[0] ? formatDate(d, false) : da}
                   </th>
                 );
@@ -49,12 +49,14 @@ export function DateHeatmap({ cells, format }: { cells: Cell[]; format: (v: numb
                           rel="noopener noreferrer"
                           onMouseEnter={() => setHover(c)}
                           onMouseLeave={() => setHover(null)}
-                          className="block h-7 w-8 rounded-[3px] ring-offset-1 hover:ring-2 hover:ring-fg"
-                          style={{ background: STEPS[idx(c.value)] }}
+                          className="grid h-7 min-w-11 place-items-center rounded-[3px] px-1 text-[10px] font-medium tabular-nums text-[#0b0d10] ring-offset-1 hover:ring-2 hover:ring-fg"
+                          style={{ background: scale.solid(c.value) }}
                           aria-label={`${formatDate(d)} ${n === -1 ? "" : n + " nights"} ${format(c.value)}`}
-                        />
+                        >
+                          {short(c.value)}
+                        </a>
                       ) : (
-                        <div className="h-7 w-8 rounded-[3px] bg-surface-2" />
+                        <div className="h-7 min-w-11 rounded-[3px] bg-surface-2" />
                       )}
                     </td>
                   );
@@ -67,13 +69,8 @@ export function DateHeatmap({ cells, format }: { cells: Cell[]; format: (v: numb
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-muted">
         <div className="flex items-center gap-1.5">
           <span>{format(min)}</span>
-          <div className="flex">
-            {STEPS.map((s) => (
-              <span key={s} className="h-2.5 w-5" style={{ background: s }} />
-            ))}
-          </div>
+          <span className="h-2.5 w-24 rounded-full" style={{ background: PRICE_GRADIENT }} />
           <span>{format(max)}</span>
-          <span className="text-faint">darker is cheaper</span>
         </div>
         <div className="min-h-4 text-fg">
           {hover &&

@@ -10,6 +10,23 @@ import httpx
 from . import config
 
 
+def _snake(obj: Any) -> Any:
+    """The web API speaks camelCase (departStart); the engine, CLI and MCP use
+    snake_case (depart_start). Convert dict keys recursively, keeping both
+    shapes for top level keys."""
+    import re
+
+    if isinstance(obj, list):
+        return [_snake(x) for x in obj]
+    if isinstance(obj, dict):
+        out = {}
+        for k, v in obj.items():
+            sk = re.sub(r"(?<!^)(?=[A-Z])", "_", k).lower() if isinstance(k, str) else k
+            out[sk] = _snake(v) if sk not in ("best_trip", "trip", "payload", "query") else v
+        return out
+    return obj
+
+
 class NotLoggedIn(RuntimeError):
     pass
 
@@ -37,7 +54,7 @@ class Client:
         if r.status_code == 401:
             raise NotLoggedIn("The web app rejected the token. Create a new one in Settings, API tokens.")
         r.raise_for_status()
-        return r.json() if r.content else None
+        return _snake(r.json()) if r.content else None
 
     # user endpoints
     def me(self): return self._req("GET", "/me")
@@ -49,7 +66,9 @@ class Client:
     def add_watch(self, **body): return self._req("POST", "/watches", json=body)
     def update_watch(self, wid: str, **body): return self._req("PATCH", f"/watches/{wid}", json=body)
     def delete_watch(self, wid: str): return self._req("DELETE", f"/watches/{wid}")
-    def history(self, wid: str): return self._req("GET", f"/watches/{wid}/history")
+    def history(self, wid: str):
+        r = self._req("GET", f"/watches/{wid}/history")
+        return r.get("observations", []) if isinstance(r, dict) else r
     def push_observations(self, wid: str, obs: list[dict]):
         return self._req("POST", f"/watches/{wid}/observations", json=obs)
     def save_result(self, kind: str, query: dict, payload: dict, origin: str = "cli"):

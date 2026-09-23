@@ -78,7 +78,7 @@ export function TripCard({
               )}
               {trip.stopovers.map((s) => (
                 <span key={s.airport + s.hours}>
-                  {s.hours >= 20 ? `${Math.round(s.hours / 24)} days` : `${Math.round(s.hours)} h`} in <Code code={s.airport} compact />
+                  {s.hours >= 20 ? `${Math.max(1, Math.round(s.hours / 24))} day${Math.round(s.hours / 24) > 1 ? "s" : ""}` : `${Math.round(s.hours)} h`} in <Code code={s.airport} compact />
                 </span>
               ))}
               {badges.length > 0 && (

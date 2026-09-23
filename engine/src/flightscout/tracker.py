@@ -21,8 +21,8 @@ log = logging.getLogger(__name__)
 
 def _sample(start: date, end: date, n: int) -> list[date]:
     days = (end - start).days
-    if days <= 0:
-        return [start]
+    if days <= 0 or n <= 1:
+        return [start + timedelta(days=days // 2)] if days > 0 else [start]
     if days + 1 <= n:
         return [start + timedelta(days=i) for i in range(days + 1)]
     return sorted({start + timedelta(days=round(i * days / (n - 1))) for i in range(n)})

@@ -440,7 +440,7 @@ def watch_list(as_json: bool = JsonOpt):
         if w.get("trip_type") == "roundtrip":
             dates_ += f" ({w.get('nights_min')}-{w.get('nights_max')}n)"
         best = f"{w['best_price']:,.0f} {w['currency']}" if w.get("best_price") else "-"
-        t.add_row(w["id"][:8], w.get("name") or "", f"{','.join(w['origins'])} to {','.join(w['destinations'])}",
+        t.add_row(str(w["id"])[:8], w.get("name") or "", f"{','.join(w['origins'])} to {','.join(w['destinations'])}",
                   dates_, best, str(w.get("last_checked_at") or "never")[:16], "yes" if w.get("active", True) else "no")
     out.print(t)
 
@@ -486,7 +486,7 @@ def watch_rm(watch_id: str):
 
 def _resolve_watch(c: Client, prefix: str) -> str:
     for w in c.watches():
-        if w["id"].startswith(prefix):
+        if str(w["id"]).startswith(str(prefix)):
             return w["id"]
     raise typer.BadParameter(f"no watch with id {prefix}")
 
@@ -528,7 +528,7 @@ def places_list(as_json: bool = JsonOpt):
     if as_json:
         return _emit_json(ps)
     for p in ps:
-        out.print(f"{p['id'][:8]}  {p['kind']:10} {p['label']}: {','.join(p['codes'])}")
+        out.print(f"{str(p['id'])[:8]}  {p['kind']:10} {p['label']}: {','.join(p['codes'])}")
 
 
 @places_app.command("add")
@@ -541,7 +541,7 @@ def places_add(label: str, codes: str, kind: str = typer.Option("interested", he
 def places_rm(place_id: str):
     c = _client()
     for p in c.places():
-        if p["id"].startswith(place_id):
+        if str(p["id"]).startswith(str(place_id)):
             c.delete_place(p["id"])
             out.print("Removed.")
             return

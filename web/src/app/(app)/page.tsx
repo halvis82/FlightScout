@@ -135,30 +135,36 @@ function SearchPage() {
       // of the new search lands.
       const PARTS: string[][] = [["google"], ["kiwi"], ["volaris", "wideroe", "skyairline", "norse", "volotea", "condor"]];
       const runId = ++runSeq.current;
-      let first = true;
+      let acc: SearchResult | null = null;
       let pending = PARTS.length;
       const searchP = Promise.all(
         PARTS.map((sources, part) =>
           api<SearchResult>("/search", { body: { ...q, sources, part } })
             .then((r) => {
               if (runSeq.current !== runId) return;
-              setResult((prev) => {
-                if (first || !prev) {
-                  first = false;
-                  return r;
-                }
-                const seen = new Set(prev.trips.map((t) => t.id));
-                return { ...prev, trips: [...prev.trips, ...r.trips.filter((t) => !seen.has(t.id))], errors: { ...prev.errors, ...r.errors } };
-              });
-              setStale(false);
+              if (!acc) acc = r;
+              else {
+                const seen = new Set(acc.trips.map((t) => t.id));
+                acc = { ...acc, trips: [...acc.trips, ...r.trips.filter((t) => !seen.has(t.id))], errors: { ...acc.errors, ...r.errors } };
+              }
             })
             .catch((e) => {
               if (runSeq.current === runId && part === 0) setErr((e as Error).message);
             })
             .finally(() => {
               pending -= 1;
-              if (runSeq.current === runId) setPending(pending);
-              if (pending === 0 && runSeq.current === runId) setBusy(false);
+              if (runSeq.current !== runId) return;
+              setPending(pending);
+              // swap in new results once some flights arrived (or all parts are done)
+              if (acc && (acc.trips.length || pending === 0)) {
+                setResult(acc);
+                setStale(false);
+              }
+              if (pending === 0) {
+                if (!acc) setResult(null);
+                setStale(false);
+                setBusy(false);
+              }
             }),
         ),
       );

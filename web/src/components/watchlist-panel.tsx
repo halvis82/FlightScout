@@ -90,7 +90,7 @@ export function WatchlistPanel() {
             <h2 className="flex items-center gap-2 text-base font-semibold">
               <Star className="size-4 text-accent" /> Watchlist
             </h2>
-            <p className="text-xs text-muted">Routes checked daily. Star any result to add it.</p>
+            <p className="text-xs text-muted">Checked twice a day. Use Watch on any search or result to add one.</p>
           </div>
           <div className="flex items-center gap-1">
             <Button size="sm" variant="soft" onClick={() => watch.open()}>
