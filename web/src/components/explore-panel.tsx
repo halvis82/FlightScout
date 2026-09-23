@@ -41,6 +41,7 @@ export function ExplorePanel({
   const [sort, setSort] = useState<Sort>("price");
   const [hover, setHover] = useState<string | null>(null);
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const [when, setWhen] = useState<"any" | "mine">("any");
   const listRef = useRef<HTMLDivElement>(null);
 
   const nights = roundTrip ? Math.max(1, dayDiff(depart, ret)) : null;
@@ -110,11 +111,17 @@ export function ExplorePanel({
     return ps.length ? [Math.floor(Math.min(...ps)), Math.ceil(Math.max(...ps))] : [0, 0];
   }, [all, convert]);
   const list = useMemo(() => {
-    const arr = all.filter((d) => maxPrice == null || convert(d.price, d.currency) <= maxPrice);
+    const lo = addDays(depart, -win);
+    const hi = addDays(depart, win);
+    const arr = all.filter(
+      (d) =>
+        (maxPrice == null || convert(d.price, d.currency) <= maxPrice) &&
+        (when === "any" || (d.departure != null && d.departure >= lo && d.departure <= hi)),
+    );
     return arr.sort((a, b) =>
       sort === "price" ? convert(a.price, a.currency, "USD") - convert(b.price, b.currency, "USD") : (a.departure ?? "").localeCompare(b.departure ?? ""),
     );
-  }, [all, sort, convert, maxPrice]);
+  }, [all, sort, convert, maxPrice, when, depart, win]);
 
   const scale = useMemo(() => priceScale(list.map((d) => convert(d.price, d.currency))), [list, convert]);
   const city = (d: Destination) => d.city || airport(d.destination)?.city || d.destination;
@@ -148,10 +155,15 @@ export function ExplorePanel({
         <h2 className="text-sm font-semibold">
           Cheapest places from {origins.map((o) => airport(o)?.city ?? o).join(" or ")}
         </h2>
-        <span className="text-xs text-muted">
-          around {formatDate(depart, false)}
-          {nights ? `, ${nights} nights` : ", one way"}
-        </span>
+        <Segmented
+          size="sm"
+          value={when}
+          onChange={setWhen}
+          options={[
+            { value: "any", label: "Any dates" },
+            { value: "mine", label: `Around ${formatDate(depart, false)}` },
+          ]}
+        />
         {loading > 0 && (
           <span className="inline-flex items-center gap-1.5 text-xs text-muted">
             <Spinner /> {list.length ? "finding more destinations" : "looking everywhere"}

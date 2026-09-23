@@ -251,9 +251,9 @@ function AirlineLinks({ it }: { it: Itinerary }) {
 }
 
 export function AirlineLogo({ code, name, className }: { code: string; name?: string | null; className?: string }) {
-  // Kiwi's CDN first, then avs.io, then the code as a badge.
+  // avs.io first (widest coverage), then Kiwi's CDN, then the code as a badge.
   const [attempt, setAttempt] = useState(0);
-  const srcs = [`https://images.kiwi.com/airlines/64/${code}.png`, `https://pics.avs.io/64/64/${code}.png`];
+  const srcs = [`https://pics.avs.io/64/64/${code}.png`, `https://images.kiwi.com/airlines/64/${code}.png`];
   if (attempt >= srcs.length)
     return (
       <span className={cn("grid size-8 place-items-center rounded-lg bg-surface-2 text-[10px] font-semibold text-muted", className)} title={name ?? code}>
