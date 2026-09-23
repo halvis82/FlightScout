@@ -23,6 +23,7 @@ export function ExplorePanel({
   ret,
   roundTrip,
   flex,
+  retFlex = 0,
   onPick,
 }: {
   origins: string[];
@@ -30,6 +31,7 @@ export function ExplorePanel({
   ret: string;
   roundTrip: boolean;
   flex: number;
+  retFlex?: number;
   onPick: (d: Destination) => void;
 }) {
   const { currency, money, convert } = useApp();
@@ -41,8 +43,10 @@ export function ExplorePanel({
   const listRef = useRef<HTMLDivElement>(null);
 
   const nights = roundTrip ? Math.max(1, dayDiff(depart, ret)) : null;
-  const win = Math.max(3, flex);
-  const key = JSON.stringify([origins, depart, nights, win, currency]);
+  // Exact dates still explore a few days around them; flexibility widens it.
+  const win = Math.max(2, flex);
+  const spread = Math.max(1, flex + retFlex);
+  const key = JSON.stringify([origins, depart, nights, win, spread, currency]);
 
   useEffect(() => {
     const codes = expandCodes(origins).slice(0, 2);
@@ -57,13 +61,13 @@ export function ExplorePanel({
         start: addDays(depart, -win),
         end: addDays(depart, win),
         currency,
-        nights_min: nights ? Math.max(1, nights - 2) : null,
-        nights_max: nights ? nights + 2 : null,
+        nights_min: nights ? Math.max(1, nights - spread) : null,
+        nights_max: nights ? nights + spread : null,
         batch,
       });
-      for (const batch of [0, 1, 2]) {
+      for (const batch of [0, 1, 2, 3, 4, 5]) {
         if (ctl.signal.aborted) return;
-        setLoading(3 - batch);
+        setLoading(6 - batch);
         const res = await Promise.allSettled(
           codes.map((o) => api<{ items: Destination[]; errors?: Record<string, string> }>("/explore", { body: body(o, batch), signal: ctl.signal })),
         );

@@ -13,7 +13,8 @@ export type SearchForm = {
   tripType: "roundtrip" | "oneway";
   depart: string;
   ret: string;
-  flex: number;
+  flex: number; // departure: +/- days
+  retFlex: number; // return: +/- days
   cabin: "economy" | "premium" | "business" | "first";
   adults: number;
   stops: string;
@@ -32,6 +33,7 @@ export function defaultForm(currency: string, origins: string[] = []): SearchFor
     depart: d,
     ret: addDays(d, 7),
     flex: 0,
+    retFlex: 0,
     cabin: "economy",
     adults: 1,
     stops: "any",
@@ -54,6 +56,7 @@ export function formToParams(f: SearchForm) {
     cur: f.currency,
     src: f.sources.join(","),
     flex: String(f.flex),
+    rflex: String(f.retFlex),
   });
   if (f.tripType === "roundtrip") p.set("r", f.ret);
   if (f.smart) p.set("smart", "1");
@@ -76,6 +79,7 @@ export function paramsToForm(p: URLSearchParams, base: SearchForm): SearchForm {
     currency: p.get("cur") ?? base.currency,
     sources: (list("src") as Source[]) ?? base.sources,
     flex: Number(p.get("flex") ?? base.flex),
+    retFlex: Number(p.get("rflex") ?? p.get("flex") ?? base.retFlex),
     smart: p.get("smart") === "1",
     nearby: Number(p.get("near") ?? base.nearby),
   };
@@ -137,12 +141,6 @@ export function SearchFormView({
           <option value="1">1 stop or fewer</option>
           <option value="2">2 stops or fewer</option>
         </Select>
-        <Select className={OPT} value={f.flex} onChange={(e) => set({ flex: Number(e.target.value) })} aria-label="Flexible dates">
-          <option value={0}>Exact dates</option>
-          <option value={1}>± 1 day</option>
-          <option value={3}>± 3 days</option>
-          <option value={7}>± 7 days</option>
-        </Select>
         <Select className={OPT} value={f.nearby} onChange={(e) => set({ nearby: Number(e.target.value) })} aria-label="Nearby airports">
           <option value={0}>Exact airports</option>
           <option value={50}>+ airports within 50 km</option>
@@ -178,21 +176,56 @@ export function SearchFormView({
         <Field label="To">
           <AirportInput value={f.to} onChange={(to) => set({ to })} placeholder="Anywhere (explore)" />
         </Field>
-        <DateRangeField
-          start={f.depart}
-          end={rt ? f.ret : undefined}
-          range={rt}
-          prices={prices}
-          onChange={(depart, ret) => set({ depart, ret: rt ? (ret ?? f.ret) : f.ret })}
-        />
+        <div className="min-w-0">
+          <DateRangeField
+            start={f.depart}
+            end={rt ? f.ret : undefined}
+            range={rt}
+            prices={prices}
+            onChange={(depart, ret) => set({ depart, ret: rt ? (ret ?? f.ret) : f.ret })}
+          />
+        </div>
         <Button type="submit" variant="primary" className="h-11 px-5" loading={busy} disabled={!f.from.length || !f.to.length}>
           <Search className="size-4" /> Search
         </Button>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-xs text-muted">
+        <span className="mr-auto" />
+        <FlexPick label="Departure" value={f.flex} onChange={(flex) => set({ flex })} />
+        {rt && <FlexPick label="Return" value={f.retFlex} onChange={(retFlex) => set({ retFlex })} />}
       </div>
       <div className="mt-2 grid grid-cols-1 gap-2 lg:grid-cols-2">
         <PlaceChips onPick={(c) => set({ from: [...new Set([...f.from, ...c])] })} />
         <PlaceChips onPick={(c) => set({ to: [...new Set([...f.to, ...c])] })} />
       </div>
     </form>
+  );
+}
+
+const FLEX = [0, 1, 2, 3, 7];
+
+// "Departure: exact | ±1 | ±2 | ±3 | ±7 days", one per date so it's clear
+// which side is flexible.
+function FlexPick({ label, value, onChange }: { label: string; value: number; onChange: (n: number) => void }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span>{label}</span>
+      <span className="inline-flex rounded-full bg-surface-2 p-0.5">
+        {FLEX.map((n) => (
+          <button
+            key={n}
+            type="button"
+            onClick={() => onChange(n)}
+            className={
+              "h-6 rounded-full px-2 tabular-nums transition-colors " +
+              (value === n ? "bg-surface text-fg shadow-sm ring-1 ring-border" : "text-muted hover:text-fg")
+            }
+            title={n ? `Also search ${n} day${n > 1 ? "s" : ""} before and after` : "Only this date"}
+          >
+            {n ? `±${n}` : "exact"}
+          </button>
+        ))}
+      </span>
+    </span>
   );
 }

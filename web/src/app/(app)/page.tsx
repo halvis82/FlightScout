@@ -9,7 +9,8 @@ import { SearchFormView, defaultForm, formToParams, paramsToForm, type SearchFor
 import { useWatchDialog } from "@/components/watch-dialog";
 import { Button, Empty, ErrorNote, Spinner } from "@/components/ui";
 import { api } from "@/lib/client";
-import { expandCodes } from "@/lib/airports-client";
+import { airport, expandCodes } from "@/lib/airports-client";
+import { RouteMap } from "@/components/route-map";
 import { addDays, dayDiff } from "@/lib/format";
 import type { PlanResult, SearchQuery, SearchResult } from "@/lib/types";
 
@@ -69,7 +70,7 @@ function SearchPage() {
     async (f0: SearchForm) => {
       setForm(f0);
       const f = { ...f0, currency };
-      lastRun.current = JSON.stringify([f.from, f.to, f.depart, f.ret, f.tripType]);
+      lastRun.current = JSON.stringify([f.from, f.to, f.depart, f.ret, f.tripType, f.flex, f.retFlex]);
       setErr(null);
       setResult(null);
       setPlan(null);
@@ -89,7 +90,7 @@ function SearchPage() {
         currency: f.currency,
         sources: f.sources,
         departure_flex_days: f.flex,
-        return_flex_days: f.tripType === "roundtrip" ? f.flex : 0,
+        return_flex_days: f.tripType === "roundtrip" ? f.retFlex : 0,
         nearby_km: f.nearby,
       };
       const searchP = api<SearchResult>("/search", { body: q })
@@ -106,8 +107,8 @@ function SearchPage() {
             destinations: q.destinations,
             depart_start: addDays(f.depart, -f.flex),
             depart_end: addDays(f.depart, f.flex),
-            return_start: q.return_date ? addDays(f.ret, -f.flex) : null,
-            return_end: q.return_date ? addDays(f.ret, f.flex) : null,
+            return_start: q.return_date ? addDays(f.ret, -f.retFlex) : null,
+            return_end: q.return_date ? addDays(f.ret, f.retFlex) : null,
             currency: f.currency,
             cabin: f.cabin,
             adults: f.adults,
@@ -128,12 +129,12 @@ function SearchPage() {
   // After a first search, changing dates (arrows or calendar) searches again.
   useEffect(() => {
     if (!form || !lastRun.current || !form.to.length || !form.from.length) return;
-    const k = JSON.stringify([form.from, form.to, form.depart, form.ret, form.tripType]);
+    const k = JSON.stringify([form.from, form.to, form.depart, form.ret, form.tripType, form.flex, form.retFlex]);
     if (k === lastRun.current) return;
     const t = setTimeout(() => run(form), 700);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form?.depart, form?.ret, form?.tripType]);
+  }, [form?.depart, form?.ret, form?.tripType, form?.flex, form?.retFlex]);
 
   // Auto run when opened with a full query in the URL (links from watches, history, CLI).
   useEffect(() => {
@@ -184,8 +185,8 @@ function SearchPage() {
                 trip_type: form.tripType,
                 depart_start: addDays(form.depart, -form.flex),
                 depart_end: addDays(form.depart, form.flex),
-                nights_min: form.tripType === "roundtrip" ? Math.max(0, dayDiff(form.depart, form.ret) - form.flex) : null,
-                nights_max: form.tripType === "roundtrip" ? dayDiff(form.depart, form.ret) + form.flex : null,
+                nights_min: form.tripType === "roundtrip" ? Math.max(0, dayDiff(form.depart, form.ret) - form.flex - form.retFlex) : null,
+                nights_max: form.tripType === "roundtrip" ? dayDiff(form.depart, form.ret) + form.flex + form.retFlex : null,
                 currency: form.currency,
                 cabin: form.cabin,
                 adults: form.adults,
@@ -204,6 +205,7 @@ function SearchPage() {
           ret={form.ret}
           roundTrip={form.tripType === "roundtrip"}
           flex={form.flex}
+          retFlex={form.retFlex}
           onPick={(d) => {
             const next: SearchForm = {
               ...form,
@@ -227,10 +229,19 @@ function SearchPage() {
         />
       ) : (
         !busy && !(form.from.length && !form.to.length) && (
-          <Empty title="Search every source at once">
-            Pick where you&apos;re flying from and to. FlightScout checks Google Flights and Kiwi.com together, and with smart routes on it
-            also builds cheaper combinations of separate tickets through hub airports.
-          </Empty>
+          form.from.length && form.to.length ? (
+            <RouteMap
+              className="h-80 rounded-2xl lg:h-[480px]"
+              fitKey={[...form.from, ...form.to].join()}
+              arcs={expandCodes(form.from).flatMap((o) => expandCodes(form.to).map((d) => ({ from: o, to: d })))}
+              points={[
+                ...expandCodes(form.from).map((c) => ({ code: c, tone: "origin" as const, label: airport(c)?.city ?? c })),
+                ...expandCodes(form.to).map((c) => ({ code: c, tone: "dest" as const, label: airport(c)?.city ?? c })),
+              ]}
+            />
+          ) : (
+            <Empty title="Where to?">Pick where you&apos;re flying from. Leave To empty to see the cheapest places to go.</Empty>
+          )
         )
       )}
       {watch.element}

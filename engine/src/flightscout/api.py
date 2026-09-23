@@ -63,7 +63,7 @@ class ExploreBody(BaseModel):
     nights_max: int | None = None
     sources: list[str] | None = None
     regions: list[str] | None = None
-    batch: int | None = None  # 0, 1, 2: request explore.BATCHES[batch] only
+    batch: int | None = None  # 0 to len(BATCHES)-1: request explore.BATCHES[batch] only
 
 
 class ExploreResult(BaseModel):

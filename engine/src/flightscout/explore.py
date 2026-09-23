@@ -21,6 +21,13 @@ BATCHES = [
     ["Africa", "Oceania", "Central America", "Caribbean", "Middle East", "Canada", "Japan", "Thailand"],
     ["Spain", "Italy", "Portugal", "Greece", "France", "United Kingdom", "Germany", "Poland",
      "Croatia", "Turkey", "Iceland", "Morocco"],
+    ["Brazil", "Colombia", "Peru", "Argentina", "Chile", "Costa Rica", "Dominican Republic", "Cuba",
+     "Puerto Rico", "Jamaica", "Panama", "Guatemala", "Hawaii", "Alaska"],
+    ["Netherlands", "Belgium", "Switzerland", "Austria", "Czechia", "Hungary", "Ireland", "Denmark",
+     "Sweden", "Norway", "Finland", "Romania", "Bulgaria", "Montenegro", "Albania", "Cyprus", "Malta"],
+    ["Philippines", "Vietnam", "Indonesia", "Malaysia", "Singapore", "South Korea", "China", "India",
+     "Sri Lanka", "Egypt", "Jordan", "United Arab Emirates", "Kenya", "South Africa", "Tanzania",
+     "Australia", "New Zealand"],
 ]
 
 log = logging.getLogger(__name__)
