@@ -79,6 +79,28 @@ function SearchPage() {
       const t0 = Date.now();
       const timer = setInterval(() => setElapsed(Math.round((Date.now() - t0) / 1000)), 1000);
       router.replace(`/?${formToParams(f).toString()}`, { scroll: false });
+      if (f.tripType === "multicity") {
+        const legs = f.legs.map((l, i) => {
+          const prevDate = i > 0 ? f.legs[i - 1].date : null;
+          const by = l.flex === "by";
+          const n = by ? 0 : Number(l.flex);
+          return {
+            origins: expandCodes(i === 0 ? f.from : f.legs[i - 1].to),
+            destinations: expandCodes(l.to),
+            date: l.date,
+            // "arrive by": any day from the previous flight up to this date
+            before: by ? (prevDate ? Math.max(0, dayDiff(prevDate, l.date)) : 14) : n,
+            after: by ? 0 : n,
+            arrive_by: by ? l.date : null,
+          };
+        });
+        await api<PlanResult>("/multicity", { body: { legs, currency: f.currency, cabin: f.cabin, adults: f.adults } })
+          .then(setPlan)
+          .catch((e) => setErr((e as Error).message))
+          .finally(() => setBusy(false));
+        clearInterval(timer);
+        return;
+      }
       const q: SearchQuery = {
         origins: expandCodes(f.from),
         destinations: expandCodes(f.to),
@@ -173,16 +195,18 @@ function SearchPage() {
       {hasResults && (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="text-sm text-muted">
-            {form.from.join("/")} to {form.to.join("/")} ·{" "}
-            {form.tripType === "roundtrip" ? `${dayDiff(form.depart, form.ret)} nights` : "one way"}
+            {form.tripType === "multicity"
+              ? [form.from.join("/"), ...form.legs.map((l) => l.to.join("/"))].join(" → ")
+              : `${form.from.join("/")} to ${form.to.join("/")} · ${form.tripType === "roundtrip" ? `${dayDiff(form.depart, form.ret)} nights` : "one way"}`}
           </div>
+          {form.tripType !== "multicity" && (
           <Button
             size="sm"
             onClick={() =>
               watch.open({
                 origins: form.from,
                 destinations: form.to,
-                trip_type: form.tripType,
+                trip_type: form.tripType === "multicity" ? "oneway" : form.tripType,
                 depart_start: addDays(form.depart, -form.flex),
                 depart_end: addDays(form.depart, form.flex),
                 nights_min: form.tripType === "roundtrip" ? Math.max(0, dayDiff(form.depart, form.ret) - form.flex - form.retFlex) : null,
@@ -196,9 +220,10 @@ function SearchPage() {
           >
             <Eye className="size-3.5" /> Watch this search
           </Button>
+          )}
         </div>
       )}
-      {!form.to.length && form.from.length > 0 && !hasResults && (
+      {form.tripType !== "multicity" && !form.to.length && form.from.length > 0 && !hasResults && (
         <ExplorePanel
           origins={form.from}
           depart={form.depart}
@@ -229,7 +254,19 @@ function SearchPage() {
         />
       ) : (
         !busy && !(form.from.length && !form.to.length) && (
-          form.from.length && form.to.length ? (
+          form.tripType === "multicity" && form.from.length && form.legs.some((l) => l.to.length) ? (
+            <RouteMap
+              className="h-80 rounded-2xl lg:h-[480px]"
+              fitKey={JSON.stringify(form.legs.map((l) => l.to)) + form.from.join()}
+              arcs={form.legs
+                .map((l, i) => ({ from: expandCodes(i ? form.legs[i - 1].to : form.from)[0], to: expandCodes(l.to)[0] }))
+                .filter((a) => a.from && a.to)}
+              points={[form.from, ...form.legs.map((l) => l.to)]
+                .map((c) => expandCodes(c)[0])
+                .filter(Boolean)
+                .map((c, i) => ({ code: c, tone: i === 0 ? ("origin" as const) : ("dest" as const), label: airport(c)?.city ?? c }))}
+            />
+          ) : form.tripType !== "multicity" && form.from.length && form.to.length ? (
             <RouteMap
               className="h-80 rounded-2xl lg:h-[480px]"
               fitKey={[...form.from, ...form.to].join()}

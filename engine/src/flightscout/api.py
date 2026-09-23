@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from . import explore as explore_mod
 from .models import DatePrice, Destination, SearchQuery, SearchResult
+from .multicity import MultiRequest, plan_multicity
 from .planner import PlanRequest, PlanResult, TripRequest, build_trip, plan
 from .search import search as run_search
 from .sources import google
@@ -96,6 +97,12 @@ def plan_route(body: PlanRequest) -> PlanResult:
 @app.post("/api/trip", dependencies=[Depends(auth)], include_in_schema=False)
 def trip(body: TripRequest) -> PlanResult:
     return build_trip(body)
+
+
+@app.post("/multicity", dependencies=[Depends(auth)])
+@app.post("/api/multicity", dependencies=[Depends(auth)], include_in_schema=False)
+def multicity(body: MultiRequest) -> PlanResult:
+    return plan_multicity(body)
 
 
 @app.post("/dates", dependencies=[Depends(auth)])

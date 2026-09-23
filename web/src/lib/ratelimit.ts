@@ -3,13 +3,14 @@ import { sql } from "drizzle-orm";
 import { db, schema } from "./db";
 import { HttpError } from "./api";
 
-export type EngineKind = "search" | "plan" | "explore" | "dates" | "trip";
+export type EngineKind = "search" | "plan" | "explore" | "dates" | "trip" | "multicity";
 
 // Requests per hour. Guests are limited per IP, signed in users per account.
 const LIMITS: Record<EngineKind, { guest: number; user: number }> = {
   search: { guest: 30, user: 300 },
   plan: { guest: 5, user: 40 },
   trip: { guest: 5, user: 40 },
+  multicity: { guest: 8, user: 60 },
   explore: { guest: 20, user: 200 },
   dates: { guest: 20, user: 200 },
 };

@@ -7,10 +7,14 @@ import { Button, Field, Segmented, Select, Switch } from "./ui";
 import { addDays, dayDiff, isoDate } from "@/lib/format";
 import type { Source } from "@/lib/types";
 
+export type LegFlex = number | "by"; // ±days, or "arrive by this date"
+export type MultiLeg = { to: string[]; date: string; flex: LegFlex };
+
 export type SearchForm = {
   from: string[];
   to: string[];
-  tripType: "roundtrip" | "oneway";
+  tripType: "roundtrip" | "oneway" | "multicity";
+  legs: MultiLeg[];
   depart: string;
   ret: string;
   flex: number; // departure: +/- days
@@ -30,6 +34,7 @@ export function defaultForm(currency: string, origins: string[] = []): SearchFor
     from: origins,
     to: [],
     tripType: "roundtrip",
+    legs: [],
     depart: d,
     ret: addDays(d, 7),
     flex: 0,
@@ -59,6 +64,7 @@ export function formToParams(f: SearchForm) {
     rflex: String(f.retFlex),
   });
   if (f.tripType === "roundtrip") p.set("r", f.ret);
+  if (f.tripType === "multicity") p.set("ml", JSON.stringify(f.legs));
   if (f.smart) p.set("smart", "1");
   if (f.nearby) p.set("near", String(f.nearby));
   return p;
@@ -81,6 +87,13 @@ export function paramsToForm(p: URLSearchParams, base: SearchForm): SearchForm {
     flex: Number(p.get("flex") ?? base.flex),
     retFlex: Number(p.get("rflex") ?? p.get("flex") ?? base.retFlex),
     smart: p.get("smart") === "1",
+    legs: (() => {
+      try {
+        return p.get("ml") ? (JSON.parse(p.get("ml")!) as MultiLeg[]) : base.legs;
+      } catch {
+        return base.legs;
+      }
+    })(),
     nearby: Number(p.get("near") ?? base.nearby),
   };
 }
@@ -116,10 +129,23 @@ export function SearchFormView({
         <Segmented
           size="sm"
           value={f.tripType}
-          onChange={(tripType) => set({ tripType, ret: tripType === "roundtrip" && f.ret <= f.depart ? addDays(f.depart, 7) : f.ret })}
+          onChange={(tripType) =>
+            set({
+              tripType,
+              ret: tripType === "roundtrip" && f.ret <= f.depart ? addDays(f.depart, 7) : f.ret,
+              legs:
+                tripType === "multicity" && !f.legs.length
+                  ? [
+                      { to: f.to, date: f.depart, flex: 0 },
+                      { to: f.from, date: f.ret > f.depart ? f.ret : addDays(f.depart, 7), flex: 0 },
+                    ]
+                  : f.legs,
+            })
+          }
           options={[
             { value: "roundtrip", label: "Round trip" },
             { value: "oneway", label: "One way" },
+            { value: "multicity", label: "Multi-city" },
           ]}
         />
         <Select className={OPT} value={f.adults} onChange={(e) => set({ adults: Number(e.target.value) })} aria-label="Passengers">
@@ -160,6 +186,9 @@ export function SearchFormView({
           />
         </div>
       </div>
+      {f.tripType === "multicity" ? (
+        <MultiCityLegs f={f} set={set} busy={busy} />
+      ) : (
       <div className="grid grid-cols-1 items-end gap-2 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_minmax(0,1.15fr)_auto]">
         <Field label="From">
           <AirportInput value={f.from} onChange={(from) => set({ from })} placeholder="Where from?" />
@@ -189,11 +218,14 @@ export function SearchFormView({
           <Search className="size-4" /> Search
         </Button>
       </div>
+      )}
+      {f.tripType !== "multicity" && (
       <div className="mt-2 flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-xs text-muted">
         <span className="mr-auto" />
         <FlexPick label="Departure" value={f.flex} onChange={(flex) => set({ flex })} />
         {rt && <FlexPick label="Return" value={f.retFlex} onChange={(retFlex) => set({ retFlex })} />}
       </div>
+      )}
       <div className="mt-2 grid grid-cols-1 gap-2 lg:grid-cols-2">
         <PlaceChips onPick={(c) => set({ from: [...new Set([...f.from, ...c])] })} />
         <PlaceChips onPick={(c) => set({ to: [...new Set([...f.to, ...c])] })} />
@@ -227,5 +259,77 @@ function FlexPick({ label, value, onChange }: { label: string; value: number; on
         ))}
       </span>
     </span>
+  );
+}
+
+function MultiCityLegs({ f, set, busy }: { f: SearchForm; set: (p: Partial<SearchForm>) => void; busy?: boolean }) {
+  const legs = f.legs;
+  const upd = (i: number, p: Partial<MultiLeg>) => set({ legs: legs.map((l, j) => (j === i ? { ...l, ...p } : l)) });
+  const ready = f.from.length > 0 && legs.length > 0 && legs.every((l) => l.to.length);
+  return (
+    <div className="space-y-2">
+      <Field label="Start from">
+        <AirportInput value={f.from} onChange={(from) => set({ from })} placeholder="Where does the trip start?" />
+      </Field>
+      {legs.map((l, i) => {
+        const fromCodes = i === 0 ? f.from : legs[i - 1].to;
+        return (
+          <div key={i} className="grid grid-cols-1 items-end gap-2 rounded-xl border border-border p-2 lg:grid-cols-[110px_minmax(0,1fr)_minmax(0,0.8fr)_auto_auto]">
+            <div className="pb-2 text-xs text-muted">
+              <div className="font-medium text-fg">Flight {i + 1}</div>
+              from {fromCodes.join(", ") || "..."}
+            </div>
+            <Field label="To">
+              <AirportInput value={l.to} onChange={(to) => upd(i, { to })} placeholder="Next stop" />
+            </Field>
+            <DateRangeField
+              start={l.date}
+              range={false}
+              labels={[l.flex === "by" ? "Arrive by" : "Depart", ""]}
+              min={i > 0 ? legs[i - 1].date : undefined}
+              onChange={(date) => upd(i, { date })}
+              prices={fromCodes.length && l.to.length ? { from: fromCodes, to: l.to, tripDays: null, currency: f.currency } : null}
+            />
+            <Select
+              className="h-11 w-44 text-sm"
+              aria-label={`Flexibility for flight ${i + 1}`}
+              value={String(l.flex)}
+              onChange={(e) => upd(i, { flex: e.target.value === "by" ? "by" : Number(e.target.value) })}
+            >
+              <option value="0">Exact date</option>
+              <option value="1">± 1 day</option>
+              <option value="2">± 2 days</option>
+              <option value="3">± 3 days</option>
+              <option value="7">± 7 days</option>
+              <option value="by">Arrive by this date</option>
+            </Select>
+            <button
+              type="button"
+              onClick={() => set({ legs: legs.filter((_, j) => j !== i) })}
+              className="mb-1 grid size-9 place-items-center rounded-full text-muted hover:bg-surface-2 hover:text-fg"
+              aria-label={`Remove flight ${i + 1}`}
+              disabled={legs.length <= 1}
+            >
+              ×
+            </button>
+          </div>
+        );
+      })}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <Button
+          type="button"
+          size="sm"
+          onClick={() => {
+            const last = legs[legs.length - 1];
+            set({ legs: [...legs, { to: [], date: addDays(last?.date ?? f.depart, 4), flex: 2 }] });
+          }}
+        >
+          + Add flight
+        </Button>
+        <Button type="submit" variant="primary" className="h-11 px-5" loading={busy} disabled={!ready}>
+          <Search className="size-4" /> Search
+        </Button>
+      </div>
+    </div>
   );
 }

@@ -115,7 +115,7 @@ type Obs = {
 
 type SearchRow = {
   id: number;
-  kind: "search" | "plan" | "explore" | "dates" | "trip";
+  kind: "search" | "plan" | "explore" | "dates" | "trip" | "multicity";
   origin: "web";
   summary: string;
   query: Record<string, unknown>;
@@ -384,7 +384,7 @@ export function saveSearch(kind: SearchRow["kind"], query: Record<string, unknow
 
 // After a guest search, feed any matching local watches (like the server does).
 export async function afterGuestEngineCall(kind: string, query: Record<string, unknown>, result: Record<string, unknown>, serverFetch: ServerFetch) {
-  if (!["search", "plan", "explore", "dates", "trip"].includes(kind)) return;
+  if (!["search", "plan", "explore", "dates", "trip", "multicity"].includes(kind)) return;
   saveSearch(kind as SearchRow["kind"], query, result);
   const trips = result.trips as Trip[] | undefined;
   if ((kind !== "search" && kind !== "plan") || !trips?.length) return;
@@ -409,7 +409,7 @@ export async function afterGuestEngineCall(kind: string, query: Record<string, u
 
 export type ServerFetch = <T>(path: string, init?: { method?: string; body?: unknown }) => Promise<T>;
 
-const ENGINE = new Set(["/search", "/plan", "/explore", "/dates", "/trip", "/fx", "/me", "/results"]);
+const ENGINE = new Set(["/search", "/plan", "/explore", "/dates", "/trip", "/fx", "/me", "/results", "/multicity"]);
 
 export function isGuestRoute(path: string) {
   const p = path.split("?")[0];

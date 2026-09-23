@@ -42,7 +42,7 @@ export function isGuest(): Promise<boolean> {
   return loadMe().then((m) => (m ? !m.user : false));
 }
 
-const ENGINE_KINDS = new Set(["/search", "/plan", "/explore", "/dates", "/trip"]);
+const ENGINE_KINDS = new Set(["/search", "/plan", "/explore", "/dates", "/trip", "/multicity"]);
 
 function rulesToEngine(rules: SellerRule[]) {
   const blocked = rules.filter((r) => r.mode === "block");

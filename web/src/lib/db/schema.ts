@@ -208,7 +208,7 @@ export const searches = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    kind: text("kind").$type<"search" | "plan" | "explore" | "dates" | "trip">().notNull(),
+    kind: text("kind").$type<"search" | "plan" | "explore" | "dates" | "trip" | "multicity">().notNull(),
     origin: text("origin").$type<"web" | "cli" | "mcp" | "tracker" | "local">().notNull().default("web"),
     summary: text("summary"),
     query: jsonb("query").notNull(),

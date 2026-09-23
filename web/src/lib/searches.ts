@@ -3,7 +3,7 @@ import { db, schema } from "./db";
 import { feedMatchingWatches } from "./observations";
 import type { SearchQuery, Trip } from "./types";
 
-type Kind = "search" | "plan" | "explore" | "dates" | "trip";
+type Kind = "search" | "plan" | "explore" | "dates" | "trip" | "multicity";
 type Origin = "web" | "cli" | "mcp" | "tracker" | "local";
 
 export function summarize(kind: Kind, q: Record<string, unknown>): string {
