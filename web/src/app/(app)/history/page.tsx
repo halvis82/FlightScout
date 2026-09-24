@@ -2,7 +2,7 @@
 import Link from "next/link";
 import useSWRInfinite from "swr/infinite";
 import { Compass, Search, Sparkles, CalendarDays, Trash2 } from "lucide-react";
-import { Badge, Button, Empty, PageHeader, Spinner } from "@/components/ui";
+import { PlainButton, Badge, Button, Empty, PageHeader, Spinner } from "@/components/ui";
 import { api, fetcher } from "@/lib/client";
 import { relativeTime } from "@/lib/format";
 
@@ -34,7 +34,7 @@ export default function HistoryPage() {
               </Link>
               <Badge tone={ORIGIN_TONE[r.origin]}>{r.origin}</Badge>
               <span className="w-16 shrink-0 text-right text-xs text-faint">{relativeTime(r.created_at)}</span>
-              <button
+              <PlainButton
                 className="rounded p-1 text-faint hover:text-bad"
                 aria-label="Delete"
                 onClick={async () => {
@@ -43,7 +43,7 @@ export default function HistoryPage() {
                 }}
               >
                 <Trash2 className="size-3.5" />
-              </button>
+              </PlainButton>
             </div>
           );
         })}

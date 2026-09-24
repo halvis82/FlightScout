@@ -4,7 +4,8 @@ export type WatchRow = {
   name: string;
   origins: string[];
   destinations: string[];
-  tripType: "oneway" | "roundtrip";
+  tripType: "oneway" | "roundtrip" | "multicity";
+  legs?: unknown;
   departStart: string;
   departEnd: string;
   nightsMin: number | null;

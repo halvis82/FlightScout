@@ -22,6 +22,7 @@ export const GET = route(async (req) => {
         origins: w.origins,
         destinations: w.destinations,
         trip_type: w.tripType,
+        legs: w.legs,
         depart_start: w.departStart < today ? today : w.departStart,
         depart_end: w.departEnd,
         nights_min: w.nightsMin,

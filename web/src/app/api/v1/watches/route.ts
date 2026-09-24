@@ -4,6 +4,7 @@ import { body, json, requireUser, route } from "@/lib/api";
 import { getRates, convertWith } from "@/lib/fx";
 import { getSettings } from "@/lib/settings";
 import { toColumns, type WatchIn } from "@/lib/watch-validate";
+import { watchSignature } from "@/lib/signature";
 
 export const GET = route(async (req) => {
   const userId = await requireUser(req);
@@ -37,10 +38,18 @@ export const POST = route(async (req) => {
   const userId = await requireUser(req);
   const p = await body<WatchIn>(req);
   if (!p.currency) p.currency = (await getSettings(userId)).currency;
-  const cols = toColumns(p, false);
+  const cols = toColumns(p, false) as typeof schema.watches.$inferInsert;
+  const signature = watchSignature({ ...cols, departStart: cols.departStart as string });
+  // Same search saved twice (double click, retry, CLI): return the existing one.
   const [row] = await db
     .insert(schema.watches)
-    .values({ ...(cols as typeof schema.watches.$inferInsert), userId })
+    .values({ ...cols, userId, signature })
+    .onConflictDoNothing({ target: [schema.watches.userId, schema.watches.signature] })
     .returning();
-  return json(row, 201);
+  if (row) return json(row, 201);
+  const [existing] = await db
+    .select()
+    .from(schema.watches)
+    .where(and(eq(schema.watches.userId, userId), eq(schema.watches.signature, signature)));
+  return json({ ...existing, existing: true }, 200);
 });

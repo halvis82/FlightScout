@@ -1,12 +1,12 @@
 "use client";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useApp } from "@/components/app-context";
 import { ExplorePanel } from "@/components/explore-panel";
 import { ResultsView, mergeTrips } from "@/components/results-view";
 import { SearchFormView, defaultForm, formToParams, paramsToForm, type SearchForm } from "@/components/search-form";
-import { useWatchDialog } from "@/components/watch-dialog";
+import { WatchButton } from "@/components/watch-dialog";
 import { Button, Empty, ErrorNote, Spinner } from "@/components/ui";
 import { api } from "@/lib/client";
 import { airport, expandCodes } from "@/lib/airports-client";
@@ -92,7 +92,6 @@ function SearchPage() {
   const [stale, setStale] = useState(false);
   const [pending, setPending] = useState(0);
   const lastRun = useRef<string | null>(null);
-  const watch = useWatchDialog();
 
   const run = useCallback(
     async (f0: SearchForm) => {
@@ -128,10 +127,19 @@ function SearchPage() {
             arrive_by: by ? l.date : null,
           };
         });
+        const runId = ++runSeq.current;
         await api<PlanResult>("/multicity", { body: { legs, currency: f.currency, cabin: f.cabin, adults: f.adults } })
-          .then(setPlan)
+          .then((r) => {
+            if (runSeq.current !== runId) return;
+            setResult(null); // never show a previous one way / round trip search under a multi city heading
+            setPlan(r);
+          })
           .catch((e) => setErr((e as Error).message))
-          .finally(() => setBusy(false));
+          .finally(() => {
+            if (runSeq.current !== runId) return;
+            setStale(false);
+            setBusy(false);
+          });
         clearInterval(timer);
         return;
       }
@@ -264,6 +272,13 @@ function SearchPage() {
       <SearchFormView
         value={form}
         onChange={(next) => {
+          // switching to or from multi city: old results don't belong to the new form
+          if (next.tripType !== form.tripType && (next.tripType === "multicity" || form.tripType === "multicity")) {
+            setResult(null);
+            setPlan(null);
+            setErr(null);
+            lastRun.current = null;
+          }
           // clearing the destination goes back to exploring
           if (!next.to.length && form.to.length && next.tripType !== "multicity") {
             setResult(null);
@@ -308,28 +323,50 @@ function SearchPage() {
               ? [form.from.join("/"), ...form.legs.map((l) => l.to.join("/"))].join(" → ")
               : `${form.from.join("/")} to ${form.to.join("/")} · ${form.tripType === "roundtrip" ? `${dayDiff(form.depart, form.ret)} nights` : "one way"}`}
           </div>
-          {form.tripType !== "multicity" && (
-          <Button
-            size="sm"
-            onClick={() =>
-              watch.open({
-                origins: form.from,
-                destinations: form.to,
-                trip_type: form.tripType === "multicity" ? "oneway" : form.tripType,
-                depart_start: addDays(form.depart, -form.flex),
-                depart_end: addDays(form.depart, form.flex),
-                nights_min: form.tripType === "roundtrip" ? Math.max(0, dayDiff(form.depart, form.ret) - form.flex - form.retFlex) : null,
-                nights_max: form.tripType === "roundtrip" ? dayDiff(form.depart, form.ret) + form.flex + form.retFlex : null,
-                currency: form.currency,
-                cabin: form.cabin,
-                adults: form.adults,
-                include_split: form.smart,
-              }, trips)
+          <WatchButton
+            seed={trips}
+            watch={
+              form.tripType === "multicity"
+                ? {
+                    name: [form.from.join("/"), ...form.legs.map((l) => l.to.join("/"))].join(" → "),
+                    origins: form.from,
+                    destinations: form.legs.at(-1)?.to ?? [],
+                    trip_type: "multicity",
+                    depart_start: form.legs[0]?.date ?? form.depart,
+                    depart_end: form.legs.at(-1)?.date ?? form.depart,
+                    nights_min: null,
+                    nights_max: null,
+                    legs: form.legs.map((l, i) => {
+                      const by = l.flex === "by";
+                      const prev = i > 0 ? form.legs[i - 1].date : null;
+                      return {
+                        origins: i === 0 ? form.from : form.legs[i - 1].to,
+                        destinations: l.to,
+                        date: l.date,
+                        before: by ? (prev ? Math.max(0, dayDiff(prev, l.date)) : 14) : Number(l.flex),
+                        after: by ? 0 : Number(l.flex),
+                        arrive_by: by ? l.date : null,
+                      };
+                    }),
+                    currency: form.currency,
+                    cabin: form.cabin,
+                    adults: form.adults,
+                  }
+                : {
+                    origins: form.from,
+                    destinations: form.to,
+                    trip_type: form.tripType,
+                    depart_start: addDays(form.depart, -form.flex),
+                    depart_end: addDays(form.depart, form.flex),
+                    nights_min: form.tripType === "roundtrip" ? Math.max(0, dayDiff(form.depart, form.ret) - form.flex - form.retFlex) : null,
+                    nights_max: form.tripType === "roundtrip" ? dayDiff(form.depart, form.ret) + form.flex + form.retFlex : null,
+                    currency: form.currency,
+                    cabin: form.cabin,
+                    adults: form.adults,
+                    include_split: form.smart,
+                  }
             }
-          >
-            <Eye className="size-3.5" /> Watch this search
-          </Button>
-          )}
+          />
         </div>
       )}
       {form.tripType !== "multicity" && !form.to.length && form.from.length > 0 && !hasResults && (
@@ -392,7 +429,6 @@ function SearchPage() {
           )
         )
       )}
-      {watch.element}
     </div>
   );
 }

@@ -8,7 +8,7 @@ import { RouteText } from "./place";
 import { Sparkline } from "./sparkline";
 import { openPanel, panelStore } from "./stores";
 import { useWatchDialog } from "./watch-dialog";
-import { Badge, Button, Spinner } from "./ui";
+import { PlainButton, Badge, Button, Spinner } from "./ui";
 import { api, fetcher } from "@/lib/client";
 import { formatDate, relativeTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -108,7 +108,7 @@ export function WatchlistPanel() {
                 <span className="flex items-center gap-1.5 text-xs font-semibold text-accent">
                   <Bell className="size-3.5" /> Price alerts
                 </span>
-                <button
+                <PlainButton
                   className="text-xs text-accent hover:underline"
                   onClick={async () => {
                     await api("/alerts", { body: { all: true } });
@@ -116,7 +116,7 @@ export function WatchlistPanel() {
                   }}
                 >
                   Mark all read
-                </button>
+                </PlainButton>
               </div>
               <ul className="space-y-1">
                 {unread.slice(0, 5).map((a) => (
@@ -180,7 +180,11 @@ function WatchRowCard({ w, onCheck, onToggle, checking }: { w: WatchRow; onCheck
       <Link href={`/watches/${w.id}`} onClick={() => openPanel(null)} className="block">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <RouteText codes={[w.origins[0], w.destinations[0]]} roundTrip={w.tripType === "roundtrip"} className="text-sm" />
+            {w.tripType === "multicity" ? (
+              <span className="text-sm font-medium">{w.name}</span>
+            ) : (
+              <RouteText codes={[w.origins[0], w.destinations[0]]} roundTrip={w.tripType === "roundtrip"} className="text-sm" />
+            )}
             <div className="mt-0.5 text-xs text-muted">
               {formatDate(w.departStart, false)}
               {w.departEnd !== w.departStart && ` to ${formatDate(w.departEnd, false)}`}

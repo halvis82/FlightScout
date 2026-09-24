@@ -45,3 +45,48 @@ test("signups are invite only", async ({ request, baseURL }) => {
   expect(r.status()).toBeGreaterThanOrEqual(400);
   expect(await r.text()).toMatch(/invite only/);
 });
+
+test("watch this search saves once, even when clicked repeatedly, and then shows Watching", async ({ page }) => {
+  await page.goto("/?from=OSL&to=CPH&tt=oneway&d=2026-11-19");
+  await expect(page.getByText(/\d+ flights/)).toBeVisible();
+  const btn = page.getByRole("button", { name: "Watch this search" });
+  await btn.click({ clickCount: 3 }); // triple click
+  await btn.click({ force: true }).catch(() => {}); // and again while saving
+  await expect(page.getByRole("link", { name: /Watching/ })).toBeVisible();
+  const n = await page.evaluate(async () => (await (await fetch("/api/v1/watches")).json()).length ?? 0).catch(() => null);
+  // guests keep watches in the browser: count them there
+  const local = await page.evaluate(() => {
+    try {
+      return (JSON.parse(localStorage.getItem("fs.guest.watches") ?? "[]") as unknown[]).length;
+    } catch {
+      return null;
+    }
+  });
+  expect(local ?? n).toBeLessThanOrEqual(1);
+  // reload: still recognized as watched
+  await page.reload();
+  await expect(page.getByRole("link", { name: /Watching/ })).toBeVisible();
+});
+
+test("favorite star double click does not flip twice", async ({ page }) => {
+  await page.goto("/?from=SAN&tt=roundtrip&d=2026-11-06&r=2026-11-13");
+  const star = page.locator("section").getByRole("button", { name: /Add .* to favorites/ }).first();
+  await expect(star).toBeVisible({ timeout: 30_000 });
+  await star.dblclick();
+  await expect(page.locator("section").getByRole("button", { name: /Remove .* from favorites/ }).first()).toBeVisible();
+});
+
+test("multi city: switching clears old results, and it can be watched", async ({ page }) => {
+  await page.goto("/?from=OSL&to=CPH&tt=oneway&d=2026-11-19");
+  await expect(page.getByText(/\d+ flights/)).toBeVisible();
+  await page.getByRole("radio", { name: "Multi-city" }).click();
+  await expect(page.getByText(/\d+ flights/)).toHaveCount(0);
+  const legs = [
+    { to: ["CPH"], date: "2026-11-19", flex: 1 },
+    { to: ["OSL"], date: "2026-11-24", flex: 1 },
+  ];
+  await page.goto(`/?from=OSL&tt=multicity&d=2026-11-19&ml=${encodeURIComponent(JSON.stringify(legs))}`);
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(page.getByText("OSL → CPH → OSL")).toBeVisible({ timeout: 90_000 });
+  await expect(page.getByRole("button", { name: "Watch this search" })).toBeVisible({ timeout: 90_000 });
+});

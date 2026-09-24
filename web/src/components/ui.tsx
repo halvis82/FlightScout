@@ -2,6 +2,8 @@
 import {
   forwardRef,
   useEffect,
+  useRef,
+  useState,
   type ButtonHTMLAttributes,
   type InputHTMLAttributes,
   type ReactNode,
@@ -16,11 +18,28 @@ type Variant = "primary" | "secondary" | "ghost" | "danger" | "soft";
 export const Button = forwardRef<
   HTMLButtonElement,
   ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: "sm" | "md" | "lg"; loading?: boolean }
->(function Button({ className, variant = "secondary", size = "md", loading, children, disabled, ...rest }, ref) {
+>(function Button({ className, variant = "secondary", size = "md", loading, children, disabled, onClick, ...rest }, ref) {
+  // Foolproof by default: if the click handler is async, the button stays
+  // disabled (with a spinner) until it finishes and extra clicks are ignored.
+  const [running, setRunning] = useState(false);
+  const busy = useRef(false);
   return (
     <button
       ref={ref}
-      disabled={disabled || loading}
+      disabled={disabled || loading || running}
+      aria-busy={loading || running || undefined}
+      onClick={(e) => {
+        if (busy.current) return;
+        const r = onClick?.(e) as unknown;
+        if (r && typeof (r as Promise<unknown>).then === "function") {
+          busy.current = true;
+          setRunning(true);
+          (r as Promise<unknown>).finally(() => {
+            busy.current = false;
+            setRunning(false);
+          });
+        }
+      }}
       className={cn(
         "inline-flex items-center justify-center gap-1.5 rounded-lg font-medium whitespace-nowrap transition-[background-color,border-color,color,box-shadow,filter]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:pointer-events-none disabled:opacity-50",
@@ -34,11 +53,56 @@ export const Button = forwardRef<
       )}
       {...rest}
     >
-      {loading && <Spinner className="size-3.5" />}
+      {(loading || running) && <Spinner className="size-3.5" />}
       {children}
     </button>
   );
 });
+
+// Unstyled button with the same double click guard as Button, for icon and
+// text buttons that run something async (delete, revoke, sign out...).
+export function PlainButton({ onClick, disabled, ...rest }: ButtonHTMLAttributes<HTMLButtonElement>) {
+  const [running, setRunning] = useState(false);
+  const busy = useRef(false);
+  return (
+    <button
+      type="button"
+      {...rest}
+      disabled={disabled || running}
+      aria-busy={running || undefined}
+      onClick={(e) => {
+        if (busy.current) return;
+        const r = onClick?.(e) as unknown;
+        if (r && typeof (r as Promise<unknown>).then === "function") {
+          busy.current = true;
+          setRunning(true);
+          (r as Promise<unknown>).finally(() => {
+            busy.current = false;
+            setRunning(false);
+          });
+        }
+      }}
+    />
+  );
+}
+
+// For small icon or text buttons: same async guard as Button.
+export function useOnce<A extends unknown[]>(fn: (...args: A) => Promise<unknown>) {
+  const busy = useRef(false);
+  const [running, setRunning] = useState(false);
+  const run = async (...args: A) => {
+    if (busy.current) return;
+    busy.current = true;
+    setRunning(true);
+    try {
+      await fn(...args);
+    } finally {
+      busy.current = false;
+      setRunning(false);
+    }
+  };
+  return [run, running] as const;
+}
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function Input({ className, ...rest }, ref) {
   return (

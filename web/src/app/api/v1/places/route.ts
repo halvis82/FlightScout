@@ -1,4 +1,5 @@
-import { asc, eq } from "drizzle-orm";
+import { placeSignature } from "@/lib/signature";
+import { and, asc, eq } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
 import { body, json, requireUser, route, HttpError } from "@/lib/api";
 
@@ -21,9 +22,16 @@ export const POST = route(async (req) => {
     .map((c) => c.trim().toUpperCase())
     .filter((c) => /^[A-Z]{3,4}$/.test(c));
   if (!p.label?.trim() || !codes.length) throw new HttpError(400, "label and at least one airport code are required");
+  const signature = placeSignature(codes);
   const [row] = await db
     .insert(schema.places)
-    .values({ userId, label: p.label.trim(), codes, kind: p.kind ?? "frequent", color: p.color, notes: p.notes })
+    .values({ userId, label: p.label.trim(), codes, kind: p.kind ?? "frequent", color: p.color, notes: p.notes, signature })
+    .onConflictDoNothing({ target: [schema.places.userId, schema.places.signature] })
     .returning();
-  return json(row, 201);
+  if (row) return json(row, 201);
+  const [existing] = await db
+    .select()
+    .from(schema.places)
+    .where(and(eq(schema.places.userId, userId), eq(schema.places.signature, signature)));
+  return json({ ...existing, existing: true }, 200);
 });

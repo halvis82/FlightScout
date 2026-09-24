@@ -5,7 +5,8 @@ export type WatchIn = Partial<{
   name: string;
   origins: string[] | string;
   destinations: string[] | string;
-  trip_type: "oneway" | "roundtrip";
+  trip_type: "oneway" | "roundtrip" | "multicity";
+  legs?: { origins: string[]; destinations: string[]; date: string; before?: number; after?: number; arrive_by?: string | null }[] | null;
   depart_start: string;
   depart_end: string;
   nights_min: number | null;
@@ -34,7 +35,16 @@ export function toColumns(p: WatchIn, partial: boolean) {
   if (p.name !== undefined) out.name = String(p.name).slice(0, 120);
   if (p.origins !== undefined) out.origins = codes(p.origins);
   if (p.destinations !== undefined) out.destinations = codes(p.destinations);
-  if (p.trip_type !== undefined) out.tripType = p.trip_type === "oneway" ? "oneway" : "roundtrip";
+  if (p.trip_type !== undefined) out.tripType = p.trip_type === "oneway" || p.trip_type === "multicity" ? p.trip_type : "roundtrip";
+  if (p.legs !== undefined) {
+    if (p.legs && (!Array.isArray(p.legs) || p.legs.length > 8)) throw new HttpError(400, "legs must be a list of up to 8 flights");
+    out.legs = p.legs
+      ? p.legs.map((l) => {
+          if (!isDate(l.date)) throw new HttpError(400, "each leg needs a date YYYY-MM-DD");
+          return { origins: codes(l.origins), destinations: codes(l.destinations), date: l.date, before: l.before ?? 0, after: l.after ?? 0, arrive_by: l.arrive_by ?? null };
+        })
+      : null;
+  }
   if (p.depart_start !== undefined) {
     if (!isDate(p.depart_start)) throw new HttpError(400, "depart_start must be YYYY-MM-DD");
     out.departStart = p.depart_start;

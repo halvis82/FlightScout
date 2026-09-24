@@ -1,5 +1,9 @@
 "use client";
-import { mutate } from "swr";
+import useSWR, { mutate } from "swr";
+import Link from "next/link";
+import { Check, Eye } from "lucide-react";
+import { fetcher } from "@/lib/client";
+import { watchSignature } from "@/lib/signature";
 import { toast } from "./stores";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -16,7 +20,8 @@ export type WatchForm = {
   name: string;
   origins: string[];
   destinations: string[];
-  trip_type: "oneway" | "roundtrip";
+  trip_type: "oneway" | "roundtrip" | "multicity";
+  legs?: { origins: string[]; destinations: string[]; date: string; before?: number; after?: number; arrive_by?: string | null }[] | null;
   depart_start: string;
   depart_end: string;
   nights_min: number | null;
@@ -215,28 +220,108 @@ function WatchFormBody({
 }
 
 // Hook for opening the dialog from anywhere with a prefilled form.
+const inflight = new Set<string>();
+
+// "Watch this search" with a clear state: Watch, Saving..., Watching ✓ (links
+// to the watch). Checks the watchlist, so it also says Watching after a reload.
+export function WatchButton({ watch, seed, label = "Watch this search" }: { watch: Partial<WatchForm>; seed?: Trip[]; label?: string }) {
+  const { currency } = useApp();
+  const w = useWatchDialog();
+  const { data: list } = useSWR<Array<Record<string, unknown>>>("/watches", fetcher, { revalidateOnFocus: false });
+  const [busy, setBusy] = useState(false);
+  const f = defaultWatch(currency, watch);
+  const key = watchSignature({
+    origins: f.origins,
+    destinations: f.destinations,
+    tripType: f.trip_type,
+    departStart: f.depart_start,
+    departEnd: f.depart_end,
+    nightsMin: f.nights_min,
+    nightsMax: f.nights_max,
+    cabin: f.cabin,
+    adults: f.adults,
+    legs: f.legs ?? null,
+  });
+  const existing = (list ?? []).find(
+    (x) =>
+      watchSignature({
+        origins: x.origins as string[],
+        destinations: x.destinations as string[],
+        tripType: x.tripType as string,
+        departStart: x.departStart as string,
+        departEnd: x.departEnd as string,
+        nightsMin: x.nightsMin as number | null,
+        nightsMax: x.nightsMax as number | null,
+        cabin: x.cabin as string,
+        adults: x.adults as number,
+        legs: (x.legs as unknown) ?? null,
+      }) === key,
+  );
+  if (existing)
+    return (
+      <Link
+        href={`/watches/${existing.id}`}
+        className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-good/40 bg-good-soft/40 px-3 text-sm font-medium text-good"
+      >
+        <Check className="size-3.5" /> Watching
+      </Link>
+    );
+  return (
+    <>
+      <Button
+        size="sm"
+        disabled={busy}
+        loading={busy}
+        onClick={async () => {
+          if (busy) return;
+          setBusy(true);
+          await w.open(watch, seed);
+          setBusy(false);
+        }}
+      >
+        {!busy && <Eye className="size-3.5" />} {busy ? "Saving" : label}
+      </Button>
+      {w.element}
+    </>
+  );
+}
+
 export function useWatchDialog() {
   const { currency } = useApp();
   const [state, setState] = useState<{ open: boolean; initial: WatchForm; seed?: Trip[] }>({ open: false, initial: defaultWatch(currency) });
   return {
     // One click: create the watch right away (sensible defaults), seed it
     // with the current results, and offer the full form from the toast.
-    open: async (p?: Partial<WatchForm>, seed?: Trip[]) => {
+    open: async (p?: Partial<WatchForm>, seed?: Trip[]): Promise<{ id: number } | null> => {
       const f = defaultWatch(currency, p);
       const body = { ...f, name: f.name || `${f.origins.join("/")} to ${f.destinations.join("/")}` };
+      const sig = JSON.stringify(body);
+      if (inflight.has(sig)) return null; // a double click while the first save is running
+      inflight.add(sig);
       try {
-        const row = await api<{ id: number }>("/watches", { body });
-        if (seed?.length) {
+        const row = await api<{ id: number; existing?: boolean }>("/watches", { body });
+        if (!row.existing && seed?.length) {
           const obs = tripsToObservations(seed, body.destinations).filter(
             (o) => o.depart_date >= body.depart_start && o.depart_date <= body.depart_end,
           );
           if (obs.length) await api(`/watches/${row.id}/observations`, { body: obs }).catch(() => {});
         }
-        mutate("/watches");
-        toast({ text: `Watching ${body.name}. Prices are checked twice a day.`, action: { label: "Open", href: `/watches/${row.id}` }, tone: "good" }, 6000);
+        await mutate("/watches");
+        toast(
+          {
+            text: row.existing ? `Already watching ${body.name}.` : `Watching ${body.name}. Prices are checked twice a day.`,
+            action: { label: "Open", href: `/watches/${row.id}` },
+            tone: "good",
+          },
+          5000,
+        );
+        return row;
       } catch {
         // fall back to the form (e.g. missing fields)
         setState({ open: true, initial: f, seed });
+        return null;
+      } finally {
+        inflight.delete(sig);
       }
     },
     edit: (p?: Partial<WatchForm>, seed?: Trip[]) => setState({ open: true, initial: defaultWatch(currency, p), seed }),

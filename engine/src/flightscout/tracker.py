@@ -52,8 +52,23 @@ def _obs(it_or_trip: Itinerary | Trip, kind: str | None = None) -> dict:
                      risks=list(it.warnings)), kind)
 
 
+def check_multicity(watch: dict[str, Any]) -> list[dict]:
+    from .multicity import Leg, MultiRequest, plan_multicity
+
+    legs = [Leg(**{k: v for k, v in lg.items() if k in ("origins", "destinations", "date", "before", "after", "arrive_by")})
+            for lg in watch.get("legs") or []]
+    if not legs or legs[-1].date < date.today():
+        return []
+    res = plan_multicity(MultiRequest(legs=legs, currency=watch.get("currency") or "USD",
+                                      cabin=watch.get("cabin") or "economy", adults=watch.get("adults") or 1,
+                                      max_results=5))
+    return [_obs(t) for t in res.trips[:5]]
+
+
 def check(watch: dict[str, Any], budget: int = 12) -> list[dict]:
     """Return observations for one watch. ``budget`` caps Google requests."""
+    if watch.get("trip_type") == "multicity":
+        return check_multicity(watch)
     cur = watch.get("currency") or "USD"
     o = airports.expand(watch["origins"])
     d = airports.expand(watch["destinations"])

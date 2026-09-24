@@ -5,7 +5,7 @@ import { Check, Copy, Fingerprint, KeyRound, Plus, Trash2 } from "lucide-react";
 import { AirportInput } from "@/components/airport-input";
 import { useApp } from "@/components/app-context";
 import { cityOf } from "@/lib/airports-client";
-import { Badge, Button, Card, ErrorNote, Field, Input, PageHeader, Select, Switch } from "@/components/ui";
+import { PlainButton, Badge, Button, Card, ErrorNote, Field, Input, PageHeader, Select, Switch } from "@/components/ui";
 import { api, fetcher } from "@/lib/client";
 import { authClient } from "@/lib/auth-client";
 import { relativeTime } from "@/lib/format";
@@ -333,7 +333,7 @@ function PasskeySection() {
             <Fingerprint className="size-4 text-muted" />
             {p.name || "Passkey"}
             <span className="text-xs text-faint">{p.createdAt ? `added ${relativeTime(p.createdAt)}` : ""}</span>
-            <button
+            <PlainButton
               className="ml-auto rounded p-1 text-muted hover:text-bad"
               aria-label="Remove passkey"
               onClick={async () => {
@@ -342,7 +342,7 @@ function PasskeySection() {
               }}
             >
               <Trash2 className="size-3.5" />
-            </button>
+            </PlainButton>
           </div>
         ))}
       </div>
@@ -418,7 +418,7 @@ function TokensSection() {
             <span className="font-medium">{t.name}</span>
             <code className="text-xs text-faint">{t.prefix}…</code>
             <span className="text-xs text-faint">used {relativeTime(t.last_used_at)}</span>
-            <button
+            <PlainButton
               className="ml-auto rounded p-1 text-muted hover:text-bad"
               aria-label="Revoke"
               onClick={async () => {
@@ -427,7 +427,7 @@ function TokensSection() {
               }}
             >
               <Trash2 className="size-3.5" />
-            </button>
+            </PlainButton>
           </div>
         ))}
       </div>

@@ -29,6 +29,13 @@
       "when": 1790189515912,
       "tag": "0003_reset_multi_default_origins",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790270957748,
+      "tag": "0004_watch_signature_legs",
+      "breakpoints": true
     }
   ]
 }

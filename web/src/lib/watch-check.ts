@@ -11,6 +11,20 @@ import type { PlanResult, SearchResult, Trip } from "./types";
 type Watch = typeof schema.watches.$inferSelect;
 
 export async function checkWatch(w: Watch, userId: string) {
+  if (w.tripType === "multicity" && w.legs?.length) {
+    const res = await engine<PlanResult>("/multicity", { legs: w.legs, currency: w.currency, cabin: w.cabin, adults: w.adults });
+    const dest = [w.legs.at(-1)!.destinations[0]];
+    const result = await recordObservations(w, tripsToObservations(res.trips.slice(0, 5), dest));
+    await db.insert(schema.searches).values({
+      userId,
+      kind: "multicity",
+      origin: "web",
+      summary: `Watch check: ${w.name}`,
+      query: { legs: w.legs },
+      payload: res,
+    });
+    return { ...result, trips: res.trips.length, errors: res.errors };
+  }
   const q = watchToQuery(w);
   const s = await getSettings(userId);
   const blocked = s.sellerRules.filter((r) => r.mode === "block");

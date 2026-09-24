@@ -82,7 +82,10 @@ def watch_add(
     )
     if fmt_of(fmt, as_json) == Fmt.json:
         return emit_json(w)
-    out.print(f"Watching {w.get('name')} (id {w['id']}). Run `flightscout watch check {w['id']}` for prices now.")
+    if w.get("existing"):
+        out.print(f"Already watching {w.get('name')} (id {w['id']}). Nothing new was created.")
+    else:
+        out.print(f"Watching {w.get('name')} (id {w['id']}). Run `flightscout watch check {w['id']}` for prices now.")
 
 
 @watch_app.command("edit")
@@ -219,7 +222,10 @@ def places_add(label: str = typer.Argument(..., help="Name, e.g. Home or Paris."
                kind: str = typer.Option("frequent", help="home, frequent (favorite) or interested (want to go).")):
     """Save a place (shows as a one click chip on the website)."""
     p = client().add_place(label=label, codes=codes(codes_), kind=kind)
-    out.print(f"Added {p['label']} ({', '.join(p['codes'])}).")
+    if p.get("existing"):
+        out.print(f"Already saved as {p['label']} ({', '.join(p['codes'])}).")
+    else:
+        out.print(f"Added {p['label']} ({', '.join(p['codes'])}).")
 
 
 @places_app.command("set")

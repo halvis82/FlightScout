@@ -175,7 +175,7 @@ export function SearchFormView({
           <option value={150}>+ airports within 150 km</option>
           <option value={250}>+ airports within 250 km</option>
         </Select>
-        <div className="ml-auto">
+        <div className={f.tripType === "multicity" ? "hidden" : "ml-auto"}>
           <Switch
             checked={f.smart}
             onChange={(smart) => set({ smart })}

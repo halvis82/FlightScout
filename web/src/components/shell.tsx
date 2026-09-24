@@ -11,7 +11,7 @@ import { CURRENCIES } from "@/lib/types";
 import { useApp } from "./app-context";
 import { GuestBanner, ImportGuestData } from "./guest-ui";
 import { openPanel, toastStore } from "./stores";
-import { Tip, useDismiss } from "./ui";
+import { PlainButton, Tip, useDismiss } from "./ui";
 import { WatchlistButton, WatchlistPanel } from "./watchlist-panel";
 
 const NAV = [
@@ -227,7 +227,7 @@ function AccountMenu() {
                 <LogIn className="size-4" /> Sign in
               </Link>
             ) : (
-              <button
+              <PlainButton
                 onClick={async () => {
                   await signOut();
                   window.location.assign(window.location.origin);
@@ -235,7 +235,7 @@ function AccountMenu() {
                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm hover:bg-surface-2"
               >
                 <LogOut className="size-4 text-muted" /> Sign out
-              </button>
+              </PlainButton>
             )}
           </div>
         </div>

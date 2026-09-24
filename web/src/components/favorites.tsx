@@ -5,6 +5,7 @@ import { api } from "@/lib/client";
 import { cityOf } from "@/lib/airports-client";
 import { cn } from "@/lib/utils";
 import { toast } from "./stores";
+import { useOnce } from "./ui";
 
 // Favorite airports and cities are saved places. Starring a code creates a
 // one airport place labeled with its city; unstarring removes it.
@@ -29,6 +30,7 @@ export function useFavorites() {
 
 export function StarButton({ code, className, size = "sm" }: { code: string; className?: string; size?: "sm" | "md" }) {
   const { isStarred, toggle } = useFavorites();
+  const [run, running] = useOnce(toggle); // a fast double click must not add then remove
   const on = isStarred(code);
   return (
     <button
@@ -37,11 +39,12 @@ export function StarButton({ code, className, size = "sm" }: { code: string; cla
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
-        toggle(code);
+        run(code);
       }}
       className={cn("grid shrink-0 place-items-center rounded-md transition-colors hover:bg-surface-2", size === "sm" ? "size-7" : "size-8", className)}
       aria-label={on ? `Remove ${code} from favorites` : `Add ${code} to favorites`}
       aria-pressed={on}
+      disabled={running}
       title={on ? "Favorite. Click to remove" : "Add to favorites"}
     >
       <Star className={cn(size === "sm" ? "size-3.5" : "size-4", on ? "fill-[oklch(0.8_0.16_85)] text-[oklch(0.72_0.16_85)]" : "text-faint")} />

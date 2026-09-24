@@ -133,12 +133,22 @@ export const places = pgTable(
     label: text("label").notNull(),
     codes: text("codes").array().notNull(),
     kind: text("kind").$type<"home" | "frequent" | "interested">().notNull().default("frequent"),
+    signature: text("signature"), // sorted codes; unique per user
     color: text("color"),
     notes: text("notes"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("places_user_idx").on(t.userId)],
+  (t) => [index("places_user_idx").on(t.userId), uniqueIndex("places_user_sig_idx").on(t.userId, t.signature)],
 );
+
+export type WatchLeg = {
+  origins: string[];
+  destinations: string[];
+  date: string;
+  before?: number;
+  after?: number;
+  arrive_by?: string | null;
+};
 
 export const watches = pgTable(
   "watches",
@@ -150,7 +160,12 @@ export const watches = pgTable(
     name: text("name").notNull(),
     origins: text("origins").array().notNull(),
     destinations: text("destinations").array().notNull(),
-    tripType: text("trip_type").$type<"oneway" | "roundtrip">().notNull().default("roundtrip"),
+    tripType: text("trip_type").$type<"oneway" | "roundtrip" | "multicity">().notNull().default("roundtrip"),
+    // multi city watches: [{origins, destinations, date, before, after, arrive_by}]
+    legs: jsonb("legs").$type<WatchLeg[] | null>(),
+    // identity of the search (route, dates, trip length, cabin, passengers);
+    // unique per user so double clicks and retries can't create duplicates
+    signature: text("signature"),
     departStart: date("depart_start").notNull(),
     departEnd: date("depart_end").notNull(),
     nightsMin: integer("nights_min"),
@@ -172,7 +187,7 @@ export const watches = pgTable(
     notes: text("notes"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("watches_user_idx").on(t.userId)],
+  (t) => [index("watches_user_idx").on(t.userId), uniqueIndex("watches_user_sig_idx").on(t.userId, t.signature)],
 );
 
 export const observations = pgTable(

@@ -119,6 +119,20 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
     searchParams.set("r", ret.toISOString().slice(0, 10));
   }
   if (w.includeSplit) searchParams.set("smart", "1");
+  if (w.tripType === "multicity" && Array.isArray(w.legs)) {
+    // back to the multi city form: each leg's destination, date and flexibility
+    searchParams.set("to", "");
+    searchParams.set(
+      "ml",
+      JSON.stringify(
+        (w.legs as { destinations: string[]; date: string; after?: number; arrive_by?: string | null }[]).map((l) => ({
+          to: l.destinations,
+          date: l.date,
+          flex: l.arrive_by ? "by" : (l.after ?? 0),
+        })),
+      ),
+    );
+  }
 
   const form: WatchForm = {
     name: w.name,

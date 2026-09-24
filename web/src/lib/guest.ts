@@ -1,4 +1,5 @@
 "use client";
+import { placeSignature, watchSignature } from "./signature";
 // Guest mode: the same /api/v1 routes the server offers for signed in users,
 // answered from localStorage. The client `api()` helper routes here when the
 // visitor has no session, so pages don't need to know which mode they're in.
@@ -77,7 +78,8 @@ type Watch = {
   name: string;
   origins: string[];
   destinations: string[];
-  tripType: "oneway" | "roundtrip";
+  tripType: "oneway" | "roundtrip" | "multicity";
+  legs?: unknown;
   departStart: string;
   departEnd: string;
   nightsMin: number | null;
@@ -442,6 +444,8 @@ export async function guestApi(path: string, method: string, body: unknown, serv
         if (method === "GET") return [...list].sort((a, b) => a.kind.localeCompare(b.kind) || a.label.localeCompare(b.label));
         const c = codes(b.codes);
         if (!String(b.label ?? "").trim() || !c.length) throw new GuestError(400, "label and at least one airport code are required");
+        const dupPlace = list.find((x) => placeSignature(x.codes) === placeSignature(c));
+        if (dupPlace) return { ...dupPlace, existing: true };
         const row: Place = { id: nextId(), label: String(b.label).trim(), codes: c, kind: (b.kind as Place["kind"]) ?? "frequent", color: null, notes: null, createdAt: new Date().toISOString() };
         write("places", [...list, row]);
         return row;
@@ -473,6 +477,10 @@ export async function guestApi(path: string, method: string, body: unknown, serv
           });
         }
         const w = watchFromInput(b);
+        // the same search saved twice returns the existing watch
+        const sig = watchSignature(w as never);
+        const dup = read<Watch[]>("watches", []).find((x) => watchSignature(x as never) === sig);
+        if (dup) return { ...dup, existing: true };
         saveWatch(w);
         return w;
       }
