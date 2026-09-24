@@ -209,7 +209,11 @@ function SearchPage() {
           },
         })
           .then(setPlan)
-          .catch((e) => setErr((x) => (x ? x + " · " : "") + `Smart routes: ${(e as Error).message}`))
+          .catch((e) => {
+            // smart routes are a bonus: never let their limit or failure look like an error
+            const msg = (e as Error).message;
+            if (!/limit|429|too many/i.test(msg)) setErr((x) => (x ? x + " · " : "") + `Smart routes: ${msg}`);
+          })
           .finally(() => setPlanBusy(false));
       }
       await Promise.all([searchP, planP]);

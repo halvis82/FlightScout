@@ -1,0 +1,44 @@
+name: Live checks
+
+# Nightly against the live site and real flight sources, plus on demand.
+# Catches sources breaking (a scraper stops working) and UI regressions.
+on:
+  schedule:
+    - cron: "40 7 * * *"
+  workflow_dispatch:
+
+jobs:
+  engine-live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - name: Live source tests
+        working-directory: engine
+        env:
+          FLIGHTSCOUT_LIVE: "1"
+        run: uv run pytest -q -m live
+
+  site:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Browser tests against the live site
+        env:
+          E2E_BASE_URL: ${{ secrets.FLIGHTSCOUT_API_URL }}
+        run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: web/test-results

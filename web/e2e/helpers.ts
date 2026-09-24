@@ -1,11 +1,13 @@
 import { expect, type Page } from "@playwright/test";
 
+// 429 is ignored: back to back test runs from one IP hit the guest rate limit,
+// which the app handles gracefully.
 export function watchErrors(page: Page) {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(String(e)));
   page.on("console", (m) => {
     // the local runner probe (127.0.0.1:8787) is expected to fail when it isn't running
-    if (m.type() === "error" && !/127\.0\.0\.1:8787|ERR_FAILED|ERR_CONNECTION_REFUSED|CORS/.test(m.text())) errors.push(m.text());
+    if (m.type() === "error" && !/127\.0\.0\.1:8787|ERR_FAILED|ERR_CONNECTION_REFUSED|CORS|status of 429/.test(m.text())) errors.push(m.text());
   });
   return errors;
 }

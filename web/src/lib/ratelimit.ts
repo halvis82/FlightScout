@@ -7,12 +7,12 @@ export type EngineKind = "search" | "plan" | "explore" | "dates" | "trip" | "mul
 
 // Requests per hour. Guests are limited per IP, signed in users per account.
 const LIMITS: Record<EngineKind, { guest: number; user: number }> = {
-  search: { guest: 30, user: 300 },
-  plan: { guest: 5, user: 40 },
+  search: { guest: 60, user: 400 },
+  plan: { guest: 12, user: 80 },
   trip: { guest: 5, user: 40 },
   multicity: { guest: 8, user: 60 },
-  explore: { guest: 20, user: 200 },
-  dates: { guest: 20, user: 200 },
+  explore: { guest: 40, user: 300 },
+  dates: { guest: 60, user: 400 },
 };
 
 // Follow up explore batches (1 and 2) of the same interaction have their own

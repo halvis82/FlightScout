@@ -49,6 +49,15 @@ The Airlines tab lists 127 airlines by region with links into each airline's own
 
 Scraping is unofficial and can break. Searches are cached, Kiwi is throttled, and the site can route searches through your own computer (local runner) so they come from a normal home IP instead of a datacenter.
 
+## Tests
+
+| Suite | Command | Runs |
+|---|---|---|
+| Engine unit tests (offline) | `cd engine && uv run pytest` | every push (GitHub Actions) |
+| Engine live source tests | `cd engine && FLIGHTSCOUT_LIVE=1 uv run pytest -m live` | nightly |
+| Web unit tests | `cd web && npm test` | every push |
+| Browser tests (every flow, step counts, no console errors, phone width) | `cd web && E2E_BASE_URL=https://flightscout-app.vercel.app npm run test:e2e` | nightly against the live site |
+
 ## Self host your own copy
 
 Everything runs on free tiers (Vercel Hobby, Neon, GitHub Actions). Fork the repo, then:
