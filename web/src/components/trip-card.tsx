@@ -69,6 +69,14 @@ export function TripCard({
           {rows.map((sl, i) => (
             <SliceRow key={i} sl={sl} />
           ))}
+          {single?.return_pending && (
+            <div className="grid grid-cols-[32px_minmax(0,1fr)] items-center gap-3">
+              <span className="grid size-8 place-items-center rounded-lg border border-dashed border-border text-muted">↩</span>
+              <a href={single.booking_url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted hover:text-fg">
+                Return: pick any return flight on Google Flights. The price is the cheapest round trip with this outbound.
+              </a>
+            </div>
+          )}
           {(trip.kind !== "single" || trip.stopovers.length > 0 || badges.length > 0) && (
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-11 text-xs text-muted">
               {trip.kind !== "single" && (
@@ -101,7 +109,9 @@ export function TripCard({
             <div className="text-xl font-semibold tabular-nums" title={`${trip.total_price} ${trip.currency}`}>
               {money(trip.total_price, trip.currency)}
             </div>
-            <div className="text-[11px] text-muted">{single ? (single.slices.length > 1 ? "round trip" : "one way") : `${trip.tickets.length} tickets total`}</div>
+            <div className="text-[11px] text-muted">
+              {single ? (single.slices.length > 1 || single.return_pending ? "round trip" : "one way") : `${trip.tickets.length} tickets total`}
+            </div>
             {alts.length > 0 && (
               <button type="button" onClick={() => setOpen(true)} className="text-[11px] text-accent hover:underline">
                 +{alts.length} return option{alts.length > 1 ? "s" : ""}

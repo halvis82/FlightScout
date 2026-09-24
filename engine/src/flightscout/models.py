@@ -99,6 +99,9 @@ class Itinerary(BaseModel):
     seller: str | None = None  # "Kiwi.com", "Google Flights", airline name...
     seller_kind: Literal["airline", "ota", "metasearch"] = "metasearch"
     self_transfer: bool = False  # connections inside this ticket are not protected
+    # Round trip where only the outbound is known: the price is Google's round
+    # trip "from" price and the return is picked on the booking page.
+    return_pending: bool = False
     baggage: dict | None = None
     offers: list[Offer] | None = None  # seller breakdown, when fetched
     price_insight: str | None = None  # e.g. "$461 is low, usually $680 to $2,850"
@@ -118,6 +121,8 @@ class Itinerary(BaseModel):
     @computed_field
     @property
     def trip_type(self) -> Literal["oneway", "roundtrip", "multi"]:
+        if self.return_pending:
+            return "roundtrip"
         if len(self.slices) == 1:
             return "oneway"
         if len(self.slices) == 2 and self.slices[0].origin == self.slices[1].destination:

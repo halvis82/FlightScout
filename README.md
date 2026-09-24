@@ -7,7 +7,7 @@ Three ways to use it, all sharing one account and database:
 | | |
 |---|---|
 | **Website** | https://flightscout-app.vercel.app. Works as a guest (data kept in your browser) or signed in (sync, background tracking, alerts) |
-| **CLI** | `flightscout search / plan / trip / explore / dates / watch ...` with `--json` for scripts and agents |
+| **CLI** | Everything the website does and more ([docs/CLI.md](docs/CLI.md)): `search`, `plan`, `multicity`, `explore`, `dates`, `airlines`, `watch`, `settings`... with `--format json/csv` for scripts and agents |
 | **MCP server** | `claude mcp add flightscout -- flightscout mcp` gives any Claude session flight tools. Results show up on the site |
 
 ## How it works

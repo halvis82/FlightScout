@@ -19,6 +19,14 @@ from fli.models import (
     TripType,
 )
 from fli.search import SearchDates, SearchFlights
+from fli.search import flights as _fli_flights
+
+# Google's results page only embeds the ~10 "top" departing flights unless
+# asked for all of them. This tfu flag (same as fast-flights uses) makes it
+# embed the full list, so we see every airline, like Google's Cheapest tab.
+_ALL_RESULTS = "&tfu=EgQIABABIgA"
+_orig_page_url = _fli_flights.page_url
+_fli_flights.page_url = lambda *a, **k: _orig_page_url(*a, **k) + _ALL_RESULTS
 
 from .. import cache
 from ..models import DatePrice, Itinerary, SearchQuery, Segment, Slice
@@ -49,8 +57,28 @@ def _diverse(flights: list, n: int) -> list:
 
 
 class _DiverseSearch(SearchFlights):
+    """Expands the cheapest outbound per airline first, and remembers every
+    outbound option so the unexpanded ones can still be listed."""
+
+    outbounds: list = []
+    filters = None
+
     def _expand_multi_leg(self, flights, filters, *, top_n, **kw):
-        return super()._expand_multi_leg(_diverse(list(flights), top_n), filters, top_n=top_n, **kw)
+        ordered = _diverse(list(flights), top_n)
+        if not self.outbounds:  # first level only (the outbound list)
+            self.outbounds, self.filters = ordered, filters
+        return super()._expand_multi_leg(ordered, filters, top_n=top_n, **kw)
+
+
+def _return_page_url(filters, outbound, currency: str) -> str:
+    """Google's "choose your return" page for a selected outbound."""
+    from copy import deepcopy
+
+    from fli.search._tfs import build_tfs
+
+    f = deepcopy(filters)
+    f.flight_segments[0].selected_flight = outbound
+    return _fli_flights.page_url(build_tfs(f), currency)
 
 
 def _airports(codes: list[str]):
@@ -112,6 +140,7 @@ def search(q: SearchQuery, top_n: int = 8) -> list[Itinerary]:
         sort_by=SortBy.CHEAPEST,
     )
     client = _DiverseSearch()
+    client.outbounds = []
     try:
         results = client.search(filters, top_n=top_n, currency=q.currency) or []
     except Exception as e:
@@ -142,6 +171,23 @@ def search(q: SearchQuery, top_n: int = 8) -> list[Itinerary]:
                 warnings=[] if len(carriers) == 1 else [],
             )
         )
+    # Every other outbound option with its round trip price (Google's list),
+    # return to be picked on Google.
+    if q.return_date and client.outbounds:
+        expanded = {tuple((l.airline.name, l.flight_number) for l in (r[0] if isinstance(r, tuple) else r).legs)
+                    for r in results}
+        for ob in client.outbounds:
+            k = tuple((l.airline.name, l.flight_number) for l in ob.legs)
+            if k in expanded or ob.price is None:
+                continue
+            try:
+                url = _return_page_url(client.filters, ob, q.currency)
+            except Exception:
+                url = search_url(q)
+            out.append(Itinerary(
+                source="google", price=float(ob.price), currency=ob.currency or q.currency, slices=[_slice(ob)],
+                booking_url=url, seller="Google Flights", seller_kind="metasearch", return_pending=True,
+            ))
     cache.put(key, [i.model_dump(mode="json") for i in out])
     return out
 

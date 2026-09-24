@@ -48,6 +48,7 @@ export interface Itinerary {
   seller?: string | null;
   seller_kind: "airline" | "ota" | "metasearch";
   self_transfer: boolean;
+  return_pending?: boolean; // round trip priced by Google, return chosen on the booking page
   baggage?: Record<string, number> | null;
   offers?: Offer[] | null;
   price_insight?: string | null;
