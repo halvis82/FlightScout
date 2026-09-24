@@ -183,7 +183,10 @@ export function RouteMap({
       const node = entry.node;
       node.title = p.title ?? p.code;
       const tone = p.tone ?? "price";
+      // keep MapLibre's own classes, maplibregl-marker is what positions the node
+      const own = [...node.classList].filter((c) => c.startsWith("maplibregl-"));
       node.className = [
+        ...own,
         "rounded-full border font-sans text-[11px] font-semibold leading-none shadow-sm transition-transform hover:scale-110 hover:z-10",
         tone === "origin" && "bg-fg text-bg border-transparent px-1.5 py-1",
         tone === "dest" && "bg-accent text-accent-fg border-transparent px-1.5 py-1",
