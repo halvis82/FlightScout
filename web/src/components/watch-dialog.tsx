@@ -5,7 +5,7 @@ import { Check, Eye } from "lucide-react";
 import { fetcher } from "@/lib/client";
 import { watchSignature } from "@/lib/signature";
 import { toast } from "./stores";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AirportInput, PlaceChips } from "./airport-input";
 import { useApp } from "./app-context";
@@ -229,6 +229,7 @@ export function WatchButton({ watch, seed, label = "Watch this search" }: { watc
   const w = useWatchDialog();
   const { data: list } = useSWR<Array<Record<string, unknown>>>("/watches", fetcher, { revalidateOnFocus: false });
   const [busy, setBusy] = useState(false);
+  const savedAt = useRef(0);
   const f = defaultWatch(currency, watch);
   const key = watchSignature({
     origins: f.origins,
@@ -261,6 +262,11 @@ export function WatchButton({ watch, seed, label = "Watch this search" }: { watc
     return (
       <Link
         href={`/watches/${existing.id}`}
+        // the rest of a double or triple click that saved it must not navigate away
+        onClick={(e) => {
+          if (Date.now() - savedAt.current < 1200) e.preventDefault();
+        }}
+        title="On your watchlist. Open it."
         className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-good/40 bg-good-soft/40 px-3 text-sm font-medium text-good"
       >
         <Check className="size-3.5" /> Watching
@@ -276,6 +282,7 @@ export function WatchButton({ watch, seed, label = "Watch this search" }: { watc
           if (busy) return;
           setBusy(true);
           await w.open(watch, seed);
+          savedAt.current = Date.now();
           setBusy(false);
         }}
       >
