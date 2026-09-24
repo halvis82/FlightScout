@@ -352,7 +352,8 @@ Local runner: the website sends searches to this computer so they come from your
 |---|---|---|
 | `--port` | int (default `8787`) | Port (the website looks for 8787). |
 | `--install` | flag | Start automatically at login (macOS). |
-| `--uninstall` | flag | Remove the login item. |
+| `--track`, `--no-track` | flag (default `True`) | With --install: also check your watches at 07:05 and 19:05 from this Mac. |
+| `--uninstall` | flag | Remove the login item and scheduled checks. |
 
 ## `flightscout mcp`
 

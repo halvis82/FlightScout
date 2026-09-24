@@ -3,6 +3,7 @@ import { json, optionalUser } from "./api";
 import { engine } from "./engine";
 import { enforceRateLimit, type EngineKind } from "./ratelimit";
 import { saveSearch } from "./searches";
+import { cacheGet, cacheKey, cachePut } from "./search-cache";
 import { getSettings } from "./settings";
 import type { SellerRule } from "./db/schema";
 
@@ -29,7 +30,6 @@ export async function proxyEngine(req: Request, kind: EngineKind) {
   const part = typeof q.part === "number" ? q.part : 0;
   delete q.part;
   const followUp = (kind === "explore" && typeof q.batch === "number" && q.batch > 0) || part > 0;
-  await enforceRateLimit(req, kind, userId, followUp);
   // `quiet` requests (calendar prices, date strips) are not saved to history
   const quiet = q.quiet === true || part > 0;
   delete q.quiet;
@@ -45,8 +45,22 @@ export async function proxyEngine(req: Request, kind: EngineKind) {
     if (blocked.length) payload.seller_rules = rulesToEngine(blocked);
   }
   delete payload.sellerRules;
-  const result = normalize(kind, await engine<unknown>(`/${kind}`, payload));
+  // Shared cache: the same search (by anyone) within a few minutes is served
+  // without asking the sources again, and doesn't count toward rate limits.
+  const key = cacheKey(kind, payload);
+  let result = await cacheGet(kind, key);
+  if (!result) {
+    await enforceRateLimit(req, kind, userId, followUp);
+    result = normalize(kind, await engine<unknown>(kind === "browser" ? "/google/browser" : `/${kind}`, payload));
+    const errs = (result as { errors?: Record<string, string> }).errors ?? {};
+    const trips = (result as { trips?: unknown[]; items?: unknown[] }).trips ?? (result as { items?: unknown[] }).items;
+    // only cache complete, useful answers
+    if (!Object.keys(errs).length && (!Array.isArray(trips) || trips.length)) await cachePut(kind, key, result);
+  }
+  // browser mode: "need more pages" answers are just passed through
+  if ((result as { need?: unknown }).need) return json(result);
   if (!userId || quiet) return json({ ...result, search_id: null, watches_updated: 0 });
-  const saved = await saveSearch(userId, kind, "web", q, result);
+  delete q.pages;
+  const saved = await saveSearch(userId, kind === "browser" ? "search" : kind, "web", q, result);
   return json({ ...result, search_id: saved.id, watches_updated: saved.watchesUpdated });
 }

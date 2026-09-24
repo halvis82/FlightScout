@@ -5,6 +5,8 @@
 
 import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { api, ApiError } from "./client";
+import { browserGoogleSearch, extensionVersion } from "./extension";
+import { localRunnerActive } from "./local-runner";
 import { expandCodes } from "./airports-client";
 import { isoDate } from "./format";
 import type { DatePrice } from "./types";
@@ -25,6 +27,28 @@ function emit() {
 
 function coolingDown() {
   return Date.now() < cooldownUntil;
+}
+
+// With the FlightScout Helper extension, Google's calendar (one page per day,
+// our heaviest Google use) is fetched by this browser; the server only adds
+// the airline and Skyscanner calendars. Without it, the server does it all.
+async function loadDates(o: string, d: string, start: string, end: string, currency: string, tripDays?: number) {
+  const body = { origin: o, destination: d, start, end, currency, trip_days: tripDays, quiet: true };
+  if (extensionVersion() && !localRunnerActive()) {
+    try {
+      const [g, rest] = await Promise.all([
+        browserGoogleSearch<{ items: DatePrice[] }>(
+          { origins: [o], destinations: [d], departure: start, currency, mode: "dates", start, end, trip_days: tripDays },
+          (b) => api<{ items: DatePrice[]; need?: string[] }>("/browser", { body: { ...b, quiet: true } }),
+        ),
+        tripDays ? Promise.resolve({ items: [] as DatePrice[] }) : api<{ items: DatePrice[] }>("/dates", { body: { ...body, skip_google: true } }),
+      ]);
+      return { items: [...(g.items ?? []), ...(rest.items ?? [])] };
+    } catch {
+      /* fall back to the server */
+    }
+  }
+  return api<{ items: DatePrice[] }>("/dates", { body });
 }
 
 export type PriceQuery = { from: string[]; to: string[]; tripDays: number | null; currency: string };
@@ -70,9 +94,7 @@ function load(q: PriceQuery, month: string) {
   if (Date.now() < cooldownUntil) return;
   cache.set(key, { status: "loading", prices: new Map(), at: Date.now() });
   emit();
-  api<{ items: DatePrice[] }>("/dates", {
-    body: { origin: r.o, destination: r.d, start: range[0], end: range[1], currency: q.currency, trip_days: q.tripDays || undefined, quiet: true },
-  })
+  loadDates(r.o, r.d, range[0], range[1], q.currency, q.tripDays || undefined)
     .then((res) => {
       const prices = new Map<string, DayPrice>();
       for (const p of res.items ?? []) {

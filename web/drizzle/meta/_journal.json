@@ -36,6 +36,13 @@
       "when": 1790270957748,
       "tag": "0004_watch_signature_legs",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790285078210,
+      "tag": "0005_search_cache",
+      "breakpoints": true
     }
   ]
 }

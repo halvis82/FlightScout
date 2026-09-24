@@ -47,7 +47,18 @@ Some airline sources need the public key their own website sends to every browse
 The Airlines tab lists 127 airlines by region with links into each airline's own search, pre-filled with your route where the airline supports it.
 | SerpApi (optional) | paid API, `SERPAPI_KEY` | Fallback if Google blocks the server |
 
-Scraping is unofficial and can break. Searches are cached, Kiwi is throttled, and the site can route searches through your own computer (local runner) so they come from a normal home IP instead of a datacenter.
+### Staying unblocked (whose IP talks to Google)
+
+Scraping is unofficial and Google limits how often one address can search, so FlightScout spreads the load:
+
+| Layer | What it does |
+|---|---|
+| **FlightScout Helper** (browser extension, `extension/`) | Google Flights pages are fetched by each visitor's own browser and IP; the server only parses them. Searches and price calendars. |
+| **Local runner** (`flightscout serve --install`) | The whole engine on your computer: the site sends searches there. Also checks your watches at 07:05 and 19:05 from your home IP. |
+| **Shared cache** | The same search by anyone within minutes (20 min searches, 6 h calendars) is answered from the database. |
+| **Fast non Google sources** | Kiwi web API, KAYAK, Skyscanner and airline APIs are used wherever possible. |
+| **Paid fallback (optional)** | If Google blocks the server, searches switch to SearchAPI.io (`SEARCHAPI_KEY`) or SerpApi (`SERPAPI_KEY`) when a key is set; nothing is spent otherwise. |
+| **Self hosting** | `scripts/setup.sh` gives anyone their own copy on their own accounts. |
 
 ## Tests
 

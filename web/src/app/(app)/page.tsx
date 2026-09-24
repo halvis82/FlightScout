@@ -9,6 +9,8 @@ import { SearchFormView, defaultForm, formToParams, paramsToForm, type SearchFor
 import { WatchButton } from "@/components/watch-dialog";
 import { Button, Empty, ErrorNote, Spinner } from "@/components/ui";
 import { api } from "@/lib/client";
+import { browserGoogleSearch, extensionVersion } from "@/lib/extension";
+import { localRunnerActive } from "@/lib/local-runner";
 import { airport, expandCodes } from "@/lib/airports-client";
 import { RouteMap } from "@/components/route-map";
 import { addDays, dayDiff } from "@/lib/format";
@@ -52,6 +54,22 @@ function persist(next: Saved) {
   } catch {
     /* quota or private mode: memory copy is enough */
   }
+}
+
+// Google via the visitor's own browser when the FlightScout Helper extension is
+// installed (and the local runner isn't running, which already uses their IP).
+// Any failure falls back to the server.
+async function searchPart(q: SearchQuery, sources: string[], part: number): Promise<SearchResult> {
+  if (sources[0] === "google" && extensionVersion() && !localRunnerActive()) {
+    try {
+      return await browserGoogleSearch<SearchResult>({ ...q, sources }, (body) =>
+        api<SearchResult & { need?: string[] }>("/browser", { body: { ...body, part } }),
+      );
+    } catch {
+      /* fall back to the server below */
+    }
+  }
+  return api<SearchResult>("/search", { body: { ...q, sources, part } });
 }
 
 // Where a fresh search starts: the default chosen in Settings, else wherever
@@ -166,7 +184,7 @@ function SearchPage() {
       let pending = PARTS.length;
       const searchP = Promise.all(
         PARTS.map((sources, part) =>
-          api<SearchResult>("/search", { body: { ...q, sources, part } })
+          searchPart(q, sources, part)
             .then((r) => {
               if (runSeq.current !== runId) return;
               if (!acc) acc = r;
@@ -313,6 +331,11 @@ function SearchPage() {
             </span>
           )}
           <span className="tabular-nums text-faint">{elapsed}s</span>
+          {!extensionVersion() && !localRunnerActive() && elapsed >= 4 && (
+            <a href="/settings#own-ip" className="text-xs text-faint underline-offset-2 hover:text-fg hover:underline">
+              Faster: search from your own IP
+            </a>
+          )}
         </div>
       )}
       {err && <ErrorNote>{err}</ErrorNote>}

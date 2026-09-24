@@ -3,7 +3,7 @@ import { sql } from "drizzle-orm";
 import { db, schema } from "./db";
 import { HttpError } from "./api";
 
-export type EngineKind = "search" | "plan" | "explore" | "dates" | "trip" | "multicity";
+export type EngineKind = "search" | "plan" | "explore" | "dates" | "trip" | "multicity" | "browser";
 
 // Requests per hour. Guests are limited per IP, signed in users per account.
 const LIMITS: Record<EngineKind, { guest: number; user: number }> = {
@@ -11,6 +11,9 @@ const LIMITS: Record<EngineKind, { guest: number; user: number }> = {
   plan: { guest: 12, user: 80 },
   trip: { guest: 5, user: 40 },
   multicity: { guest: 8, user: 60 },
+  // Google via the visitor's own browser: only parsing happens here, so these
+  // are cheap (a round trip search is 2-3 calls)
+  browser: { guest: 200, user: 1000 },
   explore: { guest: 40, user: 300 },
   dates: { guest: 60, user: 400 },
 };

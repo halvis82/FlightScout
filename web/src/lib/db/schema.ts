@@ -302,3 +302,12 @@ export const exploreCache = pgTable("explore_cache", {
   items: jsonb("items").notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// Shared engine results: the same search by anyone within a few minutes is
+// answered from here instead of asking Google (and friends) again.
+export const searchCache = pgTable("search_cache", {
+  key: text("key").primaryKey(),
+  kind: text("kind").notNull(),
+  payload: jsonb("payload").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});

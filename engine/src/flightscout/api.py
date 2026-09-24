@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 from datetime import date
+from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 from pydantic import BaseModel
@@ -53,6 +54,7 @@ class DatesBody(BaseModel):
     end: date
     currency: str = "USD"
     trip_days: int | None = None
+    skip_google: bool = False  # the visitor's browser prices the Google part (extension)
 
 
 class ExploreBody(BaseModel):
@@ -105,12 +107,45 @@ def multicity(body: MultiRequest) -> PlanResult:
     return plan_multicity(body)
 
 
+class BrowserSearchBody(SearchQuery):
+    pages: dict[str, Any] = {}  # url -> ds:1 data fetched by the visitor's browser
+    mode: str = "search"  # or "dates": price calendar (then use start/end/trip_days)
+    start: date | None = None
+    end: date | None = None
+    trip_days: int | None = None
+
+
+@app.post("/google/browser", dependencies=[Depends(auth)])
+@app.post("/api/google/browser", dependencies=[Depends(auth)], include_in_schema=False)
+def google_browser(body: BrowserSearchBody) -> dict:
+    """Google Flights with pages fetched by the visitor's browser (extension).
+    Returns {need: [urls]} until every page is there, then a SearchResult."""
+    from . import browser_fetch
+    from .search import search as run_search
+
+    q = SearchQuery(**body.model_dump(exclude={"pages", "mode", "start", "end", "trip_days"}))
+    q = q.model_copy(update={"sources": ["google"]})
+    try:
+        with browser_fetch.browser_pages(body.pages):
+            if body.mode == "dates":
+                days = google.dates(q.origins[0], q.destinations[0], body.start or q.departure, body.end or q.departure,
+                                    q.currency, body.trip_days)
+            else:
+                res = run_search(q)
+    except browser_fetch.NeedPages as e:
+        return {"need": e.urls}
+    if body.mode == "dates":
+        return {"items": [d.model_dump(mode="json") for d in days], "errors": {}}
+    return res.model_dump(mode="json")
+
+
 @app.post("/dates", dependencies=[Depends(auth)])
 @app.post("/api/dates", dependencies=[Depends(auth)], include_in_schema=False)
 def dates(body: DatesBody) -> list[DatePrice]:
     from .search import cheapest_per_day, direct_dates
 
-    res = google.dates(body.origin, body.destination, body.start, body.end, body.currency, body.trip_days)
+    res = [] if body.skip_google else google.dates(body.origin, body.destination, body.start, body.end, body.currency,
+                                                   body.trip_days)
     if not body.trip_days:  # airline calendars are one way only
         extra, _ = direct_dates(body.origin, body.destination, body.start, body.end, body.currency)
         res = cheapest_per_day(res + extra)

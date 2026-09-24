@@ -27,15 +27,40 @@ def register(app: typer.Typer) -> None:
     app.command(rich_help_panel="Scheduled jobs")(warm)
 
 
+TRACK_PLIST = "com.flightscout.track"
+
+
+def _install_tracking(exe: str, env: str, log: Path) -> None:
+    """Check the logged in user's watches at 07:00 and 19:00 from this Mac."""
+    plist = Path.home() / "Library" / "LaunchAgents" / f"{TRACK_PLIST}.plist"
+    times = "".join(f"<dict><key>Hour</key><integer>{h}</integer><key>Minute</key><integer>5</integer></dict>" for h in (7, 19))
+    plist.write_text(f"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>{TRACK_PLIST}</string>
+  <key>ProgramArguments</key><array><string>{exe}</string><string>watch</string><string>check</string></array>
+  <key>EnvironmentVariables</key><dict>{env}</dict>
+  <key>StartCalendarInterval</key><array>{times}</array>
+  <key>StandardOutPath</key><string>{log}</string>
+  <key>StandardErrorPath</key><string>{log}</string>
+</dict></plist>
+""")
+    subprocess.run(["launchctl", "unload", str(plist)], check=False, capture_output=True)
+    subprocess.run(["launchctl", "load", str(plist)], check=True)
+
+
 def serve(port: int = typer.Option(8787, help="Port (the website looks for 8787)."),
           install: bool = typer.Option(False, "--install", help="Start automatically at login (macOS)."),
-          uninstall: bool = typer.Option(False, "--uninstall", help="Remove the login item.")):
+          track: bool = typer.Option(True, "--track/--no-track",
+                                     help="With --install: also check your watches at 07:05 and 19:05 from this Mac."),
+          uninstall: bool = typer.Option(False, "--uninstall", help="Remove the login item and scheduled checks.")):
     """Local runner: the website sends searches to this computer so they come from your own IP."""
     plist = Path.home() / "Library" / "LaunchAgents" / f"{PLIST}.plist"
     if uninstall:
-        subprocess.run(["launchctl", "unload", str(plist)], check=False)
-        plist.unlink(missing_ok=True)
-        out.print("Local runner removed from login items.")
+        for p in (plist, Path.home() / "Library" / "LaunchAgents" / f"{TRACK_PLIST}.plist"):
+            subprocess.run(["launchctl", "unload", str(p)], check=False, capture_output=True)
+            p.unlink(missing_ok=True)
+        out.print("Local runner and scheduled watch checks removed.")
         return
     if install:
         exe = shutil.which("flightscout") or sys.argv[0]
@@ -58,6 +83,13 @@ def serve(port: int = typer.Option(8787, help="Port (the website looks for 8787)
         subprocess.run(["launchctl", "unload", str(plist)], check=False, capture_output=True)
         subprocess.run(["launchctl", "load", str(plist)], check=True)
         out.print(f"Local runner installed: starts at login on http://127.0.0.1:{port} (log: {log}).")
+        if track:
+            if Client().token:
+                _install_tracking(exe, env, Path.home() / "Library" / "Logs" / "flightscout-track.log")
+                out.print("Your watches will also be checked at 07:05 and 19:05 from this Mac (your home IP).")
+            else:
+                con.print("[yellow]Not logged in, so watch checks weren't scheduled. Run `flightscout login`, "
+                          "then `flightscout serve --install` again.[/yellow]")
         return
     import uvicorn
 

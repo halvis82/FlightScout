@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { api } from "@/lib/client";
 import { signOut } from "@/lib/auth-client";
 import { startLocalRunnerProbe, useLocalRunner } from "@/lib/local-runner";
+import { useExtension } from "@/lib/extension";
 import { CURRENCIES } from "@/lib/types";
 import { useApp } from "./app-context";
 import { GuestBanner, ImportGuestData } from "./guest-ui";
@@ -80,11 +81,13 @@ export function Shell({ children }: { children: ReactNode }) {
 
 function LocalRunnerPill() {
   const lr = useLocalRunner();
-  if (!lr.active) return null;
+  const ext = useExtension();
+  if (!lr.active && !ext) return null;
+  const how = lr.active ? `the local runner (flightscout serve${lr.version ? ` ${lr.version}` : ""})` : `the FlightScout Helper extension ${ext}`;
   return (
-    <Tip side="bottom" label={`Searches run on your own machine through flightscout serve${lr.version ? ` ${lr.version}` : ""}. No server rate limits.`}>
-      <Link href="/settings#local-runner" className="hidden items-center gap-1.5 rounded-full border border-good/30 bg-good-soft px-2.5 py-1 text-xs font-medium text-good md:inline-flex">
-        <span className="size-1.5 rounded-full bg-good" /> Local runner
+    <Tip side="bottom" label={`Google Flights searches run from your own IP through ${how}, so they're never blocked or rate limited.`}>
+      <Link href="/settings#own-ip" className="hidden items-center gap-1.5 rounded-full border border-good/30 bg-good-soft px-2.5 py-1 text-xs font-medium text-good md:inline-flex">
+        <span className="size-1.5 rounded-full bg-good" /> Your IP
       </Link>
     </Tip>
   );

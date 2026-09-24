@@ -3,6 +3,7 @@ currency, merge duplicates and wrap each ticket as a Trip."""
 
 from __future__ import annotations
 
+import contextvars
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
@@ -103,15 +104,30 @@ def _google_flex(q: SearchQuery) -> list[Itinerary]:
         best.append((q.departure, q.return_date))
     out: list[Itinerary] = []
     with ThreadPoolExecutor(max_workers=4) as ex:
-        for res in ex.map(lambda dr: google.search(q.model_copy(update={"departure": dr[0], "return_date": dr[1]})), best):
+        runs = [ex.submit(contextvars.copy_context().run, google.search,
+                          q.model_copy(update={"departure": dr[0], "return_date": dr[1]})) for dr in best]
+        for res in (f.result() for f in runs):
             out.extend(res)
     return out
 
 
 def _google(q: SearchQuery) -> list[Itinerary]:
-    if q.departure_flex_days or q.return_flex_days:
-        return _google_flex(q)
-    return google.search(q)
+    try:
+        if q.departure_flex_days or q.return_flex_days:
+            return _google_flex(q)
+        return google.search(q)
+    except Exception as e:
+        # Google refusing our IP: fall back to a paid Google Flights API when
+        # one is configured (SEARCHAPI_KEY, then SERPAPI_KEY). Free otherwise.
+        if "rate_limited" not in str(e) and "429" not in str(e):
+            raise
+        from .sources import searchapi
+
+        for fallback in (searchapi, serpapi):
+            if fallback.enabled():
+                log.warning("google blocked, using %s", fallback.__name__.rsplit(".", 1)[-1])
+                return fallback.search(q)
+        raise
 
 
 def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> SearchResult:
@@ -123,7 +139,8 @@ def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> Search
     errors: dict[str, str] = {}
     found: list[Itinerary] = []
     with ThreadPoolExecutor(max_workers=len(srcs) or 1) as ex:
-        futs = {s: ex.submit(SOURCES[s], q) for s in srcs}
+        # copy_context: browser mode (see browser_fetch.py) must reach the source threads
+        futs = {s: ex.submit(contextvars.copy_context().run, SOURCES[s], q) for s in srcs}
         for s, f in futs.items():
             try:
                 found.extend(f.result())

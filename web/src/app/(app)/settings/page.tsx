@@ -5,6 +5,8 @@ import { Check, Copy, Fingerprint, KeyRound, Plus, Trash2 } from "lucide-react";
 import { AirportInput } from "@/components/airport-input";
 import { useApp } from "@/components/app-context";
 import { cityOf } from "@/lib/airports-client";
+import { useExtension } from "@/lib/extension";
+import { useLocalRunner } from "@/lib/local-runner";
 import { PlainButton, Badge, Button, Card, ErrorNote, Field, Input, PageHeader, Select, Switch } from "@/components/ui";
 import { api, fetcher } from "@/lib/client";
 import { authClient } from "@/lib/auth-client";
@@ -61,6 +63,7 @@ export default function SettingsPage() {
           </Select>
         </Field>
       </Section>
+      <OwnIpSection />
       <FavoritesSection />
       <PlannerSection key={JSON.stringify(settings.planner)} planner={settings.planner} onSave={(planner) => patch({ planner })} />
       <SellerSection rules={settings.sellerRules} onSave={(sellerRules) => patch({ sellerRules })} />
@@ -84,6 +87,63 @@ export default function SettingsPage() {
           </a>
         </Section>
       )}
+    </div>
+  );
+}
+
+function OwnIpSection() {
+  const ext = useExtension();
+  const lr = useLocalRunner();
+  const active = lr.active ? "local runner" : ext ? "extension" : null;
+  return (
+    <div id="own-ip">
+      <Section
+        title="Search from your own IP"
+        sub="Google Flights limits how often one address can search. By default searches run on FlightScout's server, shared by everyone. Either option below makes your searches come from your own connection instead: faster, never blocked, and it keeps the server free for others."
+      >
+        <div className="mb-3 text-sm">
+          Status:{" "}
+          {active ? (
+            <span className="font-medium text-good">using your own IP ({active})</span>
+          ) : (
+            <span className="text-muted">using the shared server</span>
+          )}
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-xl border border-border p-3">
+            <div className="flex items-center justify-between">
+              <div className="font-medium">Browser extension</div>
+              {ext ? <Badge tone="good">Installed {ext}</Badge> : <Badge>Recommended</Badge>}
+            </div>
+            <p className="mt-1 text-xs text-muted">For Chrome, Edge, Brave and Arc. Nothing else to install or run.</p>
+            <ol className="mt-2 list-decimal space-y-0.5 pl-4 text-xs text-muted">
+              <li>
+                <a className="text-accent hover:underline" href="/flightscout-helper.zip" download>
+                  Download the extension
+                </a>{" "}
+                and unzip it.
+              </li>
+              <li>
+                Open <code>chrome://extensions</code> and turn on Developer mode (top right).
+              </li>
+              <li>Click Load unpacked and pick the unzipped folder.</li>
+              <li>Reload this page. The header shows Your IP when it&apos;s working.</li>
+            </ol>
+          </div>
+          <div className="rounded-xl border border-border p-3">
+            <div className="flex items-center justify-between">
+              <div className="font-medium">Local runner</div>
+              {lr.active ? <Badge tone="good">Running {lr.version ?? ""}</Badge> : <Badge>For the CLI</Badge>}
+            </div>
+            <p className="mt-1 text-xs text-muted">Also powers the CLI and AI agents, runs Google Explore live, and checks your watches twice a day from your Mac.</p>
+            <pre className="mt-2 overflow-x-auto rounded-lg bg-surface-2 p-2 text-[11px] leading-relaxed">
+              {"uv tool install --python 3.12 'flightscout[browser] @ git+https://github.com/halvis82/FlightScout#subdirectory=engine'\nflightscout login --url " +
+                (typeof window !== "undefined" ? window.location.origin : "") +
+                " --token <API token below>\nflightscout serve --install"}
+            </pre>
+          </div>
+        </div>
+      </Section>
     </div>
   );
 }
