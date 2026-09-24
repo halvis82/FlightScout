@@ -32,3 +32,13 @@ build-backend = "uv_build"
 
 [tool.uv.sources]
 flights = { git = "https://github.com/punitarani/fli", rev = "main" }
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["live: hits real flight sources over the internet"]

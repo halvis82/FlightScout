@@ -1,0 +1,278 @@
+{
+ "query": "OSL \u2192 SAN on 20/11/2026, 1 adult",
+ "currency": "EUR",
+ "passengers": {
+  "adults": 1,
+  "children": 0,
+  "infants": 0
+ },
+ "resultsCount": 15,
+ "itineraries": [
+  {
+   "id": "1cce078a5129000032fa1d42_0|078a260251290000a1603dc3_0|26021dac512a0000f11e859a_0|26021dac512a0000f11e859a_1",
+   "price": 400.0,
+   "priceFormatted": "400 EUR",
+   "totalDurationSeconds": 117000,
+   "bookingUrl": "https://kiwi.com/u/fq4cygg",
+   "imageId": "san-diego_ca_us",
+   "baggage": {
+    "personalItem": 1,
+    "cabinBag": 0,
+    "checkedBag": 0
+   },
+   "outbound": {
+    "from": "OSL",
+    "to": "SAN",
+    "departureTime": "2026-11-20T12:40:00",
+    "arrivalTime": "2026-11-21T12:10:00",
+    "durationSeconds": 117000,
+    "stops": 3,
+    "route": [
+     "OSL",
+     "GDN",
+     "ARN",
+     "AMS",
+     "SAN"
+    ],
+    "cabinClass": "Economy",
+    "segments": [
+     {
+      "from": "OSL",
+      "to": "GDN",
+      "fromCity": "Oslo",
+      "toCity": "Gda\u0144sk",
+      "fromName": "Oslo Airport, Gardermoen",
+      "toName": "Gda\u0144sk Lech Wa\u0142\u0119sa",
+      "fromCountry": "Norway",
+      "toCountry": "Poland",
+      "departureTime": "2026-11-20T12:40:00",
+      "arrivalTime": "2026-11-20T14:15:00",
+      "durationSeconds": 5700,
+      "carrier": "W6",
+      "carrierName": "Wizz Air",
+      "flightNumber": "W61784",
+      "cabinClass": "Economy"
+     },
+     {
+      "from": "GDN",
+      "to": "ARN",
+      "fromCity": "Gda\u0144sk",
+      "toCity": "Stockholm",
+      "fromName": "Gda\u0144sk Lech Wa\u0142\u0119sa",
+      "toName": "Stockholm Arlanda",
+      "fromCountry": "Poland",
+      "toCountry": "Sweden",
+      "departureTime": "2026-11-20T19:35:00",
+      "arrivalTime": "2026-11-20T21:05:00",
+      "durationSeconds": 5400,
+      "carrier": "W6",
+      "carrierName": "Wizz Air",
+      "flightNumber": "W61731",
+      "cabinClass": "Economy"
+     },
+     {
+      "from": "ARN",
+      "to": "AMS",
+      "fromCity": "Stockholm",
+      "toCity": "Amsterdam",
+      "fromName": "Stockholm Arlanda",
+      "toName": "Amsterdam Airport Schiphol",
+      "fromCountry": "Sweden",
+      "toCountry": "Netherlands",
+      "departureTime": "2026-11-21T06:25:00",
+      "arrivalTime": "2026-11-21T08:40:00",
+      "durationSeconds": 8100,
+      "carrier": "KL",
+      "carrierName": "KLM Royal Dutch Airlines",
+      "flightNumber": "KL1214",
+      "cabinClass": "Economy"
+     },
+     {
+      "from": "AMS",
+      "to": "SAN",
+      "fromCity": "Amsterdam",
+      "toCity": "San Diego",
+      "fromName": "Amsterdam Airport Schiphol",
+      "toName": "San Diego International",
+      "fromCountry": "Netherlands",
+      "toCountry": "United States",
+      "departureTime": "2026-11-21T09:55:00",
+      "arrivalTime": "2026-11-21T12:10:00",
+      "durationSeconds": 40500,
+      "carrier": "KL",
+      "carrierName": "KLM Royal Dutch Airlines",
+      "flightNumber": "KL639",
+      "cabinClass": "Economy"
+     }
+    ]
+   },
+   "inbound": null
+  },
+  {
+   "id": "1cce125b51290000e8dce38b_0|26021dac512a0000f11e859a_0|1cce125b51290000e8dce38b_1|26021dac512a0000f11e859a_1",
+   "price": 412.0,
+   "priceFormatted": "412 EUR",
+   "totalDurationSeconds": 85200,
+   "bookingUrl": "https://kiwi.com/u/42t4cr",
+   "imageId": "san-diego_ca_us",
+   "baggage": {
+    "personalItem": 1,
+    "cabinBag": 0,
+    "checkedBag": 0
+   },
+   "outbound": {
+    "from": "OSL",
+    "to": "SAN",
+    "departureTime": "2026-11-20T21:30:00",
+    "arrivalTime": "2026-11-21T12:10:00",
+    "durationSeconds": 85200,
+    "stops": 2,
+    "route": [
+     "OSL",
+     "ARN",
+     "AMS",
+     "SAN"
+    ],
+    "cabinClass": "Economy",
+    "segments": [
+     {
+      "from": "OSL",
+      "to": "ARN",
+      "fromCity": "Oslo",
+      "toCity": "Stockholm",
+      "fromName": "Oslo Airport, Gardermoen",
+      "toName": "Stockholm Arlanda",
+      "fromCountry": "Norway",
+      "toCountry": "Sweden",
+      "departureTime": "2026-11-20T21:30:00",
+      "arrivalTime": "2026-11-20T22:35:00",
+      "durationSeconds": 3900,
+      "carrier": "SK",
+      "carrierName": "SAS",
+      "flightNumber": "SK1488",
+      "cabinClass": "Economy"
+     },
+     {
+      "from": "ARN",
+      "to": "AMS",
+      "fromCity": "Stockholm",
+      "toCity": "Amsterdam",
+      "fromName": "Stockholm Arlanda",
+      "toName": "Amsterdam Airport Schiphol",
+      "fromCountry": "Sweden",
+      "toCountry": "Netherlands",
+      "departureTime": "2026-11-21T06:25:00",
+      "arrivalTime": "2026-11-21T08:40:00",
+      "durationSeconds": 8100,
+      "carrier": "KL",
+      "carrierName": "KLM Royal Dutch Airlines",
+      "flightNumber": "KL1214",
+      "cabinClass": "Economy"
+     },
+     {
+      "from": "AMS",
+      "to": "SAN",
+      "fromCity": "Amsterdam",
+      "toCity": "San Diego",
+      "fromName": "Amsterdam Airport Schiphol",
+      "toName": "San Diego International",
+      "fromCountry": "Netherlands",
+      "toCountry": "United States",
+      "departureTime": "2026-11-21T09:55:00",
+      "arrivalTime": "2026-11-21T12:10:00",
+      "durationSeconds": 40500,
+      "carrier": "KL",
+      "carrierName": "KLM Royal Dutch Airlines",
+      "flightNumber": "KL639",
+      "cabinClass": "Economy"
+     }
+    ]
+   },
+   "inbound": null
+  },
+  {
+   "id": "1cce2602512900007dd2a84c_0|26021dac512a0000f11e859a_0|26021dac512a0000f11e859a_1",
+   "price": 412.0,
+   "priceFormatted": "412 EUR",
+   "totalDurationSeconds": 95100,
+   "bookingUrl": "https://kiwi.com/u/sctsxw",
+   "imageId": "san-diego_ca_us",
+   "baggage": {
+    "personalItem": 1,
+    "cabinBag": 0,
+    "checkedBag": 0
+   },
+   "outbound": {
+    "from": "OSL",
+    "to": "SAN",
+    "departureTime": "2026-11-20T18:45:00",
+    "arrivalTime": "2026-11-21T12:10:00",
+    "durationSeconds": 95100,
+    "stops": 2,
+    "route": [
+     "OSL",
+     "ARN",
+     "AMS",
+     "SAN"
+    ],
+    "cabinClass": "Economy",
+    "segments": [
+     {
+      "from": "OSL",
+      "to": "ARN",
+      "fromCity": "Oslo",
+      "toCity": "Stockholm",
+      "fromName": "Oslo Airport, Gardermoen",
+      "toName": "Stockholm Arlanda",
+      "fromCountry": "Norway",
+      "toCountry": "Sweden",
+      "departureTime": "2026-11-20T18:45:00",
+      "arrivalTime": "2026-11-20T20:05:00",
+      "durationSeconds": 4800,
+      "carrier": "ET",
+      "carrierName": "Ethiopian Airlines",
+      "flightNumber": "ET715",
+      "cabinClass": "Economy"
+     },
+     {
+      "from": "ARN",
+      "to": "AMS",
+      "fromCity": "Stockholm",
+      "toCity": "Amsterdam",
+      "fromName": "Stockholm Arlanda",
+      "toName": "Amsterdam Airport Schiphol",
+      "fromCountry": "Sweden",
+      "toCountry": "Netherlands",
+      "departureTime": "2026-11-21T06:25:00",
+      "arrivalTime": "2026-11-21T08:40:00",
+      "durationSeconds": 8100,
+      "carrier": "KL",
+      "carrierName": "KLM Royal Dutch Airlines",
+      "flightNumber": "KL1214",
+      "cabinClass": "Economy"
+     },
+     {
+      "from": "AMS",
+      "to": "SAN",
+      "fromCity": "Amsterdam",
+      "toCity": "San Diego",
+      "fromName": "Amsterdam Airport Schiphol",
+      "toName": "San Diego International",
+      "fromCountry": "Netherlands",
+      "toCountry": "United States",
+      "departureTime": "2026-11-21T09:55:00",
+      "arrivalTime": "2026-11-21T12:10:00",
+      "durationSeconds": 40500,
+      "carrier": "KL",
+      "carrierName": "KLM Royal Dutch Airlines",
+      "flightNumber": "KL639",
+      "cabinClass": "Economy"
+     }
+    ]
+   },
+   "inbound": null
+  }
+ ],
+ "searchTimeMs": 8935,
+ "error": null
+}

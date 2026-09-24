@@ -18,6 +18,7 @@ class Airport(BaseModel):
     lat: float
     lon: float
     size: str  # "L" large, "M" medium
+    alt: str | None = None  # local municipality name when it differs from the city
 
 
 # Metro codes expand to every commercial airport in the area. Searching a
@@ -103,7 +104,7 @@ def find(query: str, limit: int = 25) -> list[Airport]:
     ("cancun" finds Cancún). Exact codes first, then large airports."""
     q = _fold(query.strip())
     hits = [a for a in _db().values()
-            if q == a.iata.lower() or q in _fold(a.city) or q in _fold(a.name)]
+            if q == a.iata.lower() or q in _fold(a.city) or q in _fold(a.name) or (a.alt and q in _fold(a.alt))]
     hits.sort(key=lambda a: (a.iata.lower() != q, not _fold(a.city).startswith(q), a.size != "L"))
     return hits[:limit]
 

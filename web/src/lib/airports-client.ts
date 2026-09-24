@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-export type AirportRow = { iata: string; name: string; city: string; country: string; lat: number; lon: number; size: "L" | "M" };
+export type AirportRow = { iata: string; name: string; city: string; country: string; lat: number; lon: number; size: "L" | "M"; alt?: string };
 
 // Same metro groups as the engine (engine/src/flightscout/airports.py).
 export const METROS: Record<string, { label: string; codes: string[] }> = {
@@ -82,6 +82,7 @@ export function searchAirports(rows: AirportRow[], q: string, limit = 8) {
     else if (city.split(/[\s(/-]+/).some((w) => w.startsWith(s))) score = 300;
     else if (name.includes(s)) score = 200;
     else if (city.includes(s)) score = 150;
+    else if (r.alt && fold(r.alt).includes(s)) score = fold(r.alt).startsWith(s) ? 450 : 140; // local name, e.g. San José del Cabo
     if (score >= 0) scored.push([score + (r.size === "L" ? 50 : 0), r]);
   }
   scored.sort((a, b) => b[0] - a[0] || a[1].city.localeCompare(b[1].city));

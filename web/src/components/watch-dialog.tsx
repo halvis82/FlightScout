@@ -1,4 +1,6 @@
 "use client";
+import { mutate } from "swr";
+import { toast } from "./stores";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AirportInput, PlaceChips } from "./airport-input";
@@ -217,7 +219,27 @@ export function useWatchDialog() {
   const { currency } = useApp();
   const [state, setState] = useState<{ open: boolean; initial: WatchForm; seed?: Trip[] }>({ open: false, initial: defaultWatch(currency) });
   return {
-    open: (p?: Partial<WatchForm>, seed?: Trip[]) => setState({ open: true, initial: defaultWatch(currency, p), seed }),
+    // One click: create the watch right away (sensible defaults), seed it
+    // with the current results, and offer the full form from the toast.
+    open: async (p?: Partial<WatchForm>, seed?: Trip[]) => {
+      const f = defaultWatch(currency, p);
+      const body = { ...f, name: f.name || `${f.origins.join("/")} to ${f.destinations.join("/")}` };
+      try {
+        const row = await api<{ id: number }>("/watches", { body });
+        if (seed?.length) {
+          const obs = tripsToObservations(seed, body.destinations).filter(
+            (o) => o.depart_date >= body.depart_start && o.depart_date <= body.depart_end,
+          );
+          if (obs.length) await api(`/watches/${row.id}/observations`, { body: obs }).catch(() => {});
+        }
+        mutate("/watches");
+        toast({ text: `Watching ${body.name}. Prices are checked twice a day.`, action: { label: "Open", href: `/watches/${row.id}` }, tone: "good" }, 6000);
+      } catch {
+        // fall back to the form (e.g. missing fields)
+        setState({ open: true, initial: f, seed });
+      }
+    },
+    edit: (p?: Partial<WatchForm>, seed?: Trip[]) => setState({ open: true, initial: defaultWatch(currency, p), seed }),
     element: (
       <WatchDialog
         open={state.open}

@@ -88,7 +88,6 @@ function SearchPage() {
   const [planBusy, setPlanBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
-  const autoRan = useRef(false);
   const runSeq = useRef(0);
   const [stale, setStale] = useState(false);
   const [pending, setPending] = useState(0);
@@ -104,7 +103,7 @@ function SearchPage() {
         /* ignore */
       }
       const f = { ...f0, currency };
-      lastRun.current = JSON.stringify([f.from, f.to, f.depart, f.ret, f.tripType, f.flex, f.retFlex]);
+      lastRun.current = JSON.stringify([f0.from, f0.to, f0.depart, f0.ret, f0.tripType, f0.flex, f0.retFlex, f0.cabin, f0.adults, f0.stops, f0.nearby]);
       setErr(null);
       setStale(true); // keep showing the previous results, dimmed
       setPending(4);
@@ -229,23 +228,22 @@ function SearchPage() {
     router.replace("/", { scroll: false });
   }, [fresh, router]);
 
-  // After a first search, changing dates (arrows or calendar) searches again.
+  // Search by itself as soon as the form is complete (from, to, dates) and
+  // whenever it changes: picking a destination, arrows, presets, flexibility.
+  const formKey = form
+    ? JSON.stringify([form.from, form.to, form.depart, form.ret, form.tripType, form.flex, form.retFlex, form.cabin, form.adults, form.stops, form.nearby])
+    : "";
   useEffect(() => {
-    if (!form || !lastRun.current || !form.to.length || !form.from.length) return;
-    const k = JSON.stringify([form.from, form.to, form.depart, form.ret, form.tripType, form.flex, form.retFlex]);
-    if (k === lastRun.current) return;
-    const t = setTimeout(() => run(form), 700);
+    if (!form || form.tripType === "multicity" || !form.to.length || !form.from.length) return;
+    if (lastRun.current === null && result) {
+      lastRun.current = formKey; // restored from a tab switch: don't re-run
+      return;
+    }
+    if (formKey === lastRun.current) return;
+    const t = setTimeout(() => run(form), 600);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form?.depart, form?.ret, form?.tripType, form?.flex, form?.retFlex]);
-
-  // Auto run when opened with a full query in the URL (links from watches, history, CLI).
-  useEffect(() => {
-    if (form && !autoRan.current && params.get("from") && params.get("to") && params.get("d")) {
-      autoRan.current = true;
-      run(form);
-    }
-  }, [form, params, run]);
+  }, [formKey]);
 
   if (!form)
     return (
