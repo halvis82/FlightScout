@@ -26,4 +26,6 @@ def test_fast_explore_is_broad():
 
 def test_direct_airline_source_wideroe():
     r = search(SearchQuery(origins=["BGO"], destinations=["TRD"], departure=D, sources=["wideroe"]))
+    if "403" in r.errors.get("wideroe", ""):
+        pytest.skip("Widerøe's Cloudflare blocks this IP (GitHub runners); works from home and Vercel")
     assert r.trips, r.errors
