@@ -10,7 +10,8 @@ test.describe("explore", () => {
     const rows = page.locator("section .cursor-pointer");
     await expect.poll(() => rows.count(), { timeout: 30_000 }).toBeGreaterThan(30);
     // labels, full prices (never "$1k")
-    const labels = await page.locator("[data-label]").allInnerTexts();
+    await expect.poll(() => page.locator("[data-label]:not(.fs-dot)").count()).toBeGreaterThan(10);
+    const labels = await page.locator("[data-label]:not(.fs-dot)").allInnerTexts();
     expect(labels.some((l) => /\$\d/.test(l))).toBe(true);
     expect(labels.some((l) => /\dk\b/i.test(l))).toBe(false);
     // zooming reveals more labels
@@ -32,7 +33,11 @@ test.describe("explore", () => {
     await page.getByRole("radio", { name: "Any dates" }).click();
     const slider = page.getByRole("slider", { name: "Maximum price" }).first();
     const n = await rows.count();
-    await slider.fill(String(Number(await slider.getAttribute("min")) + 50));
+    await slider.evaluate((el: HTMLInputElement) => {
+      const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
+      set.call(el, String(Math.round((Number(el.min) + Number(el.max)) / 4)));
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    });
     await expect.poll(() => rows.count()).toBeLessThan(n);
   });
 

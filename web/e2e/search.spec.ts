@@ -6,7 +6,7 @@ test.describe("search", () => {
     const errors = watchErrors(page);
     await fresh(page);
     await clearFrom(page);
-    await pickAirport(page, /Where from|Add airport/, "los angeles", "Los Angeles International");
+    await pickAirport(page, /Where from|Add airport/, "lax", "LAX");
     await pickAirport(page, "Anywhere (explore)", "denpasar", "Denpasar");
     // step count: two picks, zero clicks on Search
     await expect(page.getByText(/\d+ flights/)).toBeVisible({ timeout: 60_000 });
@@ -27,9 +27,10 @@ test.describe("search", () => {
   test("trip presets and flexibility are one click", async ({ page }) => {
     await fresh(page);
     await page.getByRole("button", { name: "Weekend" }).click();
-    await expect(page.getByText("Return", { exact: true })).toBeVisible();
+    const ret = page.locator("form").getByText("Return", { exact: true });
+    await expect(ret.first()).toBeVisible();
     await page.getByRole("button", { name: "One flight" }).click();
-    await expect(page.getByText("Return", { exact: true })).toHaveCount(0);
+    await expect(ret).toHaveCount(0);
     await page.getByRole("radio", { name: "Round trip" }).click();
     await page.getByRole("button", { name: "±2" }).first().click();
   });

@@ -67,16 +67,51 @@ export function probeLocalRunner(): Promise<boolean> {
 }
 
 let started = false;
-// Probe now and every 60 s while the tab is visible.
+const SEEN = "fs.runner.seen"; // the runner has answered on this browser before
+const MISS = "fs.runner.miss"; // last time a probe found nothing
+
+function lsGet(k: string) {
+  try {
+    return localStorage.getItem(k);
+  } catch {
+    return null;
+  }
+}
+function lsSet(k: string, v: string) {
+  try {
+    localStorage.setItem(k, v);
+  } catch {
+    /* ignore */
+  }
+}
+
+// Browsers log a console error for every failed probe, so only people who
+// actually use the runner get polled every minute. Everyone else is checked
+// at most once a day (Settings can re-check any time).
+async function probeAndRemember() {
+  const ok = await probeLocalRunner();
+  if (ok) lsSet(SEEN, "1");
+  else lsSet(MISS, String(Date.now()));
+  return ok;
+}
+
 export function startLocalRunnerProbe() {
   if (started || typeof window === "undefined") return;
   started = true;
-  probeLocalRunner();
-  setInterval(() => {
-    if (document.visibilityState === "visible") probeLocalRunner();
-  }, 60_000);
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") probeLocalRunner();
+  const seen = lsGet(SEEN) === "1";
+  const lastMiss = Number(lsGet(MISS) ?? 0);
+  if (!seen && Date.now() - lastMiss < 24 * 3600_000) {
+    emit({ ...state, checked: true });
+    return;
+  }
+  probeAndRemember().then((ok) => {
+    if (!ok && !seen) return;
+    setInterval(() => {
+      if (document.visibilityState === "visible") probeLocalRunner();
+    }, 60_000);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") probeLocalRunner();
+    });
   });
 }
 
