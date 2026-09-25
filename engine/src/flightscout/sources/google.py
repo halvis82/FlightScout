@@ -69,14 +69,19 @@ class _DiverseSearch(SearchFlights):
         ~50 flights ranked by "Best", so the long, odd, cheap connections from
         its Cheapest tab are often missing; the slices surface them (tested:
         84 itineraries covering 42 of 43 Cheapest tab departures, vs 49)."""
-        if not capture_session or filters.stops != MaxStops.ANY or filters.alliances or filters.airlines:
+        if (not capture_session or filters.stops != MaxStops.ANY or filters.alliances or filters.airlines
+                or filters.alliances_exclude):
             return super()._fetch_flights(filters, capture_session=capture_session, **kw)
         from copy import deepcopy
 
         from fli.models import Alliance
 
         variants = [filters]
-        for extra in ({"stops": MaxStops.ONE_STOP_OR_FEWER}, *({"alliances": [a]} for a in Alliance)):
+        # slices: nonstop, 1 stop or fewer, each alliance, and airlines in no
+        # alliance (Philippine, WestJet, Emirates...: often the cheap long
+        # connections Google's Cheapest tab shows)
+        for extra in ({"stops": MaxStops.NON_STOP}, {"stops": MaxStops.ONE_STOP_OR_FEWER},
+                      *({"alliances": [a]} for a in Alliance), {"alliances_exclude": list(Alliance)}):
             f = deepcopy(filters)
             for k, v in extra.items():
                 setattr(f, k, v)

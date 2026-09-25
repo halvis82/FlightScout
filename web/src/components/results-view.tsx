@@ -12,6 +12,8 @@ import type { PlanResult, SearchQuery, SearchResult, Trip } from "@/lib/types";
 
 type Sort = "price" | "duration" | "departure" | "best";
 
+const SOURCE_NAMES: Record<string, string> = { google: "Google Flights", kiwi: "Kiwi", kiwiweb: "Kiwi", serpapi: "Google (paid)" };
+
 function tripDuration(t: Trip) {
   if (t.tickets.length === 1) return t.tickets[0].slices[0].duration_min;
   return t.travel_min;
@@ -209,6 +211,17 @@ export function ResultsView({
             {grouped.length} flights{grouped.length !== trips.length ? ` (${trips.length} combinations)` : ""}
           </span>
           {blocked > 0 && <span>{blocked} hidden by your seller rules</span>}
+          <span title="Options found per source. Google includes the flights from its Cheapest tab.">
+            {Object.entries(
+              trips.reduce<Record<string, number>>((acc, t) => {
+                for (const tk of t.tickets) acc[SOURCE_NAMES[tk.source] ?? "Airlines direct"] = (acc[SOURCE_NAMES[tk.source] ?? "Airlines direct"] ?? 0) + 1;
+                return acc;
+              }, {}),
+            )
+              .sort((a, b) => b[1] - a[1])
+              .map(([k, v]) => `${k} ${v}`)
+              .join(" · ")}
+          </span>
           {direct && (
             <span>
               Cheapest single ticket: <span className="font-medium text-fg">{direct.total_price.toFixed(0)} {direct.currency}</span>

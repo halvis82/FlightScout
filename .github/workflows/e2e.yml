@@ -13,11 +13,14 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6
-      - name: Live source tests
+      - name: Browser for the Google Cheapest tab check
+        working-directory: engine
+        run: uv run --extra browser playwright install --with-deps chromium chrome
+      - name: Live source tests (incl. coverage of Google's Cheapest tab)
         working-directory: engine
         env:
           FLIGHTSCOUT_LIVE: "1"
-        run: uv run pytest -q -m live
+        run: uv run --extra browser pytest -q -m live
 
   site:
     runs-on: ubuntu-latest
