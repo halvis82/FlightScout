@@ -1,0 +1,451 @@
+{
+"isError": false,
+"trips": {
+"19": [
+{
+"id": "O1417101_I1417106",
+"outboundDepartureAirportName": "Manchester",
+"outboundDepartureAirportCode": "MAN",
+"outboundArrivalAirportName": "Tenerife",
+"outboundArrivalAirportCode": "TFS",
+"inboundDepartureAirportName": "Tenerife",
+"inboundDepartureAirportCode": "TFS",
+"inboundArrivalAirportName": "Manchester",
+"inboundArrivalAirportCode": "MAN",
+"inboundArrivalTime": "2026-12-27T00:35:00+00:00",
+"inboundArrivalTimeString": "00:35",
+"inboundArrivalDateString": "Sun 27 Dec 2026",
+"inboundDepartureTime": "2026-12-26T19:50:00+00:00",
+"inboundDepartureTimeString": "19:50",
+"inboundDepartureDateString": "Sat 26 Dec 2026",
+"inboundDuration": "04:45:00",
+"inboundDurationHours": 4,
+"inboundDurationMinutes": 45,
+"outboundArrivalTime": "2026-12-19T19:10:00+00:00",
+"outboundArrivalTimeString": "19:10",
+"outboundArrivalDateString": "Sat 19 Dec 2026",
+"outboundDepartureTime": "2026-12-19T14:25:00+00:00",
+"outboundDepartureTimeString": "14:25",
+"outboundDepartureDateString": "Sat 19 Dec 2026",
+"outboundDuration": "04:45:00",
+"outboundDurationHours": 4,
+"outboundDurationMinutes": 45,
+"price": {
+"total": 672.0,
+"perPerson": 336.0
+},
+"priceWas": {
+"total": 672.0,
+"perPerson": 336.0
+},
+"inboundPrice": {
+"total": 120.0,
+"perPerson": 60.0
+},
+"inboundPriceWas": {
+"total": 0.0,
+"perPerson": 0.0
+},
+"outboundPrice": {
+"total": 552.0,
+"perPerson": 276.0
+},
+"outboundPriceWas": {
+"total": 0.0,
+"perPerson": 0.0
+},
+"flightIds": {
+"outbound": 1417101,
+"inbound": 1417106
+},
+"originalPrice": null,
+"outboundIsMyJet2Discount": false,
+"inboundIsMyJet2Discount": false
+},
+{
+"id": "O1417101_I1417124",
+"outboundDepartureAirportName": "Manchester",
+"outboundDepartureAirportCode": "MAN",
+"outboundArrivalAirportName": "Tenerife",
+"outboundArrivalAirportCode": "TFS",
+"inboundDepartureAirportName": "Tenerife",
+"inboundDepartureAirportCode": "TFS",
+"inboundArrivalAirportName": "Manchester",
+"inboundArrivalAirportCode": "MAN",
+"inboundArrivalTime": "2026-12-27T00:45:00+00:00",
+"inboundArrivalTimeString": "00:45",
+"inboundArrivalDateString": "Sun 27 Dec 2026",
+"inboundDepartureTime": "2026-12-26T20:00:00+00:00",
+"inboundDepartureTimeString": "20:00",
+"inboundDepartureDateString": "Sat 26 Dec 2026",
+"inboundDuration": "04:45:00",
+"inboundDurationHours": 4,
+"inboundDurationMinutes": 45,
+"outboundArrivalTime": "2026-12-19T19:10:00+00:00",
+"outboundArrivalTimeString": "19:10",
+"outboundArrivalDateString": "Sat 19 Dec 2026",
+"outboundDepartureTime": "2026-12-19T14:25:00+00:00",
+"outboundDepartureTimeString": "14:25",
+"outboundDepartureDateString": "Sat 19 Dec 2026",
+"outboundDuration": "04:45:00",
+"outboundDurationHours": 4,
+"outboundDurationMinutes": 45,
+"price": {
+"total": 682.0,
+"perPerson": 341.0
+},
+"priceWas": {
+"total": 682.0,
+"perPerson": 341.0
+},
+"inboundPrice": {
+"total": 130.0,
+"perPerson": 65.0
+},
+"inboundPriceWas": {
+"total": 0.0,
+"perPerson": 0.0
+},
+"outboundPrice": {
+"total": 552.0,
+"perPerson": 276.0
+},
+"outboundPriceWas": {
+"total": 0.0,
+"perPerson": 0.0
+},
+"flightIds": {
+"outbound": 1417101,
+"inbound": 1417124
+},
+"originalPrice": null,
+"outboundIsMyJet2Discount": false,
+"inboundIsMyJet2Discount": false
+},
+{
+"id": "O1417101_I1417018",
+"outboundDepartureAirportName": "Manchester",
+"outboundDepartureAirportCode": "MAN",
+"outboundArrivalAirportName": "Tenerife",
+"outboundArrivalAirportCode": "TFS",
+"inboundDepartureAirportName": "Tenerife",
+"inboundDepartureAirportCode": "TFS",
+"inboundArrivalAirportName": "Manchester",
+"inboundArrivalAirportCode": "MAN",
+"inboundArrivalTime": "2026-12-26T20:20:00+00:00",
+"inboundArrivalTimeString": "20:20",
+"inboundArrivalDateString": "Sat 26 Dec 2026",
+"inboundDepartureTime": "2026-12-26T15:35:00+00:00",
+"inboundDepartureTimeString": "15:35",
+"inboundDepartureDateString": "Sat 26 Dec 2026",
+"inboundDuration": "04:45:00",
+"inboundDurationHours": 4,
+"inboundDurationMinutes": 45,
+"outboundArrivalTime": "2026-12-19T19:10:00+00:00",
+"outboundArrivalTimeString": "19:10",
+"outboundArrivalDateString": "Sat 19 Dec 2026",
+"outboundDepartureTime": "2026-12-19T14:25:00+00:00",
+"outboundDepartureTimeString": "14:25",
+"outboundDepartureDateString": "Sat 19 Dec 2026",
+"outboundDuration": "04:45:00",
+"outboundDurationHours": 4,
+"outboundDurationMinutes": 45,
+"price": {
+"total": 698.0,
+"perPerson": 349.0
+},
+"priceWas": {
+"total": 698.0,
+"perPerson": 349.0
+},
+"inboundPrice": {
+"total": 146.0,
+"perPerson": 73.0
+},
+"inboundPriceWas": {
+"total": 0.0,
+"perPerson": 0.0
+},
+"outboundPrice": {
+"total": 552.0,
+"perPerson": 276.0
+},
+"outboundPriceWas": {
+"total": 0.0,
+"perPerson": 0.0
+},
+"flightIds": {
+"outbound": 1417101,
+"inbound": 1417018
+},
+"originalPrice": null,
+"outboundIsMyJet2Discount": false,
+"inboundIsMyJet2Discount": false
+},
+{
+"id": "O1417101_I1416982",
+"outboundDepartureAirportName": "Manchester",
+"outboundDepartureAirportCode": "MAN",
+"outboundArrivalAirportName": "Tenerife",
+"outboundArrivalAirportCode": "TFS",
+"inboundDepartureAirportName": "Tenerife",
+"inboundDepartureAirportCode": "TFS",
+"inboundArrivalAirportName": "Manchester",
+"inboundArrivalAirportCode": "MAN",
+"inboundArrivalTime": "2026-12-26T19:50:00+00:00",
+"inboundArrivalTimeString": "19:50",
+"inboundArrivalDateString": "Sat 26 Dec 2026",
+"inboundDepartureTime": "2026-12-26T15:05:00+00:00",
+"inboundDepartureTimeString": "15:05",
+"inboundDepartureDateString": "Sat 26 Dec 2026",
+"inboundDuration": "04:45:00",
+"inboundDurationHours": 4,
+"inboundDurationMinutes": 45,
+"outboundArrivalTime": "2026-12-19T19:10:00+00:00",
+"outboundArrivalTimeString": "19:10",
+"outboundArrivalDateString": "Sat 19 Dec 2026",
+"outboundDepartureTime": "2026-12-19T14:25:00+00:00",
+"outboundDepartureTimeString": "14:25",
+"outboundDepartureDateString": "Sat 19 Dec 2026",
+"outboundDuration": "04:45:00",
+"outboundDurationHours": 4,
+"outboundDurationMinutes": 45,
+"price": {
+"total": 712.0,
+"perPerson": 356.0
+},
+"priceWas": {
+"total": 712.0,
+"perPerson": 356.0
+},
+"inboundPrice": {
+"total": 160.0,
+"perPerson": 80.0
+},
+"inboundPriceWas": {
+"total": 0.0,
+"perPerson": 0.0
+},
+"outboundPrice": {
+"total": 552.0,
+"perPerson": 276.0
+},
+"outboundPriceWas": {
+"total": 0.0,
+"perPerson": 0.0
+},
+"flightIds": {
+"outbound": 1417101,
+"inbound": 1416982
+},
+"originalPrice": null,
+"outboundIsMyJet2Discount": false,
+"inboundIsMyJet2Discount": false
+},
+{
+"id": "O1417103_I1417106",
+"outboundDepartureAirportName": "Manchester",
+"outboundDepartureAirportCode": "MAN",
+"outboundArrivalAirportName": "Tenerife",
+"outboundArrivalAirportCode": "TFS",
+"inboundDepartureAirportName": "Tenerife",
+"inboundDepartureAirportCode": "TFS",
+"inboundArrivalAirportName": "Manchester",
+"inboundArrivalAirportCode": "MAN",
+"inboundArrivalTime": "2026-12-27T00:35:00+00:00",
+"inboundArrivalTimeString": "00:35",
+"inboundArrivalDateString": "Sun 27 Dec 2026",
+"inboundDepartureTime": "2026-12-26T19:50:00+00:00",
+"inboundDepartureTimeString": "19:50",
+"inboundDepartureDateString": "Sat 26 Dec 2026",
+"inboundDuration": "04:45:00",
+"inboundDurationHours": 4,
+"inboundDurationMinutes": 45,
+"outboundArrivalTime": "2026-12-19T18:50:00+00:00",
+"outboundArrivalTimeString": "18:50",
+"outboundArrivalDateString": "Sat 19 Dec 2026",
+"outboundDepartureTime": "2026-12-19T14:05:00+00:00",
+"outboundDepartureTimeString": "14:05",
+"outboundDepartureDateString": "Sat 19 Dec 2026",
+"outboundDuration": "04:45:00",
+"outboundDurationHours": 4,
+"outboundDurationMinutes": 45,
+"price": {
+"total": 724.0,
+"perPerson": 362.0
+},
+"priceWas": {
+"total": 724.0,
+"perPerson": 362.0
+},
+"inboundPrice": {
+"total": 120.0,
+"perPerson": 60.0
+},
+"inboundPriceWas": {
+"total": 0.0,
+"perPerson": 0.0
+},
+"outboundPrice": {
+"total": 604.0,
+"perPerson": 302.0
+},
+"outboundPriceWas": {
+"total": 0.0,
+"perPerson": 0.0
+},
+"flightIds": {
+"outbound": 1417103,
+"inbound": 1417106
+},
+"originalPrice": null,
+"outboundIsMyJet2Discount": false,
+"inboundIsMyJet2Discount": false
+},
+{
+"id": "O1417103_I1417124",
+"outboundDepartureAirportName": "Manchester",
+"outboundDepartureAirportCode": "MAN",
+"outboundArrivalAirportName": "Tenerife",
+"outboundArrivalAirportCode": "TFS",
+"inboundDepartureAirportName": "Tenerife",
+"inboundDepartureAirportCode": "TFS",
+"inboundArrivalAirportName": "Manchester",
+"inboundArrivalAirportCode": "MAN",
+"inboundArrivalTime": "2026-12-27T00:45:00+00:00",
+"inboundArrivalTimeString": "00:45",
+"inboundArrivalDateString": "Sun 27 Dec 2026",
+"inboundDepartureTime": "2026-12-26T20:00:00+00:00",
+"inboundDepartureTimeString": "20:00",
+"inboundDepartureDateString": "Sat 26 Dec 2026",
+"inboundDuration": "04:45:00",
+"inboundDurationHours": 4,
+"inboundDurationMinutes": 45,
+"outboundArrivalTime": "2026-12-19T18:50:00+00:00",
+"outboundArrivalTimeString": "18:50",
+"outboundArrivalDateString": "Sat 19 Dec 2026",
+"outboundDepartureTime": "2026-12-19T14:05:00+00:00",
+"outboundDepartureTimeString": "14:05",
+"outboundDepartureDateString": "Sat 19 Dec 2026",
+"outboundDuration": "04:45:00",
+"outboundDurationHours": 4,
+"outboundDurationMinutes": 45,
+"price": {
+"total": 734.0,
+"perPerson": 367.0
+},
+"priceWas": {
+"total": 734.0,
+"perPerson": 367.0
+},
+"inboundPrice": {
+"total": 130.0,
+"perPerson": 65.0
+},
+"inboundPriceWas": {
+"total": 0.0,
+"perPerson": 0.0
+},
+"outboundPrice": {
+"total": 604.0,
+"perPerson": 302.0
+},
+"outboundPriceWas": {
+"total": 0.0,
+"perPerson": 0.0
+},
+"flightIds": {
+"outbound": 1417103,
+"inbound": 1417124
+},
+"originalPrice": null,
+"outboundIsMyJet2Discount": false,
+"inboundIsMyJet2Discount": false
+}
+]
+},
+"selectedOutboundFlight": {
+"seatsCutOffInHours": 0,
+"bagsCutOffInHours": 0,
+"onlineCheckInCutoffInHours": 0,
+"averageRoundingUplift": 0.0,
+"adultAutoDiscountAmount": 0.0,
+"adultPrice": 276.0,
+"airPassengerDuty": 15.0,
+"arrivalTime": "2026-12-19T19:10:00+00:00",
+"baseFare": 0.0,
+"childAutoDiscountAmount": 0.0,
+"childPrice": 261.0,
+"currencyCode": "GBP",
+"departureTime": "2026-12-19T14:25:00+00:00",
+"discountedPrice": 0.0,
+"flightId": 1417101,
+"flightNumber": "LS829",
+"infantPrice": 0.0,
+"isFull": false,
+"seatAvailability": 0,
+"totalSeats": 0,
+"usedSeats": 0,
+"availableSeats": 0,
+"preDiscountPrice": 0.0,
+"minAgeToExcludeFromApd": 0,
+"maxAgeToExcludeFromApd": 15,
+"minAgeForEmergencyExitSeats": 0,
+"subtotal": 0.0,
+"deadSeatChargeAccepted": false,
+"isRestricted": false,
+"totalDiscountAmount": 0.0,
+"airline": {
+"id": 1,
+"name": "Jet2.com",
+"isInternal": true
+},
+"isMyJet2Discount": false,
+"durationOverride": null,
+"duration": "04:45:00"
+},
+"selectedInboundFlight": {
+"seatsCutOffInHours": 0,
+"bagsCutOffInHours": 0,
+"onlineCheckInCutoffInHours": 0,
+"averageRoundingUplift": 0.0,
+"adultAutoDiscountAmount": 0.0,
+"adultPrice": 60.0,
+"airPassengerDuty": 0.0,
+"arrivalTime": "2026-12-27T00:35:00+00:00",
+"baseFare": 0.0,
+"childAutoDiscountAmount": 0.0,
+"childPrice": 60.0,
+"currencyCode": "GBP",
+"departureTime": "2026-12-26T19:50:00+00:00",
+"discountedPrice": 0.0,
+"flightId": 1417106,
+"flightNumber": "LS1800",
+"infantPrice": 0.0,
+"isFull": false,
+"seatAvailability": 0,
+"totalSeats": 0,
+"usedSeats": 0,
+"availableSeats": 0,
+"preDiscountPrice": 0.0,
+"minAgeToExcludeFromApd": 0,
+"maxAgeToExcludeFromApd": 0,
+"minAgeForEmergencyExitSeats": 0,
+"subtotal": 0.0,
+"deadSeatChargeAccepted": false,
+"isRestricted": false,
+"totalDiscountAmount": 0.0,
+"airline": {
+"id": 1,
+"name": "Jet2.com",
+"isInternal": true
+},
+"isMyJet2Discount": false,
+"durationOverride": null,
+"duration": "04:45:00"
+},
+"pagination": {
+"totalPages": 3,
+"currentPage": 1
+}
+}

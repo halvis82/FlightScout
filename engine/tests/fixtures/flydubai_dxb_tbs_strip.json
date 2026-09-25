@@ -1,0 +1,88 @@
+{
+ "segments": [
+  {
+   "route": "DXB_TBS",
+   "origin": "DXB",
+   "dest": "TBS",
+   "direction": "outBound",
+   "lowestAdultFarePerPax": "840.00",
+   "lowestAdultFareTaxSumPerPax": "280.00",
+   "currencyCode": "AED",
+   "departureDate": "2026-11-15T00:00:00",
+   "isSoldOut": false,
+   "flights": null
+  },
+  {
+   "route": "DXB_TBS",
+   "origin": "DXB",
+   "dest": "TBS",
+   "direction": "outBound",
+   "lowestAdultFarePerPax": "840.00",
+   "lowestAdultFareTaxSumPerPax": "280.00",
+   "currencyCode": "AED",
+   "departureDate": "2026-11-16T00:00:00",
+   "isSoldOut": false,
+   "flights": null
+  },
+  {
+   "route": "DXB_TBS",
+   "origin": "DXB",
+   "dest": "TBS",
+   "direction": "outBound",
+   "lowestAdultFarePerPax": "840.00",
+   "lowestAdultFareTaxSumPerPax": "280.00",
+   "currencyCode": "AED",
+   "departureDate": "2026-11-17T00:00:00",
+   "isSoldOut": false,
+   "flights": null
+  },
+  {
+   "route": "DXB_TBS",
+   "origin": "DXB",
+   "dest": "TBS",
+   "direction": "outBound",
+   "lowestAdultFarePerPax": "891.00",
+   "lowestAdultFareTaxSumPerPax": "281.00",
+   "currencyCode": "AED",
+   "departureDate": "2026-11-18T00:00:00",
+   "isSoldOut": false,
+   "flights": null
+  },
+  {
+   "route": "DXB_TBS",
+   "origin": "DXB",
+   "dest": "TBS",
+   "direction": "outBound",
+   "lowestAdultFarePerPax": "840.00",
+   "lowestAdultFareTaxSumPerPax": "280.00",
+   "currencyCode": "AED",
+   "departureDate": "2026-11-19T00:00:00",
+   "isSoldOut": false,
+   "flights": null
+  },
+  {
+   "route": "DXB_TBS",
+   "origin": "DXB",
+   "dest": "TBS",
+   "direction": "outBound",
+   "lowestAdultFarePerPax": "840.00",
+   "lowestAdultFareTaxSumPerPax": "280.00",
+   "currencyCode": "AED",
+   "departureDate": "2026-11-20T00:00:00",
+   "isSoldOut": false,
+   "flights": null
+  },
+  {
+   "route": "DXB_TBS",
+   "origin": "DXB",
+   "dest": "TBS",
+   "direction": "outBound",
+   "lowestAdultFarePerPax": "840.00",
+   "lowestAdultFareTaxSumPerPax": "280.00",
+   "currencyCode": "AED",
+   "departureDate": "2026-11-21T00:00:00",
+   "isSoldOut": false,
+   "flights": null
+  }
+ ]
+}

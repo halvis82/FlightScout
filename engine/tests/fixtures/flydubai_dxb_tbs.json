@@ -1,0 +1,286 @@
+{
+ "segments": [
+  {
+   "route": "DXB_TBS",
+   "origin": "DXB",
+   "dest": "TBS",
+   "operatingCarrier": null,
+   "direction": "outBound",
+   "lowestAdultFarePerPax": "891.00",
+   "lowestAdultFareTaxSumPerPax": "281.00",
+   "lowestAdultFareNoTaxUnformatted": "610.00",
+   "lowestAdultFareCabin": "ECONOMY",
+   "currencyCode": "AED",
+   "departureDate": "2026-11-18T00:00:00",
+   "isPromoFare": false,
+   "isSoldOut": false,
+   "flights": [
+    {
+     "origin": "DXB",
+     "dest": "TBS",
+     "lfId": "17604365",
+     "departureDate": "11/18/2026 08:00:00",
+     "isAvailabile": true,
+     "isInterline": false,
+     "isCodeShare": false,
+     "stops": [],
+     "totalDuration": "03:35",
+     "departureTime": "2026-11-18T08:00:00",
+     "arrivalTime": "2026-11-18T11:35:00",
+     "fareTypes": [
+      {
+       "fareTypeName": "LITE",
+       "cabin": "economy",
+       "fare": {
+        "baseFare": "610.00",
+        "tax": "281.00",
+        "totalFare": "891.00",
+        "currencyCode": "AED"
+       },
+       "fareInformation": {
+        "adultFares": [
+         {
+          "adultFarePerPax": "891.00",
+          "taxPerPax": "281.00",
+          "paxCount": 1
+         }
+        ]
+       },
+       "seatsLeft": null,
+       "isSoldOut": false
+      },
+      {
+       "fareTypeName": "VALUE",
+       "cabin": "economy",
+       "fare": {
+        "baseFare": "650.00",
+        "tax": "283.00",
+        "totalFare": "933.00",
+        "currencyCode": "AED"
+       },
+       "fareInformation": {
+        "adultFares": [
+         {
+          "adultFarePerPax": "933.00",
+          "taxPerPax": "283.00",
+          "paxCount": 1
+         }
+        ]
+       },
+       "seatsLeft": null,
+       "isSoldOut": false
+      },
+      {
+       "fareTypeName": "FLEX",
+       "cabin": "economy",
+       "fare": {
+        "baseFare": "740.00",
+        "tax": "285.00",
+        "totalFare": "1,025.00",
+        "currencyCode": "AED"
+       },
+       "fareInformation": {
+        "adultFares": [
+         {
+          "adultFarePerPax": "1,025.00",
+          "taxPerPax": "285.00",
+          "paxCount": 1
+         }
+        ]
+       },
+       "seatsLeft": null,
+       "isSoldOut": false
+      },
+      {
+       "fareTypeName": "Business",
+       "cabin": "business",
+       "fare": {
+        "baseFare": "4,490.00",
+        "tax": "1,191.00",
+        "totalFare": "5,681.00",
+        "currencyCode": "AED"
+       },
+       "fareInformation": {
+        "adultFares": [
+         {
+          "adultFarePerPax": "5,681.00",
+          "taxPerPax": "1,191.00",
+          "paxCount": 1
+         }
+        ]
+       },
+       "seatsLeft": null,
+       "isSoldOut": false
+      }
+     ],
+     "legs": [
+      {
+       "departureDate": "2026-11-18T08:00:00",
+       "departureTime": "08:00",
+       "arrivalDate": "2026-11-18T11:35:00",
+       "hasFreeMeals": false,
+       "arrivalTime": "11:35",
+       "flightDuration": "03:35",
+       "flightNumber": "721",
+       "isCircularNextLeg": false,
+       "origin": "DXB",
+       "destination": "TBS",
+       "operatingCarrier": "FZ",
+       "marketingCarrier": "FZ",
+       "marketingFlightNum": "721",
+       "operatingFlightNum": null,
+       "fromTerminal": "Terminal 2",
+       "toTerminal": "",
+       "isBusRoute": false,
+       "isWetLeased": false,
+       "equipmentType": "73X"
+      }
+     ],
+     "flightNum": "721",
+     "flightGroupID": null,
+     "isDsoAvailable": false
+    },
+    {
+     "origin": "DXB",
+     "dest": "TBS",
+     "lfId": "17604373",
+     "departureDate": "11/18/2026 12:20:00",
+     "isAvailabile": true,
+     "isInterline": false,
+     "isCodeShare": false,
+     "stops": [],
+     "totalDuration": "03:35",
+     "departureTime": "2026-11-18T12:20:00",
+     "arrivalTime": "2026-11-18T15:55:00",
+     "fareTypes": [
+      {
+       "fareTypeName": "LITE",
+       "cabin": "economy",
+       "fare": {
+        "baseFare": "760.00",
+        "tax": "286.00",
+        "totalFare": "1,046.00",
+        "currencyCode": "AED"
+       },
+       "fareInformation": {
+        "adultFares": [
+         {
+          "adultFarePerPax": "1,046.00",
+          "taxPerPax": "286.00",
+          "paxCount": 1
+         }
+        ]
+       },
+       "seatsLeft": null,
+       "isSoldOut": false
+      },
+      {
+       "fareTypeName": "VALUE",
+       "cabin": "economy",
+       "fare": {
+        "baseFare": "790.00",
+        "tax": "287.00",
+        "totalFare": "1,077.00",
+        "currencyCode": "AED"
+       },
+       "fareInformation": {
+        "adultFares": [
+         {
+          "adultFarePerPax": "1,077.00",
+          "taxPerPax": "287.00",
+          "paxCount": 1
+         }
+        ]
+       },
+       "seatsLeft": null,
+       "isSoldOut": false
+      },
+      {
+       "fareTypeName": "FLEX",
+       "cabin": "economy",
+       "fare": {
+        "baseFare": "890.00",
+        "tax": "290.00",
+        "totalFare": "1,180.00",
+        "currencyCode": "AED"
+       },
+       "fareInformation": {
+        "adultFares": [
+         {
+          "adultFarePerPax": "1,180.00",
+          "taxPerPax": "290.00",
+          "paxCount": 1
+         }
+        ]
+       },
+       "seatsLeft": null,
+       "isSoldOut": false
+      },
+      {
+       "fareTypeName": "Business",
+       "cabin": "business",
+       "fare": {
+        "baseFare": "8,570.00",
+        "tax": "1,313.00",
+        "totalFare": "9,883.00",
+        "currencyCode": "AED"
+       },
+       "fareInformation": {
+        "adultFares": [
+         {
+          "adultFarePerPax": "9,883.00",
+          "taxPerPax": "1,313.00",
+          "paxCount": 1
+         }
+        ]
+       },
+       "seatsLeft": 2,
+       "isSoldOut": false
+      }
+     ],
+     "legs": [
+      {
+       "departureDate": "2026-11-18T12:20:00",
+       "departureTime": "12:20",
+       "arrivalDate": "2026-11-18T15:55:00",
+       "hasFreeMeals": false,
+       "arrivalTime": "15:55",
+       "flightDuration": "03:35",
+       "flightNumber": "711",
+       "isCircularNextLeg": false,
+       "origin": "DXB",
+       "destination": "TBS",
+       "operatingCarrier": "FZ",
+       "marketingCarrier": "FZ",
+       "marketingFlightNum": "711",
+       "operatingFlightNum": null,
+       "fromTerminal": "Terminal 2",
+       "toTerminal": "",
+       "isBusRoute": false,
+       "isWetLeased": false,
+       "equipmentType": "73R"
+      }
+     ],
+     "flightNum": "711",
+     "flightGroupID": null,
+     "isDsoAvailable": false
+    }
+   ],
+   "isInterline": false,
+   "isCodeShare": false
+  }
+ ],
+ "lowestTotalFare": [
+  {
+   "totalFare": "891.00",
+   "cabin": "economy",
+   "lowestFlights": [
+    {
+     "lfId": "17604365",
+     "solutionId": "1",
+     "cabin": "economy"
+    }
+   ]
+  }
+ ]
+}

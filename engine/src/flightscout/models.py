@@ -21,14 +21,10 @@ Source = Literal["google", "kiwi", "ryanair", "serpapi", "volaris", "wideroe", "
                  # Americas direct airline sources
                  "frontier", "breeze", "avelo", "jetblue", "alaska", "united", "westjet", "porter",
                  "aeromexico", "arajet", "caribbean", "caymanairways", "wingo", "aerolineas",
-                 # world direct airline sources (Europe, Middle East, Africa, Asia, Oceania; pruned to the built ones)
-                 "sas", "finnair", "icelandair", "play", "airbaltic", "lot", "smartwings", "afklm", "lufthansa",
-                 "britishairways", "aerlingus", "jet2", "ita", "iberia", "vueling", "level", "tap", "aegean",
-                 "skyexpress", "pegasus", "sunexpress", "ajet", "turkish", "flydubai", "airarabia", "jazeera",
-                 "flynas", "emirates", "qatar", "etihad", "flysafair", "airpeace", "indigo", "airindiaexpress",
-                 "spicejet", "akasa", "scoot", "cebupacific", "vietjet", "bamboo", "batik", "peach", "zipair",
-                 "jejuair", "tway", "airbusan", "tigerair", "starlux", "qantas", "jetstar", "virginaustralia",
-                 "airnewzealand", "rex"]
+                 # world direct airline sources (Europe, Middle East, Africa, Asia, Oceania)
+                 "finnair", "afklm", "jet2", "aerlingus", "vueling", "level", "skyexpress", "tap", "aegean",
+                 "flydubai", "jazeera", "flysafair", "qatar", "etihad", "spicejet", "vietjet", "akasa",
+                 "tigerair", "zipair", "jejuair", "virginaustralia", "airnewzealand"]
 Cabin = Literal["economy", "premium", "business", "first"]
 
 

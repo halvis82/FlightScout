@@ -18,6 +18,10 @@ from .sources import (_browser, condor, flair, google, kiwi, kiwiweb, norse, ser
 from .sources import (allegiant_browser, norwegian_browser, southwest_browser, transavia_browser,
                       vivaaerobus_browser)
 from .sources import aerolineas, aeromexico, alaska, arajet, breeze, frontier, jetblue
+from .sources import aerlingus, airnewzealand, flysafair, jazeera, jet2, skyexpress, vueling
+from .sources import (aegean_browser, afklm_browser, akasa_browser, etihad_browser, finnair_browser,
+                      flydubai_browser, jejuair_browser, level_browser, qatar_browser, spicejet_browser,
+                      tap_browser, tigerair_browser, vietjet_browser, virginaustralia_browser, zipair_browser)
 from .sources import (avelo_browser, caribbean_browser, caymanairways_browser, porter_browser, united_browser,
                       westjet_browser, wingo_browser)
 from .sources import (almosafer, aviasales_browser, booking, cleartrip, edreams, expedia, gotogate, kayakweb,
@@ -44,11 +48,19 @@ BROWSER_SOURCES = {
     "avelo": avelo_browser.search, "united": united_browser.search, "porter": porter_browser.search,
     "westjet": westjet_browser.search, "caribbean": caribbean_browser.search,
     "caymanairways": caymanairways_browser.search, "wingo": wingo_browser.search,
+    "finnair": finnair_browser.search, "afklm": afklm_browser.search, "level": level_browser.search,
+    "tap": tap_browser.search, "aegean": aegean_browser.search, "flydubai": flydubai_browser.search,
+    "qatar": qatar_browser.search, "etihad": etihad_browser.search, "spicejet": spicejet_browser.search,
+    "akasa": akasa_browser.search, "vietjet": vietjet_browser.search, "tigerair": tigerair_browser.search,
+    "zipair": zipair_browser.search, "jejuair": jejuair_browser.search,
+    "virginaustralia": virginaustralia_browser.search,
 }
 SOURCES.update(BROWSER_SOURCES)
 SOURCES.update({
     "frontier": frontier.search, "breeze": breeze.search, "jetblue": jetblue.search, "alaska": alaska.search,
     "arajet": arajet.search, "aeromexico": aeromexico.search, "aerolineas": aerolineas.search,
+    "jet2": jet2.search, "aerlingus": aerlingus.search, "vueling": vueling.search, "skyexpress": skyexpress.search,
+    "jazeera": jazeera.search, "flysafair": flysafair.search, "airnewzealand": airnewzealand.search,
 })
 # Booking sites (OTAs and metasearch), each verified against its own results
 # page. The "otas" group: plain HTTP ones everywhere, the headless Chrome ones
@@ -68,7 +80,8 @@ SOURCES.update(OTAS_BROWSER)
 OTA_WAIT = float(os.environ.get("FLIGHTSCOUT_OTA_WAIT", "45"))
 # Direct airline sources over plain HTTP. Each gates itself on its network.
 AIRLINES = ["volaris", "wideroe", "skyairline", "norse", "volotea", "condor", "flair",
-            "frontier", "breeze", "jetblue", "alaska", "arajet", "aeromexico", "aerolineas"]
+            "frontier", "breeze", "jetblue", "alaska", "arajet", "aeromexico", "aerolineas",
+            "jet2", "aerlingus", "vueling", "skyexpress", "jazeera", "flysafair", "airnewzealand"]
 _DIRECT = set(AIRLINES)
 
 
@@ -91,6 +104,7 @@ def expand_sources(names: list[str]) -> list[str]:
 CALENDARS = {
     "volaris": volaris, "vivaaerobus": vivaaerobus, "wizzair": wizzair, "volotea": volotea,
     "skyairline": skyairline, "flair": flair, "norse": norse,
+    "level": level_browser, "flydubai": flydubai_browser,
     # Every route: Kiwi's own per day calendar and Skyscanner's cached month grid.
     "kiwiweb": kiwiweb, "skyscanner": skyscanner,
 }
