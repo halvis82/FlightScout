@@ -104,8 +104,10 @@ def _google_flex(q: SearchQuery) -> list[Itinerary]:
         best.append((q.departure, q.return_date))
     out: list[Itinerary] = []
     with ThreadPoolExecutor(max_workers=4) as ex:
+        # the exact dates get the wide (Cheapest tab) search, alternatives a single page
         runs = [ex.submit(contextvars.copy_context().run, google.search,
-                          q.model_copy(update={"departure": dr[0], "return_date": dr[1]})) for dr in best]
+                          q.model_copy(update={"departure": dr[0], "return_date": dr[1]}), 8,
+                          dr == (q.departure, q.return_date)) for dr in best]
         for res in (f.result() for f in runs):
             out.extend(res)
     return out

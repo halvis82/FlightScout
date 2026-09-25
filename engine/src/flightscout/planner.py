@@ -76,7 +76,7 @@ class _Ctx:
         q = SearchQuery(origins=o, destinations=d, departure=dep, return_date=ret,
                         currency=self.req.currency, cabin=self.req.cabin, adults=self.req.adults)
         try:
-            res = google.search(q, top_n=2 if ret else 3)
+            res = google.search(q, top_n=2 if ret else 3, wide=False)
         except Exception as e:
             self.errors[f"google {','.join(o)}-{','.join(d)} {dep}"] = str(e)[:200]
             return []
@@ -429,7 +429,7 @@ def build_trip(req: TripRequest) -> PlanResult:
             try:
                 requests += 1
                 g = google.search(SearchQuery(origins=[sl.origin], destinations=[sl.destination],
-                                              departure=sl.departure.date(), currency=req.currency))
+                                              departure=sl.departure.date(), currency=req.currency), wide=False)
                 g = [to_currency(x, req.currency) for x in g]
                 alt = min(g, key=lambda x: x.price, default=None)
             except Exception as e:

@@ -101,7 +101,7 @@ def check(watch: dict[str, Any], budget: int = 12) -> list[dict]:
                             return_date=dep + timedelta(days=n) if n else None, currency=cur,
                             cabin=cabin, adults=watch.get("adults") or 1, max_stops=watch.get("max_stops"))
             try:
-                res = google.search(q, top_n=2)
+                res = google.search(q, top_n=2, wide=False)
             except Exception as e:
                 log.warning("google failed %s %s: %s", watch.get("id"), dep, e)
                 continue

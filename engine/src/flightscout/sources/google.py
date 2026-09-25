@@ -62,6 +62,7 @@ class _DiverseSearch(SearchFlights):
 
     outbounds: list = []
     filters = None
+    wide = True  # slice the outbound search to cover Google's Cheapest tab
 
     def _fetch_flights(self, filters, *, capture_session, **kw):
         """For the outbound list, also fetch a few slices of the search (1 stop
@@ -69,8 +70,8 @@ class _DiverseSearch(SearchFlights):
         ~50 flights ranked by "Best", so the long, odd, cheap connections from
         its Cheapest tab are often missing; the slices surface them (tested:
         84 itineraries covering 42 of 43 Cheapest tab departures, vs 49)."""
-        if (not capture_session or filters.stops != MaxStops.ANY or filters.alliances or filters.airlines
-                or filters.alliances_exclude):
+        if (not self.wide or not capture_session or filters.stops != MaxStops.ANY or filters.alliances
+                or filters.airlines or filters.alliances_exclude):
             return super()._fetch_flights(filters, capture_session=capture_session, **kw)
         from copy import deepcopy
 
@@ -153,8 +154,11 @@ def _slice(res) -> Slice:
     return Slice(segments=segs, duration_min=res.duration)
 
 
-def search(q: SearchQuery, top_n: int = 8) -> list[Itinerary]:
-    key = f"google:{q.model_dump_json()}:{top_n}"
+def search(q: SearchQuery, top_n: int = 8, wide: bool = True) -> list[Itinerary]:
+    """``wide`` adds the sliced outbound searches that cover Google's Cheapest
+    tab (8 page loads instead of 1). The planner, multi city and tracker call
+    this many times per run and pass wide=False."""
+    key = f"google:{q.model_dump_json()}:{top_n}:{wide}"
     if (hit := cache.get(key)) is not None:
         return [Itinerary(**x) for x in hit]
 
@@ -183,6 +187,7 @@ def search(q: SearchQuery, top_n: int = 8) -> list[Itinerary]:
     )
     client = _DiverseSearch()
     client.outbounds = []
+    client.wide = wide
     try:
         results = client.search(filters, top_n=top_n, currency=q.currency) or []
     except Exception as e:

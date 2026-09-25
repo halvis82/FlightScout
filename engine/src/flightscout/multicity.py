@@ -70,7 +70,7 @@ def _leg_options(leg: Leg, req: MultiRequest, errors: dict[str, str]) -> list[It
         out = []
         for day in days[:2]:
             out += google.search(SearchQuery(origins=o, destinations=d, departure=day, currency=req.currency,
-                                             cabin=req.cabin, adults=req.adults), top_n=1)
+                                             cabin=req.cabin, adults=req.adults), top_n=1, wide=False)
         return out
 
     with ThreadPoolExecutor(max_workers=2) as ex:
