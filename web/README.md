@@ -6,11 +6,13 @@ It talks to the Python engine (`../engine`, FastAPI) server side for every fligh
 
 ## Modes
 
-* **Guest (no login).** Search, smart routes, trip builder, explore and the map all work. Places, the watchlist (with a manual "Check now"), settings and recent history are kept in this browser. The client `api()` helper (`src/lib/client.ts`) sends those routes to `src/lib/guest.ts` instead of the server. Engine calls are rate limited per IP.
+* **Guest (no login).** Search, smart routes, trip builder, explore and the map all work. Places, the watchlist (with a manual "Check now"), settings and recent history are kept in this browser. The client `api()` helper (`src/lib/client.ts`) sends those routes to `src/lib/guest.ts` instead of the server. Engine calls are rate limited per IP on the hosted site (not with a local runner, whose searches skip the server, and not on a local copy run with `scripts/run-local.sh`).
 * **Signed in.** Data syncs across devices. The GitHub Actions tracker checks watches daily. Alerts go out by email or web push. API tokens let the CLI, the MCP server and AI agents push results into History and watches. On first login the app offers to import guest data.
 * **Invite only sign up.** Only emails in `ALLOWED_SIGNUP_EMAILS` can create accounts. This is enforced in a Better Auth `databaseHooks.user.create.before` hook, so it covers email, OAuth and passkey sign ups.
 
 ## Local setup
+
+To just use FlightScout on your computer, run `./scripts/run-local.sh` from the repo root (see the main README). For development:
 
 ```bash
 cd web
@@ -22,6 +24,8 @@ cp .env.example .env.local   # then fill in secrets
 npm run db:migrate
 npm run dev                  # http://localhost:3000
 ```
+
+For development, `FLIGHTSCOUT_NO_RATE_LIMIT=1` turns off the per hour limits and `ALLOWED_SIGNUP_EMAILS=*` lets any email sign up.
 
 Run the engine next to it (see `../engine`) on `http://127.0.0.1:8787` with `ENGINE_KEY=dev-engine-key`.
 

@@ -38,6 +38,9 @@ export function clientIp(req: Request) {
 }
 
 export async function enforceRateLimit(req: Request, kind: EngineKind, userId: string | null, followUp = false) {
+  // Your own copy on your computer (scripts/run-local.sh): searches use your
+  // IP and nobody else's quota, so there's nothing to limit.
+  if (process.env.FLIGHTSCOUT_NO_RATE_LIMIT === "1") return;
   const lim = followUp && kind === "explore" ? EXPLORE_MORE : LIMITS[kind];
   const limit = userId ? lim.user : lim.guest;
   const key = `${kind}${followUp ? "+" : ""}:${userId ? `u:${userId}` : `ip:${clientIp(req)}`}`;

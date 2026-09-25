@@ -27,7 +27,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 }
 
 // Only these emails may create accounts. Everyone else can still use the site
-// as a guest.
+// as a guest. "*" lets anyone sign up (your own copy on your computer).
 export const allowedSignupEmails = (process.env.ALLOWED_SIGNUP_EMAILS ?? "hhafnor@gmail.com")
   .split(",")
   .map((e) => e.trim().toLowerCase())
@@ -52,13 +52,13 @@ export const auth = betterAuth({
   emailAndPassword: { enabled: true, minPasswordLength: 8 },
   socialProviders,
   session: { expiresIn: 60 * 60 * 24 * 60, updateAge: 60 * 60 * 24 },
-  trustedOrigins: [baseURL, "https://flightscout-app.vercel.app"],
+  trustedOrigins: [baseURL, "https://flightscout-app.vercel.app", "http://localhost:3000"],
   databaseHooks: {
     user: {
       create: {
         // Enforced for every sign up path (email, OAuth, passkey).
         before: async (user) => {
-          if (!allowedSignupEmails.includes(String(user.email ?? "").toLowerCase())) {
+          if (!allowedSignupEmails.includes("*") && !allowedSignupEmails.includes(String(user.email ?? "").toLowerCase())) {
             throw new APIError("FORBIDDEN", { message: INVITE_ONLY_MESSAGE });
           }
           return { data: user };

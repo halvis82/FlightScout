@@ -66,7 +66,7 @@ export function LoginForm({ social }: { social: string[] }) {
             <Field label="Email">
               <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email webauthn" />
             </Field>
-            <Field label="Password" hint={mode === "signup" ? "At least 8 characters. Sign ups are invite only for now." : undefined}>
+            <Field label="Password" hint={mode === "signup" ? `At least 8 characters.${process.env.NEXT_PUBLIC_OPEN_SIGNUP === "1" ? "" : " Sign ups are invite only for now."}` : undefined}>
               <Input
                 type="password"
                 required
