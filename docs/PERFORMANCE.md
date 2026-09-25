@@ -1,6 +1,6 @@
 # Performance
 
-Measured 2026-09-25 from San Diego (about 70 ms round trip to Vercel's iad1). Web, engine and the Neon database all run in
+Measured 2026-09-25 (re-measured after adding ITA Matrix, 62 airlines and the on demand runner) from San Diego (about 70 ms round trip to Vercel's iad1). Web, engine and the Neon database all run in
 us-east-1 / iad1, so no request crosses regions.
 
 ## Website
@@ -39,6 +39,33 @@ booking site far below Google, Kiwi or the airline for the same flights gets a w
 
 Tried and rejected: blocking images, fonts and CSS in the Google browser page (both Playwright routing and Chrome's
 own URL blocking made Google's page about twice as slow).
+
+## A search, end to end (live site, server mode, warm)
+
+| Part | Done after | Notes |
+|---|---|---|
+| Kiwi web | 2.5 s | |
+| Airlines direct (27 over HTTP) | 3.1 s | each checks its own network first, so only the relevant ones call out |
+| Google Flights | 4.1 to 4.9 s | first results on screen at 3 to 4 s |
+| Kiwi | 11 s | Kiwi's own search time |
+| Booking sites, fast part | 12 s | Booking.com, Expedia group, Gotogate, Mytrip, Skiplagged, EaseMyTrip |
+| Booking sites, slow part | 45 to 57 s | ITA Matrix (90 s cap), KAYAK family, Agoda, Priceline, Wego (45 s cap each) |
+
+Splitting the booking sites into two streamed parts brought their first results forward by about 30 s. With the local
+runner (Chrome permission granted) the same search ran every part from the home IP, first results in 2.0 s and 436
+flights instead of 301, since the browser only airlines and booking sites join in.
+
+From Vercel's shared IPs some sites refuse often (Expedia group 429, Skiplagged 403 in this run): those pause themselves
+for 10 to 60 minutes instead of being retried on every search, and work from the local runner.
+
+## Local runner
+
+| What | Measured |
+|---|---|
+| Idle | no process at all (launchd / systemd holds the port) |
+| First request after idle (cold start) | 1 to 2 s |
+| Exits after | 10 minutes without searches (health checks don't count) |
+| Memory while running | about 80 MB engine, plus one headless Chrome (tabs for parallel jobs) only while browser sources run, closed after 5 idle minutes |
 
 ## Where the time goes now
 
