@@ -47,9 +47,13 @@ def chrome_path() -> str | None:
 
 def available(headful: bool = False) -> bool:
     """Playwright importable, a Chrome binary present, not disabled with
-    FLIGHTSCOUT_BROWSER=0. Headful also needs a display (always on macOS and
-    Windows, DISPLAY on Linux)."""
+    FLIGHTSCOUT_BROWSER=0. Everything runs headless: a visible (headful)
+    Chrome only when FLIGHTSCOUT_HEADFUL=1 opts in (sources that need one,
+    like VivaAerobus and Allegiant, skip otherwise), and then also a display
+    (always on macOS and Windows, DISPLAY on Linux)."""
     if os.environ.get("FLIGHTSCOUT_BROWSER") == "0":
+        return False
+    if headful and os.environ.get("FLIGHTSCOUT_HEADFUL") != "1":
         return False
     try:
         import playwright  # noqa: F401
