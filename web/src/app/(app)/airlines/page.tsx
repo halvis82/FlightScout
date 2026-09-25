@@ -4,11 +4,15 @@ import { ExternalLink, Search } from "lucide-react";
 import { AirportInput } from "@/components/airport-input";
 import { DateRangeField } from "@/components/date-picker";
 import { AirlineLogo } from "@/components/trip-card";
-import { Segmented } from "@/components/ui";
+import { Segmented, Switch } from "@/components/ui";
 import { airport, expandCodes } from "@/lib/airports-client";
 import { CATEGORY_LABEL, REGIONS, airlineLink, useAirlines, type Airline } from "@/lib/airlines";
 import { addDays, isoDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import directAirlines from "@/lib/direct-airlines.json";
+
+// airline code -> searched directly on every search, or only with a local runner
+const DIRECT = directAirlines as Record<string, "everywhere" | "local">;
 
 // Countries to directory regions, so a route can surface the airlines that
 // most likely fly it.
@@ -39,6 +43,7 @@ export default function AirlinesPage() {
   const [region, setRegion] = useState<string>("all");
   const [cat, setCat] = useState<string>("all");
   const [q, setQ] = useState("");
+  const [onlyDirect, setOnlyDirect] = useState(false);
   const [from, setFrom] = useState<string[]>([]);
   const [to, setTo] = useState<string[]>([]);
   const [depart, setDepart] = useState(() => addDays(isoDate(new Date()), 14));
@@ -60,7 +65,8 @@ export default function AirlinesPage() {
       (a) =>
         (region === "all" || a.regions.includes(region)) &&
         (cat === "all" || a.category === cat || (cat === "low_cost" && (a.category === "ultra_low_cost" || a.category === "hybrid"))) &&
-        (!needle || a.name.toLowerCase().includes(needle) || a.iata.toLowerCase() === needle || a.tags.some((t) => t.includes(needle))),
+        (!needle || a.name.toLowerCase().includes(needle) || a.iata.toLowerCase() === needle || a.tags.some((t) => t.includes(needle))) &&
+        (!onlyDirect || DIRECT[a.iata] != null),
     );
     if (routeRegions.size) {
       const score = (a: Airline) =>
@@ -68,7 +74,7 @@ export default function AirlinesPage() {
       r = [...r].sort((a, b) => score(a) - score(b));
     }
     return r;
-  }, [list, region, cat, q, routeRegions, o, d]);
+  }, [list, region, cat, q, routeRegions, o, d, onlyDirect]);
 
   return (
     <div className="space-y-4">
@@ -133,6 +139,7 @@ export default function AirlinesPage() {
             className="h-8 w-56 rounded-lg border border-border bg-surface pl-8 pr-2 text-sm outline-none focus:border-accent"
           />
         </div>
+        <Switch checked={onlyDirect} onChange={setOnlyDirect} label={<span className="text-xs">Only airlines FlightScout searches directly</span>} />
         <span className="text-xs text-muted">{shown.length} airlines</span>
       </div>
 
@@ -184,6 +191,18 @@ function AirlineCard({ a, route }: { a: Airline; route: { origin: string; destin
             {a.alliance && ` · ${a.alliance === "star" ? "Star Alliance" : a.alliance === "oneworld" ? "oneworld" : "SkyTeam"}`}
             {a.hubs.length > 0 && ` · ${a.hubs.slice(0, 3).join(", ")}`}
           </div>
+          {DIRECT[a.iata] === "everywhere" ? (
+            <div className="mt-0.5 text-[11px] font-medium text-good" title="FlightScout reads this airline's own fares on every search">
+              Included in FlightScout searches
+            </div>
+          ) : DIRECT[a.iata] === "local" ? (
+            <div
+              className="mt-0.5 text-[11px] font-medium text-info"
+              title="FlightScout reads this airline's own fares when searches run on your computer (local runner). Otherwise its flights come through Google Flights and the booking sites."
+            >
+              Included in local FlightScout searches
+            </div>
+          ) : null}
         </div>
       </div>
       {a.tags.length > 0 && (

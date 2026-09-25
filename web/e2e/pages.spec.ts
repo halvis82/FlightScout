@@ -142,3 +142,11 @@ test("watch before searching, stays watched, readable watch page with all flight
   await expect(page.getByText("Flights for this multi city trip")).toBeVisible();
   await expect(page.getByText(/\d+ flights/)).toBeVisible({ timeout: 180_000 });
 });
+
+test("airlines tab marks airlines searched directly, everywhere or only locally", async ({ page }) => {
+  await page.goto("/airlines");
+  await expect(page.getByText(/\d+ airlines/)).toBeVisible();
+  await page.getByText("Only airlines FlightScout searches directly").click();
+  await expect(page.getByText("Included in FlightScout searches").first()).toBeVisible();
+  await expect(page.getByText("Included in local FlightScout searches").first()).toBeVisible();
+});

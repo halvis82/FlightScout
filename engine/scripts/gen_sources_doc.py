@@ -4,6 +4,7 @@ adding a source: `uv run python scripts/gen_sources_doc.py`)."""
 from __future__ import annotations
 
 import importlib
+import json
 from pathlib import Path
 
 from flightscout import search as s
@@ -47,6 +48,19 @@ def main() -> None:
     out = Path(__file__).resolve().parents[2] / "docs" / "SOURCES.md"
     out.write_text("\n".join(lines))
     print(f"wrote {out} ({total} entries)")
+    # For the website's Airlines tab: which airlines FlightScout searches
+    # directly, and whether that works everywhere or only with a local runner.
+    direct: dict[str, str] = {}
+    for name, codes in s.AIRLINE_CODES.items():
+        if name in s.HEADFUL_ONLY:
+            continue
+        where = "local" if name in s.BROWSER_SOURCES else "everywhere"
+        for c in codes:
+            if direct.get(c) != "everywhere":
+                direct[c] = where
+    web = Path(__file__).resolve().parents[2] / "web" / "src" / "lib" / "direct-airlines.json"
+    web.write_text(json.dumps(dict(sorted(direct.items())), indent=0) + "\n")
+    print(f"wrote {web} ({len(direct)} airlines)")
 
 
 if __name__ == "__main__":

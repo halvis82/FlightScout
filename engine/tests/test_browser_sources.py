@@ -184,3 +184,17 @@ def test_booking_sites_split_fast_and_slow(monkeypatch):
     fast, slow, both = s.expand_sources(["otas_fast"]), s.expand_sources(["otas_slow"]), s.expand_sources(["otas"])
     assert set(fast) == s.OTAS_FAST and not set(fast) & set(slow)
     assert set(fast) | set(slow) == set(both) and "ita" in slow and "tripcom" in slow
+
+
+def test_every_direct_source_has_airline_codes_and_the_web_map_is_current():
+    import json
+    from pathlib import Path
+
+    from flightscout import search as s
+
+    missing = [n for n in list(s.AIRLINES) + list(s.BROWSER_SOURCES) if n not in s.AIRLINE_CODES]
+    assert not missing, f"add these to AIRLINE_CODES in search.py: {missing}"
+    web = json.loads((Path(__file__).resolve().parents[2] / "web" / "src" / "lib" / "direct-airlines.json").read_text())
+    for name, codes in s.AIRLINE_CODES.items():
+        if name not in s.HEADFUL_ONLY:
+            assert all(c in web for c in codes), f"run scripts/gen_sources_doc.py ({name})"

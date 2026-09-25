@@ -162,6 +162,27 @@ def expand_sources(names: list[str]) -> list[str]:
     off = _disabled()
     return [s for s in out if s not in off]
 
+# Airline codes each direct source searches (the Airlines tab shows which are
+# searched directly, and where: see scripts/gen_sources_doc.py).
+AIRLINE_CODES = {
+    "volaris": ["Y4"], "wideroe": ["WF"], "skyairline": ["H2"], "norse": ["N0", "Z0"], "volotea": ["V7"],
+    "condor": ["DE"], "flair": ["F8"], "frontier": ["F9"], "breeze": ["MX"], "jetblue": ["B6"],
+    "alaska": ["AS", "HA"], "arajet": ["DM"], "aeromexico": ["AM"], "aerolineas": ["AR"], "jet2": ["LS"],
+    "aerlingus": ["EI"], "vueling": ["VY"], "skyexpress": ["GQ"], "jazeera": ["J9"], "flysafair": ["FA"],
+    "airnewzealand": ["NZ"], "biman": ["BG"], "flyarystan": ["FS"], "starair": ["S5"], "allianceair": ["9I"],
+    "nokair": ["DD"], "spring": ["9C"],
+    "transavia": ["HV", "TO"], "norwegian": ["DY", "D8"], "southwest": ["WN"], "vivaaerobus": ["VB"],
+    "allegiant": ["G4"], "avelo": ["XP"], "united": ["UA"], "porter": ["PD"], "westjet": ["WS"],
+    "caribbean": ["BW"], "caymanairways": ["KX"], "wingo": ["P5"], "finnair": ["AY"], "afklm": ["AF", "KL"],
+    "level": ["LL"], "tap": ["TP"], "aegean": ["A3"], "flydubai": ["FZ"], "qatar": ["QR"], "etihad": ["EY"],
+    "spicejet": ["SG"], "akasa": ["QP"], "vietjet": ["VJ"], "tigerair": ["IT"], "zipair": ["ZG"],
+    "jejuair": ["7C"], "virginaustralia": ["VA"], "fly91": ["IC"], "linkairways": ["FC"], "airniugini": ["PX"],
+    "vietnamairlines": ["VN"], "philippineairlines": ["PR"], "bangkokair": ["PG"], "avianca": ["AV"],
+    "sas": ["SK"],
+}
+# Sources that only run with a visible browser (FLIGHTSCOUT_HEADFUL=1): not listed as searched.
+HEADFUL_ONLY = {"vivaaerobus", "allegiant"}
+
 # Airline low fare calendars (one way, cheapest fare per day). Each module
 # gates itself with relevant(), so only carriers that fly the market are asked.
 CALENDARS = {
