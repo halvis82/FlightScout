@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { api, ApiError } from "./client";
 import { browserGoogleSearch, extensionVersion } from "./extension";
-import { localRunnerActive } from "./local-runner";
+import { localRunnerActive, runnerKnown } from "./local-runner";
 import { expandCodes } from "./airports-client";
 import { isoDate } from "./format";
 import type { DatePrice } from "./types";
@@ -34,6 +34,7 @@ function coolingDown() {
 // the airline and Skyscanner calendars. Without it, the server does it all.
 async function loadDates(o: string, d: string, start: string, end: string, currency: string, tripDays?: number) {
   const body = { origin: o, destination: d, start, end, currency, trip_days: tripDays, quiet: true };
+  await runnerKnown();
   if (extensionVersion() && !localRunnerActive()) {
     try {
       const [g, rest] = await Promise.all([

@@ -1,6 +1,6 @@
 "use client";
 import { afterGuestEngineCall, guestApi, GuestError, guestSettings, isGuestRoute } from "./guest";
-import { localEngine, localRunnerActive } from "./local-runner";
+import { localEngine, localRunnerActive, runnerKnown } from "./local-runner";
 import type { SellerRule } from "./db/schema";
 
 export class ApiError extends Error {
@@ -86,6 +86,7 @@ export async function api<T = unknown>(path: string, init?: Init): Promise<T> {
   const external = !path.startsWith("/api");
   const guest = external && (await isGuest());
 
+  if (external && ENGINE_KINDS.has(p)) await runnerKnown();
   if (external && ENGINE_KINDS.has(p) && localRunnerActive()) {
     try {
       return await viaLocalRunner<T>(p, (init?.body ?? {}) as Record<string, unknown>, guest, init?.signal);

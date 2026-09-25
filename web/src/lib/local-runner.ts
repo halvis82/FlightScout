@@ -44,6 +44,15 @@ export function localRunnerActive() {
   return state.available && !state.disabled;
 }
 
+// Before the first engine call on a page: if this browser has used a runner
+// before and the check is still running, wait for it (the first search of a
+// page load otherwise goes to the server). Returns at once for everyone else.
+export async function runnerKnown(): Promise<void> {
+  if (typeof window === "undefined" || state.checked) return;
+  if (lsGet(SEEN) !== "1") return;
+  await (inflight ?? probeLocalRunner());
+}
+
 let inflight: Promise<boolean> | null = null;
 
 // Available only when /health says local === true. The dev engine on the same

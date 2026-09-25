@@ -12,7 +12,7 @@ import { WatchButton } from "@/components/watch-dialog";
 import { Button, Empty, ErrorNote, Spinner } from "@/components/ui";
 import { api } from "@/lib/client";
 import { browserGoogleSearch, extensionVersion } from "@/lib/extension";
-import { localRunnerActive } from "@/lib/local-runner";
+import { localRunnerActive, runnerKnown } from "@/lib/local-runner";
 import { airport, expandCodes } from "@/lib/airports-client";
 import { RouteMap } from "@/components/route-map";
 import { addDays, dayDiff } from "@/lib/format";
@@ -62,6 +62,7 @@ function persist(next: Saved) {
 // installed (and the local runner isn't running, which already uses their IP).
 // Any failure falls back to the server.
 async function searchPart(q: SearchQuery, sources: string[], part: number): Promise<SearchResult> {
+  await runnerKnown();
   if (sources[0] === "google" && extensionVersion() && !localRunnerActive()) {
     try {
       return await browserGoogleSearch<SearchResult>({ ...q, sources }, (body) =>
