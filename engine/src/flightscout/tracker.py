@@ -84,30 +84,39 @@ def check(watch: dict[str, Any], budget: int = 12) -> list[dict]:
     cabin = watch.get("cabin") or "economy"
     out: list[dict] = []
 
-    # Kiwi: one request covers the whole window (and the nights range).
-    try:
-        k = kiwi.search_range(o[0], d[0], start, end, cur, (nmin, nmax) if rt else None, cabin)
-        for it in sorted(k, key=lambda i: i.price)[:5]:
-            out.append(_obs(to_currency(it, cur)))
-    except Exception as e:
-        log.warning("kiwi failed for %s: %s", watch.get("id"), e)
-
-    # Google: exact dates across the window.
+    # Kiwi (one request covers the whole window and nights range) and Google
+    # (exact dates across the window) run in parallel, at most 5 at a time so
+    # Google isn't hammered. Same observations, in about a quarter the time.
     nights = sorted({nmin, nmax, (nmin + nmax) // 2}) if rt else [None]
     dates = _sample(start, end, max(1, budget // len(nights)))
-    for dep in dates:
-        for n in nights:
-            q = SearchQuery(origins=o, destinations=d, departure=dep,
-                            return_date=dep + timedelta(days=n) if n else None, currency=cur,
-                            cabin=cabin, adults=watch.get("adults") or 1, max_stops=watch.get("max_stops"))
-            try:
-                res = google.search(q, top_n=2, wide=False)
-            except Exception as e:
-                log.warning("google failed %s %s: %s", watch.get("id"), dep, e)
-                continue
-            if res:
-                best = min((to_currency(i, cur) for i in res), key=lambda i: i.price)
-                out.append(_obs(best))
+
+    def kiwi_obs() -> list[dict]:
+        try:
+            k = kiwi.search_range(o[0], d[0], start, end, cur, (nmin, nmax) if rt else None, cabin)
+            return [_obs(to_currency(it, cur)) for it in sorted(k, key=lambda i: i.price)[:5]]
+        except Exception as e:
+            log.warning("kiwi failed for %s: %s", watch.get("id"), e)
+            return []
+
+    def google_obs(dep: date, n: int | None) -> list[dict]:
+        q = SearchQuery(origins=o, destinations=d, departure=dep,
+                        return_date=dep + timedelta(days=n) if n else None, currency=cur,
+                        cabin=cabin, adults=watch.get("adults") or 1, max_stops=watch.get("max_stops"))
+        try:
+            res = google.search(q, top_n=2, wide=False)
+        except Exception as e:
+            log.warning("google failed %s %s: %s", watch.get("id"), dep, e)
+            return []
+        return [_obs(min((to_currency(i, cur) for i in res), key=lambda i: i.price))] if res else []
+
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=5) as ex:
+        kf = ex.submit(kiwi_obs)
+        gfs = [ex.submit(google_obs, dep, n) for dep in dates for n in nights]
+        out.extend(kf.result())
+        for f in gfs:
+            out.extend(f.result())
 
     # Split tickets and stopovers on the currently cheapest date.
     if watch.get("include_split") and out:
