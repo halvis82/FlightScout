@@ -24,5 +24,16 @@ function create(): DB {
   return drizzlePg(client, { schema });
 }
 
-export const db: DB = globalForDb.__fsDb ?? (globalForDb.__fsDb = create());
+// Opened on first use, not at import: build workers render pages that import
+// this module without querying (and PGlite can't be opened by 9 at once).
+function get(): DB {
+  return globalForDb.__fsDb ?? (globalForDb.__fsDb = create());
+}
+export const db: DB = new Proxy({} as DB, {
+  get: (_t, prop) => {
+    const real = get() as unknown as Record<string | symbol, unknown>;
+    const v = real[prop];
+    return typeof v === "function" ? (v as (...a: unknown[]) => unknown).bind(real) : v;
+  },
+});
 export { schema };

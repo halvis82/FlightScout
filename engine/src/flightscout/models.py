@@ -24,7 +24,13 @@ Source = Literal["google", "kiwi", "ryanair", "serpapi", "volaris", "wideroe", "
                  # world direct airline sources (Europe, Middle East, Africa, Asia, Oceania)
                  "finnair", "afklm", "jet2", "aerlingus", "vueling", "level", "skyexpress", "tap", "aegean",
                  "flydubai", "jazeera", "flysafair", "qatar", "etihad", "spicejet", "vietjet", "akasa",
-                 "tigerair", "zipair", "jejuair", "virginaustralia", "airnewzealand"]
+                 "tigerair", "zipair", "jejuair", "virginaustralia", "airnewzealand",
+                 # East / Southeast Asia and Oceania direct airline sources (wave 2a)
+                 "nokair", "spring", "linkairways",
+                 # fare engines and hidden city search (wave 2c)
+                 "ita", "skiplagged",
+                 # Middle East, Africa, South and Central Asia direct airline sources (wave 2b)
+                 "biman", "flyarystan", "starair", "allianceair"]
 Cabin = Literal["economy", "premium", "business", "first"]
 
 

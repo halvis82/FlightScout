@@ -1,6 +1,6 @@
 # FlightScout
 
-End to end flight finder for people who fly a lot. It searches Google Flights, Kiwi.com and airlines directly (Volaris, Widerøe, Sky Airline, Norse, Volotea, Condor, plus fare calendars from Wizz Air, VivaAerobus and Ryanair) together, builds cheaper routes out of separate tickets (self transfers, stopovers, nested round trips, multi city trips), shows where you can go cheaply, and tracks the routes you care about twice a day so you get price history and alerts. Every result links straight to the page where you can book it.
+End to end flight finder for people who fly a lot. One search asks Google Flights, Kiwi.com, 48 airlines directly and 18 booking sites (Booking.com, Expedia, KAYAK, Priceline, Trip.com...) at once, builds cheaper routes out of separate tickets (self transfers, stopovers, nested round trips, multi city trips), shows where you can go cheaply, and tracks the routes you care about twice a day so you get price history and alerts. Every result links straight to the page where you can book it, and every source's prices were checked against that site's own booking page.
 
 Three ways to use it, all sharing one account and database:
 
@@ -18,7 +18,7 @@ browser ──▶ web/ (Next.js on Vercel: UI, accounts, watchlist, alerts, Post
    │              ▼
    │        engine/ (Python on Vercel: sources, planner, explore)
    │
-   └──▶ local runner (optional, `flightscout serve` on your computer: same engine, your home IP)
+   └──▶ local runner (optional, on demand on your computer: same engine, your home IP, headless Chrome)
 
 GitHub Actions (twice a day) ── engine + headless browser ──▶ web /api/v1/tracker (price history, alerts)
 ```
@@ -27,38 +27,54 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [engine/README.md](engine
 
 ## Data sources
 
-| Source | Method | Coverage |
+| Group | What | Where it runs |
 |---|---|---|
-| Google Flights | [fli](https://github.com/punitarani/fli) reads the data embedded in the results page | Almost every airline. Booking link opens Google's page for the exact itinerary with the airline's own "Book" button |
-| Google booking page | headless browser (CLI and tracker only) | Every seller for an itinerary (airline or agency), fare families, bag fees, change and refund rules, Google's typical price range |
-| Kiwi.com | public MCP endpoint and the GraphQL backend of kiwi.com | Self transfer combinations, flexible date ranges, "anywhere" and region explore, per day calendar |
-| KAYAK Explore, Skyscanner calendar | the JSON behind kayak.com/explore and Skyscanner's month view | Fast "anywhere" leads and cached per day fares that Google often misses |
-| Volaris | volaris.com backend | Volaris fares Google doesn't price (most Mexican routes), fare calendar |
-| Ryanair | fare finder API | Cheap destinations from Ryanair bases |
-| Widerøe | wideroe.no booking page data | Real Widerøe fares (Google has none or badly overpriced ones) |
-| Sky Airline | Sky's web API (`FLIGHTSCOUT_SKY_KEYS`) | Chile and Peru; Google has no Sky prices |
-| Norse, Condor | their web APIs | Transatlantic low cost; not sold by Kiwi |
-| Volotea | Volotea's web API (`FLIGHTSCOUT_VOLOTEA_KEY`) + public schedule | Seasonal European routes |
-| Wizz Air, VivaAerobus (`FLIGHTSCOUT_VIVA_KEY`) | fare calendars | Cheapest fare per day in the date picker |
-| Flair (opt-in) | Flair's web API | Same prices as Google, enable with `--sources` |
+| Google Flights | every airline Google sells, both its "Best" and "Cheapest" lists, price calendar | server, your browser (extension) or your computer |
+| Kiwi.com | self transfer combinations, flexible dates, "anywhere" explore | server or your computer |
+| Airlines direct (21 over plain HTTP) | Volaris, Frontier, JetBlue, Alaska, Breeze, Aeroméxico, Arajet, Aerolíneas Argentinas, Flair, Sky, Norse, Condor, Widerøe, Volotea, Jet2, Aer Lingus, Vueling, SKY express, Jazeera, FlySafair, Air New Zealand | server or your computer |
+| Airlines direct (27 that need a real browser) | United, Southwest, Qatar, Etihad, Air France/KLM, Finnair, TAP, Norwegian, Transavia, WestJet, Porter, VietJet, SpiceJet, Virgin Australia... | your computer only (headless Chrome) |
+| Booking sites (11 over HTTP, 7 in a browser) | Booking.com, Expedia, Orbitz, Travelocity, Priceline, KAYAK, momondo, Cheapflights, Wego, Gotogate, Mytrip; Trip.com, Aviasales, eDreams, Opodo, Almosafer, Traveloka, Cleartrip | HTTP ones on the server or your computer, browser ones on your computer |
+| Fare calendars | Wizz Air, Ryanair, VivaAerobus, Volotea, LEVEL, flydubai, Skyscanner | server or your computer |
 
-Some airline sources need the public key their own website sends to every browser. Those keys aren't kept in this repo; set the env vars shown (find them in your browser's dev tools on the airline's site). Without them those sources simply stay off.
+The full list with methods and caveats: [docs/SOURCES.md](docs/SOURCES.md). Some airline sources need the public key their own website sends to every browser; those keys aren't in this repo (set the env vars in [engine/README.md](engine/README.md)), without them those sources stay off. Booking site prices far below what Google, Kiwi or the airline ask for the same flights are flagged, since they tend to grow at checkout.
 
-The Airlines tab lists 127 airlines by region with links into each airline's own search, pre-filled with your route where the airline supports it.
-| SerpApi (optional) | paid API, `SERPAPI_KEY` | Fallback if Google blocks the server |
+## Where searches run
 
-### Staying unblocked (whose IP talks to Google)
+The website works the same in every mode; only whose internet connection talks to the airlines changes. Settings, "Where your searches run", shows which mode is active.
 
-Scraping is unofficial and Google limits how often one address can search, so FlightScout spreads the load:
+| | Server (default) | Extension | Local runner | Everything local |
+|---|---|---|---|---|
+| Google Flights and its calendar | FlightScout's server | **your browser** | **your computer** | **your computer** |
+| Kiwi, airlines, booking sites | server | server | **your computer** | **your computer** |
+| Browser only airlines and sites | not searched | not searched | **your computer** | **your computer** |
+| Website | flightscout-app.vercel.app | same | same | **localhost:3000** |
+| Install | nothing | [extension/](extension/README.md) (Chrome, Edge, Brave, Arc) | one command (below) | clone and `./scripts/run-local.sh` |
 
-| Layer | What it does |
+**Local runner (recommended), macOS and Linux:**
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/halvis82/FlightScout/main/scripts/install-runner.sh | sh
+```
+
+It installs the `flightscout` command and registers it on demand: the system (launchd on macOS, a systemd socket on Linux) holds port 8787, starts the runner when the website sends a search (1 to 2 s the first time) and the runner exits after 10 quiet minutes. Nothing runs while you're not searching. The website finds it by itself; the header then shows "Your IP". Remove it with `flightscout serve --uninstall` (or `scripts/uninstall-runner.sh`). On Windows, run `flightscout serve` while you search. With Google Chrome installed, the browser only airlines and booking sites are added, always headless (no windows).
+
+**Everything on your computer** (no Vercel, no database server, guest mode or local accounts): `./scripts/run-local.sh` from a clone. It uses the runner, an embedded database (PGlite) and serves the site on http://localhost:3000 until you press Ctrl+C.
+
+**Your own hosted copy** on your own free accounts: see "Self host your own copy" below.
+
+### If the server gets limited
+
+Sites limit how often one address can search, and the server's address is shared by everyone who doesn't run locally. What protects it, and the levers if it isn't enough:
+
+| | |
 |---|---|
-| **FlightScout Helper** (browser extension, `extension/`) | Google Flights pages are fetched by each visitor's own browser and IP; the server only parses them. Searches and price calendars. |
-| **Local runner** (`flightscout serve --install`) | The whole engine on your computer: the site sends searches there. Also checks your watches at 07:05 and 19:05 from your home IP. |
-| **Shared cache** | The same search by anyone within minutes (20 min searches, 6 h calendars) is answered from the database. |
-| **Fast non Google sources** | Kiwi web API, KAYAK, Skyscanner and airline APIs are used wherever possible. |
-| **Paid fallback (optional)** | If Google blocks the server, searches switch to SearchAPI.io (`SEARCHAPI_KEY`) or SerpApi (`SERPAPI_KEY`) when a key is set; nothing is spent otherwise. |
-| **Self hosting** | `scripts/setup.sh` gives anyone their own copy on their own accounts. |
+| Shared cache | The same search by anyone within 20 minutes (calendars 6 h, explore 3 h) is answered from the database without asking any source |
+| Rate limits | Per guest IP and per account, per hour |
+| Automatic pause | A source that answers "blocked" (403, 429, captcha) is paused for 10 minutes, doubling up to an hour, instead of being asked again on every search |
+| Deadlines | Slow booking sites and browser sources never hold a search more than 45 s |
+| Turn sources off on the server | `FLIGHTSCOUT_DISABLE=otas` (or `kiwi`, `airlines`, single names) on the engine's Vercel project; the local runner keeps everything |
+| Paid Google fallback | `SEARCHAPI_KEY` or `SERPAPI_KEY` on the engine: used only when Google blocks the server |
+| Move searches off the server | Extension or local runner (above); every visitor who does takes their load with them |
 
 ## Tests
 
@@ -80,13 +96,14 @@ vercel login && gh auth login
 
 The script creates both Vercel projects, a Neon database, all secrets (kept in `~/.config/flightscout/deploy-secrets.env`, Vercel and GitHub only), the tracker's GitHub secrets, and deploys. Only `you@example.com` can sign up; add more emails to `ALLOWED_SIGNUP_EMAILS` on Vercel.
 
-## CLI and local runner
+## CLI
 
 ```sh
-uv tool install --python 3.12 'flightscout[browser] @ git+https://github.com/halvis82/FlightScout#subdirectory=engine'
-flightscout setup-browser                      # headless Chromium for --sellers
-flightscout login --url https://<your-site> --token fsk_...   # token from Settings
-flightscout serve --install                    # local runner, starts at login
+curl -fsSL https://raw.githubusercontent.com/halvis82/FlightScout/main/scripts/install-runner.sh | sh   # or: uv tool install ...
+flightscout login --url https://<your-site> --token fsk_...   # token from Settings (for watches and history)
+flightscout search SAN OSL 2026-11-10 --return 2026-11-20
 ```
 
-Optional keys: `RESEND_API_KEY` + `ALERT_FROM_EMAIL` for email alerts, GitHub or Google OAuth IDs for social login, `SERPAPI_KEY` as a GitHub secret for the paid fallback.
+Full reference: [docs/CLI.md](docs/CLI.md). `--sources` takes groups (`google`, `kiwi`, `airlines`, `otas`) or single sources.
+
+Optional keys: `RESEND_API_KEY` + `ALERT_FROM_EMAIL` for email alerts, GitHub or Google OAuth IDs for social login, `SEARCHAPI_KEY`/`SERPAPI_KEY` for the paid Google fallback.

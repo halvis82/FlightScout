@@ -85,6 +85,46 @@ AIRLINES = ["volaris", "wideroe", "skyairline", "norse", "volotea", "condor", "f
 _DIRECT = set(AIRLINES)
 
 
+# Turn sources or whole groups off on this deployment, e.g. on the hosted
+# engine if it gets limited: FLIGHTSCOUT_DISABLE=otas,kiwi (names or groups:
+# airlines, browser, otas). The local runner keeps its own setting.
+def _disabled() -> set[str]:
+    raw = {x.strip().lower() for x in os.environ.get("FLIGHTSCOUT_DISABLE", "").split(",") if x.strip()}
+    out = set(raw)
+    if "airlines" in raw:
+        out |= set(AIRLINES) | set(BROWSER_SOURCES)
+    if "browser" in raw:
+        out |= set(BROWSER_SOURCES) | set(OTAS_BROWSER)
+    if "otas" in raw:
+        out |= set(OTAS) | set(OTAS_BROWSER)
+    return out
+
+
+# A source that answers "blocked" (403, 429, captcha...) is paused instead of
+# being hit again on every search, which is what gets IPs banned for longer.
+# 10 minutes, doubling on repeat blocks up to an hour. Google has its own
+# fallback (SearchAPI/SerpApi) and is not paused.
+_BLOCK_WORDS = ("403", "429", "rate_limited", "captcha", "unusual traffic", "access denied", "forbidden",
+                "too many requests", "security verification")
+_cool: dict[str, tuple[float, float]] = {}  # source -> (paused until, next pause length)
+
+
+def _cooling(s: str) -> float:
+    until = _cool.get(s, (0.0, 0.0))[0]
+    return max(0.0, until - time.time())
+
+
+def _note(s: str, err: Exception | None) -> None:
+    if s == "google":
+        return
+    if err is None:
+        _cool.pop(s, None)
+    elif any(w in str(err).lower() for w in _BLOCK_WORDS):
+        length = _cool.get(s, (0.0, 600.0))[1]
+        _cool[s] = (time.time() + length, min(length * 2, 3600.0))
+        log.warning("source %s blocked, paused %d min", s, length // 60)
+
+
 def expand_sources(names: list[str]) -> list[str]:
     """Resolve the "airlines" group (and legacy explicit airline lists) to
     every direct airline source, plus the browser ones where Chrome is here."""
@@ -97,7 +137,8 @@ def expand_sources(names: list[str]) -> list[str]:
         out += [s for s in OTAS if s not in out]
         if _browser.available():
             out += [s for s in OTAS_BROWSER if s not in out]
-    return out
+    off = _disabled()
+    return [s for s in out if s not in off]
 
 # Airline low fare calendars (one way, cheapest fare per day). Each module
 # gates itself with relevant(), so only carriers that fly the market are asked.
@@ -237,6 +278,9 @@ def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> Search
     })
     srcs = expand_sources(list(q.sources))
     errors: dict[str, str] = {}
+    for s in [s for s in srcs if _cooling(s)]:
+        errors[s] = f"paused for {_cooling(s) / 60:.0f} min after being blocked"
+        srcs.remove(s)
     found: list[Itinerary] = []
     ex = ThreadPoolExecutor(max_workers=len(srcs) or 1)
     # copy_context: browser mode (see browser_fetch.py) must reach the source threads
@@ -251,11 +295,13 @@ def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> Search
                 found.extend(f.result(timeout=max(0.0, deadline - time.monotonic())))
             else:
                 found.extend(f.result())
+            _note(s, None)
         except FutureTimeout:
             errors[s] = f"still searching after {OTA_WAIT:.0f} s (cached for the next search)"
         except Exception as e:  # one source failing must not sink the search
             log.warning("source %s failed: %s", s, e)
             errors[s] = str(e)[:300]
+            _note(s, e)
     ex.shutdown(wait=False)
     items = merge(_flag_outliers([sellers.annotate(to_currency(i, q.currency)) for i in found]))
     trips = [Trip(tickets=[i], total_price=i.price, currency=i.currency, kind="single",

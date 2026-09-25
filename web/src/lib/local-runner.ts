@@ -3,6 +3,10 @@
 // engine API at http://127.0.0.1:8787 in local mode (no key, CORS for this
 // app). When it is up, engine calls go straight from the browser to it, so
 // searches use the user's home IP and skip the server's rate limits.
+// Installed with `flightscout serve --install` it starts on demand (the OS
+// holds the port and starts it on the first request, about 1 to 2 s) and
+// exits after 10 quiet minutes, so probes must allow for a cold start and
+// must not keep it awake.
 
 import { useSyncExternalStore } from "react";
 
@@ -50,7 +54,8 @@ export function probeLocalRunner(): Promise<boolean> {
     const disabled = readDisabled();
     try {
       const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 1500);
+      // a known runner may be starting on demand; an unknown port fails fast anyway
+      const t = setTimeout(() => ctrl.abort(), lsGet(SEEN) === "1" ? 8000 : 1500);
       const res = await fetch(`${LOCAL_RUNNER_URL}/health`, { signal: ctrl.signal, cache: "no-store", mode: "cors" }).finally(() => clearTimeout(t));
       const j = res.ok ? ((await res.json()) as { ok?: boolean; local?: boolean; version?: string }) : null;
       const ok = j?.local === true;
@@ -85,9 +90,12 @@ function lsSet(k: string, v: string) {
   }
 }
 
-// Browsers log a console error for every failed probe, so only people who
-// actually use the runner get polled every minute. Everyone else is checked
-// at most once a day (Settings can re-check any time).
+// Browsers log a console error for every failed probe, so people who never
+// used the runner are checked at most once a day (Settings can re-check any
+// time). People who do are checked on page load and when they come back to
+// the tab (at most every 5 minutes): no polling, so an on demand runner can
+// go back to sleep. If it's gone at search time, searches fall back to the
+// server by themselves.
 async function probeAndRemember() {
   const ok = await probeLocalRunner();
   if (ok) lsSet(SEEN, "1");
@@ -104,13 +112,14 @@ export function startLocalRunnerProbe() {
     emit({ ...state, checked: true });
     return;
   }
+  let last = Date.now();
   probeAndRemember().then((ok) => {
     if (!ok && !seen) return;
-    setInterval(() => {
-      if (document.visibilityState === "visible") probeLocalRunner();
-    }, 60_000);
     document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") probeLocalRunner();
+      if (document.visibilityState === "visible" && Date.now() - last > 5 * 60_000) {
+        last = Date.now();
+        probeLocalRunner();
+      }
     });
   });
 }

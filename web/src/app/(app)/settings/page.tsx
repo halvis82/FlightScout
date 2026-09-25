@@ -4,6 +4,7 @@ import useSWR from "swr";
 import { Check, Copy, Fingerprint, KeyRound, Plus, Trash2 } from "lucide-react";
 import { AirportInput } from "@/components/airport-input";
 import { useApp } from "@/components/app-context";
+import { cn } from "@/lib/utils";
 import { cityOf } from "@/lib/airports-client";
 import { useExtension } from "@/lib/extension";
 import { useLocalRunner } from "@/lib/local-runner";
@@ -91,26 +92,73 @@ export default function SettingsPage() {
   );
 }
 
+const REPO = "https://github.com/halvis82/FlightScout";
+const INSTALL = "curl -fsSL https://raw.githubusercontent.com/halvis82/FlightScout/main/scripts/install-runner.sh | sh";
+
 function OwnIpSection() {
   const ext = useExtension();
   const EXT_LATEST = "1.1.0";
   const lr = useLocalRunner();
-  const active = lr.active ? "local runner" : ext ? "extension" : null;
+  const mode = lr.active ? "runner" : ext ? "extension" : "server";
+  const where = {
+    server: "on FlightScout's server (shared by everyone)",
+    extension: "Google from your browser, the rest on FlightScout's server",
+    runner: "everything from your computer",
+  }[mode];
   return (
     <div id="own-ip">
       <Section
-        title="Search from your own IP"
-        sub="Google Flights limits how often one address can search. By default searches run on FlightScout's server, shared by everyone. Either option below makes your searches come from your own connection instead: faster, never blocked, and it keeps the server free for others."
+        title="Where your searches run"
+        sub="The website works the same in every mode. Running searches from your own connection is faster, can't get the shared server blocked, and adds the airlines and booking sites that need a real browser."
       >
         <div className="mb-3 text-sm">
-          Status:{" "}
-          {active ? (
-            <span className="font-medium text-good">using your own IP ({active})</span>
-          ) : (
-            <span className="text-muted">using the shared server</span>
-          )}
+          Now: <span className={mode === "server" ? "text-muted" : "font-medium text-good"}>{where}</span>
+        </div>
+        <div className="mb-3 overflow-x-auto rounded-xl border border-border text-xs">
+          <table className="w-full min-w-[520px]">
+            <thead className="bg-surface-2 text-left text-muted">
+              <tr>
+                <th className="px-2 py-1.5 font-medium">Part of a search</th>
+                <th className="px-2 py-1.5 font-medium">Server (default)</th>
+                <th className="px-2 py-1.5 font-medium">Extension</th>
+                <th className="px-2 py-1.5 font-medium">Local runner</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {[
+                ["Google Flights and its price calendar", "server", "your IP", "your IP"],
+                ["Kiwi, airlines direct, booking sites", "server", "server", "your IP"],
+                ["Airlines and sites that need a browser (United, Qatar, TAP, Trip.com...)", "not searched", "not searched", "your IP"],
+                ["Explore, smart routes, multi city", "server", "server", "your IP"],
+              ].map(([what, ...cols]) => (
+                <tr key={what}>
+                  <td className="px-2 py-1.5">{what}</td>
+                  {cols.map((c, i) => (
+                    <td key={i} className={cn("px-2 py-1.5", c === "your IP" ? "text-good" : c === "not searched" ? "text-faint" : "text-muted")}>
+                      {c}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="min-w-0 rounded-xl border border-border p-3">
+            <div className="flex items-center justify-between">
+              <div className="font-medium">Local runner</div>
+              {lr.active ? <Badge tone="good">In use {lr.version ?? ""}</Badge> : <Badge>Recommended</Badge>}
+            </div>
+            <p className="mt-1 text-xs text-muted">
+              Mac or Linux. Starts only when the website searches and stops after 10 quiet minutes, so nothing runs in the
+              background. Also powers the CLI and AI agents.
+            </p>
+            <pre className="mt-2 overflow-x-auto rounded-lg bg-surface-2 p-2 text-[11px] leading-relaxed">{INSTALL}</pre>
+            <p className="mt-1.5 text-xs text-faint">
+              Remove with <code>flightscout serve --uninstall</code>. Windows: run <code>flightscout serve</code> while you
+              search.
+            </p>
+          </div>
           <div className="min-w-0 rounded-xl border border-border p-3">
             <div className="flex items-center justify-between">
               <div className="font-medium">Browser extension</div>
@@ -121,40 +169,37 @@ function OwnIpSection() {
                   <Badge tone="good">Installed {ext}</Badge>
                 )
               ) : (
-                <Badge>Recommended</Badge>
+                <Badge>Google only</Badge>
               )}
             </div>
             <p className="mt-1 text-xs text-muted">
-              For Chrome, Edge, Brave and Arc. Prices then match what you see on Google Flights yourself.
+              Chrome, Edge, Brave, Arc. Google Flights searches use your browser, so prices match what you see on Google.
               {ext && ext < EXT_LATEST && " To update: download it again, unzip over the old folder, and click reload on chrome://extensions."}
             </p>
             <ol className="mt-2 list-decimal space-y-0.5 pl-4 text-xs text-muted">
               <li>
                 <a className="text-accent hover:underline" href="/flightscout-helper.zip" download>
-                  Download the extension
+                  Download
                 </a>{" "}
                 and unzip it.
               </li>
               <li>
-                Open <code>chrome://extensions</code> and turn on Developer mode (top right).
+                <code>chrome://extensions</code>, turn on Developer mode, Load unpacked, pick the folder.
               </li>
-              <li>Click Load unpacked and pick the unzipped folder.</li>
-              <li>Reload this page. The header shows Your IP when it&apos;s working.</li>
             </ol>
           </div>
-          <div className="min-w-0 rounded-xl border border-border p-3">
-            <div className="flex items-center justify-between">
-              <div className="font-medium">Local runner</div>
-              {lr.active ? <Badge tone="good">Running {lr.version ?? ""}</Badge> : <Badge>For the CLI</Badge>}
-            </div>
-            <p className="mt-1 text-xs text-muted">Also powers the CLI and AI agents, runs Google Explore live, and checks your watches twice a day from your Mac.</p>
-            <pre className="mt-2 overflow-x-auto rounded-lg bg-surface-2 p-2 text-[11px] leading-relaxed">
-              {"uv tool install --python 3.12 'flightscout[browser] @ git+https://github.com/halvis82/FlightScout#subdirectory=engine'\nflightscout login --url " +
-                (typeof window !== "undefined" ? window.location.origin : "") +
-                " --token <API token below>\nflightscout serve --install"}
-            </pre>
-          </div>
         </div>
+        <p className="mt-3 text-xs text-muted">
+          Want it all on your computer, website included (no server, no accounts)? Clone the repo and run{" "}
+          <code>./scripts/run-local.sh</code>.{" "}
+          <a className="text-accent hover:underline" href={`${REPO}#where-searches-run`} target="_blank" rel="noopener noreferrer">
+            Setup guide
+          </a>{" "}
+          ·{" "}
+          <a className="text-accent hover:underline" href={REPO} target="_blank" rel="noopener noreferrer">
+            Source code
+          </a>
+        </p>
       </Section>
     </div>
   );

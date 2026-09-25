@@ -151,3 +151,27 @@ def test_live_browser_source(name, mod, o, d, headful):
     assert all(i.source == name and i.seller_kind == "airline" and i.price > 0 for i in its)
     assert all(i.booking_url.startswith("https://") for i in its)
     assert all(i.slices[0].origin == o and i.slices[0].destination == d for i in its)
+
+
+def test_disable_switch_and_blocked_source_pause(monkeypatch):
+    import time as _t
+
+    from flightscout import search as s
+
+    monkeypatch.setattr(s._browser, "available", lambda headful=False: False)
+    monkeypatch.setenv("FLIGHTSCOUT_DISABLE", "otas,kiwi")
+    got = s.expand_sources(["google", "kiwi", "airlines", "otas"])
+    assert "kiwi" not in got and not set(got) & set(s.OTAS) and "google" in got and "jetblue" in got
+    monkeypatch.delenv("FLIGHTSCOUT_DISABLE")
+
+    s._cool.clear()
+    s._note("booking", RuntimeError("search page HTTP 429"))
+    assert s._cooling("booking") > 500
+    s._note("booking", RuntimeError("HTTP 403"))  # a repeat block doubles the pause
+    assert s._cooling("booking") > 1100
+    s._note("google", RuntimeError("429"))  # Google has its own fallback
+    assert not s._cooling("google")
+    s._note("booking", None)  # success clears it
+    assert not s._cooling("booking")
+    s._cool.clear()
+    assert _t.time()

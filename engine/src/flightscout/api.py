@@ -4,6 +4,7 @@ called server side by the web app. Protected by a shared ENGINE_KEY."""
 from __future__ import annotations
 
 import os
+import time
 from datetime import date
 from typing import Any
 
@@ -33,6 +34,27 @@ if LOCAL:
     app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST", "OPTIONS"],
                        allow_headers=["*"], max_age=600,
                        allow_private_network=True)
+
+
+# Last time anything but a health check came in: an on demand local runner
+# (`flightscout serve --install`) exits after a few quiet minutes.
+_last = [time.time()]
+
+
+def last_activity() -> float:
+    return _last[0]
+
+
+@app.middleware("http")
+async def _touch(request, call_next):
+    busy = request.url.path not in ("/health", "/api/health")
+    if busy:
+        _last[0] = time.time()
+    try:
+        return await call_next(request)
+    finally:
+        if busy:
+            _last[0] = time.time()
 
 
 def auth(x_engine_key: str | None = Header(default=None)) -> None:

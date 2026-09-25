@@ -50,55 +50,146 @@ def _install_tracking(exe: str, env: str, log: Path) -> None:
     subprocess.run(["launchctl", "load", str(plist)], check=True)
 
 
-def serve(port: int = typer.Option(8787, help="Port (the website looks for 8787)."),
-          install: bool = typer.Option(False, "--install", help="Start automatically at login (macOS)."),
-          track: bool = typer.Option(True, "--track/--no-track",
-                                     help="With --install: also check your watches at 07:05 and 19:05 from this Mac."),
-          uninstall: bool = typer.Option(False, "--uninstall", help="Remove the login item and scheduled checks.")):
-    """Local runner: the website sends searches to this computer so they come from your own IP."""
+def _activated_socket() -> int | None:
+    """The listening socket handed over by launchd (macOS) or systemd (Linux)
+    when the runner is started on demand, else None."""
+    if os.environ.get("LISTEN_PID") == str(os.getpid()) and int(os.environ.get("LISTEN_FDS", "0")) >= 1:
+        return 3  # systemd socket activation
+    if sys.platform == "darwin" and os.environ.get("FLIGHTSCOUT_LAUNCHD") == "1":
+        import ctypes
+
+        libc = ctypes.CDLL("/usr/lib/libSystem.dylib")
+        fds = ctypes.POINTER(ctypes.c_int)()
+        count = ctypes.c_size_t(0)
+        if libc.launch_activate_socket(b"Listeners", ctypes.byref(fds), ctypes.byref(count)) == 0 and count.value:
+            return fds[0]
+    return None
+
+
+def _install_macos(exe: str, port: int, idle: int) -> Path:
+    """launchd listens on the port and starts the runner on the first request;
+    the runner exits after ``idle`` quiet minutes. Nothing runs in between."""
     plist = Path.home() / "Library" / "LaunchAgents" / f"{PLIST}.plist"
-    if uninstall:
-        for p in (plist, Path.home() / "Library" / "LaunchAgents" / f"{TRACK_PLIST}.plist"):
-            subprocess.run(["launchctl", "unload", str(p)], check=False, capture_output=True)
-            p.unlink(missing_ok=True)
-        out.print("Local runner and scheduled watch checks removed.")
-        return
-    if install:
-        exe = shutil.which("flightscout") or sys.argv[0]
-        log = Path.home() / "Library" / "Logs" / "flightscout-runner.log"
-        keep = [k for k in os.environ if k.startswith("FLIGHTSCOUT_") or k == "SERPAPI_KEY"]
-        env = "".join(f"<key>{k}</key><string>{os.environ[k]}</string>" for k in keep)
-        plist.parent.mkdir(parents=True, exist_ok=True)
-        plist.write_text(f"""<?xml version="1.0" encoding="UTF-8"?>
+    log = Path.home() / "Library" / "Logs" / "flightscout-runner.log"
+    keep = [k for k in os.environ if k.startswith("FLIGHTSCOUT_") and k != "FLIGHTSCOUT_LAUNCHD"] + \
+        [k for k in ("SERPAPI_KEY", "SEARCHAPI_KEY") if k in os.environ]
+    env = "".join(f"<key>{k}</key><string>{os.environ[k]}</string>" for k in keep)
+    plist.parent.mkdir(parents=True, exist_ok=True)
+    plist.write_text(f"""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>Label</key><string>{PLIST}</string>
-  <key>ProgramArguments</key><array><string>{exe}</string><string>serve</string><string>--port</string><string>{port}</string></array>
-  <key>EnvironmentVariables</key><dict>{env}</dict>
-  <key>RunAtLoad</key><true/>
-  <key>KeepAlive</key><true/>
+  <key>ProgramArguments</key><array><string>{exe}</string><string>serve</string><string>--idle</string><string>{idle}</string></array>
+  <key>EnvironmentVariables</key><dict><key>FLIGHTSCOUT_LAUNCHD</key><string>1</string>{env}</dict>
+  <key>Sockets</key><dict><key>Listeners</key><dict>
+    <key>SockNodeName</key><string>127.0.0.1</string>
+    <key>SockServiceName</key><string>{port}</string>
+    <key>SockType</key><string>stream</string>
+  </dict></dict>
   <key>StandardOutPath</key><string>{log}</string>
   <key>StandardErrorPath</key><string>{log}</string>
 </dict></plist>
 """)
-        subprocess.run(["launchctl", "unload", str(plist)], check=False, capture_output=True)
-        subprocess.run(["launchctl", "load", str(plist)], check=True)
-        out.print(f"Local runner installed: starts at login on http://127.0.0.1:{port} (log: {log}).")
-        if track:
+    plist.chmod(0o600)  # may hold airline public keys from the environment
+    subprocess.run(["launchctl", "unload", str(plist)], check=False, capture_output=True)
+    subprocess.run(["launchctl", "load", str(plist)], check=True)
+    return plist
+
+
+def _install_linux(exe: str, port: int, idle: int) -> Path:
+    """systemd --user socket activation: same on demand behavior."""
+    d = Path.home() / ".config" / "systemd" / "user"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "flightscout-runner.socket").write_text(
+        f"[Unit]\nDescription=FlightScout local runner (on demand)\n\n[Socket]\nListenStream=127.0.0.1:{port}\n\n"
+        "[Install]\nWantedBy=sockets.target\n")
+    (d / "flightscout-runner.service").write_text(
+        f"[Unit]\nDescription=FlightScout local runner\n\n[Service]\nExecStart={exe} serve --idle {idle}\n")
+    subprocess.run(["systemctl", "--user", "daemon-reload"], check=False)
+    subprocess.run(["systemctl", "--user", "enable", "--now", "flightscout-runner.socket"], check=True)
+    return d / "flightscout-runner.socket"
+
+
+def _uninstall() -> list[str]:
+    done = []
+    for p in (Path.home() / "Library" / "LaunchAgents" / f"{PLIST}.plist",
+              Path.home() / "Library" / "LaunchAgents" / f"{TRACK_PLIST}.plist"):
+        if p.exists():
+            subprocess.run(["launchctl", "unload", str(p)], check=False, capture_output=True)
+            p.unlink(missing_ok=True)
+            done.append(str(p))
+    d = Path.home() / ".config" / "systemd" / "user"
+    if (d / "flightscout-runner.socket").exists():
+        subprocess.run(["systemctl", "--user", "disable", "--now", "flightscout-runner.socket"], check=False)
+        for n in ("flightscout-runner.socket", "flightscout-runner.service"):
+            (d / n).unlink(missing_ok=True)
+        subprocess.run(["systemctl", "--user", "daemon-reload"], check=False)
+        done.append(str(d / "flightscout-runner.socket"))
+    return done
+
+
+def serve(port: int = typer.Option(8787, help="Port (the website looks for 8787)."),
+          install: bool = typer.Option(False, "--install",
+                                       help="Start on demand: the system listens on the port and starts the "
+                                            "runner when the website calls it (macOS launchd, Linux systemd). "
+                                            "Nothing runs while you're not searching."),
+          idle: int = typer.Option(0, "--idle", help="Exit after this many minutes without searches (0 = never). "
+                                   "--install uses 10."),
+          track: bool = typer.Option(False, "--track/--no-track",
+                                     help="With --install on macOS: also check your watches at 07:05 and 19:05 "
+                                          "from this Mac (a few minutes twice a day)."),
+          uninstall: bool = typer.Option(False, "--uninstall", help="Remove the on demand runner and scheduled checks.")):
+    """Local runner: the website sends searches to this computer, so they come from your own IP and can use the
+    browser read airlines and booking sites. Runs only while you use it."""
+    if uninstall:
+        done = _uninstall()
+        out.print("Removed: " + ", ".join(done) if done else "Nothing was installed.")
+        return
+    if install:
+        exe = shutil.which("flightscout") or sys.argv[0]
+        mins = idle or 10
+        if sys.platform == "darwin":
+            where = _install_macos(exe, port, mins)
+        elif sys.platform.startswith("linux") and shutil.which("systemctl"):
+            where = _install_linux(exe, port, mins)
+        else:
+            con.print("[yellow]On demand start needs macOS or Linux with systemd. Run `flightscout serve` "
+                      "while you search instead.[/yellow]")
+            raise typer.Exit(1)
+        out.print(f"Local runner ready on http://127.0.0.1:{port}: it starts when the website searches and "
+                  f"stops after {mins} quiet minutes ({where}). Remove with `flightscout serve --uninstall`.")
+        if track and sys.platform == "darwin":
             if Client().token:
-                _install_tracking(exe, env, Path.home() / "Library" / "Logs" / "flightscout-track.log")
-                out.print("Your watches will also be checked at 07:05 and 19:05 from this Mac (your home IP).")
+                _install_tracking(exe, "", Path.home() / "Library" / "Logs" / "flightscout-track.log")
+                out.print("Your watches will also be checked at 07:05 and 19:05 from this Mac.")
             else:
                 con.print("[yellow]Not logged in, so watch checks weren't scheduled. Run `flightscout login`, "
-                          "then `flightscout serve --install` again.[/yellow]")
+                          "then `flightscout serve --install --track`.[/yellow]")
         return
+    import threading
+    import time
+
     import uvicorn
 
     os.environ["FLIGHTSCOUT_LOCAL"] = "1"
-    from ..api import app as api_app
+    from .. import api as api_mod
 
-    out.print(f"FlightScout local runner on http://127.0.0.1:{port}. The website will use it automatically.")
-    uvicorn.run(api_app, host="127.0.0.1", port=port, log_level="warning")
+    fd = _activated_socket()
+    config = uvicorn.Config(api_mod.app, host="127.0.0.1", port=port, fd=fd, log_level="warning")
+    server = uvicorn.Server(config)
+    if idle:
+        # Health checks don't count: only searches keep the runner awake.
+        def watch_idle() -> None:
+            while not server.should_exit:
+                time.sleep(15)
+                if time.time() - api_mod.last_activity() > idle * 60:
+                    server.should_exit = True
+
+        threading.Thread(target=watch_idle, daemon=True).start()
+    if fd is None:
+        out.print(f"FlightScout local runner on http://127.0.0.1:{port}. The website uses it automatically"
+                  + (f"; exits after {idle} quiet minutes." if idle else "; Ctrl+C to stop."))
+    server.run()
 
 
 def status():

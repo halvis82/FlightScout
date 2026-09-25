@@ -54,8 +54,10 @@ export async function proxyEngine(req: Request, kind: EngineKind) {
     result = normalize(kind, await engine<unknown>(kind === "browser" ? "/google/browser" : `/${kind}`, payload));
     const errs = (result as { errors?: Record<string, string> }).errors ?? {};
     const trips = (result as { trips?: unknown[]; items?: unknown[] }).trips ?? (result as { items?: unknown[] }).items;
-    // only cache complete, useful answers
-    if (!Object.keys(errs).length && (!Array.isArray(trips) || trips.length)) await cachePut(kind, key, result);
+    // only cache complete, useful answers ("paused" and "still searching"
+    // notes are expected and don't make an answer incomplete)
+    const hard = Object.values(errs).filter((m) => !/^(paused for|still searching)/.test(String(m)));
+    if (!hard.length && (!Array.isArray(trips) || trips.length)) await cachePut(kind, key, result);
   }
   // browser mode: "need more pages" answers are just passed through
   if ((result as { need?: unknown }).need) return json(result);
