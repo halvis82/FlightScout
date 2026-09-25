@@ -94,6 +94,7 @@ def _build(c: dict) -> None:
     out.print("Installing the website's packages (first time takes a minute)")
     subprocess.run([npm, "ci", "--no-audit", "--no-fund", "--loglevel=error"], cwd=web, env=env, check=True)
     out.print("Building the website")
+    shutil.rmtree(web / ".next", ignore_errors=True)  # never build on top of a failed or older build
     subprocess.run([npm, "run", "-s", "build"], cwd=web, env=env, check=True)  # also applies database migrations
     (web / ".next" / "fs-mode").write_text(c["mode"])
 
