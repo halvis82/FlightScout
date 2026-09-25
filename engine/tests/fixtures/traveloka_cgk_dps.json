@@ -1,0 +1,861 @@
+{
+"data": {
+"meta": {
+"searchCompleted": false
+},
+"airlineDataMap": {
+"OD": {
+"airlineId": "OD",
+"name": "Batik Air Malaysia",
+"shortName": "Batik Air Malaysia",
+"iconUrl": "https://img.cnt.traveloka.com/tvlk/image/imageResource/2024/01/16/1705391671497-951163190bba584ed41ce3cfe4138279.png?tr=q-75",
+"iataCode": "OD"
+},
+"IN": {
+"airlineId": "IN",
+"name": "NAM Air",
+"shortName": "NAM Air",
+"iconUrl": "https://img.cnt.traveloka.com/tvlk/image/imageResource/2024/10/22/1729582463612-6f9baef7047263b3356da5f909b561c9.png?tr=q-75",
+"iataCode": "IN"
+},
+"QG": {
+"airlineId": "QG",
+"name": "Citilink",
+"shortName": "Citilink",
+"iconUrl": "https://img.cnt.traveloka.com/tvlk/image/imageResource/2015/12/17/1450350561012-6584b693edd67d75cfc25ecff41c5704.png?tr=q-75",
+"iataCode": "QG"
+},
+"IP": {
+"airlineId": "IP",
+"name": "Pelita Air",
+"shortName": "Pelita Air",
+"iconUrl": "https://img.cnt.traveloka.com/tvlk/image/imageResource/2022/06/17/1655443880079-cbc17b9b0017fcffca1e294e9165c791.png?tr=q-75",
+"iataCode": "IP"
+},
+"SJ": {
+"airlineId": "SJ",
+"name": "Sriwijaya Air",
+"shortName": "Sriwijaya Air",
+"iconUrl": "https://img.cnt.traveloka.com/tvlk/image/imageResource/2019/12/12/1576139484141-e3bb88cae8d9f1f89d9b3d1b8788c450.png?tr=q-75",
+"iataCode": "SJ"
+},
+"QZ": {
+"airlineId": "QZ",
+"name": "AirAsia Indonesia",
+"shortName": "AirAsia Indonesia",
+"iconUrl": "https://img.cnt.traveloka.com/tvlk/image/imageResource/2022/09/05/1662367239331-9fca504de7049b772dd2386631705024.png?tr=q-75",
+"iataCode": "QZ"
+},
+"JT": {
+"airlineId": "JT",
+"name": "Lion Air",
+"shortName": "Lion Air",
+"iconUrl": "https://img.cnt.traveloka.com/tvlk/image/imageResource/2015/12/17/1450349861201-09ec8f298222a73d66e8e96aa3b918f0.png?tr=q-75",
+"iataCode": "JT, IW, ID"
+},
+"8B": {
+"airlineId": "8B",
+"name": "TransNusa",
+"shortName": "TransNusa",
+"iconUrl": "https://img.cnt.traveloka.com/tvlk/image/imageResource/2022/05/05/1651724293186-ee122b2d6b66f97e7262b4e2db977e1b.png?tr=q-75",
+"iataCode": "8B"
+},
+"GA": {
+"airlineId": "GA",
+"name": "Garuda Indonesia",
+"shortName": "Garuda Indonesia",
+"iconUrl": "https://img.cnt.traveloka.com/tvlk/image/imageResource/2019/12/12/1576140134467-906ded3638e9045d664adc40caa8ec47.png?tr=q-75",
+"iataCode": "GA"
+},
+"ID": {
+"airlineId": "ID",
+"name": "Batik Air",
+"shortName": "Batik Air",
+"iconUrl": "https://img.cnt.traveloka.com/tvlk/image/imageResource/2019/12/13/1576208649600-12471f9b7ffa159361f7bbbfb63065ee.png?tr=q-75",
+"iataCode": "JT, IW, ID, OD"
+},
+"IU": {
+"airlineId": "IU",
+"name": "Super Air Jet",
+"shortName": "Super Air Jet",
+"iconUrl": "https://img.cnt.traveloka.com/tvlk/image/imageResource/2021/07/12/1626063527483-f24d3eae611b51022ab0d1fc1457c820.png?tr=q-75",
+"iataCode": "IU"
+}
+},
+"searchResults": [
+{
+"id": "a69e9808f6430f00437a34cc4f44d9e9",
+"flightMetadata": {
+"isShared": false,
+"score": "0.0",
+"totalNumStop": "0",
+"tripDuration": "115",
+"airlineIds": [
+"JT"
+],
+"promoLabels": [],
+"quickFilterIds": [],
+"applicablePromoIds": [
+"ID_FL_BPG_baliho_desktop",
+"21542212",
+"3831165",
+"21542220",
+"21608511"
+],
+"availableFacilities": [
+"cabinBaggage",
+"baggage"
+],
+"cardFacilities": [
+{
+"airlineId": "JT",
+"items": [
+{
+"facilityType": "BAGGAGE",
+"labelDisplay": "10 kg"
+}
+]
+}
+],
+"cardFacilityV2": {
+"items": [
+{
+"facilityType": "BAGGAGE",
+"labelDisplay": "10 kg"
+}
+]
+},
+"seatClassInventory": "ECONOMY",
+"seatClassLabel": null,
+"isRefundable": true,
+"isReschedulable": true,
+"isSmartCombo": false,
+"smartComboCopy": null,
+"transitAirportCodes": [],
+"shouldDisplayTravelTax": false,
+"inventoryLabel": null,
+"inventoryLabelHighlighterColor": null,
+"transitDurations": [],
+"infoHighlighter": null,
+"applicablePreferences": [],
+"inventoryTrackingId": "be963914d1858eab0a043ca88d15375d",
+"isMultiClass": false,
+"totalCombinedPrice": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1578400",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"totalCombinedPriceRounded": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1578400",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"isCouponApplied": false,
+"highlightedFacility": null,
+"isSelfTransfer": false,
+"bestPaymentMethod": null,
+"alternateSeatClassLabel": null,
+"paymentMethodDiscount": null,
+"isCodeShare": false,
+"smartCombo": false,
+"codeShare": false,
+"couponApplied": false,
+"selfTransfer": false,
+"refundable": true,
+"reschedulable": true,
+"shared": false,
+"multiClass": false
+},
+"fare": {
+"displayType": "ADT",
+"display": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1578400",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"displayRounded": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1578400",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"airlineFare": null,
+"adult": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1578400",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"adultRounded": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1578400",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"hasPointCashback": false
+},
+"connectingFlightRoutes": [
+{
+"departureAirport": "CGK",
+"arrivalAirport": "DPS",
+"numDayOffset": "0",
+"totalNumStop": "0",
+"segments": [
+{
+"departureAirport": "CGK",
+"arrivalAirport": "DPS",
+"departureTerminalName": "Terminal 1B",
+"arrivalTerminalName": "Terminal Domestic",
+"flightNumber": "JT-12",
+"seatClass": "ECONOMY",
+"airlineCode": "JT",
+"brandCode": "JT",
+"operatingAirlineCode": "JT",
+"aircraftType": "",
+"flightLegInfoList": [],
+"numTransits": "0",
+"durationMinutes": "115",
+"routeNumDaysOffset": "0",
+"tzDepartureMinuteOffset": "420",
+"tzArrivalMinuteOffset": "480",
+"departureDate": {
+"month": "11",
+"day": "6",
+"year": "2026"
+},
+"arrivalDate": {
+"month": "11",
+"day": "6",
+"year": "2026"
+},
+"departureTime": {
+"hour": "17",
+"minute": "40"
+},
+"arrivalTime": {
+"hour": "20",
+"minute": "35"
+},
+"visaRequired": false,
+"mayReCheckIn": false,
+"upsellAvailable": false,
+"transitInfoV2": null
+}
+],
+"durationInMinutes": "0"
+}
+]
+},
+{
+"id": "d0d351fb0227458c92c814519ac0d702",
+"flightMetadata": {
+"isShared": false,
+"score": "0.0",
+"totalNumStop": "0",
+"tripDuration": "110",
+"airlineIds": [
+"8B"
+],
+"promoLabels": [
+"ID_FL_BPG"
+],
+"quickFilterIds": [
+{
+"id": "ID_FL_BPG",
+"type": "PROMO_ID"
+}
+],
+"applicablePromoIds": [
+"ID_FL_BPG_baliho_desktop",
+"21542212",
+"3831165",
+"21542220",
+"21608511"
+],
+"availableFacilities": [
+"cabinBaggage",
+"baggage"
+],
+"cardFacilities": [
+{
+"airlineId": "8B",
+"items": [
+{
+"facilityType": "BAGGAGE",
+"labelDisplay": "20 kg"
+}
+]
+}
+],
+"cardFacilityV2": {
+"items": [
+{
+"facilityType": "BAGGAGE",
+"labelDisplay": "20 kg"
+}
+]
+},
+"seatClassInventory": "ECONOMY",
+"seatClassLabel": null,
+"isRefundable": true,
+"isReschedulable": true,
+"isSmartCombo": false,
+"smartComboCopy": null,
+"transitAirportCodes": [],
+"shouldDisplayTravelTax": false,
+"inventoryLabel": null,
+"inventoryLabelHighlighterColor": null,
+"transitDurations": [],
+"infoHighlighter": null,
+"applicablePreferences": [],
+"inventoryTrackingId": "cf8bcdd6526880b1eaa483797a30f2fa",
+"isMultiClass": false,
+"totalCombinedPrice": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1442765",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"totalCombinedPriceRounded": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1442765",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"isCouponApplied": false,
+"highlightedFacility": null,
+"isSelfTransfer": false,
+"bestPaymentMethod": null,
+"alternateSeatClassLabel": null,
+"paymentMethodDiscount": null,
+"isCodeShare": false,
+"smartCombo": false,
+"codeShare": false,
+"couponApplied": false,
+"selfTransfer": false,
+"refundable": true,
+"reschedulable": true,
+"shared": false,
+"multiClass": false
+},
+"fare": {
+"displayType": "ADT",
+"display": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1442765",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"displayRounded": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1442765",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"airlineFare": null,
+"adult": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1442765",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"adultRounded": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1442765",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"hasPointCashback": false
+},
+"connectingFlightRoutes": [
+{
+"departureAirport": "CGK",
+"arrivalAirport": "DPS",
+"numDayOffset": "0",
+"totalNumStop": "0",
+"segments": [
+{
+"departureAirport": "CGK",
+"arrivalAirport": "DPS",
+"departureTerminalName": "Terminal 3",
+"arrivalTerminalName": "Terminal Domestic",
+"flightNumber": "8B-5108",
+"seatClass": "ECONOMY",
+"airlineCode": "8B",
+"brandCode": "8B",
+"operatingAirlineCode": "8B",
+"aircraftType": "Airbus A320-200",
+"flightLegInfoList": [],
+"numTransits": "0",
+"durationMinutes": "110",
+"routeNumDaysOffset": "0",
+"tzDepartureMinuteOffset": "420",
+"tzArrivalMinuteOffset": "480",
+"departureDate": {
+"month": "11",
+"day": "6",
+"year": "2026"
+},
+"arrivalDate": {
+"month": "11",
+"day": "6",
+"year": "2026"
+},
+"departureTime": {
+"hour": "15",
+"minute": "10"
+},
+"arrivalTime": {
+"hour": "18",
+"minute": "0"
+},
+"visaRequired": false,
+"mayReCheckIn": false,
+"upsellAvailable": false,
+"transitInfoV2": null
+}
+],
+"durationInMinutes": "0"
+}
+]
+},
+{
+"id": "471cc0db53c72a8547893b59f2480230",
+"flightMetadata": {
+"isShared": false,
+"score": "0.0",
+"totalNumStop": "0",
+"tripDuration": "110",
+"airlineIds": [
+"QZ"
+],
+"promoLabels": [
+"ID_FL_BPG"
+],
+"quickFilterIds": [
+{
+"id": "ID_FL_BPG",
+"type": "PROMO_ID"
+}
+],
+"applicablePromoIds": [
+"ID_FL_BPG_baliho_desktop",
+"21542212",
+"3831165",
+"21542220",
+"21608511"
+],
+"availableFacilities": [
+"cabinBaggage",
+"baggage",
+"wifi"
+],
+"cardFacilities": [
+{
+"airlineId": "QZ",
+"items": [
+{
+"facilityType": "BAGGAGE",
+"labelDisplay": "15 kg"
+}
+]
+}
+],
+"cardFacilityV2": {
+"items": [
+{
+"facilityType": "BAGGAGE",
+"labelDisplay": "15 kg"
+}
+]
+},
+"seatClassInventory": "ECONOMY",
+"seatClassLabel": null,
+"isRefundable": true,
+"isReschedulable": true,
+"isSmartCombo": false,
+"smartComboCopy": null,
+"transitAirportCodes": [],
+"shouldDisplayTravelTax": false,
+"inventoryLabel": null,
+"inventoryLabelHighlighterColor": null,
+"transitDurations": [],
+"infoHighlighter": null,
+"applicablePreferences": [],
+"inventoryTrackingId": "33d060ff815e834e975334712d7f86e5",
+"isMultiClass": false,
+"totalCombinedPrice": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1452300",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"totalCombinedPriceRounded": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1452300",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"isCouponApplied": false,
+"highlightedFacility": null,
+"isSelfTransfer": false,
+"bestPaymentMethod": null,
+"alternateSeatClassLabel": null,
+"paymentMethodDiscount": null,
+"isCodeShare": false,
+"smartCombo": false,
+"codeShare": false,
+"couponApplied": false,
+"selfTransfer": false,
+"refundable": true,
+"reschedulable": true,
+"shared": false,
+"multiClass": false
+},
+"fare": {
+"displayType": "ADT",
+"display": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1452300",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"displayRounded": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1452300",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"airlineFare": null,
+"adult": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1452300",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"adultRounded": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "1452300",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"hasPointCashback": false
+},
+"connectingFlightRoutes": [
+{
+"departureAirport": "CGK",
+"arrivalAirport": "DPS",
+"numDayOffset": "0",
+"totalNumStop": "0",
+"segments": [
+{
+"departureAirport": "CGK",
+"arrivalAirport": "DPS",
+"departureTerminalName": "Terminal 2E",
+"arrivalTerminalName": "Terminal Domestic",
+"flightNumber": "QZ-818",
+"seatClass": "ECONOMY",
+"airlineCode": "QZ",
+"brandCode": "QZ",
+"operatingAirlineCode": "QZ",
+"aircraftType": "Airbus A320-100/200",
+"flightLegInfoList": [],
+"numTransits": "0",
+"durationMinutes": "110",
+"routeNumDaysOffset": "0",
+"tzDepartureMinuteOffset": "420",
+"tzArrivalMinuteOffset": "480",
+"departureDate": {
+"month": "11",
+"day": "6",
+"year": "2026"
+},
+"arrivalDate": {
+"month": "11",
+"day": "6",
+"year": "2026"
+},
+"departureTime": {
+"hour": "17",
+"minute": "55"
+},
+"arrivalTime": {
+"hour": "20",
+"minute": "45"
+},
+"visaRequired": false,
+"mayReCheckIn": false,
+"upsellAvailable": false,
+"transitInfoV2": null
+}
+],
+"durationInMinutes": "0"
+}
+]
+},
+{
+"id": "eca598e15bdbf03216e8d75fb0bb1006",
+"flightMetadata": {
+"isShared": false,
+"score": "0.0",
+"totalNumStop": "1",
+"tripDuration": "645",
+"airlineIds": [
+"OD"
+],
+"promoLabels": [],
+"quickFilterIds": [],
+"applicablePromoIds": [
+"ID_FL_BPG_baliho_desktop",
+"21542212",
+"3831165",
+"21542220",
+"21608511"
+],
+"availableFacilities": [
+"cabinBaggage",
+"baggage",
+"entertainment",
+"usbAndPower"
+],
+"cardFacilities": [
+{
+"airlineId": "OD",
+"items": [
+{
+"facilityType": "BAGGAGE",
+"labelDisplay": "15 kg"
+}
+]
+}
+],
+"cardFacilityV2": {
+"items": [
+{
+"facilityType": "BAGGAGE",
+"labelDisplay": "15 kg"
+}
+]
+},
+"seatClassInventory": "ECONOMY",
+"seatClassLabel": null,
+"isRefundable": true,
+"isReschedulable": true,
+"isSmartCombo": false,
+"smartComboCopy": null,
+"transitAirportCodes": [
+"KUL"
+],
+"shouldDisplayTravelTax": false,
+"inventoryLabel": null,
+"inventoryLabelHighlighterColor": null,
+"transitDurations": [
+"330"
+],
+"infoHighlighter": null,
+"applicablePreferences": [],
+"inventoryTrackingId": "ac7548c75dbe4667d16d551175877457",
+"isMultiClass": false,
+"totalCombinedPrice": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "3949800",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"totalCombinedPriceRounded": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "3949800",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"isCouponApplied": false,
+"highlightedFacility": null,
+"isSelfTransfer": false,
+"bestPaymentMethod": null,
+"alternateSeatClassLabel": null,
+"paymentMethodDiscount": null,
+"isCodeShare": false,
+"smartCombo": false,
+"codeShare": false,
+"couponApplied": false,
+"selfTransfer": false,
+"refundable": true,
+"reschedulable": true,
+"shared": false,
+"multiClass": false
+},
+"fare": {
+"displayType": "ADT",
+"display": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "3949800",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"displayRounded": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "3949800",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"airlineFare": null,
+"adult": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "3949800",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"adultRounded": {
+"currencyValue": {
+"currency": "IDR",
+"amount": "3949800",
+"nullOrEmpty": false
+},
+"numOfDecimalPoint": "0"
+},
+"hasPointCashback": false
+},
+"connectingFlightRoutes": [
+{
+"departureAirport": "CGK",
+"arrivalAirport": "DPS",
+"numDayOffset": "0",
+"totalNumStop": "1",
+"segments": [
+{
+"departureAirport": "CGK",
+"arrivalAirport": "KUL",
+"departureTerminalName": "Terminal 2F",
+"arrivalTerminalName": "Terminal KLIA1",
+"flightNumber": "OD-397",
+"seatClass": "ECONOMY",
+"airlineCode": "OD",
+"brandCode": "OD",
+"operatingAirlineCode": "OD",
+"aircraftType": "Boeing 737-800",
+"flightLegInfoList": [],
+"numTransits": "0",
+"durationMinutes": "135",
+"routeNumDaysOffset": "0",
+"tzDepartureMinuteOffset": "420",
+"tzArrivalMinuteOffset": "480",
+"departureDate": {
+"month": "11",
+"day": "6",
+"year": "2026"
+},
+"arrivalDate": {
+"month": "11",
+"day": "6",
+"year": "2026"
+},
+"departureTime": {
+"hour": "5",
+"minute": "15"
+},
+"arrivalTime": {
+"hour": "8",
+"minute": "30"
+},
+"visaRequired": false,
+"mayReCheckIn": false,
+"upsellAvailable": false,
+"transitInfoV2": null
+},
+{
+"departureAirport": "KUL",
+"arrivalAirport": "DPS",
+"departureTerminalName": "Terminal KLIA1",
+"arrivalTerminalName": "Terminal International",
+"flightNumber": "OD-193",
+"seatClass": "ECONOMY",
+"airlineCode": "OD",
+"brandCode": "OD",
+"operatingAirlineCode": "OD",
+"aircraftType": "Boeing 737-800",
+"flightLegInfoList": [],
+"numTransits": "0",
+"durationMinutes": "180",
+"routeNumDaysOffset": "0",
+"tzDepartureMinuteOffset": "480",
+"tzArrivalMinuteOffset": "480",
+"departureDate": {
+"month": "11",
+"day": "6",
+"year": "2026"
+},
+"arrivalDate": {
+"month": "11",
+"day": "6",
+"year": "2026"
+},
+"departureTime": {
+"hour": "14",
+"minute": "0"
+},
+"arrivalTime": {
+"hour": "17",
+"minute": "0"
+},
+"visaRequired": false,
+"mayReCheckIn": false,
+"upsellAvailable": false,
+"transitInfoV2": null
+}
+],
+"durationInMinutes": "0"
+}
+]
+}
+]
+}
+}

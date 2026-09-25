@@ -5,7 +5,10 @@ from __future__ import annotations
 
 import contextvars
 import logging
+import os
+import time
 from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FutureTimeout
 
 from . import airports, fx, sellers
 from .models import Itinerary, SearchQuery, SearchResult, Trip
@@ -14,6 +17,11 @@ from .sources import (_browser, condor, flair, google, kiwi, kiwiweb, norse, ser
                       vivaaerobus, volaris, volotea, wideroe, wizzair)
 from .sources import (allegiant_browser, norwegian_browser, southwest_browser, transavia_browser,
                       vivaaerobus_browser)
+from .sources import aerolineas, aeromexico, alaska, arajet, breeze, frontier, jetblue
+from .sources import (avelo_browser, caribbean_browser, caymanairways_browser, porter_browser, united_browser,
+                      westjet_browser, wingo_browser)
+from .sources import (almosafer, aviasales_browser, booking, cleartrip, edreams, expedia, gotogate, kayakweb,
+                      mytrip, opodo, priceline, traveloka, tripcom_browser, wego)
 
 log = logging.getLogger(__name__)
 
@@ -33,10 +41,34 @@ BROWSER_SOURCES = {
     "transavia": transavia_browser.search, "norwegian": norwegian_browser.search,
     "southwest": southwest_browser.search, "vivaaerobus": vivaaerobus_browser.search,
     "allegiant": allegiant_browser.search,
+    "avelo": avelo_browser.search, "united": united_browser.search, "porter": porter_browser.search,
+    "westjet": westjet_browser.search, "caribbean": caribbean_browser.search,
+    "caymanairways": caymanairways_browser.search, "wingo": wingo_browser.search,
 }
 SOURCES.update(BROWSER_SOURCES)
+SOURCES.update({
+    "frontier": frontier.search, "breeze": breeze.search, "jetblue": jetblue.search, "alaska": alaska.search,
+    "arajet": arajet.search, "aeromexico": aeromexico.search, "aerolineas": aerolineas.search,
+})
+# Booking sites (OTAs and metasearch), each verified against its own results
+# page. The "otas" group: plain HTTP ones everywhere, the headless Chrome ones
+# only where Chrome is installed.
+OTAS = {
+    "booking": booking.search, "kayakweb": kayakweb.search, "momondo": kayakweb.search_momondo,
+    "cheapflights": kayakweb.search_cheapflights, "expedia": expedia.search, "orbitz": expedia.search_orbitz,
+    "travelocity": expedia.search_travelocity, "priceline": priceline.search, "wego": wego.search,
+    "gotogate": gotogate.search, "mytrip": mytrip.search,
+}
+OTAS_BROWSER = {
+    "tripcom": tripcom_browser.search, "aviasales": aviasales_browser.search, "edreams": edreams.search,
+    "opodo": opodo.search, "almosafer": almosafer.search, "traveloka": traveloka.search, "cleartrip": cleartrip.search,
+}
+SOURCES.update(OTAS)
+SOURCES.update(OTAS_BROWSER)
+OTA_WAIT = float(os.environ.get("FLIGHTSCOUT_OTA_WAIT", "45"))
 # Direct airline sources over plain HTTP. Each gates itself on its network.
-AIRLINES = ["volaris", "wideroe", "skyairline", "norse", "volotea", "condor", "flair"]
+AIRLINES = ["volaris", "wideroe", "skyairline", "norse", "volotea", "condor", "flair",
+            "frontier", "breeze", "jetblue", "alaska", "arajet", "aeromexico", "aerolineas"]
 _DIRECT = set(AIRLINES)
 
 
@@ -48,6 +80,10 @@ def expand_sources(names: list[str]) -> list[str]:
         out += [s for s in AIRLINES if s not in out]
     if ("airlines" in names or set(names) & _DIRECT) and _browser.available():
         out += [s for s in BROWSER_SOURCES if s not in out]
+    if "otas" in names:
+        out += [s for s in OTAS if s not in out]
+        if _browser.available():
+            out += [s for s in OTAS_BROWSER if s not in out]
     return out
 
 # Airline low fare calendars (one way, cheapest fare per day). Each module
@@ -169,15 +205,25 @@ def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> Search
     srcs = expand_sources(list(q.sources))
     errors: dict[str, str] = {}
     found: list[Itinerary] = []
-    with ThreadPoolExecutor(max_workers=len(srcs) or 1) as ex:
-        # copy_context: browser mode (see browser_fetch.py) must reach the source threads
-        futs = {s: ex.submit(contextvars.copy_context().run, SOURCES[s], q) for s in srcs}
-        for s, f in futs.items():
-            try:
+    ex = ThreadPoolExecutor(max_workers=len(srcs) or 1)
+    # copy_context: browser mode (see browser_fetch.py) must reach the source threads
+    futs = {s: ex.submit(contextvars.copy_context().run, SOURCES[s], q) for s in srcs}
+    # Booking sites and browser read airlines can be slow (up to a minute or
+    # two): don't hold the search
+    # for them. Late ones keep running and fill the cache for the next search.
+    deadline = time.monotonic() + OTA_WAIT
+    for s, f in futs.items():
+        try:
+            if s in OTAS or s in OTAS_BROWSER or s in BROWSER_SOURCES:
+                found.extend(f.result(timeout=max(0.0, deadline - time.monotonic())))
+            else:
                 found.extend(f.result())
-            except Exception as e:  # one source failing must not sink the search
-                log.warning("source %s failed: %s", s, e)
-                errors[s] = str(e)[:300]
+        except FutureTimeout:
+            errors[s] = f"still searching after {OTA_WAIT:.0f} s (cached for the next search)"
+        except Exception as e:  # one source failing must not sink the search
+            log.warning("source %s failed: %s", s, e)
+            errors[s] = str(e)[:300]
+    ex.shutdown(wait=False)
     items = merge([sellers.annotate(to_currency(i, q.currency)) for i in found])
     trips = [Trip(tickets=[i], total_price=i.price, currency=i.currency, kind="single",
                   risks=list(i.warnings)) for i in items]

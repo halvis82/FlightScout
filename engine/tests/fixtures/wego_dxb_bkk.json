@@ -1,0 +1,666 @@
+{
+"fares": [
+{
+"ecpc": 0.953626,
+"mv": 0.0,
+"remainingSeatsCount": 0,
+"conditionIds": [],
+"legConditionIds": [],
+"refundable": false,
+"exchangeable": false,
+"penaltyInfos": [],
+"tags": [],
+"score": 659.72363,
+"legsSourceTypes": [
+"NORMAL"
+],
+"searchRoute": "DXB-BKK-20261112",
+"paymentFees": [],
+"id": "97471bae0fbeeb3fmsr:ae.trip.com:64449373385cf94a",
+"price": {
+"totalAmount": 694.0,
+"amount": 694.0,
+"currencyCode": "AED"
+},
+"providerCode": "ae.trip.com",
+"tripId": "97471bae0fbeeb3fmsr:IX926~12~0030~0545-IX896~12~0945~1520",
+"fareOptions": [
+{
+"id": "1",
+"handoffUrl": "https://handoff.wego.com/flights/continue?currency=AED&url_locale=en&site_code=AE&device_type=desktop&app_type=WEB_APP&domain=www.wego.ae&fare_id=97471bae0fbeeb3fmsr:ae.trip.com:64449373385cf94a&route=DXB-BKK&search_id=97471bae0fbeeb3fmsr&trip_id=DXB:BKK:2026-11-12&pwa=false&api_version=2&integration_code=ctrip.com&region=us-east-1&placement_type=metasearch&show_weegio=true&fare_option_id=1",
+"price": {
+"totalAmount": 694.0,
+"totalAmountUsd": 188.94637,
+"totalAmountWithFraction": 694.0,
+"amount": 694.0,
+"amountUsd": 188.94637,
+"amountWithFraction": 694.0,
+"originalAmount": 0.0,
+"originalAmountUsd": 0.0,
+"amountPerAdult": 694.0,
+"amountPerChild": 0.0,
+"amountPerInfant": 0.0,
+"taxAmount": 0.0,
+"taxAmountUsd": 0.0,
+"totalTaxAmount": 0.0,
+"totalTaxAmountUsd": 0.0,
+"currencyCode": "AED",
+"paymentFeeAmountUsd": 0.0,
+"bookingFee": 0.0,
+"bookingFeeUsd": 0.0,
+"totalBookingFee": 0.0,
+"totalBookingFeeUsd": 0.0
+},
+"adultPassengerInfo": {
+"baggageAllowances": [
+[
+[
+"H:1::"
+],
+[
+"H:1::"
+]
+]
+]
+},
+"childPassengerInfo": {
+"baggageAllowances": [
+[
+[],
+[]
+]
+]
+},
+"infantPassengerInfo": {
+"baggageAllowances": [
+[
+[],
+[]
+]
+]
+},
+"legBaggageInclusions": [
+{
+"cabin": "INCLUDED",
+"checked": "UNKNOWN",
+"checkedIncluded": false,
+"generalized": false,
+"cabinIncluded": true
+}
+],
+"tripBaggageInclusions": {
+"cabin": "INCLUDED",
+"checked": "UNKNOWN",
+"checkedIncluded": false,
+"generalized": false,
+"cabinIncluded": true
+}
+}
+]
+},
+{
+"ecpc": 0.302346,
+"mv": 0.0,
+"remainingSeatsCount": 0,
+"conditionIds": [],
+"legConditionIds": [],
+"refundable": false,
+"exchangeable": false,
+"penaltyInfos": [],
+"tags": [],
+"score": 647.89136,
+"legsSourceTypes": [
+"NORMAL"
+],
+"searchRoute": "DXB-BKK-20261112",
+"paymentFees": [],
+"id": "97471bae0fbeeb3fmsr:mytickets.ae:29a68e951d63bff",
+"price": {
+"totalAmount": 737.0,
+"amount": 737.0,
+"currencyCode": "AED"
+},
+"providerCode": "mytickets.ae",
+"tripId": "97471bae0fbeeb3fmsr:IX926~12~0030~0545-IX896~12~0945~1520",
+"fareOptions": []
+},
+{
+"ecpc": 0.63994,
+"mv": 0.0,
+"remainingSeatsCount": 0,
+"conditionIds": [],
+"legConditionIds": [],
+"refundable": false,
+"exchangeable": false,
+"penaltyInfos": [],
+"tags": [],
+"score": 642.2992,
+"legsSourceTypes": [
+"NORMAL"
+],
+"searchRoute": "DXB-BKK-20261112",
+"paymentFees": [],
+"id": "97471bae0fbeeb3fmsr:ae.kiwi.com:fee4ff82a336a1",
+"price": {
+"totalAmount": 758.0,
+"amount": 758.0,
+"currencyCode": "AED"
+},
+"providerCode": "ae.kiwi.com",
+"tripId": "97471bae0fbeeb3fmsr:IX926~12~0030~0545-IX896~12~0945~1520",
+"fareOptions": [
+{
+"id": "1",
+"handoffUrl": "https://handoff.wego.com/flights/continue?currency=AED&url_locale=en&site_code=AE&device_type=desktop&app_type=WEB_APP&domain=www.wego.ae&fare_id=97471bae0fbeeb3fmsr:ae.kiwi.com:fee4ff82a336a1&route=DXB-BKK&search_id=97471bae0fbeeb3fmsr&trip_id=DXB:BKK:2026-11-12&pwa=false&api_version=2&integration_code=kiwi.com&region=us-east-1&placement_type=metasearch&show_weegio=true&fare_option_id=1",
+"price": {
+"totalAmount": 758.0,
+"totalAmountUsd": 206.3708,
+"totalAmountWithFraction": 758.0,
+"amount": 758.0,
+"amountUsd": 206.3708,
+"amountWithFraction": 758.0,
+"originalAmount": 0.0,
+"originalAmountUsd": 0.0,
+"amountPerAdult": 0.0,
+"amountPerChild": 0.0,
+"amountPerInfant": 0.0,
+"taxAmount": 0.0,
+"taxAmountUsd": 0.0,
+"totalTaxAmount": 0.0,
+"totalTaxAmountUsd": 0.0,
+"currencyCode": "AED",
+"paymentFeeAmountUsd": 0.0,
+"bookingFee": 0.0,
+"bookingFeeUsd": 0.0,
+"totalBookingFee": 0.0,
+"totalBookingFeeUsd": 0.0
+},
+"adultPassengerInfo": {
+"baggageAllowances": [
+[
+[
+"H::5:P",
+"C::20:P"
+],
+[
+"H::5:P",
+"C::20:P"
+]
+]
+]
+},
+"childPassengerInfo": {
+"baggageAllowances": [
+[
+[],
+[]
+]
+]
+},
+"infantPassengerInfo": {
+"baggageAllowances": [
+[
+[],
+[]
+]
+]
+},
+"legBaggageInclusions": [
+{
+"cabin": "INCLUDED",
+"checked": "INCLUDED",
+"checkedIncluded": true,
+"generalized": false,
+"cabinIncluded": true
+}
+],
+"tripBaggageInclusions": {
+"cabin": "INCLUDED",
+"checked": "INCLUDED",
+"checkedIncluded": true,
+"generalized": false,
+"cabinIncluded": true
+}
+}
+]
+},
+{
+"ecpc": 0.222099,
+"mv": 0.0,
+"remainingSeatsCount": 0,
+"conditionIds": [],
+"legConditionIds": [],
+"refundable": false,
+"exchangeable": false,
+"penaltyInfos": [],
+"tags": [],
+"score": 659.24927,
+"legsSourceTypes": [
+"NORMAL"
+],
+"searchRoute": "DXB-BKK-20261112",
+"paymentFees": [],
+"id": "97471bae0fbeeb3fmsr:ae.opodo.com:cd8043a1a161725",
+"price": {
+"totalAmount": 783.0,
+"amount": 783.0,
+"currencyCode": "AED"
+},
+"providerCode": "ae.opodo.com",
+"tripId": "97471bae0fbeeb3fmsr:RX244~12~1955~2050-RX853~12~2245~0935",
+"fareOptions": []
+},
+{
+"ecpc": 0.953626,
+"mv": 0.0,
+"remainingSeatsCount": 0,
+"conditionIds": [],
+"legConditionIds": [],
+"refundable": false,
+"exchangeable": false,
+"penaltyInfos": [],
+"tags": [],
+"score": 657.6892,
+"legsSourceTypes": [
+"NORMAL"
+],
+"searchRoute": "DXB-BKK-20261112",
+"paymentFees": [],
+"id": "97471bae0fbeeb3fmsr:ae.trip.com:89ca97ea203b2d4b",
+"price": {
+"totalAmount": 789.0,
+"amount": 789.0,
+"currencyCode": "AED"
+},
+"providerCode": "ae.trip.com",
+"tripId": "97471bae0fbeeb3fmsr:RX244~12~1955~2050-RX853~12~2245~0935",
+"fareOptions": [
+{
+"id": "1",
+"handoffUrl": "https://handoff.wego.com/flights/continue?currency=AED&url_locale=en&site_code=AE&device_type=desktop&app_type=WEB_APP&domain=www.wego.ae&fare_id=97471bae0fbeeb3fmsr:ae.trip.com:89ca97ea203b2d4b&route=DXB-BKK&search_id=97471bae0fbeeb3fmsr&trip_id=DXB:BKK:2026-11-12&pwa=false&api_version=2&integration_code=ctrip.com&region=us-east-1&placement_type=metasearch&show_weegio=true&fare_option_id=1",
+"price": {
+"totalAmount": 789.0,
+"totalAmountUsd": 214.81078,
+"totalAmountWithFraction": 789.0,
+"amount": 789.0,
+"amountUsd": 214.81078,
+"amountWithFraction": 789.0,
+"originalAmount": 0.0,
+"originalAmountUsd": 0.0,
+"amountPerAdult": 789.0,
+"amountPerChild": 0.0,
+"amountPerInfant": 0.0,
+"taxAmount": 0.0,
+"taxAmountUsd": 0.0,
+"totalTaxAmount": 0.0,
+"totalTaxAmountUsd": 0.0,
+"currencyCode": "AED",
+"paymentFeeAmountUsd": 0.0,
+"bookingFee": 0.0,
+"bookingFeeUsd": 0.0,
+"totalBookingFee": 0.0,
+"totalBookingFeeUsd": 0.0
+},
+"adultPassengerInfo": {
+"baggageAllowances": [
+[
+[
+"C:1:25:K",
+"H:1:7:K"
+],
+[
+"C:1:25:K",
+"H:1:7:K"
+]
+]
+]
+},
+"childPassengerInfo": {
+"baggageAllowances": [
+[
+[],
+[]
+]
+]
+},
+"infantPassengerInfo": {
+"baggageAllowances": [
+[
+[],
+[]
+]
+]
+},
+"legBaggageInclusions": [
+{
+"cabin": "INCLUDED",
+"checked": "INCLUDED",
+"checkedIncluded": true,
+"generalized": false,
+"cabinIncluded": true
+}
+],
+"tripBaggageInclusions": {
+"cabin": "INCLUDED",
+"checked": "INCLUDED",
+"checkedIncluded": true,
+"generalized": false,
+"cabinIncluded": true
+}
+}
+]
+},
+{
+"ecpc": 0.715782,
+"mv": 0.0,
+"remainingSeatsCount": 0,
+"conditionIds": [],
+"legConditionIds": [],
+"refundable": false,
+"exchangeable": false,
+"penaltyInfos": [],
+"tags": [],
+"score": 649.24927,
+"legsSourceTypes": [
+"NORMAL"
+],
+"searchRoute": "DXB-BKK-20261112",
+"paymentFees": [],
+"id": "97471bae0fbeeb3fmsr:makemytrip.com-ae:c836893245c44324",
+"price": {
+"totalAmount": 820.0,
+"amount": 820.0,
+"currencyCode": "AED"
+},
+"providerCode": "makemytrip.com-ae",
+"tripId": "97471bae0fbeeb3fmsr:RX244~12~1955~2050-RX853~12~2245~0935",
+"fareOptions": [
+{
+"id": "1",
+"handoffUrl": "https://handoff.wego.com/flights/continue?currency=AED&url_locale=en&site_code=AE&device_type=desktop&app_type=WEB_APP&domain=www.wego.ae&fare_id=97471bae0fbeeb3fmsr:makemytrip.com-ae:c836893245c44324&route=DXB-BKK&search_id=97471bae0fbeeb3fmsr&trip_id=DXB:BKK:2026-11-12&pwa=false&api_version=2&integration_code=makemytrip.com&region=us-east-1&placement_type=metasearch&show_weegio=true&fare_option_id=1",
+"price": {
+"totalAmount": 820.0,
+"totalAmountUsd": 223.25075,
+"totalAmountWithFraction": 820.0,
+"amount": 820.0,
+"amountUsd": 223.25075,
+"amountWithFraction": 820.0,
+"originalAmount": 0.0,
+"originalAmountUsd": 0.0,
+"amountPerAdult": 820.0,
+"amountPerChild": 0.0,
+"amountPerInfant": 0.0,
+"taxAmount": 0.0,
+"taxAmountUsd": 0.0,
+"totalTaxAmount": 0.0,
+"totalTaxAmountUsd": 0.0,
+"currencyCode": "AED",
+"paymentFeeAmountUsd": 0.0,
+"bookingFee": 0.0,
+"bookingFeeUsd": 0.0,
+"totalBookingFee": 0.0,
+"totalBookingFeeUsd": 0.0
+},
+"adultPassengerInfo": {
+"baggageAllowances": [
+[
+[
+"H::7:P",
+"C::25:P"
+],
+[
+"H::7:P",
+"C::25:P"
+]
+]
+]
+},
+"childPassengerInfo": {
+"baggageAllowances": [
+[
+[],
+[]
+]
+]
+},
+"infantPassengerInfo": {
+"baggageAllowances": [
+[
+[],
+[]
+]
+]
+},
+"legBaggageInclusions": [
+{
+"cabin": "INCLUDED",
+"checked": "INCLUDED",
+"generalized": false,
+"cabinIncluded": true,
+"checkedIncluded": true
+}
+],
+"tripBaggageInclusions": {
+"cabin": "INCLUDED",
+"checked": "INCLUDED",
+"generalized": false,
+"cabinIncluded": true,
+"checkedIncluded": true
+}
+}
+]
+}
+],
+"trips": [
+{
+"id": "97471bae0fbeeb3fmsr:IX926~12~0030~0545-IX896~12~0945~1520",
+"originalFlightId": "97471bae0fbeeb3fmsr:IX926~12~0030~0545-IX896~12~0945~1520",
+"code": "IX926~12~0030~0545-IX896~12~0945~1520",
+"legIds": [
+"DXB-BKK:IX926~12:IX896~12:0"
+],
+"normalizedFlight": false
+},
+{
+"id": "97471bae0fbeeb3fmsr:RX244~12~1955~2050-RX853~12~2245~0935",
+"originalFlightId": "97471bae0fbeeb3fmsr:RX244~12~1820~1915-RX853~12~2215~0905",
+"code": "RX244~12~1955~2050-RX853~12~2245~0935",
+"legIds": [
+"DXB-BKK:RX244~12:RX853~12:0"
+],
+"normalizedFlight": true
+}
+],
+"legs": [
+{
+"id": "DXB-BKK:RX244~12:RX853~12:0",
+"departureTime": "19:55",
+"arrivalTime": "09:35",
+"duration": "10h 40m",
+"departureAirportCode": "DXB",
+"arrivalAirportCode": "BKK",
+"airlineCodes": [
+"RX"
+],
+"aircraftCodes": [
+"787"
+],
+"stopoverAirportCodes": [
+"RUH"
+],
+"allianceCodes": [
+"lcc"
+],
+"stopoversCount": 1,
+"departureTimeMinutes": 1195,
+"arrivalTimeMinutes": 575,
+"departureDateTime": "2026-11-12T19:55:00.000+04:00",
+"arrivalDateTime": "2026-11-13T09:35:00.000+07:00",
+"stopoverDurationMinutes": 115,
+"durationMinutes": 640,
+"overnight": true,
+"stopoverDuration": "1h 55m",
+"durationDays": 1,
+"longStopover": false,
+"segments": [
+{
+"durationMinutes": 115,
+"stopoverDurationMinutes": 115,
+"departureAirportCode": "DXB",
+"arrivalAirportCode": "RUH",
+"airlineCode": "RX",
+"cabin": "economy",
+"designatorCode": "RX244",
+"departureDateTime": "2026-11-12T19:55:00.000+04:00",
+"arrivalDateTime": "2026-11-12T20:50:00.000+03:00",
+"transportType": "FLIGHT",
+"aircraftCode": "787"
+},
+{
+"durationMinutes": 410,
+"stopoverDurationMinutes": 0,
+"departureAirportCode": "RUH",
+"arrivalAirportCode": "BKK",
+"airlineCode": "RX",
+"cabin": "economy",
+"designatorCode": "RX853",
+"departureDateTime": "2026-11-12T22:45:00.000+03:00",
+"arrivalDateTime": "2026-11-13T09:35:00.000+07:00",
+"transportType": "FLIGHT",
+"aircraftCode": "787"
+}
+],
+"operatingAirlineCodes": [],
+"stopoverCode": "ONE_STOP",
+"shortStopover": false,
+"earlyDeparture": false,
+"lateArrival": false,
+"newAircraft": false,
+"oldAircraft": true,
+"highlyRatedCarrier": false,
+"score": 872.5
+},
+{
+"id": "DXB-BKK:IX926~12:IX896~12:0",
+"departureTime": "00:30",
+"arrivalTime": "15:20",
+"duration": "11h 50m",
+"departureAirportCode": "DXB",
+"arrivalAirportCode": "BKK",
+"airlineCodes": [
+"IX"
+],
+"aircraftCodes": [
+"7M8",
+"738"
+],
+"stopoverAirportCodes": [
+"BLR"
+],
+"allianceCodes": [
+"lcc"
+],
+"stopoversCount": 1,
+"departureTimeMinutes": 30,
+"arrivalTimeMinutes": 920,
+"departureDateTime": "2026-11-12T00:30:00.000+04:00",
+"arrivalDateTime": "2026-11-12T15:20:00.000+07:00",
+"stopoverDurationMinutes": 240,
+"durationMinutes": 710,
+"overnight": false,
+"stopoverDuration": "4h",
+"durationDays": 0,
+"longStopover": false,
+"segments": [
+{
+"durationMinutes": 225,
+"stopoverDurationMinutes": 240,
+"departureAirportCode": "DXB",
+"arrivalAirportCode": "BLR",
+"airlineCode": "IX",
+"cabin": "economy",
+"designatorCode": "IX926",
+"departureDateTime": "2026-11-12T00:30:00.000+04:00",
+"arrivalDateTime": "2026-11-12T05:45:00.000+05:30",
+"transportType": "FLIGHT",
+"aircraftCode": "7M8"
+},
+{
+"durationMinutes": 245,
+"stopoverDurationMinutes": 0,
+"departureAirportCode": "BLR",
+"arrivalAirportCode": "BKK",
+"airlineCode": "IX",
+"cabin": "economy",
+"designatorCode": "IX896",
+"departureDateTime": "2026-11-12T09:45:00.000+05:30",
+"arrivalDateTime": "2026-11-12T15:20:00.000+07:00",
+"transportType": "FLIGHT",
+"aircraftCode": "738"
+}
+],
+"operatingAirlineCodes": [],
+"stopoverCode": "ONE_STOP",
+"shortStopover": false,
+"earlyDeparture": true,
+"lateArrival": false,
+"newAircraft": false,
+"oldAircraft": true,
+"highlyRatedCarrier": false,
+"score": 848.67,
+"distanceInKm": 4884.819475320055
+}
+],
+"providers": [
+{
+"code": "ae.kiwi.com",
+"name": "Kiwi",
+"type": "ota",
+"instant": false,
+"facilitatedBooking": false,
+"wegoFare": false
+},
+{
+"code": "ae.opodo.com",
+"name": "Opodo",
+"type": "ota",
+"instant": false,
+"facilitatedBooking": false,
+"wegoFare": false
+},
+{
+"code": "ae.trip.com",
+"name": "Trip.com",
+"type": "ota",
+"instant": false,
+"facilitatedBooking": false,
+"wegoFare": false
+},
+{
+"code": "makemytrip.com-ae",
+"name": "Makemytrip",
+"type": "ota",
+"instant": false,
+"facilitatedBooking": false,
+"wegoFare": false
+},
+{
+"code": "mytickets.ae",
+"name": "Mytickets",
+"type": "ota",
+"instant": false,
+"facilitatedBooking": false,
+"wegoFare": false
+}
+],
+"airlines": [
+{
+"name": "Riyadh Air",
+"code": "RX"
+},
+{
+"name": "Air India Express",
+"code": "IX"
+}
+]
+}

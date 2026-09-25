@@ -1,0 +1,731 @@
+{
+"data": {
+"outbounds": {
+"cards": {
+"6066855905693963989-136-flight-0-11": {
+"arrivalOvernightOffset": false,
+"arrivalStationName": "Barcelona El Prat Airport",
+"arrivalStationType": "airport",
+"arrivalTime": "2026-12-04T13:20:00.000+01:00",
+"carrierLogos": [
+{
+"logoUrl": "https://static.omio.design/web/logos/63/ryanair.png",
+"name": "Ryanair"
+}
+],
+"carrierCode": "Ryanair",
+"companyId": "136",
+"providerId": "100117",
+"departureOvernightOffset": false,
+"departureStationName": "Berlin Brandenburg Airport",
+"departureStationType": "airport",
+"departureTime": "2026-12-04T10:45:00.000+01:00",
+"duration": 155,
+"isBookable": true,
+"isCabinBookable": false,
+"isCabinRequired": false,
+"isCarSharing": false,
+"isGoEuroBooking": true,
+"isMobileTicketSupported": false,
+"isNearbyArrival": false,
+"isNearbyDeparture": false,
+"isRoutedConnection": false,
+"isVehicleBookable": false,
+"isVehicleRequired": false,
+"journeyId": "1431611870",
+"operatingCarrierNames": "",
+"outboundId": "6066855905693963989",
+"partiallyOperated": true,
+"price": 5235,
+"legPrice": 5235,
+"totalPrice": 5235,
+"seatAvailability": {
+"display": false
+},
+"segmentCount": 1,
+"status": "available",
+"stops": "0",
+"travelMode": "flight",
+"travelModes": [
+"flight"
+],
+"trainTypes": [],
+"discoveryOfferSnapshot": {
+"priceCents": 5235,
+"fullFareId": "ryanair.Basic"
+}
+},
+"-3719988445583658347-136-flight-0-11": {
+"arrivalOvernightOffset": false,
+"arrivalStationName": "Barcelona El Prat Airport",
+"arrivalStationType": "airport",
+"arrivalTime": "2026-12-04T20:00:00.000+01:00",
+"carrierLogos": [
+{
+"logoUrl": "https://static.omio.design/web/logos/63/ryanair.png",
+"name": "Ryanair"
+}
+],
+"carrierCode": "Ryanair",
+"companyId": "136",
+"providerId": "100117",
+"departureOvernightOffset": false,
+"departureStationName": "Berlin Brandenburg Airport",
+"departureStationType": "airport",
+"departureTime": "2026-12-04T17:25:00.000+01:00",
+"duration": 155,
+"isBookable": true,
+"isCabinBookable": false,
+"isCabinRequired": false,
+"isCarSharing": false,
+"isGoEuroBooking": true,
+"isMobileTicketSupported": false,
+"isNearbyArrival": false,
+"isNearbyDeparture": false,
+"isRoutedConnection": false,
+"isVehicleBookable": false,
+"isVehicleRequired": false,
+"journeyId": "866482357",
+"operatingCarrierNames": "",
+"outboundId": "-3719988445583658347",
+"partiallyOperated": true,
+"price": 5235,
+"legPrice": 5235,
+"totalPrice": 5235,
+"seatAvailability": {
+"display": false
+},
+"segmentCount": 1,
+"status": "available",
+"stops": "0",
+"travelMode": "flight",
+"travelModes": [
+"flight"
+],
+"trainTypes": [],
+"discoveryOfferSnapshot": {
+"priceCents": 5235,
+"fullFareId": "ryanair.Basic"
+}
+},
+"-8681950012853765769-117-flight-0-17": {
+"arrivalOvernightOffset": true,
+"arrivalStationName": "Barcelona El Prat Airport",
+"arrivalStationType": "airport",
+"arrivalTime": "2026-12-05T00:05:00.000+01:00",
+"carrierLogos": [
+{
+"logoUrl": "https://static.omio.design/web/logos/63/vueling.png",
+"name": "Vueling"
+}
+],
+"carrierCode": "Vueling",
+"companyId": "117",
+"providerId": "100101",
+"departureOvernightOffset": false,
+"departureStationName": "Berlin Brandenburg Airport",
+"departureStationType": "airport",
+"departureTime": "2026-12-04T21:25:00.000+01:00",
+"duration": 160,
+"isBookable": true,
+"isCabinBookable": false,
+"isCabinRequired": false,
+"isCarSharing": false,
+"isGoEuroBooking": true,
+"isMobileTicketSupported": false,
+"isNearbyArrival": false,
+"isNearbyDeparture": false,
+"isRoutedConnection": false,
+"isVehicleBookable": false,
+"isVehicleRequired": false,
+"journeyId": "2088898272",
+"operatingCarrierNames": "",
+"outboundId": "-8681950012853765769",
+"partiallyOperated": true,
+"price": 6803,
+"legPrice": 6803,
+"totalPrice": 6803,
+"seatAvailability": {
+"display": false
+},
+"segmentCount": 1,
+"status": "available",
+"stops": "0",
+"travelMode": "flight",
+"travelModes": [
+"flight"
+],
+"trainTypes": [],
+"discoveryOfferSnapshot": {
+"priceCents": 6803,
+"cheapestClassName": "Providers.travelfusionconnect.ECONOMY",
+"fullFareId": "travelfusionconnect.vueling.basic_fare"
+}
+},
+"-28923773554143525-117-flight-0-17": {
+"arrivalOvernightOffset": false,
+"arrivalStationName": "Barcelona El Prat Airport",
+"arrivalStationType": "airport",
+"arrivalTime": "2026-12-04T19:05:00.000+01:00",
+"carrierLogos": [
+{
+"logoUrl": "https://static.omio.design/web/logos/63/vueling.png",
+"name": "Vueling"
+}
+],
+"carrierCode": "Vueling",
+"companyId": "117",
+"providerId": "100101",
+"departureOvernightOffset": false,
+"departureStationName": "Berlin Brandenburg Airport",
+"departureStationType": "airport",
+"departureTime": "2026-12-04T16:30:00.000+01:00",
+"duration": 155,
+"isBookable": true,
+"isCabinBookable": false,
+"isCabinRequired": false,
+"isCarSharing": false,
+"isGoEuroBooking": true,
+"isMobileTicketSupported": false,
+"isNearbyArrival": false,
+"isNearbyDeparture": false,
+"isRoutedConnection": false,
+"isVehicleBookable": false,
+"isVehicleRequired": false,
+"journeyId": "993289317",
+"operatingCarrierNames": "",
+"outboundId": "-28923773554143525",
+"partiallyOperated": true,
+"price": 6803,
+"legPrice": 6803,
+"totalPrice": 6803,
+"seatAvailability": {
+"display": false
+},
+"segmentCount": 1,
+"status": "available",
+"stops": "0",
+"travelMode": "flight",
+"travelModes": [
+"flight"
+],
+"trainTypes": [],
+"discoveryOfferSnapshot": {
+"priceCents": 6803,
+"cheapestClassName": "Providers.travelfusionconnect.ECONOMY",
+"fullFareId": "travelfusionconnect.vueling.basic_fare"
+}
+},
+"-4814550949342198971-117-flight-0-17": {
+"arrivalOvernightOffset": false,
+"arrivalStationName": "Barcelona El Prat Airport",
+"arrivalStationType": "airport",
+"arrivalTime": "2026-12-04T13:10:00.000+01:00",
+"carrierLogos": [
+{
+"logoUrl": "https://static.omio.design/web/logos/63/vueling.png",
+"name": "Vueling"
+}
+],
+"carrierCode": "Vueling",
+"companyId": "117",
+"providerId": "100101",
+"departureOvernightOffset": false,
+"departureStationName": "Berlin Brandenburg Airport",
+"departureStationType": "airport",
+"departureTime": "2026-12-04T10:30:00.000+01:00",
+"duration": 160,
+"isBookable": true,
+"isCabinBookable": false,
+"isCabinRequired": false,
+"isCarSharing": false,
+"isGoEuroBooking": true,
+"isMobileTicketSupported": false,
+"isNearbyArrival": false,
+"isNearbyDeparture": false,
+"isRoutedConnection": false,
+"isVehicleBookable": false,
+"isVehicleRequired": false,
+"journeyId": "566892161",
+"operatingCarrierNames": "",
+"outboundId": "-4814550949342198971",
+"partiallyOperated": true,
+"price": 6803,
+"legPrice": 6803,
+"totalPrice": 6803,
+"seatAvailability": {
+"display": false
+},
+"segmentCount": 1,
+"status": "available",
+"stops": "0",
+"travelMode": "flight",
+"travelModes": [
+"flight"
+],
+"trainTypes": [],
+"discoveryOfferSnapshot": {
+"priceCents": 6803,
+"cheapestClassName": "Providers.travelfusionconnect.ECONOMY",
+"fullFareId": "travelfusionconnect.vueling.basic_fare"
+}
+},
+"-4286095330266063907-37-flight-1-17": {
+"arrivalOvernightOffset": false,
+"arrivalStationName": "Barcelona El Prat Airport",
+"arrivalStationType": "airport",
+"arrivalTime": "2026-12-04T19:00:00.000+01:00",
+"carrierLogos": [
+{
+"logoUrl": "https://static.omio.design/web/logos/63/klm.png",
+"name": "KLM"
+}
+],
+"carrierCode": "KLM",
+"companyId": "37",
+"providerId": "100101",
+"departureOvernightOffset": false,
+"departureStationName": "Berlin Brandenburg Airport",
+"departureStationType": "airport",
+"departureTime": "2026-12-04T06:00:00.000+01:00",
+"duration": 780,
+"isBookable": true,
+"isCabinBookable": false,
+"isCabinRequired": false,
+"isCarSharing": false,
+"isGoEuroBooking": true,
+"isMobileTicketSupported": false,
+"isNearbyArrival": false,
+"isNearbyDeparture": false,
+"isRoutedConnection": false,
+"isVehicleBookable": false,
+"isVehicleRequired": false,
+"journeyId": "-871538077",
+"operatingCarrierNames": "",
+"outboundId": "-4286095330266063907",
+"partiallyOperated": true,
+"price": 12702,
+"legPrice": 12702,
+"totalPrice": 12702,
+"seatAvailability": {
+"display": false
+},
+"segmentCount": 2,
+"status": "available",
+"stops": "1",
+"travelMode": "flight",
+"travelModes": [
+"flight"
+],
+"trainTypes": [],
+"discoveryOfferSnapshot": {
+"priceCents": 12702,
+"cheapestClassName": "Providers.travelfusionconnect.ECONOMY",
+"fullFareId": "travelfusionconnect.airfranceklm.basic"
+}
+},
+"-2462161634208029563-1045-bus-2-19": {
+"arrivalOvernightOffset": true,
+"arrivalStationName": "Barcelona, Estaci\u00f3n de Autobuses de Sants",
+"arrivalStationType": "busStation",
+"arrivalTime": "2026-12-05T23:10:00.000+01:00",
+"carrierLogos": [
+{
+"logoUrl": "https://static.omio.design/web/logos/63/meinfernbus_flixbus.png",
+"name": "FlixBus"
+}
+],
+"carrierCode": "FlixBus",
+"companyId": "1045",
+"providerId": "100104",
+"departureOvernightOffset": false,
+"departureStationName": "Berlin, Karolinenstra\u00dfe (Alt-Tegel)",
+"departureStationType": "busStation",
+"departureTime": "2026-12-04T13:50:00.000+01:00",
+"duration": 2000,
+"isBookable": true,
+"isCabinBookable": false,
+"isCabinRequired": false,
+"isCarSharing": false,
+"isGoEuroBooking": true,
+"isMobileTicketSupported": false,
+"isNearbyArrival": false,
+"isNearbyDeparture": false,
+"isRoutedConnection": false,
+"isVehicleBookable": false,
+"isVehicleRequired": false,
+"journeyId": "-700585203",
+"operatingCarrierNames": "",
+"outboundId": "-2462161634208029563",
+"partiallyOperated": false,
+"price": 8081,
+"legPrice": 8081,
+"totalPrice": 8081,
+"seatAvailability": {
+"display": false
+},
+"segmentCount": 3,
+"status": "available",
+"stops": "2",
+"travelMode": "bus",
+"travelModes": [
+"bus"
+],
+"trainTypes": [],
+"discoveryOfferSnapshot": {
+"priceCents": 8081,
+"fullFareId": "flixbusConnect.NORMAL"
+}
+}
+},
+"journeys": {
+"6066855905693963989-136-flight-0-11": {
+"segmentIds": [
+"-695442366"
+],
+"mapEdges": [
+{
+"departurePositionId": "map:departure:17134736",
+"arrivalPositionId": "map:arrival:313711"
+}
+],
+"pricingDeparturePositionId": "17134736",
+"pricingArrivalPositionId": "313711"
+},
+"-3719988445583658347-136-flight-0-11": {
+"segmentIds": [
+"-1142492165"
+],
+"mapEdges": [
+{
+"departurePositionId": "map:departure:17134736",
+"arrivalPositionId": "map:arrival:313711"
+}
+],
+"pricingDeparturePositionId": "17134736",
+"pricingArrivalPositionId": "313711"
+},
+"-8681950012853765769-117-flight-0-17": {
+"segmentIds": [
+"-72106558"
+],
+"mapEdges": [
+{
+"departurePositionId": "map:departure:17134736",
+"arrivalPositionId": "map:arrival:313711"
+}
+],
+"pricingDeparturePositionId": "17134736",
+"pricingArrivalPositionId": "313711"
+},
+"-28923773554143525-117-flight-0-17": {
+"segmentIds": [
+"-467569834"
+],
+"mapEdges": [
+{
+"departurePositionId": "map:departure:17134736",
+"arrivalPositionId": "map:arrival:313711"
+}
+],
+"pricingDeparturePositionId": "17134736",
+"pricingArrivalPositionId": "313711"
+},
+"-4814550949342198971-117-flight-0-17": {
+"segmentIds": [
+"-1059470442"
+],
+"mapEdges": [
+{
+"departurePositionId": "map:departure:17134736",
+"arrivalPositionId": "map:arrival:313711"
+}
+],
+"pricingDeparturePositionId": "17134736",
+"pricingArrivalPositionId": "313711"
+},
+"-4286095330266063907-37-flight-1-17": {
+"segmentIds": [
+"-374221410",
+"-1857506169"
+],
+"changeovers": [
+{
+"afterSegmentId": "-374221410",
+"type": "SWITCHING",
+"duration": 565,
+"previousPositionId": "314044",
+"nextPositionId": "314044"
+}
+],
+"mapEdges": [
+{
+"departurePositionId": "map:departure:17134736",
+"arrivalPositionId": "map:arrival:314044"
+},
+{
+"departurePositionId": "map:departure:314044",
+"arrivalPositionId": "map:arrival:313711"
+}
+],
+"pricingDeparturePositionId": "17134736",
+"pricingArrivalPositionId": "313711"
+},
+"-2462161634208029563-1045-bus-2-19": {
+"segmentIds": [
+"1889205586",
+"-1667656538",
+"908174629"
+],
+"changeovers": [
+{
+"afterSegmentId": "1889205586",
+"type": "SWITCHING",
+"duration": 210,
+"previousPositionId": "8121055",
+"nextPositionId": "8121055"
+},
+{
+"afterSegmentId": "-1667656538",
+"type": "SWITCHING",
+"duration": 140,
+"previousPositionId": "4272016",
+"nextPositionId": "4272016"
+}
+],
+"mapEdges": [
+{
+"departurePositionId": "map:departure:16927080",
+"arrivalPositionId": "map:arrival:8121055"
+},
+{
+"departurePositionId": "map:departure:8121055",
+"arrivalPositionId": "map:arrival:4272016"
+},
+{
+"departurePositionId": "map:departure:4272016",
+"arrivalPositionId": "map:arrival:475131"
+}
+],
+"pricingDeparturePositionId": "16927080",
+"pricingArrivalPositionId": "475131"
+}
+}
+},
+"entities": {
+"segments": {
+"-1142492165": {
+"duration": 155,
+"travelMode": "flight",
+"departurePositionId": "17134736",
+"departureTime": "2026-12-04T17:25:00.000+01:00",
+"departureOvernightOffset": false,
+"arrivalPositionId": "313711",
+"arrivalTime": "2026-12-04T20:00:00.000+01:00",
+"arrivalOvernightOffset": false,
+"companyId": "136",
+"operatingCompanyId": "136",
+"transportId": "FR 148"
+},
+"-374221410": {
+"duration": 85,
+"travelMode": "flight",
+"departurePositionId": "17134736",
+"departureTime": "2026-12-04T06:00:00.000+01:00",
+"departureOvernightOffset": false,
+"arrivalPositionId": "314044",
+"arrivalTime": "2026-12-04T07:25:00.000+01:00",
+"arrivalOvernightOffset": false,
+"companyId": "37",
+"operatingCompanyId": "37",
+"transportId": "KL1770"
+},
+"-1857506169": {
+"duration": 130,
+"travelMode": "flight",
+"departurePositionId": "314044",
+"departureTime": "2026-12-04T16:50:00.000+01:00",
+"departureOvernightOffset": false,
+"arrivalPositionId": "313711",
+"arrivalTime": "2026-12-04T19:00:00.000+01:00",
+"arrivalOvernightOffset": false,
+"companyId": "37",
+"operatingCompanyId": "37",
+"transportId": "KL1519"
+},
+"1889205586": {
+"duration": 350,
+"travelMode": "bus",
+"departurePositionId": "16927080",
+"departureTime": "2026-12-04T13:50:00.000+01:00",
+"departureOvernightOffset": false,
+"arrivalPositionId": "8121055",
+"arrivalTime": "2026-12-04T19:40:00.000+01:00",
+"arrivalOvernightOffset": false,
+"companyId": "1045",
+"transportId": "FlixBus"
+},
+"-467569834": {
+"duration": 155,
+"travelMode": "flight",
+"departurePositionId": "17134736",
+"departureTime": "2026-12-04T16:30:00.000+01:00",
+"departureOvernightOffset": false,
+"arrivalPositionId": "313711",
+"arrivalTime": "2026-12-04T19:05:00.000+01:00",
+"arrivalOvernightOffset": false,
+"companyId": "117",
+"operatingCompanyId": "117",
+"transportId": "VY1073"
+},
+"-72106558": {
+"duration": 160,
+"travelMode": "flight",
+"departurePositionId": "17134736",
+"departureTime": "2026-12-04T21:25:00.000+01:00",
+"departureOvernightOffset": false,
+"arrivalPositionId": "313711",
+"arrivalTime": "2026-12-05T00:05:00.000+01:00",
+"arrivalOvernightOffset": true,
+"companyId": "117",
+"operatingCompanyId": "117",
+"transportId": "VY1075"
+},
+"-1667656538": {
+"duration": 980,
+"travelMode": "bus",
+"departurePositionId": "8121055",
+"departureTime": "2026-12-04T23:10:00.000+01:00",
+"departureOvernightOffset": false,
+"arrivalPositionId": "4272016",
+"arrivalTime": "2026-12-05T15:30:00.000+01:00",
+"arrivalOvernightOffset": true,
+"companyId": "1045",
+"transportId": "FlixBus"
+},
+"-695442366": {
+"duration": 155,
+"travelMode": "flight",
+"departurePositionId": "17134736",
+"departureTime": "2026-12-04T10:45:00.000+01:00",
+"departureOvernightOffset": false,
+"arrivalPositionId": "313711",
+"arrivalTime": "2026-12-04T13:20:00.000+01:00",
+"arrivalOvernightOffset": false,
+"companyId": "136",
+"operatingCompanyId": "136",
+"transportId": "FR 132"
+},
+"-1059470442": {
+"duration": 160,
+"travelMode": "flight",
+"departurePositionId": "17134736",
+"departureTime": "2026-12-04T10:30:00.000+01:00",
+"departureOvernightOffset": false,
+"arrivalPositionId": "313711",
+"arrivalTime": "2026-12-04T13:10:00.000+01:00",
+"arrivalOvernightOffset": false,
+"companyId": "117",
+"operatingCompanyId": "117",
+"transportId": "VY1071"
+},
+"908174629": {
+"duration": 320,
+"travelMode": "bus",
+"departurePositionId": "4272016",
+"departureTime": "2026-12-05T17:50:00.000+01:00",
+"departureOvernightOffset": false,
+"arrivalPositionId": "475131",
+"arrivalTime": "2026-12-05T23:10:00.000+01:00",
+"arrivalOvernightOffset": false,
+"companyId": "1045",
+"transportId": "FlixBus"
+}
+},
+"positions": {
+"313711": {
+"name": "Barcelona El Prat Airport",
+"cityName": "El Prat de Llobregat",
+"countryCode": "ES",
+"iataCode": "BCN",
+"longitude": 2.0744297,
+"latitude": 41.3025957,
+"stationType": "airport"
+},
+"314044": {
+"name": "Amsterdam Airport Schiphol",
+"cityName": "Rozenburg",
+"countryCode": "NL",
+"iataCode": "AMS",
+"longitude": 4.763385,
+"latitude": 52.30907,
+"stationType": "airport"
+},
+"475131": {
+"name": "Barcelona, Estaci\u00f3n de Autobuses de Sants",
+"cityName": "Barcelona",
+"countryCode": "ES",
+"longitude": 2.138935258930246,
+"latitude": 41.37971480623591,
+"stationType": "busStation"
+},
+"4272016": {
+"name": "Montpellier, Sabines Gare Routi\u00e8re",
+"cityName": "Montpellier",
+"countryCode": "FR",
+"longitude": 3.86044,
+"latitude": 43.58382,
+"stationType": "busStation"
+},
+"8121055": {
+"name": "N\u00fcrnberg, ZOB",
+"cityName": "Nuremberg",
+"countryCode": "DE",
+"longitude": 11.08559,
+"latitude": 49.44774,
+"stationType": "busStation"
+},
+"16927080": {
+"name": "Berlin, Karolinenstra\u00dfe (Alt-Tegel)",
+"cityName": "Berlin",
+"countryCode": "DE",
+"longitude": 13.282160203704848,
+"latitude": 52.5915926818021,
+"stationType": "busStation"
+},
+"17134736": {
+"name": "Berlin Brandenburg Airport",
+"cityName": "Sch\u00f6nefeld",
+"countryCode": "DE",
+"iataCode": "BER",
+"longitude": 13.500278,
+"latitude": 52.366944,
+"stationType": "airport"
+}
+},
+"companies": {
+"37": {
+"name": "KLM",
+"code": "klm",
+"logoUrl": "https://static.omio.design/web/logos/63/klm.png"
+},
+"117": {
+"name": "Vueling",
+"code": "vueling",
+"logoUrl": "https://static.omio.design/web/logos/63/vueling.png"
+},
+"136": {
+"name": "Ryanair",
+"code": "ryanair",
+"logoUrl": "https://static.omio.design/web/logos/63/ryanair.png"
+},
+"1045": {
+"name": "FlixBus",
+"code": "meinfernbus_flixbus",
+"logoUrl": "https://static.omio.design/web/logos/63/meinfernbus_flixbus.png"
+}
+}
+},
+"isLiveSearchDone": true
+}
+}

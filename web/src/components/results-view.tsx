@@ -14,6 +14,13 @@ type Sort = "price" | "duration" | "departure" | "best";
 
 const SOURCE_NAMES: Record<string, string> = { google: "Google Flights", kiwi: "Kiwi", kiwiweb: "Kiwi", serpapi: "Google (paid)" };
 
+// Filter chips group the ~40 sources into what people care about.
+function sourceGroup(tk: { source: string; seller_kind?: string }) {
+  if (tk.source === "google" || tk.source === "serpapi") return "Google Flights";
+  if (tk.source === "kiwi" || tk.source === "kiwiweb") return "Kiwi";
+  return tk.seller_kind === "airline" ? "Airlines direct" : "Booking sites";
+}
+
 function tripDuration(t: Trip) {
   if (t.tickets.length === 1) return t.tickets[0].slices[0].duration_min;
   return t.travel_min;
@@ -70,7 +77,7 @@ export function ResultsView({
   }, [trips, convert]);
   const rules = useMemo(() => settings?.sellerRules ?? [], [settings]);
 
-  const allSources = useMemo(() => [...new Set(trips.flatMap((t) => t.tickets.map((x) => x.source)))], [trips]);
+  const allSources = useMemo(() => [...new Set(trips.flatMap((t) => t.tickets.map(sourceGroup)))], [trips]);
   const blocked = trips.filter((t) => tripBlocked(rules, t)).length;
 
   const list = useMemo(() => {
@@ -82,7 +89,7 @@ export function ResultsView({
       if (!showSplit && t.tickets.length > 1) return false;
       if (hideSelfTransfer && t.tickets.some((x) => x.self_transfer)) return false;
       if (maxStops !== "any" && tripStops(t) > Number(maxStops)) return false;
-      if (sources.length && !t.tickets.every((x) => sources.includes(x.source))) return false;
+      if (sources.length && !t.tickets.every((x) => sources.includes(sourceGroup(x)))) return false;
       if (timeOfDay !== "any") {
         const h = parseLocal(t.departure).h;
         if (timeOfDay === "morning" && (h < 5 || h >= 12)) return false;
@@ -237,7 +244,10 @@ export function ResultsView({
           <span title="Options found per source. Google includes the flights from its Cheapest tab.">
             {Object.entries(
               trips.reduce<Record<string, number>>((acc, t) => {
-                for (const tk of t.tickets) acc[SOURCE_NAMES[tk.source] ?? "Airlines direct"] = (acc[SOURCE_NAMES[tk.source] ?? "Airlines direct"] ?? 0) + 1;
+                for (const tk of t.tickets) {
+                  const name = SOURCE_NAMES[tk.source] ?? (tk.seller_kind === "ota" ? (tk.seller ?? tk.source) : "Airlines direct");
+                  acc[name] = (acc[name] ?? 0) + 1;
+                }
                 return acc;
               }, {}),
             )

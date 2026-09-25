@@ -1,0 +1,155 @@
+{
+"flightsCount": 375,
+"searchPath": "/air/BCNLHR06NOV/1/-/-/c:Y",
+"flights": [
+{
+"selectionKey": "FR774-06Nov26-N_FR467-06Nov26-N,14hko7d",
+"shareableUrl": "https://uk.gotogate.com/from/sharedurl/air/BCNLHR06NOV/1/-/-/c:Y?selectionKey=FR774-06Nov26-N_FR467-06Nov26-N%2C14hko7d%2C%3A%3Ag_0.0%3Ah_0.0%3Aa_N7.109%3Ab_8M%3Ac_8M%3Ad_82c8%3Ae_119e%3Af_5%3Ai_1.0.0%3Aj_OM%3Az_67gkv1",
+"tripTags": [
+"PRICE"
+],
+"tripCharacteristics": [
+"VIRTUAL_INTERLINING"
+],
+"bounds": [
+{
+"segments": [
+{
+"__typename": "TripSegment",
+"departuredAt": "2026-11-06T13:55",
+"arrivedAt": "2026-11-06T15:35",
+"duration": 6000000,
+"flightNumber": "FR774",
+"marketingCarrier": {
+"code": "FR",
+"name": "Ryanair"
+},
+"operatingCarrier": {
+"code": "FR",
+"name": "Ryanair"
+},
+"origin": {
+"code": "BCN",
+"airportCode": "BCN"
+},
+"destination": {
+"code": "TRN",
+"airportCode": "TRN"
+},
+"segmentDetails": [
+{
+"paxType": "ADT",
+"numberOfSeatsLeft": 0
+}
+]
+},
+{
+"__typename": "EventSegment",
+"types": [
+"STOP",
+"SELF_TRANSFER"
+],
+"duration": 22200000
+},
+{
+"__typename": "TripSegment",
+"departuredAt": "2026-11-06T21:45",
+"arrivedAt": "2026-11-06T22:45",
+"duration": 7200000,
+"flightNumber": "FR467",
+"marketingCarrier": {
+"code": "FR",
+"name": "Ryanair"
+},
+"operatingCarrier": {
+"code": "FR",
+"name": "Ryanair"
+},
+"origin": {
+"code": "TRN",
+"airportCode": "TRN"
+},
+"destination": {
+"code": "STN",
+"airportCode": "STN"
+},
+"segmentDetails": [
+{
+"paxType": "ADT",
+"numberOfSeatsLeft": 0
+}
+]
+}
+]
+}
+],
+"travelerPrices": [
+{
+"price": {
+"price": {
+"value": 3799,
+"currency": {
+"code": "GBP"
+}
+}
+},
+"travelerId": "9870189485804700"
+}
+]
+},
+{
+"selectionKey": "VY7642-06Nov26-W,ca8hi4",
+"shareableUrl": "https://uk.gotogate.com/from/sharedurl/air/BCNLHR06NOV/1/-/-/c:Y?selectionKey=VY7642-06Nov26-W%2Cca8hi4%2C%3A%3Ag_0%3Ah_0%3Aa_V9%3Ab_8M%3Ac_8M%3Ad_a46a%3Ae_10c2%3Af_5%3Ai_1.0.0%3Aj_OM%3Az_7amv22",
+"tripTags": [],
+"tripCharacteristics": [],
+"bounds": [
+{
+"segments": [
+{
+"__typename": "TripSegment",
+"departuredAt": "2026-11-06T18:45",
+"arrivedAt": "2026-11-06T20:05",
+"duration": 8400000,
+"flightNumber": "VY7642",
+"marketingCarrier": {
+"code": "VY",
+"name": "Vueling"
+},
+"operatingCarrier": {
+"code": "VY",
+"name": "Vueling"
+},
+"origin": {
+"code": "BCN",
+"airportCode": "BCN"
+},
+"destination": {
+"code": "LHR",
+"airportCode": "LHR"
+},
+"segmentDetails": [
+{
+"paxType": "ADT",
+"numberOfSeatsLeft": 0
+}
+]
+}
+]
+}
+],
+"travelerPrices": [
+{
+"price": {
+"price": {
+"value": 4638,
+"currency": {
+"code": "GBP"
+}
+}
+},
+"travelerId": "9870189485804610"
+}
+]
+}
+]
+}

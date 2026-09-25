@@ -41,10 +41,11 @@ def search(
     max_stops: Optional[int] = typer.Option(None, "--max-stops", help="0 for nonstop only."),
     nearby: int = typer.Option(0, "--nearby", help="Also search airports within this many km (SAN adds TIJ)."),
     smart: bool = typer.Option(False, "--smart", help="Also look for cheaper separate ticket combinations (slower)."),
-    sources: str = typer.Option("default", help="default, or a list: google,kiwiweb,kiwi,volaris,wideroe,skyairline,"
-                                "norse,volotea,condor,flair,serpapi. With Chrome installed, any direct airline "
-                                "source also brings in transavia, norwegian, southwest, vivaaerobus and allegiant "
-                                "(read in a real browser, FLIGHTSCOUT_BROWSER=0 turns that off)."),
+    sources: str = typer.Option("default", help="default (google, kiwi, kiwiweb, airlines, otas), or a list. "
+                                "Groups: airlines = every direct airline that flies the route, otas = booking "
+                                "sites (Booking.com, Expedia, KAYAK, Priceline, Trip.com...). Or single sources "
+                                "like google,kiwiweb,jetblue,booking. Browser ones need Chrome (headless); "
+                                "FLIGHTSCOUT_BROWSER=0 turns them off."),
     max_price: Optional[float] = typer.Option(None, "--max-price", help="Hide results above this price."),
     sort: Sort = typer.Option(Sort.price, help="price, duration, departure or best (price + time)."),
     time_of_day: Optional[str] = typer.Option(None, "--time", help="morning, afternoon or evening departure."),

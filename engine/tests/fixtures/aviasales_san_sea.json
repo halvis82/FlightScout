@@ -1,0 +1,746 @@
+[
+{
+"chunk_id": "results",
+"last_update_timestamp": 0,
+"tickets": [
+{
+"id": "431964f553ed28b58687df6d671a38fb",
+"segments": [
+{
+"flights": [
+0
+],
+"transfers": [],
+"tags": []
+}
+],
+"proposals": [
+{
+"id": "492:0",
+"itinerary_key": "jWvu9AixO8nJhXIeqsKuGA",
+"price": {
+"currency_code": "USD",
+"value": 99
+},
+"price_per_person": {
+"currency_code": "USD",
+"value": 99
+},
+"agent_id": 492,
+"flight_terms": {
+"0": {
+"fare_code": "V",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "713"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 0
+},
+"additional_tariff_info": {},
+"is_charter": false
+}
+},
+"weight": 1e-06,
+"from_main_airline": false,
+"tags": [
+"cheap"
+],
+"is_warmcache": false
+},
+{
+"id": "8:0",
+"itinerary_key": "jWvu9AixO8nJhXIeqsKuGA",
+"price": {
+"currency_code": "USD",
+"value": 105
+},
+"price_per_person": {
+"currency_code": "USD",
+"value": 105
+},
+"agent_id": 8,
+"flight_terms": {
+"0": {
+"fare_code": "Y_0PC",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "713"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"length": 40,
+"width": 25,
+"height": 60,
+"unlimited_weight": true
+},
+"additional_tariff_info": {},
+"is_charter": false
+}
+},
+"weight": 0,
+"from_main_airline": false,
+"tags": [
+"cheap"
+],
+"is_warmcache": false
+}
+],
+"popularity": 0,
+"score": 0.0380409637917573,
+"tags": [
+"convenient_ticket",
+"direct"
+],
+"position": 1
+},
+{
+"id": "531939357d22c499a0df154653413485",
+"segments": [
+{
+"flights": [
+1,
+2
+],
+"transfers": [
+{
+"visa_rules": {
+"required": false
+},
+"recheck_baggage": false,
+"night_transfer": false,
+"tags": null
+}
+],
+"tags": []
+}
+],
+"proposals": [
+{
+"id": "492:3",
+"itinerary_key": "bx93aqPpMz1LsJSjYLIfZQ",
+"price": {
+"currency_code": "USD",
+"value": 110
+},
+"price_per_person": {
+"currency_code": "USD",
+"value": 110
+},
+"agent_id": 492,
+"flight_terms": {
+"2": {
+"fare_code": "V",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "146"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 0
+},
+"additional_tariff_info": {},
+"is_charter": false
+},
+"1": {
+"fare_code": "V",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "3194"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 0
+},
+"additional_tariff_info": {},
+"is_charter": false
+}
+},
+"weight": 1e-06,
+"from_main_airline": false,
+"tags": [
+"cheap"
+],
+"is_warmcache": false
+},
+{
+"id": "8:16",
+"itinerary_key": "bx93aqPpMz1LsJSjYLIfZQ",
+"price": {
+"currency_code": "USD",
+"value": 115
+},
+"price_per_person": {
+"currency_code": "USD",
+"value": 115
+},
+"agent_id": 8,
+"flight_terms": {
+"2": {
+"fare_code": "Y_0PC",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "146"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"length": 40,
+"width": 25,
+"height": 60,
+"unlimited_weight": true
+},
+"additional_tariff_info": {},
+"is_charter": false
+},
+"1": {
+"fare_code": "Y_0PC",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "3194"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"length": 40,
+"width": 25,
+"height": 60,
+"unlimited_weight": true
+},
+"additional_tariff_info": {},
+"is_charter": false
+}
+},
+"weight": 0,
+"from_main_airline": false,
+"tags": [
+"cheap"
+],
+"is_warmcache": false
+}
+],
+"popularity": 0,
+"score": 0.2772939698955674,
+"tags": [
+"convenient_ticket"
+],
+"position": 2
+},
+{
+"id": "27b42484308ae341905d48310e2c5488",
+"segments": [
+{
+"flights": [
+3,
+2
+],
+"transfers": [
+{
+"visa_rules": {
+"required": false
+},
+"recheck_baggage": false,
+"night_transfer": false,
+"tags": null
+}
+],
+"tags": []
+}
+],
+"proposals": [
+{
+"id": "492:8",
+"itinerary_key": "2nrm7tssPR52dUO388uawA",
+"price": {
+"currency_code": "USD",
+"value": 110
+},
+"price_per_person": {
+"currency_code": "USD",
+"value": 110
+},
+"agent_id": 492,
+"flight_terms": {
+"3": {
+"fare_code": "V",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "3717"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 0
+},
+"additional_tariff_info": {},
+"is_charter": false
+},
+"2": {
+"fare_code": "V",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "146"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 0
+},
+"additional_tariff_info": {},
+"is_charter": false
+}
+},
+"weight": 1e-06,
+"from_main_airline": false,
+"tags": [
+"cheap"
+],
+"is_warmcache": false
+},
+{
+"id": "8:6",
+"itinerary_key": "2nrm7tssPR52dUO388uawA",
+"price": {
+"currency_code": "USD",
+"value": 115
+},
+"price_per_person": {
+"currency_code": "USD",
+"value": 115
+},
+"agent_id": 8,
+"flight_terms": {
+"3": {
+"fare_code": "Y_0PC",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "3717"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"length": 40,
+"width": 25,
+"height": 60,
+"unlimited_weight": true
+},
+"additional_tariff_info": {},
+"is_charter": false
+},
+"2": {
+"fare_code": "Y_0PC",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "146"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"length": 40,
+"width": 25,
+"height": 60,
+"unlimited_weight": true
+},
+"additional_tariff_info": {},
+"is_charter": false
+}
+},
+"weight": 0,
+"from_main_airline": false,
+"tags": [
+"cheap"
+],
+"is_warmcache": false
+}
+],
+"popularity": 0,
+"score": 0.2644312667892161,
+"tags": [
+"convenient_ticket"
+],
+"position": 3
+},
+{
+"id": "0f104964a43132200c53ecd5b860591a",
+"segments": [
+{
+"flights": [
+5,
+6
+],
+"transfers": [
+{
+"visa_rules": {
+"required": false
+},
+"recheck_baggage": false,
+"night_transfer": false,
+"tags": null
+}
+],
+"tags": []
+}
+],
+"proposals": [
+{
+"id": "492:9",
+"itinerary_key": "GJ7TwWrmnvVOFYWBpa55vQ",
+"price": {
+"currency_code": "USD",
+"value": 110
+},
+"price_per_person": {
+"currency_code": "USD",
+"value": 110
+},
+"agent_id": 492,
+"flight_terms": {
+"6": {
+"fare_code": "V",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "4476"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 0
+},
+"additional_tariff_info": {},
+"is_charter": false
+},
+"5": {
+"fare_code": "V",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "284"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 0
+},
+"additional_tariff_info": {},
+"is_charter": false
+}
+},
+"weight": 1e-06,
+"from_main_airline": false,
+"tags": [
+"cheap"
+],
+"is_warmcache": false
+},
+{
+"id": "8:22",
+"itinerary_key": "GJ7TwWrmnvVOFYWBpa55vQ",
+"price": {
+"currency_code": "USD",
+"value": 115
+},
+"price_per_person": {
+"currency_code": "USD",
+"value": 115
+},
+"agent_id": 8,
+"flight_terms": {
+"6": {
+"fare_code": "Y_0PC",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "4476"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"length": 40,
+"width": 25,
+"height": 60,
+"unlimited_weight": true
+},
+"additional_tariff_info": {},
+"is_charter": false
+},
+"5": {
+"fare_code": "Y_0PC",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "284"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"length": 40,
+"width": 25,
+"height": 60,
+"unlimited_weight": true
+},
+"additional_tariff_info": {},
+"is_charter": false
+}
+},
+"weight": 0,
+"from_main_airline": false,
+"tags": [
+"cheap"
+],
+"is_warmcache": false
+}
+],
+"popularity": 0,
+"score": 0.23106439368201276,
+"tags": [
+"convenient_ticket"
+],
+"position": 4
+}
+],
+"flight_legs": [
+{
+"origin": "SAN",
+"destination": "SEA",
+"local_departure_date_time": "2026-11-13 18:00",
+"local_arrival_date_time": "2026-11-13 21:15",
+"departure_unix_timestamp": 1794621600,
+"arrival_unix_timestamp": 1794633300,
+"operating_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "713"
+},
+"equipment": {
+"code": "7S7",
+"type": "plane",
+"name": "Boeing 737-700 (Scimitar Winglets)"
+},
+"technical_stops": [],
+"signature": "1794592800:1794604500:SAN:SEA",
+"tags": []
+},
+{
+"origin": "SAN",
+"destination": "OAK",
+"local_departure_date_time": "2026-11-13 07:05",
+"local_arrival_date_time": "2026-11-13 08:45",
+"departure_unix_timestamp": 1794582300,
+"arrival_unix_timestamp": 1794588300,
+"operating_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "3194"
+},
+"equipment": {
+"code": "7M8",
+"type": "plane",
+"name": "Boeing 737 MAX 8 / BBJ MAX 8 / Boeing 737 MAX 200"
+},
+"technical_stops": [],
+"signature": "1794553500:1794559500:SAN:OAK",
+"tags": []
+},
+{
+"origin": "OAK",
+"destination": "SEA",
+"local_departure_date_time": "2026-11-13 11:45",
+"local_arrival_date_time": "2026-11-13 13:55",
+"departure_unix_timestamp": 1794599100,
+"arrival_unix_timestamp": 1794606900,
+"operating_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "146"
+},
+"equipment": {
+"code": "7M8",
+"type": "plane",
+"name": "Boeing 737 MAX 8 / BBJ MAX 8 / Boeing 737 MAX 200"
+},
+"technical_stops": [],
+"signature": "1794570300:1794578100:OAK:SEA",
+"tags": []
+},
+{
+"origin": "SAN",
+"destination": "OAK",
+"local_departure_date_time": "2026-11-13 08:30",
+"local_arrival_date_time": "2026-11-13 10:10",
+"departure_unix_timestamp": 1794587400,
+"arrival_unix_timestamp": 1794593400,
+"operating_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "3717"
+},
+"equipment": {
+"code": "7S7",
+"type": "plane",
+"name": "Boeing 737-700 (Scimitar Winglets)"
+},
+"technical_stops": [],
+"signature": "1794558600:1794564600:SAN:OAK",
+"tags": []
+},
+{
+"origin": "OAK",
+"destination": "SEA",
+"local_departure_date_time": "2026-11-13 11:45",
+"local_arrival_date_time": "2026-11-13 13:55",
+"departure_unix_timestamp": 1794599100,
+"arrival_unix_timestamp": 1794606900,
+"operating_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "146"
+},
+"equipment": {
+"code": "7M8",
+"type": "plane",
+"name": "Boeing 737 MAX 8 / BBJ MAX 8 / Boeing 737 MAX 200"
+},
+"technical_stops": [],
+"signature": "1794570300:1794578100:OAK:SEA",
+"tags": []
+},
+{
+"origin": "SAN",
+"destination": "PHX",
+"local_departure_date_time": "2026-11-13 14:10",
+"local_arrival_date_time": "2026-11-13 16:30",
+"departure_unix_timestamp": 1794607800,
+"arrival_unix_timestamp": 1794612600,
+"operating_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "284"
+},
+"equipment": {
+"code": "7M8",
+"type": "plane",
+"name": "Boeing 737 MAX 8 / BBJ MAX 8 / Boeing 737 MAX 200"
+},
+"technical_stops": [],
+"signature": "1794579000:1794587400:SAN:PHX",
+"tags": []
+},
+{
+"origin": "PHX",
+"destination": "SEA",
+"local_departure_date_time": "2026-11-13 18:45",
+"local_arrival_date_time": "2026-11-13 20:45",
+"departure_unix_timestamp": 1794620700,
+"arrival_unix_timestamp": 1794631500,
+"operating_carrier_designator": {
+"carrier": "WN",
+"airline_id": "WN",
+"number": "4476"
+},
+"equipment": {
+"code": "7M8",
+"type": "plane",
+"name": "Boeing 737 MAX 8 / BBJ MAX 8 / Boeing 737 MAX 200"
+},
+"technical_stops": [],
+"signature": "1794595500:1794602700:PHX:SEA",
+"tags": []
+}
+],
+"agents": {
+"492": {
+"id": 492,
+"gate_name": "farera",
+"label": {
+"en": {
+"default": "Farera"
+}
+}
+},
+"8": {
+"id": 8,
+"gate_name": "tickets",
+"label": {
+"en": {
+"default": "Kissandfly.com"
+}
+}
+}
+},
+"airlines": {
+"WN": {
+"iata": "WN",
+"name": {
+"en": {
+"default": "Southwest Airlines"
+}
+}
+}
+}
+}
+]

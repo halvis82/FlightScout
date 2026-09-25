@@ -1,0 +1,436 @@
+{
+"subTravelOptions": {
+"SG-511-BOM-DEL-1793984400": {
+"subTravelOptionId": "SG-511-BOM-DEL-1793984400",
+"type": "flight",
+"subTravelOptionKey": "BOM_DEL",
+"sequenceToFlightIdMap": {
+"1": "SG-511-BOM-DEL-1793984400"
+},
+"totalFareCount": 3,
+"fareIds": [
+"F2"
+],
+"defaultFareShowCount": 4,
+"cheapestFareId": "F2",
+"tags": [],
+"showInterstitial": true
+},
+"SG-611-BOM-DEL-1793977200": {
+"subTravelOptionId": "SG-611-BOM-DEL-1793977200",
+"type": "flight",
+"subTravelOptionKey": "BOM_DEL",
+"sequenceToFlightIdMap": {
+"1": "SG-611-BOM-DEL-1793977200"
+},
+"totalFareCount": 3,
+"fareIds": [
+"F3"
+],
+"defaultFareShowCount": 4,
+"cheapestFareId": "F3",
+"tags": [],
+"showInterstitial": true
+},
+"SG-613-BOM-DEL-1793982000": {
+"subTravelOptionId": "SG-613-BOM-DEL-1793982000",
+"type": "flight",
+"subTravelOptionKey": "BOM_DEL",
+"sequenceToFlightIdMap": {
+"1": "SG-613-BOM-DEL-1793982000"
+},
+"totalFareCount": 3,
+"fareIds": [
+"F4"
+],
+"defaultFareShowCount": 4,
+"cheapestFareId": "F4",
+"tags": [],
+"showInterstitial": true
+},
+"IX-1275-BOM-GOX-1793943900__IX-1120-GOX-DEL-1793989500": {
+"subTravelOptionId": "IX-1275-BOM-GOX-1793943900__IX-1120-GOX-DEL-1793989500",
+"type": "flight",
+"subTravelOptionKey": "BOM_DEL",
+"sequenceToFlightIdMap": {
+"1": "IX-1275-BOM-GOX-1793943900",
+"2": "IX-1120-GOX-DEL-1793989500"
+},
+"totalFareCount": 3,
+"fareIds": [
+"F1"
+],
+"defaultFareShowCount": 4,
+"cheapestFareId": "F1",
+"tags": [],
+"showInterstitial": true
+},
+"AI-9822-NMI-BLR-1793933700__AI-2511-BLR-DEL-1793961000": {
+"subTravelOptionId": "AI-9822-NMI-BLR-1793933700__AI-2511-BLR-DEL-1793961000",
+"type": "flight",
+"subTravelOptionKey": "NMI_DEL",
+"sequenceToFlightIdMap": {
+"1": "AI-9822-NMI-BLR-1793933700",
+"2": "AI-2511-BLR-DEL-1793961000"
+},
+"totalFareCount": 3,
+"fareIds": [
+"F0"
+],
+"defaultFareShowCount": 4,
+"cheapestFareId": "F0",
+"tags": [],
+"showInterstitial": true
+}
+},
+"flights": {
+"SG-511-BOM-DEL-1793984400": {
+"id": "SG-511-BOM-DEL-1793984400",
+"fltNo": "511",
+"equipmentCode": "",
+"aircraftType": "73H A01",
+"airlineCode": "SG",
+"marketingAirlineCode": "SG",
+"operatingAirlineCode": "SG",
+"departure": {
+"airlineCode": "SG",
+"airport": {
+"code": "BOM",
+"terminal": {
+"name": "1",
+"gate": ""
+},
+"zoneId": "Asia/Kolkata",
+"timeZone": "IST",
+"time": "2026-11-06T22:30:00.000+05:30"
+}
+},
+"arrival": {
+"airlineCode": "SG",
+"airport": {
+"code": "DEL",
+"terminal": {
+"name": "1D",
+"gate": ""
+},
+"zoneId": "Asia/Kolkata",
+"timeZone": "IST",
+"time": "2026-11-07T00:40:00.000+05:30"
+}
+},
+"stops": [],
+"duration": {
+"hh": 2,
+"mm": 10
+},
+"stopFlightDurations": []
+},
+"AI-9822-NMI-BLR-1793933700": {
+"id": "AI-9822-NMI-BLR-1793933700",
+"fltNo": "9822",
+"equipmentCode": "",
+"aircraftType": "",
+"airlineCode": "AI",
+"marketingAirlineCode": "AI",
+"operatingAirlineCode": "IX",
+"departure": {
+"airlineCode": "AI",
+"airport": {
+"code": "NMI",
+"terminal": {
+"name": "",
+"gate": ""
+},
+"zoneId": "Asia/Kolkata",
+"timeZone": "IST",
+"time": "2026-11-06T08:25:00.000+05:30"
+}
+},
+"arrival": {
+"airlineCode": "AI",
+"airport": {
+"code": "BLR",
+"terminal": {
+"name": "2",
+"gate": ""
+},
+"zoneId": "Asia/Kolkata",
+"timeZone": "IST",
+"time": "2026-11-06T09:55:00.000+05:30"
+}
+},
+"stops": [],
+"duration": {
+"hh": 1,
+"mm": 30
+},
+"stopFlightDurations": []
+},
+"AI-2511-BLR-DEL-1793961000": {
+"id": "AI-2511-BLR-DEL-1793961000",
+"fltNo": "2511",
+"equipmentCode": "",
+"aircraftType": "",
+"airlineCode": "AI",
+"marketingAirlineCode": "AI",
+"operatingAirlineCode": "AI",
+"departure": {
+"airlineCode": "AI",
+"airport": {
+"code": "BLR",
+"terminal": {
+"name": "2",
+"gate": ""
+},
+"zoneId": "Asia/Kolkata",
+"timeZone": "IST",
+"time": "2026-11-06T16:00:00.000+05:30"
+}
+},
+"arrival": {
+"airlineCode": "AI",
+"airport": {
+"code": "DEL",
+"terminal": {
+"name": "3",
+"gate": ""
+},
+"zoneId": "Asia/Kolkata",
+"timeZone": "IST",
+"time": "2026-11-06T18:55:00.000+05:30"
+}
+},
+"stops": [],
+"duration": {
+"hh": 2,
+"mm": 55
+},
+"stopFlightDurations": []
+},
+"IX-1120-GOX-DEL-1793989500": {
+"id": "IX-1120-GOX-DEL-1793989500",
+"fltNo": "1120",
+"equipmentCode": "",
+"aircraftType": "32N B",
+"airlineCode": "IX",
+"marketingAirlineCode": "IX",
+"operatingAirlineCode": "IX",
+"departure": {
+"airlineCode": "IX",
+"airport": {
+"code": "GOX",
+"terminal": {
+"name": "",
+"gate": ""
+},
+"zoneId": "Asia/Kolkata",
+"timeZone": "IST",
+"time": "2026-11-06T23:55:00.000+05:30"
+}
+},
+"arrival": {
+"airlineCode": "IX",
+"airport": {
+"code": "DEL",
+"terminal": {
+"name": "1",
+"gate": ""
+},
+"zoneId": "Asia/Kolkata",
+"timeZone": "IST",
+"time": "2026-11-07T02:40:00.000+05:30"
+}
+},
+"stops": [],
+"duration": {
+"hh": 2,
+"mm": 45
+},
+"stopFlightDurations": []
+},
+"IX-1275-BOM-GOX-1793943900": {
+"id": "IX-1275-BOM-GOX-1793943900",
+"fltNo": "1275",
+"equipmentCode": "",
+"aircraftType": "320 F",
+"airlineCode": "IX",
+"marketingAirlineCode": "IX",
+"operatingAirlineCode": "IX",
+"departure": {
+"airlineCode": "IX",
+"airport": {
+"code": "BOM",
+"terminal": {
+"name": "2",
+"gate": ""
+},
+"zoneId": "Asia/Kolkata",
+"timeZone": "IST",
+"time": "2026-11-06T11:15:00.000+05:30"
+}
+},
+"arrival": {
+"airlineCode": "IX",
+"airport": {
+"code": "GOX",
+"terminal": {
+"name": "",
+"gate": ""
+},
+"zoneId": "Asia/Kolkata",
+"timeZone": "IST",
+"time": "2026-11-06T12:35:00.000+05:30"
+}
+},
+"stops": [],
+"duration": {
+"hh": 1,
+"mm": 20
+},
+"stopFlightDurations": []
+},
+"SG-613-BOM-DEL-1793982000": {
+"id": "SG-613-BOM-DEL-1793982000",
+"fltNo": "613",
+"equipmentCode": "",
+"aircraftType": "73H A01",
+"airlineCode": "SG",
+"marketingAirlineCode": "SG",
+"operatingAirlineCode": "SG",
+"departure": {
+"airlineCode": "SG",
+"airport": {
+"code": "BOM",
+"terminal": {
+"name": "1",
+"gate": ""
+},
+"zoneId": "Asia/Kolkata",
+"timeZone": "IST",
+"time": "2026-11-06T21:50:00.000+05:30"
+}
+},
+"arrival": {
+"airlineCode": "SG",
+"airport": {
+"code": "DEL",
+"terminal": {
+"name": "1D",
+"gate": ""
+},
+"zoneId": "Asia/Kolkata",
+"timeZone": "IST",
+"time": "2026-11-06T23:55:00.000+05:30"
+}
+},
+"stops": [],
+"duration": {
+"hh": 2,
+"mm": 5
+},
+"stopFlightDurations": []
+},
+"SG-611-BOM-DEL-1793977200": {
+"id": "SG-611-BOM-DEL-1793977200",
+"fltNo": "611",
+"equipmentCode": "",
+"aircraftType": "73H A01",
+"airlineCode": "SG",
+"marketingAirlineCode": "SG",
+"operatingAirlineCode": "SG",
+"departure": {
+"airlineCode": "SG",
+"airport": {
+"code": "BOM",
+"terminal": {
+"name": "1",
+"gate": ""
+},
+"zoneId": "Asia/Kolkata",
+"timeZone": "IST",
+"time": "2026-11-06T20:30:00.000+05:30"
+}
+},
+"arrival": {
+"airlineCode": "SG",
+"airport": {
+"code": "DEL",
+"terminal": {
+"name": "1D",
+"gate": ""
+},
+"zoneId": "Asia/Kolkata",
+"timeZone": "IST",
+"time": "2026-11-06T22:45:00.000+05:30"
+}
+},
+"stops": [],
+"duration": {
+"hh": 2,
+"mm": 15
+},
+"stopFlightDurations": []
+}
+},
+"fares": {
+"F0": {
+"fareId": "F0",
+"pricing": {
+"totalPricing": {
+"totalPrice": 29998.0
+}
+}
+},
+"F1": {
+"fareId": "F1",
+"pricing": {
+"totalPricing": {
+"totalPrice": 12450.0
+}
+}
+},
+"F3": {
+"fareId": "F3",
+"pricing": {
+"totalPricing": {
+"totalPrice": 12960.0
+}
+}
+},
+"F4": {
+"fareId": "F4",
+"pricing": {
+"totalPricing": {
+"totalPrice": 11984.0
+}
+}
+},
+"F2": {
+"fareId": "F2",
+"pricing": {
+"totalPricing": {
+"totalPrice": 11984.0
+}
+}
+}
+},
+"metaData": {
+"airlineDetail": {
+"SG": {
+"code": "SG",
+"name": "SpiceJet",
+"logoURL": ""
+},
+"6E": {
+"code": "6E",
+"name": "IndiGo",
+"logoURL": ""
+},
+"IX": {
+"code": "IX",
+"name": "Air India Express",
+"logoURL": ""
+}
+}
+}
+}

@@ -1,0 +1,405 @@
+{
+"data": {
+"searchItinerary": {
+"searchId": 0,
+"priceTypeDisplayed": "MEMBER_PRICE_POLICY_DISCOUNTED",
+"itineraries": [
+{
+"isFareUpgradeAvailable": false,
+"key": "20",
+"hotelXSellingEnabled": false,
+"meRating": 2.0988945960998535,
+"fees": [
+{
+"price": {
+"amount": 59.97,
+"currency": "GBP"
+},
+"type": "MEMBER_PRICE_POLICY_UNDISCOUNTED"
+},
+{
+"price": {
+"amount": 36.97,
+"currency": "GBP"
+},
+"type": "MEMBER_PRICE_POLICY_DISCOUNTED"
+}
+],
+"ticketsLeft": 1,
+"legs": [
+{
+"segmentKey": "0",
+"segmentId": "20"
+}
+],
+"transportTypes": [
+"PLANE"
+]
+},
+{
+"isFareUpgradeAvailable": false,
+"key": "29",
+"hotelXSellingEnabled": false,
+"meRating": 1.7121992111206055,
+"fees": [
+{
+"price": {
+"amount": 75.97,
+"currency": "GBP"
+},
+"type": "MEMBER_PRICE_POLICY_UNDISCOUNTED"
+},
+{
+"price": {
+"amount": 49.97,
+"currency": "GBP"
+},
+"type": "MEMBER_PRICE_POLICY_DISCOUNTED"
+}
+],
+"ticketsLeft": -1,
+"legs": [
+{
+"segmentKey": "0",
+"segmentId": "29"
+}
+],
+"transportTypes": [
+"PLANE"
+]
+},
+{
+"isFareUpgradeAvailable": false,
+"key": "1",
+"hotelXSellingEnabled": false,
+"meRating": 2.694711685180664,
+"fees": [
+{
+"price": {
+"amount": 32.97,
+"currency": "GBP"
+},
+"type": "MEMBER_PRICE_POLICY_UNDISCOUNTED"
+},
+{
+"price": {
+"amount": 9.97,
+"currency": "GBP"
+},
+"type": "MEMBER_PRICE_POLICY_DISCOUNTED"
+}
+],
+"ticketsLeft": 9,
+"legs": [
+{
+"segmentKey": "0",
+"segmentId": "1"
+}
+],
+"transportTypes": [
+"PLANE"
+]
+},
+{
+"isFareUpgradeAvailable": false,
+"key": "0",
+"hotelXSellingEnabled": false,
+"meRating": -3.4743807315826416,
+"fees": [
+{
+"price": {
+"amount": 66.97,
+"currency": "GBP"
+},
+"type": "MEMBER_PRICE_POLICY_UNDISCOUNTED"
+},
+{
+"price": {
+"amount": 9.97,
+"currency": "GBP"
+},
+"type": "MEMBER_PRICE_POLICY_DISCOUNTED"
+}
+],
+"ticketsLeft": 3,
+"legs": [
+{
+"segmentKey": "0",
+"segmentId": "0"
+}
+],
+"transportTypes": [
+"PLANE"
+]
+}
+],
+"segments": [
+{
+"id": "0",
+"segment": {
+"id": "0",
+"duration": 855,
+"carrierId": "U2",
+"sections": [
+"0",
+"1"
+],
+"baggageCondition": "BASED_ON_AIRLINE",
+"transportTypes": [
+"PLANE"
+],
+"ticketsLeft": 3
+}
+},
+{
+"id": "1",
+"segment": {
+"id": "1",
+"duration": 145,
+"carrierId": "U2",
+"sections": [
+"2"
+],
+"baggageCondition": "BASED_ON_AIRLINE",
+"transportTypes": [
+"PLANE"
+],
+"ticketsLeft": 9
+}
+},
+{
+"id": "20",
+"segment": {
+"id": "20",
+"duration": 140,
+"carrierId": "VY",
+"sections": [
+"21"
+],
+"baggageCondition": "BASED_ON_AIRLINE",
+"transportTypes": [
+"PLANE"
+],
+"ticketsLeft": 1
+}
+},
+{
+"id": "29",
+"segment": {
+"id": "29",
+"duration": 145,
+"carrierId": "BA",
+"sections": [
+"30"
+],
+"baggageCondition": "CABIN_INCLUDED",
+"transportTypes": [
+"PLANE"
+],
+"ticketsLeft": -1
+}
+}
+],
+"sections": [
+{
+"id": "0",
+"section": {
+"id": "0",
+"departureDate": "2026-11-06T08:55:00+01:00",
+"arrivalDate": "2026-11-06T10:05:00+01:00",
+"duration": 70,
+"departureId": "157",
+"destinationId": "62",
+"carrierId": "VY",
+"operatingCarrierId": "VY",
+"commercialBrandId": "VY",
+"technicalStops": [],
+"cabinClass": "TOURIST",
+"flightCode": "VY1302",
+"departureTerminal": null,
+"arrivalTerminal": null,
+"vehicleModel": null,
+"transportType": "PLANE",
+"insuranceOfferId": "0"
+}
+},
+{
+"id": "1",
+"section": {
+"id": "1",
+"departureDate": "2026-11-06T20:30:00+01:00",
+"arrivalDate": "2026-11-06T22:10:00Z",
+"duration": 160,
+"departureId": "62",
+"destinationId": "1121",
+"carrierId": "U2",
+"operatingCarrierId": "U2",
+"commercialBrandId": "U2",
+"technicalStops": [],
+"cabinClass": "TOURIST",
+"flightCode": "U22316",
+"departureTerminal": null,
+"arrivalTerminal": null,
+"vehicleModel": null,
+"transportType": "PLANE",
+"insuranceOfferId": null
+}
+},
+{
+"id": "2",
+"section": {
+"id": "2",
+"departureDate": "2026-11-06T22:15:00+01:00",
+"arrivalDate": "2026-11-06T23:40:00Z",
+"duration": 145,
+"departureId": "157",
+"destinationId": "1068",
+"carrierId": "U2",
+"operatingCarrierId": "U2",
+"commercialBrandId": "U2",
+"technicalStops": [],
+"cabinClass": "TOURIST",
+"flightCode": "U28060",
+"departureTerminal": null,
+"arrivalTerminal": null,
+"vehicleModel": null,
+"transportType": "PLANE",
+"insuranceOfferId": null
+}
+},
+{
+"id": "21",
+"section": {
+"id": "21",
+"departureDate": "2026-11-06T18:45:00+01:00",
+"arrivalDate": "2026-11-06T20:05:00Z",
+"duration": 140,
+"departureId": "157",
+"destinationId": "1070",
+"carrierId": "VY",
+"operatingCarrierId": "VY",
+"commercialBrandId": "VY",
+"technicalStops": [],
+"cabinClass": "TOURIST",
+"flightCode": "VY7642",
+"departureTerminal": null,
+"arrivalTerminal": null,
+"vehicleModel": null,
+"transportType": "PLANE",
+"insuranceOfferId": null
+}
+},
+{
+"id": "30",
+"section": {
+"id": "30",
+"departureDate": "2026-11-06T11:40:00+01:00",
+"arrivalDate": "2026-11-06T13:05:00Z",
+"duration": 145,
+"departureId": "157",
+"destinationId": "1070",
+"carrierId": "BA",
+"operatingCarrierId": "BA",
+"commercialBrandId": "BA",
+"technicalStops": [],
+"cabinClass": "TOURIST",
+"flightCode": "BA475",
+"departureTerminal": "1",
+"arrivalTerminal": "5",
+"vehicleModel": "320",
+"transportType": "PLANE",
+"insuranceOfferId": null
+}
+}
+],
+"locations": [
+{
+"id": "1121",
+"location": {
+"id": "1121",
+"iata": "LTN",
+"cityIata": "LON",
+"cityName": "London",
+"name": "London Luton Airport",
+"countryName": "United Kingdom",
+"locationType": "AIRPORT"
+}
+},
+{
+"id": "1068",
+"location": {
+"id": "1068",
+"iata": "LGW",
+"cityIata": "LON",
+"cityName": "London",
+"name": "Gatwick Airport",
+"countryName": "United Kingdom",
+"locationType": "AIRPORT"
+}
+},
+{
+"id": "1070",
+"location": {
+"id": "1070",
+"iata": "LHR",
+"cityIata": "LON",
+"cityName": "London",
+"name": "Heathrow Airport",
+"countryName": "United Kingdom",
+"locationType": "AIRPORT"
+}
+},
+{
+"id": "157",
+"location": {
+"id": "157",
+"iata": "BCN",
+"cityIata": "BCN",
+"cityName": "Barcelona",
+"name": "El Prat Airport",
+"countryName": "Spain",
+"locationType": "AIRPORT"
+}
+},
+{
+"id": "62",
+"location": {
+"id": "62",
+"iata": "ALC",
+"cityIata": "ALC",
+"cityName": "Alicante",
+"name": "Alicante\u2013Elche Miguel Hern\u00e1ndez Airport",
+"countryName": "Spain",
+"locationType": "AIRPORT"
+}
+}
+],
+"carriers": [
+{
+"id": "VY",
+"carrier": {
+"id": "VY",
+"name": "Vueling",
+"supportUrl": null
+}
+},
+{
+"id": "U2",
+"carrier": {
+"id": "U2",
+"name": "Easyjet",
+"supportUrl": null
+}
+},
+{
+"id": "BA",
+"carrier": {
+"id": "BA",
+"name": "British Airways",
+"supportUrl": null
+}
+}
+]
+}
+}
+}

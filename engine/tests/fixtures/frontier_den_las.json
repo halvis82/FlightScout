@@ -1,0 +1,123 @@
+{
+ "journeys": [
+  {
+   "isReturnTrip": false,
+   "departureStation": "DEN",
+   "arrivalStation": "LAS",
+   "flights": [
+    {
+     "standardFare": 78.98,
+     "discountDenFare": 77.98,
+     "isMonetary": true,
+     "standardFareSeatsRemaining": null,
+     "legs": [
+      {
+       "departureStation": "DEN",
+       "arrivalStation": "LAS",
+       "departureDate": "2026-11-10T07:30:00",
+       "arrivalDate": "2026-11-10T08:32:00",
+       "departureDateUtc": "2026-11-10T14:30:00Z",
+       "arrivalDateUtc": "2026-11-10T16:32:00Z",
+       "isNextDayArrival": false,
+       "duration": "02:02:00",
+       "durationFormatted": "2 hrs 2 min",
+       "flightNumber": 2349,
+       "carrierCode": "F9",
+       "carrierText": "",
+       "departureDateFormatted": "7:30 AM",
+       "arrivalDateFormatted": "8:32 AM",
+       "flightTime": "2hrs 2min"
+      }
+     ],
+     "stopCount": 0
+    },
+    {
+     "standardFare": 176.58,
+     "discountDenFare": 175.58,
+     "isMonetary": true,
+     "standardFareSeatsRemaining": "3 Seats Left!",
+     "legs": [
+      {
+       "departureStation": "DEN",
+       "arrivalStation": "ATL",
+       "departureDate": "2026-11-10T10:41:00",
+       "arrivalDate": "2026-11-10T15:43:00",
+       "departureDateUtc": "2026-11-10T17:41:00Z",
+       "arrivalDateUtc": "2026-11-10T20:43:00Z",
+       "isNextDayArrival": false,
+       "duration": "03:02:00",
+       "durationFormatted": "3 hrs 2 min",
+       "flightNumber": 3600,
+       "carrierCode": "F9",
+       "carrierText": "",
+       "departureDateFormatted": "10:41 AM",
+       "arrivalDateFormatted": "3:43 PM",
+       "flightTime": "3hrs 2min"
+      },
+      {
+       "departureStation": "ATL",
+       "arrivalStation": "LAS",
+       "departureDate": "2026-11-10T21:32:00",
+       "arrivalDate": "2026-11-10T23:08:00",
+       "departureDateUtc": "2026-11-11T02:32:00Z",
+       "arrivalDateUtc": "2026-11-11T07:08:00Z",
+       "isNextDayArrival": false,
+       "duration": "04:36:00",
+       "durationFormatted": "4 hrs 36 min",
+       "flightNumber": 3923,
+       "carrierCode": "F9",
+       "carrierText": "",
+       "departureDateFormatted": "9:32 PM",
+       "arrivalDateFormatted": "11:08 PM",
+       "flightTime": "4hrs 36min"
+      }
+     ],
+     "stopCount": 1
+    },
+    {
+     "standardFare": 62.36,
+     "discountDenFare": 60.36,
+     "isMonetary": true,
+     "standardFareSeatsRemaining": null,
+     "legs": [
+      {
+       "departureStation": "DEN",
+       "arrivalStation": "PHX",
+       "departureDate": "2026-11-10T14:14:00",
+       "arrivalDate": "2026-11-10T16:17:00",
+       "departureDateUtc": "2026-11-10T21:14:00Z",
+       "arrivalDateUtc": "2026-11-10T23:17:00Z",
+       "isNextDayArrival": false,
+       "duration": "02:03:00",
+       "durationFormatted": "2 hrs 3 min",
+       "flightNumber": 2105,
+       "carrierCode": "F9",
+       "carrierText": "",
+       "departureDateFormatted": "2:14 PM",
+       "arrivalDateFormatted": "4:17 PM",
+       "flightTime": "2hrs 3min"
+      },
+      {
+       "departureStation": "PHX",
+       "arrivalStation": "LAS",
+       "departureDate": "2026-11-10T19:21:00",
+       "arrivalDate": "2026-11-10T19:35:00",
+       "departureDateUtc": "2026-11-11T02:21:00Z",
+       "arrivalDateUtc": "2026-11-11T03:35:00Z",
+       "isNextDayArrival": false,
+       "duration": "01:14:00",
+       "durationFormatted": "1 hrs 14 min",
+       "flightNumber": 3983,
+       "carrierCode": "F9",
+       "carrierText": "",
+       "departureDateFormatted": "7:21 PM",
+       "arrivalDateFormatted": "7:35 PM",
+       "flightTime": "1hrs 14min"
+      }
+     ],
+     "stopCount": 1
+    }
+   ]
+  }
+ ]
+}

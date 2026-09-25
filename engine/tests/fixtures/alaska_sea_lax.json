@@ -1,0 +1,179 @@
+{
+ "departureStation": "SEA",
+ "arrivalStation": "LAX",
+ "rows": [
+  {
+   "duration": 272,
+   "segments": [
+    {
+     "publishingCarrier": {
+      "carrierCode": "AS",
+      "flightNumber": 2238,
+      "carrierFullName": "Alaska Airlines"
+     },
+     "departureStation": "SEA",
+     "arrivalStation": "PDX",
+     "departureTime": "2026-11-10T07:40:00-08:00",
+     "arrivalTime": "2026-11-10T08:38:00-08:00",
+     "duration": 58,
+     "aircraft": "Embraer 175"
+    },
+    {
+     "publishingCarrier": {
+      "carrierCode": "AS",
+      "flightNumber": 1755,
+      "carrierFullName": "Alaska Airlines"
+     },
+     "departureStation": "PDX",
+     "arrivalStation": "LAX",
+     "departureTime": "2026-11-10T09:46:00-08:00",
+     "arrivalTime": "2026-11-10T12:12:00-08:00",
+     "duration": 146,
+     "aircraft": "Boeing 737 MAX 8 Passenger"
+    }
+   ],
+   "solutions": {
+    "FIRST": {
+     "grandTotal": 293.2,
+     "allPaxTotal": 293.2,
+     "seatsRemaining": 7
+    },
+    "MAIN": {
+     "grandTotal": 123.2,
+     "allPaxTotal": 123.2,
+     "seatsRemaining": 5
+    },
+    "PREMIUM": {
+     "grandTotal": 173.2,
+     "allPaxTotal": 173.2,
+     "seatsRemaining": 5
+    },
+    "REFUNDABLE_FIRST": {
+     "grandTotal": 493.2,
+     "allPaxTotal": 493.2,
+     "seatsRemaining": 7
+    },
+    "REFUNDABLE_MAIN": {
+     "grandTotal": 198.2,
+     "allPaxTotal": 198.2,
+     "seatsRemaining": 5
+    },
+    "REFUNDABLE_PREMIUM": {
+     "grandTotal": 248.2,
+     "allPaxTotal": 248.2,
+     "seatsRemaining": 5
+    }
+   }
+  },
+  {
+   "duration": 164,
+   "segments": [
+    {
+     "publishingCarrier": {
+      "carrierCode": "AS",
+      "flightNumber": 505,
+      "carrierFullName": "Alaska Airlines"
+     },
+     "departureStation": "SEA",
+     "arrivalStation": "LAX",
+     "departureTime": "2026-11-10T06:00:00-08:00",
+     "arrivalTime": "2026-11-10T08:44:00-08:00",
+     "duration": 164,
+     "aircraft": "Boeing 737 MAX 8 Passenger"
+    }
+   ],
+   "solutions": {
+    "FIRST": {
+     "grandTotal": 698.4,
+     "allPaxTotal": 698.4,
+     "seatsRemaining": 4
+    },
+    "MAIN": {
+     "grandTotal": 193.4,
+     "allPaxTotal": 193.4,
+     "seatsRemaining": 9
+    },
+    "PREMIUM": {
+     "grandTotal": 263.4,
+     "allPaxTotal": 263.4,
+     "seatsRemaining": 9
+    },
+    "REFUNDABLE_FIRST": {
+     "grandTotal": 958.4,
+     "allPaxTotal": 958.4,
+     "seatsRemaining": 4
+    },
+    "REFUNDABLE_MAIN": {
+     "grandTotal": 273.4,
+     "allPaxTotal": 273.4,
+     "seatsRemaining": 9
+    },
+    "REFUNDABLE_PREMIUM": {
+     "grandTotal": 343.4,
+     "allPaxTotal": 343.4,
+     "seatsRemaining": 9
+    },
+    "SAVER": {
+     "grandTotal": 143.4,
+     "allPaxTotal": 143.4,
+     "seatsRemaining": 9
+    }
+   }
+  },
+  {
+   "duration": 179,
+   "segments": [
+    {
+     "publishingCarrier": {
+      "carrierCode": "AS",
+      "flightNumber": 1306,
+      "carrierFullName": "Alaska Airlines"
+     },
+     "departureStation": "SEA",
+     "arrivalStation": "LAX",
+     "departureTime": "2026-11-10T08:03:00-08:00",
+     "arrivalTime": "2026-11-10T11:02:00-08:00",
+     "duration": 179,
+     "aircraft": "Boeing 737-900 (Winglets) Passenger"
+    }
+   ],
+   "solutions": {
+    "FIRST": {
+     "grandTotal": 353.4,
+     "allPaxTotal": 353.4,
+     "seatsRemaining": 8
+    },
+    "MAIN": {
+     "grandTotal": 183.4,
+     "allPaxTotal": 183.4,
+     "seatsRemaining": 9
+    },
+    "PREMIUM": {
+     "grandTotal": 218.4,
+     "allPaxTotal": 218.4,
+     "seatsRemaining": 9
+    },
+    "REFUNDABLE_FIRST": {
+     "grandTotal": 573.4,
+     "allPaxTotal": 573.4,
+     "seatsRemaining": 8
+    },
+    "REFUNDABLE_MAIN": {
+     "grandTotal": 268.4,
+     "allPaxTotal": 268.4,
+     "seatsRemaining": 9
+    },
+    "REFUNDABLE_PREMIUM": {
+     "grandTotal": 303.4,
+     "allPaxTotal": 303.4,
+     "seatsRemaining": 9
+    },
+    "SAVER": {
+     "grandTotal": 143.4,
+     "allPaxTotal": 143.4,
+     "seatsRemaining": 9
+    }
+   }
+  }
+ ]
+}

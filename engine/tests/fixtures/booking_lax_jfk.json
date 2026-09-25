@@ -1,0 +1,578 @@
+{
+"flightOffers": [
+{
+"token": "offer-token-0",
+"segments": [
+{
+"departureAirport": {
+"type": "AIRPORT",
+"code": "LAX",
+"name": "Los Angeles International Airport",
+"city": "LAX",
+"cityName": "Los Angeles",
+"country": "US",
+"countryName": "United States",
+"province": "California",
+"provinceCode": "CA"
+},
+"arrivalAirport": {
+"type": "AIRPORT",
+"code": "JFK",
+"name": "John F. Kennedy International Airport",
+"city": "NYC",
+"cityName": "New York",
+"country": "US",
+"countryName": "United States",
+"province": "New York State",
+"provinceCode": "NY"
+},
+"departureTime": "2026-11-06T07:03:00",
+"arrivalTime": "2026-11-06T19:19:00",
+"legs": [
+{
+"departureTime": "2026-11-06T07:03:00",
+"arrivalTime": "2026-11-06T09:31:00",
+"departureAirport": {
+"type": "AIRPORT",
+"code": "LAX",
+"name": "Los Angeles International Airport",
+"city": "LAX",
+"cityName": "Los Angeles",
+"country": "US",
+"countryName": "United States",
+"province": "California",
+"provinceCode": "CA"
+},
+"arrivalAirport": {
+"type": "AIRPORT",
+"code": "PDX",
+"name": "Portland International Airport",
+"city": "PDX",
+"cityName": "Portland",
+"country": "US",
+"countryName": "United States",
+"province": "Oregon",
+"provinceCode": "OR"
+},
+"flightInfo": {
+"facilities": [],
+"flightNumber": 668,
+"planeType": "",
+"carrierInfo": {
+"operatingCarrier": "AS",
+"marketingCarrier": "AS",
+"operatingCarrierDisclosureText": "",
+"tier": {
+"addons": [],
+"type": "ADVANTAGE"
+}
+}
+},
+"carriers": [
+"AS",
+"AS"
+],
+"carriersData": [
+{
+"name": "Alaska Airlines",
+"code": "AS",
+"logo": "https://r-xx.bstatic.com/data/airlines_logo/AS.png"
+},
+{
+"name": "Alaska Airlines",
+"code": "AS",
+"logo": "https://r-xx.bstatic.com/data/airlines_logo/AS.png"
+}
+],
+"totalTime": 8880,
+"departureTimeTz": "2026-11-06T07:03:00-08:00",
+"arrivalTimeTz": "2026-11-06T09:31:00-08:00"
+},
+{
+"departureTime": "2026-11-06T10:50:00",
+"arrivalTime": "2026-11-06T19:19:00",
+"departureAirport": {
+"type": "AIRPORT",
+"code": "PDX",
+"name": "Portland International Airport",
+"city": "PDX",
+"cityName": "Portland",
+"country": "US",
+"countryName": "United States",
+"province": "Oregon",
+"provinceCode": "OR"
+},
+"arrivalAirport": {
+"type": "AIRPORT",
+"code": "JFK",
+"name": "John F. Kennedy International Airport",
+"city": "NYC",
+"cityName": "New York",
+"country": "US",
+"countryName": "United States",
+"province": "New York State",
+"provinceCode": "NY"
+},
+"flightInfo": {
+"facilities": [],
+"flightNumber": 18,
+"planeType": "",
+"carrierInfo": {
+"operatingCarrier": "AS",
+"marketingCarrier": "AS",
+"operatingCarrierDisclosureText": "",
+"tier": {
+"addons": [],
+"type": "ADVANTAGE"
+}
+}
+},
+"carriers": [
+"AS",
+"AS"
+],
+"carriersData": [
+{
+"name": "Alaska Airlines",
+"code": "AS",
+"logo": "https://r-xx.bstatic.com/data/airlines_logo/AS.png"
+},
+{
+"name": "Alaska Airlines",
+"code": "AS",
+"logo": "https://r-xx.bstatic.com/data/airlines_logo/AS.png"
+}
+],
+"totalTime": 19740,
+"departureTimeTz": "2026-11-06T10:50:00-08:00",
+"arrivalTimeTz": "2026-11-06T19:19:00-05:00"
+}
+],
+"totalTime": 33360,
+"travellerCheckedLuggage": [],
+"travellerCabinLuggage": [
+{
+"travellerReference": "1",
+"luggageAllowance": {
+"luggageType": "HAND",
+"maxPiece": 1,
+"sizeRestrictions": {
+"maxLength": 22.1,
+"maxWidth": 14.2,
+"maxHeight": 9.1,
+"sizeUnit": "INCH"
+}
+},
+"personalItem": true
+}
+]
+}
+],
+"priceBreakdown": {
+"total": {
+"currencyCode": "USD",
+"units": 224,
+"nanos": 200000000
+},
+"baseFare": {
+"currencyCode": "USD",
+"units": 224,
+"nanos": 200000000
+},
+"fee": {
+"currencyCode": "USD",
+"units": 0,
+"nanos": 0
+},
+"tax": {
+"currencyCode": "USD",
+"units": 0,
+"nanos": 0
+},
+"totalRounded": {
+"currencyCode": "USD",
+"nanos": 0,
+"units": 225
+},
+"discount": {
+"currencyCode": "USD",
+"units": 0,
+"nanos": 0
+},
+"totalWithoutDiscount": {
+"currencyCode": "USD",
+"units": 224,
+"nanos": 200000000
+},
+"totalWithoutDiscountRounded": {
+"currencyCode": "USD",
+"nanos": 0,
+"units": 225
+},
+"showPriceStrikethrough": false
+}
+},
+{
+"token": "offer-token-1",
+"segments": [
+{
+"departureAirport": {
+"type": "AIRPORT",
+"code": "LAX",
+"name": "Los Angeles International Airport",
+"city": "LAX",
+"cityName": "Los Angeles",
+"country": "US",
+"countryName": "United States",
+"province": "California",
+"provinceCode": "CA"
+},
+"arrivalAirport": {
+"type": "AIRPORT",
+"code": "JFK",
+"name": "John F. Kennedy International Airport",
+"city": "NYC",
+"cityName": "New York",
+"country": "US",
+"countryName": "United States",
+"province": "New York State",
+"provinceCode": "NY"
+},
+"departureTime": "2026-11-06T06:00:00",
+"arrivalTime": "2026-11-06T22:55:00",
+"legs": [
+{
+"departureTime": "2026-11-06T06:00:00",
+"arrivalTime": "2026-11-06T08:54:00",
+"departureAirport": {
+"type": "AIRPORT",
+"code": "LAX",
+"name": "Los Angeles International Airport",
+"city": "LAX",
+"cityName": "Los Angeles",
+"country": "US",
+"countryName": "United States",
+"province": "California",
+"provinceCode": "CA"
+},
+"arrivalAirport": {
+"type": "AIRPORT",
+"code": "SEA",
+"name": "Seattle\u2013Tacoma International Airport",
+"city": "SEA",
+"cityName": "Seattle",
+"country": "US",
+"countryName": "United States",
+"province": "Washington State",
+"provinceCode": "WA"
+},
+"flightInfo": {
+"facilities": [],
+"flightNumber": 495,
+"planeType": "",
+"carrierInfo": {
+"operatingCarrier": "AS",
+"marketingCarrier": "AS",
+"operatingCarrierDisclosureText": "",
+"tier": {
+"addons": [],
+"type": "ADVANTAGE"
+}
+}
+},
+"carriers": [
+"AS",
+"AS"
+],
+"carriersData": [
+{
+"name": "Alaska Airlines",
+"code": "AS",
+"logo": "https://r-xx.bstatic.com/data/airlines_logo/AS.png"
+},
+{
+"name": "Alaska Airlines",
+"code": "AS",
+"logo": "https://r-xx.bstatic.com/data/airlines_logo/AS.png"
+}
+],
+"totalTime": 10440,
+"departureTimeTz": "2026-11-06T06:00:00-08:00",
+"arrivalTimeTz": "2026-11-06T08:54:00-08:00"
+},
+{
+"departureTime": "2026-11-06T14:35:00",
+"arrivalTime": "2026-11-06T22:55:00",
+"departureAirport": {
+"type": "AIRPORT",
+"code": "SEA",
+"name": "Seattle\u2013Tacoma International Airport",
+"city": "SEA",
+"cityName": "Seattle",
+"country": "US",
+"countryName": "United States",
+"province": "Washington State",
+"provinceCode": "WA"
+},
+"arrivalAirport": {
+"type": "AIRPORT",
+"code": "JFK",
+"name": "John F. Kennedy International Airport",
+"city": "NYC",
+"cityName": "New York",
+"country": "US",
+"countryName": "United States",
+"province": "New York State",
+"provinceCode": "NY"
+},
+"flightInfo": {
+"facilities": [],
+"flightNumber": 34,
+"planeType": "",
+"carrierInfo": {
+"operatingCarrier": "AS",
+"marketingCarrier": "AS",
+"operatingCarrierDisclosureText": "",
+"tier": {
+"addons": [],
+"type": "ADVANTAGE"
+}
+}
+},
+"carriers": [
+"AS",
+"AS"
+],
+"carriersData": [
+{
+"name": "Alaska Airlines",
+"code": "AS",
+"logo": "https://r-xx.bstatic.com/data/airlines_logo/AS.png"
+},
+{
+"name": "Alaska Airlines",
+"code": "AS",
+"logo": "https://r-xx.bstatic.com/data/airlines_logo/AS.png"
+}
+],
+"totalTime": 19200,
+"departureTimeTz": "2026-11-06T14:35:00-08:00",
+"arrivalTimeTz": "2026-11-06T22:55:00-05:00"
+}
+],
+"totalTime": 50100,
+"travellerCheckedLuggage": [],
+"travellerCabinLuggage": [
+{
+"travellerReference": "1",
+"luggageAllowance": {
+"luggageType": "HAND",
+"maxPiece": 1,
+"sizeRestrictions": {
+"maxLength": 22.1,
+"maxWidth": 14.2,
+"maxHeight": 9.1,
+"sizeUnit": "INCH"
+}
+},
+"personalItem": true
+}
+]
+}
+],
+"priceBreakdown": {
+"total": {
+"currencyCode": "USD",
+"units": 229,
+"nanos": 800000000
+},
+"baseFare": {
+"currencyCode": "USD",
+"units": 229,
+"nanos": 800000000
+},
+"fee": {
+"currencyCode": "USD",
+"units": 0,
+"nanos": 0
+},
+"tax": {
+"currencyCode": "USD",
+"units": 0,
+"nanos": 0
+},
+"totalRounded": {
+"currencyCode": "USD",
+"nanos": 0,
+"units": 230
+},
+"discount": {
+"currencyCode": "USD",
+"units": 0,
+"nanos": 0
+},
+"totalWithoutDiscount": {
+"currencyCode": "USD",
+"units": 229,
+"nanos": 800000000
+},
+"totalWithoutDiscountRounded": {
+"currencyCode": "USD",
+"nanos": 0,
+"units": 230
+},
+"showPriceStrikethrough": false
+}
+},
+{
+"token": "offer-token-2",
+"segments": [
+{
+"departureAirport": {
+"type": "AIRPORT",
+"code": "LAX",
+"name": "Los Angeles International Airport",
+"city": "LAX",
+"cityName": "Los Angeles",
+"country": "US",
+"countryName": "United States",
+"province": "California",
+"provinceCode": "CA"
+},
+"arrivalAirport": {
+"type": "AIRPORT",
+"code": "JFK",
+"name": "John F. Kennedy International Airport",
+"city": "NYC",
+"cityName": "New York",
+"country": "US",
+"countryName": "United States",
+"province": "New York State",
+"provinceCode": "NY"
+},
+"departureTime": "2026-11-06T20:50:00",
+"arrivalTime": "2026-11-07T05:09:00",
+"legs": [
+{
+"departureTime": "2026-11-06T20:50:00",
+"arrivalTime": "2026-11-07T05:09:00",
+"departureAirport": {
+"type": "AIRPORT",
+"code": "LAX",
+"name": "Los Angeles International Airport",
+"city": "LAX",
+"cityName": "Los Angeles",
+"country": "US",
+"countryName": "United States",
+"province": "California",
+"provinceCode": "CA"
+},
+"arrivalAirport": {
+"type": "AIRPORT",
+"code": "JFK",
+"name": "John F. Kennedy International Airport",
+"city": "NYC",
+"cityName": "New York",
+"country": "US",
+"countryName": "United States",
+"province": "New York State",
+"provinceCode": "NY"
+},
+"flightInfo": {
+"facilities": [],
+"flightNumber": 1524,
+"planeType": "32S",
+"carrierInfo": {
+"operatingCarrier": "B6",
+"marketingCarrier": "B6",
+"operatingCarrierDisclosureText": "",
+"tier": {
+"addons": [],
+"type": "CORE"
+}
+}
+},
+"carriers": [
+"B6",
+"B6"
+],
+"carriersData": [
+{
+"name": "JetBlue",
+"code": "B6",
+"logo": "https://r-xx.bstatic.com/data/airlines_logo/B6.png"
+},
+{
+"name": "JetBlue",
+"code": "B6",
+"logo": "https://r-xx.bstatic.com/data/airlines_logo/B6.png"
+}
+],
+"totalTime": 19140,
+"departureTimeTz": "2026-11-06T20:50:00-08:00",
+"arrivalTimeTz": "2026-11-07T05:09:00-05:00"
+}
+],
+"totalTime": 19140,
+"travellerCheckedLuggage": [],
+"travellerCabinLuggage": [
+{
+"travellerReference": "1",
+"luggageAllowance": {
+"luggageType": "HAND",
+"maxPiece": 1,
+"sizeRestrictions": {
+"sizeUnit": "INCH"
+}
+},
+"personalItem": true
+}
+]
+}
+],
+"priceBreakdown": {
+"total": {
+"currencyCode": "USD",
+"units": 248,
+"nanos": 400000000
+},
+"baseFare": {
+"currencyCode": "USD",
+"units": 216,
+"nanos": 740000000
+},
+"fee": {
+"currencyCode": "USD",
+"units": 0,
+"nanos": 0
+},
+"tax": {
+"currencyCode": "USD",
+"units": 31,
+"nanos": 660000000
+},
+"totalRounded": {
+"currencyCode": "USD",
+"nanos": 0,
+"units": 249
+},
+"discount": {
+"currencyCode": "USD",
+"units": 0,
+"nanos": 0
+},
+"totalWithoutDiscount": {
+"currencyCode": "USD",
+"units": 248,
+"nanos": 400000000
+},
+"totalWithoutDiscountRounded": {
+"currencyCode": "USD",
+"nanos": 0,
+"units": 249
+},
+"showPriceStrikethrough": false
+}
+}
+]
+}

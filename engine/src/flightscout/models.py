@@ -13,7 +13,22 @@ from pydantic import BaseModel, Field, computed_field, model_validator
 Source = Literal["google", "kiwi", "ryanair", "serpapi", "volaris", "wideroe", "skyairline", "norse", "volotea",
                  "condor", "flair", "wizzair", "vivaaerobus", "kiwiweb", "kayak", "skyscanner",
                  # direct airline sources that need a real browser (sources/_browser.py)
-                 "transavia", "norwegian", "southwest", "allegiant"]
+                 "transavia", "norwegian", "southwest", "allegiant",
+                 # OTAs and metasearch sites, live search results
+                 "booking", "kayakweb", "momondo", "cheapflights", "tripcom", "expedia", "orbitz", "travelocity",
+                 "priceline", "aviasales", "wego", "omio", "edreams", "opodo", "gotogate", "mytrip", "almosafer",
+                 "cleartrip", "traveloka",
+                 # Americas direct airline sources
+                 "frontier", "breeze", "avelo", "jetblue", "alaska", "united", "westjet", "porter",
+                 "aeromexico", "arajet", "caribbean", "caymanairways", "wingo", "aerolineas",
+                 # world direct airline sources (Europe, Middle East, Africa, Asia, Oceania; pruned to the built ones)
+                 "sas", "finnair", "icelandair", "play", "airbaltic", "lot", "smartwings", "afklm", "lufthansa",
+                 "britishairways", "aerlingus", "jet2", "ita", "iberia", "vueling", "level", "tap", "aegean",
+                 "skyexpress", "pegasus", "sunexpress", "ajet", "turkish", "flydubai", "airarabia", "jazeera",
+                 "flynas", "emirates", "qatar", "etihad", "flysafair", "airpeace", "indigo", "airindiaexpress",
+                 "spicejet", "akasa", "scoot", "cebupacific", "vietjet", "bamboo", "batik", "peach", "zipair",
+                 "jejuair", "tway", "airbusan", "tigerair", "starlux", "qantas", "jetstar", "virginaustralia",
+                 "airnewzealand", "rex"]
 Cabin = Literal["economy", "premium", "business", "first"]
 
 
@@ -245,9 +260,10 @@ class SearchQuery(BaseModel):
     cabin: Cabin = "economy"
     max_stops: int | None = None
     currency: str = "USD"
-    # "airlines" = every direct airline source that flies the route
-    sources: list[Source | Literal["airlines"]] = Field(default_factory=lambda: [
-        "google", "kiwi", "kiwiweb", "airlines"])
+    # "airlines" = every direct airline source that flies the route,
+    # "otas" = every booking site / metasearch source
+    sources: list[Source | Literal["airlines", "otas"]] = Field(default_factory=lambda: [
+        "google", "kiwi", "kiwiweb", "airlines", "otas"])
     departure_flex_days: int = 0
     return_flex_days: int = 0
     nearby_km: int = 0  # also search airports within this radius of each side

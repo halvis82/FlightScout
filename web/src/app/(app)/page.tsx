@@ -127,7 +127,7 @@ function SearchPage() {
       lastRun.current = JSON.stringify([f0.from, f0.to, f0.depart, f0.ret, f0.tripType, f0.flex, f0.retFlex, f0.cabin, f0.adults, f0.stops, f0.nearby]);
       setErr(null);
       setStale(true); // keep showing the previous results, dimmed
-      setPending(4);
+      setPending(5);
       setPlan(null);
       setBusy(true);
       setElapsed(0);
@@ -193,7 +193,7 @@ function SearchPage() {
       // Stream: ask each group of sources separately and show results as each
       // arrives. Earlier results stay on screen (dimmed) until the first part
       // of the new search lands.
-      const PARTS: string[][] = [["google"], ["kiwiweb"], ["airlines"], ["kiwi"]];
+      const PARTS: string[][] = [["google"], ["kiwiweb"], ["airlines"], ["kiwi"], ["otas"]];
       const runId = ++runSeq.current;
       let acc: SearchResult | null = null;
       let pending = PARTS.length;

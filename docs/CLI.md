@@ -121,7 +121,7 @@ flightscout search LAX DPS +60 -r +71 --depart-flex 3 --smart --sort best
 | `--max-stops` | int | 0 for nonstop only. |
 | `--nearby` | int | Also search airports within this many km (SAN adds TIJ). |
 | `--smart` | flag | Also look for cheaper separate ticket combinations (slower). |
-| `--sources` | str (default `default`) | default, or a list: google,kiwiweb,kiwi,volaris,wideroe,skyairline,norse,volotea,condor,flair,serpapi. With Chrome installed, any direct airline source also brings in transavia, norwegian, southwest, vivaaerobus and allegiant (read in a real browser, FLIGHTSCOUT_BROWSER=0 turns that off). |
+| `--sources` | str (default `default`) | default (google, kiwi, kiwiweb, airlines, otas), or a list. Groups: airlines = every direct airline that flies the route, otas = booking sites (Booking.com, Expedia, KAYAK, Priceline, Trip.com...). Or single sources like google,kiwiweb,jetblue,booking. Browser ones need Chrome (headless); FLIGHTSCOUT_BROWSER=0 turns them off. |
 | `--max-price` | float | Hide results above this price. |
 | `--sort` | choice (default `price`) | price, duration, departure or best (price + time). |
 | `--time` | str | morning, afternoon or evening departure. |

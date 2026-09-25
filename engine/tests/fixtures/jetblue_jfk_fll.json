@@ -1,0 +1,686 @@
+{
+ "status": {
+  "transactionStatus": "success"
+ },
+ "data": {
+  "searchResults": [
+   {
+    "productOffers": [
+     {
+      "originAndDestination": [
+       {
+        "type": "ItineraryPart",
+        "@id": "1",
+        "originDestinationType": "NONSTOP",
+        "departure": {
+         "date": "2026-11-10T06:00:00",
+         "airport": "JFK",
+         "terminal": "5"
+        },
+        "arrival": {
+         "date": "2026-11-10T09:04:00",
+         "airport": "FLL",
+         "terminal": "3"
+        },
+        "stops": 0,
+        "totalDuration": 184,
+        "flightSegments": [
+         {
+          "type": "Segment",
+          "@id": "2",
+          "segmentType": "JETBLUE",
+          "departure": {
+           "date": "2026-11-10T06:00:00",
+           "airport": "JFK",
+           "terminal": "5"
+          },
+          "arrival": {
+           "date": "2026-11-10T09:04:00",
+           "airport": "FLL",
+           "terminal": "3"
+          },
+          "duration": 184,
+          "cabinClass": "Economy",
+          "layoverDuration": 0,
+          "flightInfo": {
+           "marketingFlightNumber": 1,
+           "operatingFlightNumber": 1,
+           "operatingAirlineCode": "B6",
+           "marketingAirlineCode": "B6"
+          },
+          "stopAirport": [],
+          "aircraft": "321",
+          "aircraftCode": "321",
+          "distance": 1069,
+          "arrivalDateOffset": 0,
+          "awardFare": false
+         }
+        ],
+        "arrivalDateOffset": 0,
+        "awardBooking": false,
+        "isQuickest": true
+       }
+      ],
+      "offers": [
+       {
+        "brand": {
+         "brandId": "DN"
+        },
+        "cabinClass": "Economy",
+        "soldOut": false,
+        "seatsRemaining": {
+         "count": 9,
+         "lowAvailability": false
+        },
+        "price": [
+         {
+          "amount": 99.4,
+          "currency": "USD"
+         }
+        ],
+        "offerSegmentInfo": [
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "L",
+          "fareBasis": "PI2QBVY1",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/0/originAndDestination/0/flightSegments/0"
+           }
+          }
+         }
+        ],
+        "selectedOfferInfo": []
+       },
+       {
+        "brand": {
+         "brandId": "AN"
+        },
+        "cabinClass": "Economy",
+        "soldOut": false,
+        "seatsRemaining": {
+         "count": 9,
+         "lowAvailability": false
+        },
+        "price": [
+         {
+          "amount": 144.4,
+          "currency": "USD"
+         }
+        ],
+        "offerSegmentInfo": [
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "P",
+          "fareBasis": "PI2QBVY5",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/0/originAndDestination/0/flightSegments/0"
+           }
+          }
+         }
+        ],
+        "selectedOfferInfo": []
+       },
+       {
+        "brand": {
+         "brandId": "DE"
+        },
+        "cabinClass": "Economy",
+        "soldOut": false,
+        "seatsRemaining": {
+         "count": 9,
+         "lowAvailability": false
+        },
+        "price": [
+         {
+          "amount": 178.4,
+          "currency": "USD"
+         }
+        ],
+        "offerSegmentInfo": [
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "N",
+          "fareBasis": "PI2QBVN1",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/0/originAndDestination/0/flightSegments/0"
+           }
+          }
+         }
+        ],
+        "selectedOfferInfo": []
+       },
+       {
+        "brand": {
+         "brandId": "GR"
+        },
+        "cabinClass": "Economy",
+        "soldOut": false,
+        "seatsRemaining": {
+         "count": 9,
+         "lowAvailability": false
+        },
+        "price": [
+         {
+          "amount": 210.41,
+          "currency": "USD"
+         }
+        ],
+        "offerSegmentInfo": [
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "P",
+          "fareBasis": "PI2QBVY9",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/0/originAndDestination/0/flightSegments/0"
+           }
+          }
+         }
+        ],
+        "selectedOfferInfo": []
+       },
+       {
+        "brand": {
+         "brandId": "EN"
+        },
+        "cabinClass": "Economy",
+        "soldOut": false,
+        "seatsRemaining": {
+         "count": 9,
+         "lowAvailability": false
+        },
+        "price": [
+         {
+          "amount": 223.4,
+          "currency": "USD"
+         }
+        ],
+        "offerSegmentInfo": [
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "N",
+          "fareBasis": "PI2QBVN5",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/0/originAndDestination/0/flightSegments/0"
+           }
+          }
+         }
+        ],
+        "selectedOfferInfo": []
+       },
+       {
+        "brand": {
+         "brandId": "ER"
+        },
+        "cabinClass": "Economy",
+        "soldOut": false,
+        "seatsRemaining": {
+         "count": 9,
+         "lowAvailability": false
+        },
+        "price": [
+         {
+          "amount": 289.4,
+          "currency": "USD"
+         }
+        ],
+        "offerSegmentInfo": [
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "N",
+          "fareBasis": "PI2QBVN9",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/0/originAndDestination/0/flightSegments/0"
+           }
+          }
+         }
+        ],
+        "selectedOfferInfo": []
+       }
+      ]
+     },
+     {
+      "originAndDestination": [
+       {
+        "type": "ItineraryPart",
+        "@id": "49",
+        "originDestinationType": "CONNECTING",
+        "departure": {
+         "date": "2026-11-10T06:40:00",
+         "airport": "JFK",
+         "terminal": "5"
+        },
+        "arrival": {
+         "date": "2026-11-10T14:29:00",
+         "airport": "FLL",
+         "terminal": "3"
+        },
+        "stops": 1,
+        "totalDuration": 469,
+        "flightSegments": [
+         {
+          "type": "Segment",
+          "@id": "50",
+          "segmentType": "JETBLUE",
+          "departure": {
+           "date": "2026-11-10T06:40:00",
+           "airport": "JFK",
+           "terminal": "5"
+          },
+          "arrival": {
+           "date": "2026-11-10T07:50:00",
+           "airport": "BOS",
+           "terminal": "C"
+          },
+          "duration": 70,
+          "cabinClass": "Economy",
+          "layoverDuration": 190,
+          "flightInfo": {
+           "marketingFlightNumber": 2718,
+           "operatingFlightNumber": 2718,
+           "operatingAirlineCode": "B6",
+           "marketingAirlineCode": "B6"
+          },
+          "stopAirport": [],
+          "aircraft": "223",
+          "aircraftCode": "223",
+          "distance": 187,
+          "arrivalDateOffset": 0,
+          "awardFare": false
+         },
+         {
+          "type": "Segment",
+          "@id": "51",
+          "segmentType": "JETBLUE",
+          "departure": {
+           "date": "2026-11-10T11:00:00",
+           "airport": "BOS",
+           "terminal": "C"
+          },
+          "arrival": {
+           "date": "2026-11-10T14:29:00",
+           "airport": "FLL",
+           "terminal": "3"
+          },
+          "duration": 209,
+          "cabinClass": "Economy",
+          "layoverDuration": 0,
+          "flightInfo": {
+           "marketingFlightNumber": 869,
+           "operatingFlightNumber": 869,
+           "operatingAirlineCode": "B6",
+           "marketingAirlineCode": "B6"
+          },
+          "stopAirport": [],
+          "aircraft": "223",
+          "aircraftCode": "223",
+          "distance": 1237,
+          "arrivalDateOffset": 0,
+          "awardFare": false
+         }
+        ],
+        "arrivalDateOffset": 0,
+        "awardBooking": false,
+        "isQuickest": false
+       }
+      ],
+      "offers": [
+       {
+        "brand": {
+         "brandId": "DN"
+        },
+        "cabinClass": "Economy",
+        "soldOut": false,
+        "seatsRemaining": {
+         "count": 6,
+         "lowAvailability": false
+        },
+        "price": [
+         {
+          "amount": 183.33,
+          "currency": "USD"
+         }
+        ],
+        "offerSegmentInfo": [
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "L",
+          "fareBasis": "PC2AUEY1",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/4/originAndDestination/0/flightSegments/0"
+           }
+          }
+         },
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "L",
+          "fareBasis": "PC2AUEY1",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/4/originAndDestination/0/flightSegments/1"
+           }
+          }
+         }
+        ],
+        "selectedOfferInfo": []
+       },
+       {
+        "brand": {
+         "brandId": "AN"
+        },
+        "cabinClass": "Economy",
+        "soldOut": false,
+        "seatsRemaining": {
+         "count": 6,
+         "lowAvailability": false
+        },
+        "price": [
+         {
+          "amount": 212.63,
+          "currency": "USD"
+         }
+        ],
+        "offerSegmentInfo": [
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "P",
+          "fareBasis": "PC2AUEY5",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/4/originAndDestination/0/flightSegments/0"
+           }
+          }
+         },
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "P",
+          "fareBasis": "PC2AUEY5",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/4/originAndDestination/0/flightSegments/1"
+           }
+          }
+         }
+        ],
+        "selectedOfferInfo": []
+       },
+       {
+        "brand": {
+         "brandId": "EN"
+        },
+        "cabinClass": "Economy",
+        "soldOut": false,
+        "seatsRemaining": {
+         "count": 4,
+         "lowAvailability": false
+        },
+        "price": [
+         {
+          "amount": 265.34,
+          "currency": "USD"
+         }
+        ],
+        "offerSegmentInfo": [
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "N",
+          "fareBasis": "PC2AUEN5",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/4/originAndDestination/0/flightSegments/0"
+           }
+          }
+         },
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "N",
+          "fareBasis": "PC2AUEN5",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/4/originAndDestination/0/flightSegments/1"
+           }
+          }
+         }
+        ],
+        "selectedOfferInfo": []
+       },
+       {
+        "brand": {
+         "brandId": "GR"
+        },
+        "cabinClass": "Economy",
+        "soldOut": false,
+        "seatsRemaining": {
+         "count": 6,
+         "lowAvailability": false
+        },
+        "price": [
+         {
+          "amount": 271.19,
+          "currency": "USD"
+         }
+        ],
+        "offerSegmentInfo": [
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "P",
+          "fareBasis": "PC2AUEY9",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/4/originAndDestination/0/flightSegments/0"
+           }
+          }
+         },
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "P",
+          "fareBasis": "PC2AUEY9",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/4/originAndDestination/0/flightSegments/1"
+           }
+          }
+         }
+        ],
+        "selectedOfferInfo": []
+       },
+       {
+        "brand": {
+         "brandId": "ER"
+        },
+        "cabinClass": "Economy",
+        "soldOut": false,
+        "seatsRemaining": {
+         "count": 4,
+         "lowAvailability": false
+        },
+        "price": [
+         {
+          "amount": 323.91,
+          "currency": "USD"
+         }
+        ],
+        "offerSegmentInfo": [
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "N",
+          "fareBasis": "PC2AUEN9",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/4/originAndDestination/0/flightSegments/0"
+           }
+          }
+         },
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "N",
+          "fareBasis": "PC2AUEN9",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/4/originAndDestination/0/flightSegments/1"
+           }
+          }
+         }
+        ],
+        "selectedOfferInfo": []
+       }
+      ]
+     },
+     {
+      "originAndDestination": [
+       {
+        "type": "ItineraryPart",
+        "@id": "236",
+        "originDestinationType": "CONNECTING",
+        "departure": {
+         "date": "2026-11-10T07:40:00",
+         "airport": "JFK",
+         "terminal": "5"
+        },
+        "arrival": {
+         "date": "2026-11-10T15:44:00",
+         "airport": "FLL",
+         "terminal": "0"
+        },
+        "stops": 4,
+        "totalDuration": 484,
+        "flightSegments": [
+         {
+          "type": "Segment",
+          "@id": "237",
+          "segmentType": "JETBLUE",
+          "departure": {
+           "date": "2026-11-10T07:40:00",
+           "airport": "JFK",
+           "terminal": "5"
+          },
+          "arrival": {
+           "date": "2026-11-10T10:43:00",
+           "airport": "MCO",
+           "terminal": "C"
+          },
+          "duration": 183,
+          "cabinClass": "Economy",
+          "layoverDuration": 97,
+          "flightInfo": {
+           "marketingFlightNumber": 883,
+           "operatingFlightNumber": 883,
+           "operatingAirlineCode": "B6",
+           "marketingAirlineCode": "B6"
+          },
+          "stopAirport": [],
+          "aircraft": "32Q",
+          "aircraftCode": "3N1",
+          "distance": 944,
+          "arrivalDateOffset": 0,
+          "awardFare": false
+         },
+         {
+          "type": "Segment",
+          "@id": "238",
+          "segmentType": "INTERLINE",
+          "departure": {
+           "date": "2026-11-10T12:20:00",
+           "airport": "MCO",
+           "terminal": "0"
+          },
+          "arrival": {
+           "date": "2026-11-10T15:44:00",
+           "airport": "FLL",
+           "terminal": "0"
+          },
+          "duration": 204,
+          "cabinClass": "Economy",
+          "layoverDuration": 8,
+          "flightInfo": {
+           "marketingFlightNumber": 3981,
+           "operatingFlightNumber": 3981,
+           "operatingAirlineCode": "9B",
+           "marketingAirlineCode": "9B"
+          },
+          "stopAirport": [
+           {
+            "airport": "WPT",
+            "arrivalDateTime": "2026-11-10T14:32:00",
+            "departureDateTime": "2026-11-10T14:34:00",
+            "duration": 2
+           },
+           {
+            "airport": "RRN",
+            "arrivalDateTime": "2026-11-10T14:56:00",
+            "departureDateTime": "2026-11-10T14:58:00",
+            "duration": 2
+           },
+           {
+            "airport": "FBT",
+            "arrivalDateTime": "2026-11-10T15:14:00",
+            "departureDateTime": "2026-11-10T15:18:00",
+            "duration": 4
+           }
+          ],
+          "aircraft": "TRN",
+          "distance": 185,
+          "arrivalDateOffset": 0,
+          "awardFare": false,
+          "aircraftLeaseText": " BRIGHTLINE TRAINS"
+         }
+        ],
+        "arrivalDateOffset": 0,
+        "awardBooking": false,
+        "isQuickest": false
+       }
+      ],
+      "offers": [
+       {
+        "brand": {
+         "brandId": "A1"
+        },
+        "cabinClass": "Economy",
+        "soldOut": false,
+        "seatsRemaining": {
+         "count": 4,
+         "lowAvailability": false
+        },
+        "price": [
+         {
+          "amount": 233.4,
+          "currency": "USD"
+         }
+        ],
+        "offerSegmentInfo": [
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "P",
+          "fareBasis": "PI2QBVY5",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/13/originAndDestination/0/flightSegments/0"
+           }
+          }
+         },
+         {
+          "cabinClass": "Economy",
+          "bookingClass": "Y",
+          "fareBasis": "YBRIGHT",
+          "ref": {
+           "flightSegment": {
+            "$ref": "#/data/searchResults/0/productOffers/13/originAndDestination/0/flightSegments/1"
+           }
+          }
+         }
+        ],
+        "selectedOfferInfo": []
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

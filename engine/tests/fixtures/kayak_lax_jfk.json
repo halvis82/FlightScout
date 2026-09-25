@@ -1,0 +1,309 @@
+{
+"status": "complete",
+"searchId": "redacted",
+"results": [
+{
+"resultId": "56737f250847e060a16dfdecf1d6e60b",
+"type": "core",
+"legs": [
+{
+"id": "LAXJFK1793995200000B61881794034800000B69172",
+"segments": [
+{
+"id": "1793995200000B618815300000"
+},
+{
+"id": "1794034800000B691702090330"
+}
+]
+}
+],
+"hasHackerFares": false,
+"bookingOptions": [
+{
+"providerCode": "SUPERAIR",
+"fees": {
+"totalPrice": {
+"price": 181,
+"currency": "USD",
+"localizedPrice": "$181"
+}
+},
+"splitBookingOptions": [],
+"bookingUrl": {
+"url": "/book/flight?code=redacted",
+"urlType": "relative"
+}
+},
+{
+"providerCode": "B6",
+"fees": {
+"totalPrice": {
+"price": 184,
+"currency": "USD",
+"localizedPrice": "$184"
+}
+},
+"splitBookingOptions": [],
+"bookingUrl": {
+"url": "/book/flight?code=redacted",
+"urlType": "relative"
+}
+},
+{
+"providerCode": "B6",
+"fees": {
+"totalPrice": {
+"price": 210,
+"currency": "USD",
+"localizedPrice": "$210"
+}
+},
+"splitBookingOptions": [],
+"bookingUrl": {
+"url": "/book/flight?code=redacted",
+"urlType": "relative"
+}
+},
+{
+"providerCode": "B6",
+"fees": {
+"totalPrice": {
+"price": 256,
+"currency": "USD",
+"localizedPrice": "$256"
+}
+},
+"splitBookingOptions": [],
+"bookingUrl": {
+"url": "/book/flight?code=redacted",
+"urlType": "relative"
+}
+}
+]
+},
+{
+"resultId": "be8e96c9af409c46d931297209748c3f",
+"type": "core",
+"legs": [
+{
+"id": "LAXJFK1793948400000AS6681793959200000AS182",
+"segments": [
+{
+"id": "1793948400000AS66802030431"
+},
+{
+"id": "1793959200000AS1805501419"
+}
+]
+}
+],
+"hasHackerFares": false,
+"bookingOptions": [
+{
+"providerCode": "EXPEDIAAIR",
+"fees": {
+"totalPrice": {
+"price": 225,
+"currency": "USD",
+"localizedPrice": "$225"
+}
+},
+"splitBookingOptions": [],
+"bookingUrl": {
+"url": "/book/flight?code=redacted",
+"urlType": "relative"
+}
+},
+{
+"providerCode": "ASWHISKY",
+"fees": {
+"totalPrice": {
+"price": 225,
+"currency": "USD",
+"localizedPrice": "$225"
+}
+},
+"splitBookingOptions": [],
+"bookingUrl": {
+"url": "/book/flight?code=redacted",
+"urlType": "relative"
+}
+},
+{
+"providerCode": "AS",
+"fees": {
+"totalPrice": {
+"price": 225,
+"currency": "USD",
+"localizedPrice": "$225"
+}
+},
+"splitBookingOptions": [],
+"bookingUrl": {
+"url": "/book/flight?code=redacted",
+"urlType": "relative"
+}
+},
+{
+"providerCode": "ORBITZAIRWHISKY",
+"fees": {
+"totalPrice": {
+"price": 234,
+"currency": "USD",
+"localizedPrice": "$234"
+}
+},
+"splitBookingOptions": [],
+"bookingUrl": {
+"url": "/book/flight?code=redacted",
+"urlType": "relative"
+}
+}
+]
+},
+{
+"resultId": "ad",
+"type": "inlineAd"
+}
+],
+"legs": {
+"LAXJFK1793995200000B61881794034800000B69172": {
+"duration": 540,
+"segments": [
+{
+"id": "1793995200000B618815300000",
+"isArrivalDateMismatch": true,
+"layover": {
+"duration": 129,
+"isLong": false,
+"isShort": false
+}
+},
+{
+"id": "1794034800000B691702090330"
+}
+],
+"arrival": "2026-11-07T08:30:00",
+"departure": "2026-11-06T20:30:00"
+},
+"LAXJFK1793948400000AS6681793959200000AS182": {
+"duration": 556,
+"segments": [
+{
+"id": "1793948400000AS66802030431",
+"layover": {
+"duration": 79,
+"isLong": false,
+"isShort": false
+}
+},
+{
+"id": "1793959200000AS1805501419"
+}
+],
+"arrival": "2026-11-06T19:19:00",
+"departure": "2026-11-06T07:03:00"
+}
+},
+"segments": {
+"1793995200000B618815300000": {
+"airline": "B6",
+"flightNumber": "188",
+"origin": "LAX",
+"destination": "BOS",
+"arrival": "2026-11-07T05:00:00",
+"departure": "2026-11-06T20:30:00",
+"equipmentTypeName": "Airbus A318/A319/A320/A321",
+"duration": 330,
+"isOvernight": true
+},
+"1794034800000B691702090330": {
+"airline": "B6",
+"flightNumber": "917",
+"origin": "BOS",
+"destination": "JFK",
+"arrival": "2026-11-07T08:30:00",
+"departure": "2026-11-07T07:09:00",
+"equipmentTypeName": "Airbus A220-300",
+"duration": 81
+},
+"1793948400000AS66802030431": {
+"airline": "AS",
+"flightNumber": "668",
+"operationalDisplay": "Alaska",
+"origin": "LAX",
+"destination": "PDX",
+"arrival": "2026-11-06T09:31:00",
+"departure": "2026-11-06T07:03:00",
+"equipmentTypeName": "Boeing 737 MAX 9",
+"duration": 148
+},
+"1793959200000AS1805501419": {
+"airline": "AS",
+"flightNumber": "18",
+"operationalDisplay": "Alaska",
+"origin": "PDX",
+"destination": "JFK",
+"arrival": "2026-11-06T19:19:00",
+"departure": "2026-11-06T10:50:00",
+"equipmentTypeName": "Boeing 737 MAX 9",
+"duration": 329
+}
+},
+"providers": {
+"SUPERAIR": {
+"displayName": "Super.com",
+"providerQualityScore": {
+"badgeType": "PQS_VALUE"
+}
+},
+"B6": {
+"displayName": "JetBlue",
+"providerQualityScore": {
+"badgeType": "AIRLINE"
+}
+},
+"EXPEDIAAIR": {
+"displayName": "Expedia",
+"providerQualityScore": {
+"badgeType": "PQS_VALUE"
+}
+},
+"ASWHISKY": {
+"displayName": "Alaska Airlines",
+"providerQualityScore": {
+"badgeType": "AIRLINE"
+}
+},
+"AS": {
+"displayName": "Alaska Airlines",
+"providerQualityScore": {
+"badgeType": "AIRLINE"
+}
+},
+"ORBITZAIRWHISKY": {
+"displayName": "Orbitz",
+"providerQualityScore": {
+"badgeType": "PQS_VALUE"
+}
+}
+},
+"airlines": {
+"AA": {
+"name": "American Airlines"
+},
+"AS": {
+"name": "Alaska Airlines"
+},
+"MULT": {
+"name": "Multiple airlines"
+},
+"B6": {
+"name": "JetBlue"
+},
+"DL": {
+"name": "Delta"
+}
+}
+}

@@ -1,0 +1,457 @@
+{
+"meta": {
+"status": "COMPLETED_WITH_TIMEOUT",
+"resultSet": {
+"currency": "USD",
+"returnedCount": 141
+}
+},
+"data": {
+"itineraries": [
+{
+"itineraryId": "e804eb6aXY-6396488d_XY_ONE",
+"vendor": "ONE",
+"price": {
+"itineraryPrice": {
+"currency": "USD",
+"basePrice": 27.21,
+"tax": 39.21,
+"total": 66.41,
+"totalBeforeAdjustments": 66.41
+},
+"tripPrice": {
+"currency": "USD",
+"basePrice": 27.21,
+"tax": 39.21,
+"total": 66.41,
+"totalBeforeAdjustments": 66.41
+}
+},
+"validatingCarrier": "XY",
+"attributes": {
+"hasFareFamilies": true,
+"hasFareRules": true,
+"hasFareRuleFees": false,
+"hasFrequentFlyerOptions": true,
+"hasHajjAndUmrah": false,
+"hasAirportChange": false,
+"containsDifferentCabin": false
+},
+"paymentOptions": {},
+"legs": [
+{
+"path": [
+"DXB",
+"RUH"
+],
+"departureAirport": "DXB",
+"arrivalAirport": "RUH",
+"departureDateTime": "2026-11-06T21:35:00",
+"arrivalDateTime": "2026-11-06T22:45:00",
+"durationMin": 130,
+"stops": 0,
+"connections": [],
+"flightCodes": [
+"XY-210"
+],
+"segmentRefs": [
+{
+"segmentId": "fdb58b6c3cc8be9",
+"fareId": "a20d9b1d"
+}
+],
+"airlines": [
+"XY"
+],
+"isNearByDepartureAirport": false,
+"isNearByDestinationAirport": false
+}
+]
+},
+{
+"itineraryId": "4f6146fdF3-c5b34517_F3_ONE",
+"vendor": "ONE",
+"price": {
+"itineraryPrice": {
+"currency": "USD",
+"basePrice": 74.4,
+"tax": 0.0,
+"total": 74.4,
+"totalBeforeAdjustments": 74.4
+},
+"tripPrice": {
+"currency": "USD",
+"basePrice": 74.4,
+"tax": 0.0,
+"total": 74.4,
+"totalBeforeAdjustments": 74.4
+}
+},
+"validatingCarrier": "F3",
+"attributes": {
+"hasFareFamilies": true,
+"hasFareRules": true,
+"hasFareRuleFees": false,
+"hasFrequentFlyerOptions": false,
+"hasHajjAndUmrah": false,
+"hasAirportChange": false,
+"containsDifferentCabin": false
+},
+"paymentOptions": {},
+"legs": [
+{
+"path": [
+"DXB",
+"RUH"
+],
+"departureAirport": "DXB",
+"arrivalAirport": "RUH",
+"departureDateTime": "2026-11-06T21:30:00",
+"arrivalDateTime": "2026-11-06T22:25:00",
+"durationMin": 115,
+"stops": 0,
+"connections": [],
+"flightCodes": [
+"F3-512"
+],
+"segmentRefs": [
+{
+"segmentId": "10d5c012",
+"fareId": "91ddfcdf"
+}
+],
+"airlines": [
+"F3"
+],
+"isNearByDepartureAirport": false,
+"isNearByDestinationAirport": false
+}
+]
+},
+{
+"itineraryId": "91dcd823G9-6969a03d_G9_ONE",
+"vendor": "ONE",
+"price": {
+"itineraryPrice": {
+"currency": "USD",
+"basePrice": 81.4,
+"tax": 0.0,
+"total": 81.4,
+"totalBeforeAdjustments": 81.4
+},
+"tripPrice": {
+"currency": "USD",
+"basePrice": 81.4,
+"tax": 0.0,
+"total": 81.4,
+"totalBeforeAdjustments": 81.4
+}
+},
+"validatingCarrier": "G9",
+"attributes": {
+"hasFareFamilies": true,
+"hasFareRules": true,
+"hasFareRuleFees": false,
+"hasFrequentFlyerOptions": true,
+"hasHajjAndUmrah": false,
+"hasAirportChange": false,
+"containsDifferentCabin": false
+},
+"paymentOptions": {},
+"legs": [
+{
+"path": [
+"SHJ",
+"RUH"
+],
+"departureAirport": "SHJ",
+"arrivalAirport": "RUH",
+"departureDateTime": "2026-11-06T07:30:00",
+"arrivalDateTime": "2026-11-06T08:35:00",
+"durationMin": 125,
+"stops": 0,
+"connections": [],
+"flightCodes": [
+"G9-151"
+],
+"segmentRefs": [
+{
+"segmentId": "85ad6b19",
+"fareId": "b2bbaa52"
+}
+],
+"airlines": [
+"G9"
+],
+"isNearByDepartureAirport": true,
+"isNearByDestinationAirport": false
+}
+]
+},
+{
+"itineraryId": "f5f2727bJ9-b35112e9_J9_ONE",
+"vendor": "ONE",
+"price": {
+"itineraryPrice": {
+"currency": "USD",
+"basePrice": 47.35,
+"tax": 54.58,
+"total": 101.93,
+"totalBeforeAdjustments": 101.93
+},
+"tripPrice": {
+"currency": "USD",
+"basePrice": 47.35,
+"tax": 54.58,
+"total": 101.93,
+"totalBeforeAdjustments": 101.93
+}
+},
+"validatingCarrier": "J9",
+"attributes": {
+"hasFareFamilies": true,
+"hasFareRules": true,
+"hasFareRuleFees": false,
+"hasFrequentFlyerOptions": true,
+"hasHajjAndUmrah": false,
+"hasAirportChange": false,
+"containsDifferentCabin": false
+},
+"paymentOptions": {},
+"legs": [
+{
+"path": [
+"DXB",
+"KWI",
+"RUH"
+],
+"departureAirport": "DXB",
+"arrivalAirport": "RUH",
+"departureDateTime": "2026-11-06T10:55:00",
+"arrivalDateTime": "2026-11-06T14:00:00",
+"durationMin": 245,
+"stops": 1,
+"connections": [
+{
+"type": "STANDARD",
+"segmentId": "989496ce",
+"duration": {
+"text": "00h 50m",
+"value": 50,
+"unit": "MINUTE"
+},
+"airports": {
+"at": {
+"code": "KWI",
+"terminal": "5"
+}
+}
+}
+],
+"totalConnectionTime": {
+"text": "50m",
+"value": 50,
+"unit": "min"
+},
+"flightCodes": [
+"J9-122",
+"J9-221"
+],
+"segmentRefs": [
+{
+"segmentId": "989496ce",
+"fareId": "5300167"
+},
+{
+"segmentId": "cd3ef9aa",
+"fareId": "5300167"
+}
+],
+"airlines": [
+"J9"
+],
+"isNearByDepartureAirport": false,
+"isNearByDestinationAirport": false
+}
+]
+}
+],
+"segments": [
+{
+"segmentId": "989496ce",
+"departureAirport": {
+"code": "DXB",
+"terminal": "1"
+},
+"arrivalAirport": {
+"code": "KWI",
+"terminal": "5"
+},
+"departureDateTime": "2026-11-06T10:55:00",
+"arrivalDateTime": "2026-11-06T11:55:00",
+"marketingCarrier": "J9",
+"operatingCarrier": "J9",
+"flightCode": "J9-122",
+"aircraftType": {},
+"durationMin": 120
+},
+{
+"segmentId": "fdb58b6c3cc8be9",
+"departureAirport": {
+"code": "DXB",
+"terminal": "1"
+},
+"arrivalAirport": {
+"code": "RUH",
+"terminal": "1"
+},
+"departureDateTime": "2026-11-06T21:35:00",
+"arrivalDateTime": "2026-11-06T22:45:00",
+"marketingCarrier": "XY",
+"operatingCarrier": "XY",
+"flightCode": "XY-210",
+"aircraftType": {},
+"durationMin": 130
+},
+{
+"segmentId": "10d5c012",
+"departureAirport": {
+"code": "DXB",
+"terminal": "1"
+},
+"arrivalAirport": {
+"code": "RUH",
+"terminal": "1"
+},
+"departureDateTime": "2026-11-06T21:30:00",
+"arrivalDateTime": "2026-11-06T22:25:00",
+"marketingCarrier": "F3",
+"operatingCarrier": "F3",
+"flightCode": "F3-512",
+"aircraftType": {},
+"durationMin": 115
+},
+{
+"segmentId": "cd3ef9aa",
+"departureAirport": {
+"code": "KWI",
+"terminal": "5"
+},
+"arrivalAirport": {
+"code": "RUH",
+"terminal": "5"
+},
+"departureDateTime": "2026-11-06T12:45:00",
+"arrivalDateTime": "2026-11-06T14:00:00",
+"marketingCarrier": "J9",
+"operatingCarrier": "J9",
+"flightCode": "J9-221",
+"aircraftType": {},
+"durationMin": 75
+},
+{
+"segmentId": "85ad6b19",
+"departureAirport": {
+"code": "SHJ",
+"terminal": ""
+},
+"arrivalAirport": {
+"code": "RUH",
+"terminal": "Terminal 5"
+},
+"departureDateTime": "2026-11-06T07:30:00",
+"arrivalDateTime": "2026-11-06T08:35:00",
+"marketingCarrier": "G9",
+"operatingCarrier": "G9",
+"flightCode": "G9-151",
+"aircraftType": {
+"code": "A32B-Y215",
+"name": "A32B-Y215"
+},
+"durationMin": 125
+}
+],
+"fares": [
+{
+"fareId": "a20d9b1d",
+"cabin": {
+"code": "ECONOMY",
+"text": "Economy"
+},
+"rules": {
+"refundable": false
+},
+"seatsRemaining": 9,
+"baggageOptionsAvailable": true,
+"baggage": [
+{
+"baggageType": "CABIN_BAGGAGE",
+"unit": "KG",
+"value": 7,
+"pieceCount": 1
+}
+]
+},
+{
+"fareId": "91ddfcdf",
+"cabin": {
+"code": "ECONOMY",
+"text": "Economy"
+},
+"rules": {
+"refundable": false
+},
+"seatsRemaining": 8,
+"baggageOptionsAvailable": true,
+"baggage": [
+{
+"baggageType": "CABIN_BAGGAGE",
+"unit": "KG",
+"value": 7,
+"pieceCount": 1
+}
+]
+},
+{
+"fareId": "5300167",
+"cabin": {
+"code": "ECONOMY",
+"text": "Economy"
+},
+"rules": {
+"refundable": false
+},
+"seatsRemaining": 0,
+"baggageOptionsAvailable": false,
+"baggage": [
+{
+"baggageType": "CABIN_BAGGAGE",
+"unit": "KG",
+"value": 7,
+"pieceCount": 1
+}
+]
+},
+{
+"fareId": "b2bbaa52",
+"cabin": {
+"code": "ECONOMY",
+"text": "Economy"
+},
+"rules": {
+"refundable": false
+},
+"seatsRemaining": 9,
+"baggageOptionsAvailable": true,
+"baggage": [
+{
+"baggageType": "CABIN_BAGGAGE",
+"unit": "KG",
+"value": 7,
+"pieceCount": 1
+}
+]
+}
+]
+}
+}

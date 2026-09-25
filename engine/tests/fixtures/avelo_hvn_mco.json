@@ -1,0 +1,334 @@
+{
+ "FlightSegmentItineraries": {
+  "Items": [
+   {
+    "FareProducts": {
+     "Items": [
+      {
+       "Description": "Standard",
+       "Prices": {
+        "Items": [
+         {
+          "BaseAmount": {
+           "Value": 98
+          },
+          "Charges": {
+           "Items": [
+            {
+             "Value": 5.6,
+             "Code": "AY"
+            },
+            {
+             "Value": 7.35,
+             "Code": "US"
+            },
+            {
+             "Value": 4.5,
+             "Code": "XF"
+            },
+            {
+             "Value": 20,
+             "Code": "YR"
+            },
+            {
+             "Value": 5.3,
+             "Code": "ZP"
+            }
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "Description": "Subscription",
+       "Prices": {
+        "Items": [
+         {
+          "BaseAmount": {
+           "Value": 49.0
+          },
+          "Charges": {
+           "Items": [
+            {
+             "Value": 5.6,
+             "Code": "AY"
+            },
+            {
+             "Value": 3.68,
+             "Code": "US"
+            },
+            {
+             "Value": 4.5,
+             "Code": "XF"
+            },
+            {
+             "Value": 16,
+             "Code": "YR"
+            },
+            {
+             "Value": 5.3,
+             "Code": "ZP"
+            }
+           ]
+          }
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "Flights": {
+     "Items": [
+      {
+       "AirlineMarketing": {
+        "Code": "XP"
+       },
+       "FlightNumber": "717",
+       "ScheduledDepart": {
+        "Date": "2026-11-10",
+        "GMTDate": "2026-11-10",
+        "GMTTime": "11:30 AM",
+        "Time": "6:30 AM"
+       },
+       "ScheduledArrive": {
+        "Date": "2026-11-10",
+        "GMTDate": "2026-11-10",
+        "GMTTime": "2:20 PM",
+        "Time": "9:20 AM"
+       },
+       "LocationDepart": {
+        "Code": "HVN"
+       },
+       "LocationArrive": {
+        "Code": "MCO"
+       },
+       "Equipment": {
+        "Description": "Boeing 737-800 "
+       },
+       "ClassOfService": {
+        "Count": 10
+       }
+      }
+     ]
+    }
+   },
+   {
+    "FareProducts": {
+     "Items": [
+      {
+       "Description": "Standard",
+       "Prices": {
+        "Items": [
+         {
+          "BaseAmount": {
+           "Value": 175.06
+          },
+          "Charges": {
+           "Items": [
+            {
+             "Value": 5.6,
+             "Code": "AY"
+            },
+            {
+             "Value": 13.13,
+             "Code": "US"
+            },
+            {
+             "Value": 4.5,
+             "Code": "XF"
+            },
+            {
+             "Value": 20,
+             "Code": "YR"
+            },
+            {
+             "Value": 5.3,
+             "Code": "ZP"
+            }
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "Description": "Subscription",
+       "Prices": {
+        "Items": [
+         {
+          "BaseAmount": {
+           "Value": 122.54
+          },
+          "Charges": {
+           "Items": [
+            {
+             "Value": 5.6,
+             "Code": "AY"
+            },
+            {
+             "Value": 9.19,
+             "Code": "US"
+            },
+            {
+             "Value": 4.5,
+             "Code": "XF"
+            },
+            {
+             "Value": 16,
+             "Code": "YR"
+            },
+            {
+             "Value": 5.3,
+             "Code": "ZP"
+            }
+           ]
+          }
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "Flights": {
+     "Items": [
+      {
+       "AirlineMarketing": {
+        "Code": "XP"
+       },
+       "FlightNumber": "714",
+       "ScheduledDepart": {
+        "Date": "2026-11-15",
+        "GMTDate": "2026-11-15",
+        "GMTTime": "5:55 PM",
+        "Time": "12:55 PM"
+       },
+       "ScheduledArrive": {
+        "Date": "2026-11-15",
+        "GMTDate": "2026-11-15",
+        "GMTTime": "8:39 PM",
+        "Time": "3:39 PM"
+       },
+       "LocationDepart": {
+        "Code": "MCO"
+       },
+       "LocationArrive": {
+        "Code": "HVN"
+       },
+       "Equipment": {
+        "Description": "Boeing 737-800 "
+       },
+       "ClassOfService": {
+        "Count": 5
+       }
+      }
+     ]
+    }
+   },
+   {
+    "FareProducts": {
+     "Items": [
+      {
+       "Description": "Standard",
+       "Prices": {
+        "Items": [
+         {
+          "BaseAmount": {
+           "Value": 97.04
+          },
+          "Charges": {
+           "Items": [
+            {
+             "Value": 5.6,
+             "Code": "AY"
+            },
+            {
+             "Value": 7.28,
+             "Code": "US"
+            },
+            {
+             "Value": 20,
+             "Code": "YR"
+            },
+            {
+             "Value": 5.3,
+             "Code": "ZP"
+            }
+           ]
+          }
+         }
+        ]
+       }
+      },
+      {
+       "Description": "Subscription",
+       "Prices": {
+        "Items": [
+         {
+          "BaseAmount": {
+           "Value": 67.93
+          },
+          "Charges": {
+           "Items": [
+            {
+             "Value": 5.6,
+             "Code": "AY"
+            },
+            {
+             "Value": 5.09,
+             "Code": "US"
+            },
+            {
+             "Value": 16,
+             "Code": "YR"
+            },
+            {
+             "Value": 5.3,
+             "Code": "ZP"
+            }
+           ]
+          }
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "Flights": {
+     "Items": [
+      {
+       "AirlineMarketing": {
+        "Code": "XP"
+       },
+       "FlightNumber": "232",
+       "ScheduledDepart": {
+        "Date": "2026-11-15",
+        "GMTDate": "2026-11-16",
+        "GMTTime": "1:07 AM",
+        "Time": "8:07 PM"
+       },
+       "ScheduledArrive": {
+        "Date": "2026-11-15",
+        "GMTDate": "2026-11-16",
+        "GMTTime": "3:49 AM",
+        "Time": "10:49 PM"
+       },
+       "LocationDepart": {
+        "Code": "LAL"
+       },
+       "LocationArrive": {
+        "Code": "HVN"
+       },
+       "Equipment": {
+        "Description": "Boeing 737-800 "
+       },
+       "ClassOfService": {
+        "Count": 8
+       }
+      }
+     ]
+    }
+   }
+  ]
+ }
+}
