@@ -92,7 +92,7 @@ def _hook_page_fetch() -> None:
 
 
 SLICE_GRACE = 2.5  # seconds to wait for coverage slices after the base page
-PAGE_GRACE = 4.0  # seconds to wait for the real browser Cheapest list after the search
+PAGE_GRACE = 8.0  # seconds to wait for the real browser Cheapest list after the search (covers a cold Chrome start; warm it is ready with the search)
 
 
 class _DiverseSearch(SearchFlights):

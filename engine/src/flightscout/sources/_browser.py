@@ -3,13 +3,13 @@ HTTP clients (Cloudflare, Akamai, ...).
 
 We start the installed Google Chrome ourselves (no Playwright launch flags,
 so no ``--enable-automation`` or ``navigator.webdriver``) and attach over CDP.
-Playwright's sync API is bound to the thread that started it, so every browser
-job runs on a dedicated worker thread: one for the headless Chrome and one for
-a headful Chrome (some Akamai setups only let a visible browser through; that
-window is moved off screen and minimized). Each job key (one per airline) gets
-its own page (tab), reused across searches, so cookies and bot
-manager tokens earned on the first search carry over to the next (all pages
-share the profile's default context: Cloudflare is stricter with new ones).
+Playwright's sync API is bound to the thread that started it, so browser jobs
+run on worker threads, up to TABS at once, each with its own connection to the
+same Chrome (headless; a headful one only with FLIGHTSCOUT_HEADFUL=1, moved off
+screen and minimized). Each job key (one per airline) gets its own page (tab),
+reused across searches, so cookies and bot manager tokens earned on the first
+search carry over to the next (all pages share the profile's default context:
+Cloudflare is stricter with new ones).
 
 Chrome is started lazily on the first job and closed after a few idle
 minutes, or at exit."""
@@ -103,19 +103,17 @@ def _reap_orphans() -> None:
                 pass
 
 
-class _Chrome:
-    """A Chrome process plus the Playwright connection, owned by one thread."""
+class _Proc:
+    """The shared Chrome process (one headless, one headful), started lazily."""
 
     def __init__(self, headful: bool):
-        from playwright.sync_api import sync_playwright
-
         self.headful = headful
-        s = socket.socket()
-        s.bind(("127.0.0.1", 0))
-        port = s.getsockname()[1]
-        s.close()
+        sock = socket.socket()
+        sock.bind(("127.0.0.1", 0))
+        self.port = sock.getsockname()[1]
+        sock.close()
         self.profile = tempfile.mkdtemp(prefix=_PREFIX)
-        args = [chrome_path(), f"--remote-debugging-port={port}", f"--user-data-dir={self.profile}",
+        args = [chrome_path(), f"--remote-debugging-port={self.port}", f"--user-data-dir={self.profile}",
                 "--no-first-run", "--no-default-browser-check", "--window-size=1440,900",
                 "--disable-background-timer-throttling", "--disable-renderer-backgrounding",
                 "--disable-backgrounding-occluded-windows", "--lang=en-US"]
@@ -126,24 +124,44 @@ class _Chrome:
         _reap_orphans()
         self.proc = subprocess.Popen(args + ["about:blank"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         _procs[self.proc] = self.profile
+        self.users = 0  # worker connections (or reservations) on this process
+
+    def alive(self) -> bool:
+        return self.proc.poll() is None
+
+    def close(self) -> None:
+        _kill(self.proc, self.profile)
+
+
+class _Conn:
+    """One worker thread's Playwright connection to the shared Chrome. Each
+    job key (one per airline or site) gets its own page (tab) per connection,
+    reused across searches; all pages share the profile's default context, so
+    cookies and bot manager tokens carry over."""
+
+    def __init__(self, proc: _Proc):
+        from playwright.sync_api import sync_playwright
+
+        self.headful = proc.headful
         self.pw = sync_playwright().start()
         err = None
         for _ in range(100):
             try:
-                self.browser = self.pw.chromium.connect_over_cdp(f"http://127.0.0.1:{port}")
+                self.browser = self.pw.chromium.connect_over_cdp(f"http://127.0.0.1:{proc.port}")
                 break
             except Exception as e:  # Chrome not listening yet
                 err = e
                 time.sleep(0.1)
         else:
-            self.close()
+            self.pw.stop()
             raise RuntimeError(f"could not attach to Chrome: {err}")
         self.pages: dict[str, Any] = {}
-        first = self.browser.contexts[0].pages[0] if self.browser.contexts[0].pages else None
+        ctx = self.browser.contexts[0]
+        first = ctx.pages[0] if ctx.pages else None
         self.ua = None
         if first:
             self.ua = first.evaluate("navigator.userAgent").replace("HeadlessChrome", "Chrome")
-            if headful:
+            if self.headful:
                 self._minimize(first)
 
     def _minimize(self, page) -> None:
@@ -181,65 +199,122 @@ class _Chrome:
         return pg
 
     def close(self) -> None:
-        _kill(self.proc, self.profile)
-        try:  # the CDP connection is gone with the process, so this returns at once
+        try:
             self.pw.stop()
         except Exception:
             pass
 
 
-class _Worker(threading.Thread):
+# Several jobs (Google's list, browser airlines, booking sites) run at the
+# same time as tabs of the one Chrome process: one worker thread each, since
+# Playwright's sync API is bound to its thread. FLIGHTSCOUT_BROWSER_TABS caps it.
+TABS = max(1, int(os.environ.get("FLIGHTSCOUT_BROWSER_TABS", 4)))
+
+
+class _Pool:
     def __init__(self, headful: bool):
-        super().__init__(daemon=True, name=f"flightscout-chrome-{'headful' if headful else 'headless'}")
         self.headful = headful
         self.jobs: queue.Queue = queue.Queue()
-        self.chrome: _Chrome | None = None
+        self.lock = threading.Lock()
+        self.proc: _Proc | None = None
+        self.workers: list[_Worker] = []
+
+    def acquire(self) -> _Proc:
+        """The live Chrome process, with one user reserved for the caller (in
+        the same lock, so an idle worker can't stop it in between)."""
+        with self.lock:
+            if self.proc is None or not self.proc.alive():
+                self.proc = _Proc(self.headful)
+            self.proc.users += 1
+            return self.proc
+
+    def release(self, proc: _Proc) -> None:
+        """A worker dropped its connection: stop that Chrome when nobody uses it."""
+        with self.lock:
+            proc.users -= 1
+            if proc.users <= 0:
+                proc.close()
+                if self.proc is proc:
+                    self.proc = None
+
+    def submit(self, item) -> None:
+        with self.lock:
+            self.workers = [w for w in self.workers if w.is_alive()]
+            if len(self.workers) < TABS and (self.jobs.qsize() >= len(self.workers) - self.busy()):
+                w = _Worker(self, len(self.workers))
+                self.workers.append(w)
+                w.start()
+        self.jobs.put(item)
+
+    def busy(self) -> int:
+        return sum(1 for w in self.workers if w.busy)
+
+
+class _Worker(threading.Thread):
+    def __init__(self, pool: _Pool, n: int):
+        super().__init__(daemon=True, name=f"flightscout-chrome-{'headful' if pool.headful else 'headless'}-{n}")
+        self.pool = pool
+        self.conn: _Conn | None = None
+        self.proc: _Proc | None = None
+        self.busy = False
+
+    def _drop(self) -> None:
+        if self.conn is not None:
+            self.conn.close()
+            self.conn = None
+        if self.proc is not None:
+            self.pool.release(self.proc)
+            self.proc = None
 
     def run(self) -> None:
         while True:
             try:
-                item = self.jobs.get(timeout=IDLE_S)
+                item = self.pool.jobs.get(timeout=IDLE_S)
             except queue.Empty:
-                self._shutdown()  # idle: free the memory, restart on the next job
+                self._drop()  # idle: free the memory, reconnect on the next job
                 continue
             if item is None:
-                self._shutdown()
+                self._drop()
                 return
             fn, key, fut = item
             if not fut.set_running_or_notify_cancel():
                 continue
+            self.busy = True
             try:
-                if self.chrome is None:
-                    self.chrome = _Chrome(self.headful)
-                fut.set_result(fn(self.chrome.page(key)))
+                if self.conn is not None and (not self.proc.alive() or not self.conn.browser.is_connected()):
+                    self._drop()
+                if self.conn is None:
+                    self.proc = self.pool.acquire()
+                    try:
+                        self.conn = _Conn(self.proc)
+                    except BaseException:
+                        self._drop()
+                        raise
+                fut.set_result(fn(self.conn.page(key)))
             except BaseException as e:
                 fut.set_exception(e)
-                if self.chrome is not None and not self.chrome.browser.is_connected():
-                    self._shutdown()
-
-    def _shutdown(self) -> None:
-        if self.chrome is not None:
-            self.chrome.close()
-            self.chrome = None
+                if self.conn is not None and not self.conn.browser.is_connected():
+                    self._drop()
+            finally:
+                self.busy = False
 
 
-_workers: dict[bool, _Worker] = {}
+_pools: dict[bool, _Pool] = {}
 _lock = threading.Lock()
 
 
 def run(fn: Callable[[Any], Any], key: str, headful: bool = False, timeout: float = 120) -> Any:
-    """Run ``fn(page)`` on the browser thread with the persistent page for
-    ``key`` and return its result. Jobs on the same browser run one at a time."""
+    """Run ``fn(page)`` on a browser worker thread with a persistent page for
+    ``key`` and return its result. Up to TABS jobs run at the same time."""
     if not available(headful):
         raise RuntimeError("browser sources need Playwright and Google Chrome"
                            + (" and a display" if headful else ""))
     with _lock:
-        w = _workers.get(headful)
-        if w is None or not w.is_alive():
-            w = _workers[headful] = _Worker(headful)
-            w.start()
+        pool = _pools.get(headful)
+        if pool is None:
+            pool = _pools[headful] = _Pool(headful)
     fut: Future = Future()
-    w.jobs.put((fn, key, fut))
+    pool.submit((fn, key, fut))
     return fut.result(timeout=timeout)
 
 
@@ -300,11 +375,13 @@ def capture(page, go: Callable[[], Any], match: Callable[[str], bool], timeout: 
 
 
 def _stop_all() -> None:
-    for w in list(_workers.values()):
-        if w.is_alive():
-            w.jobs.put(None)
-    for w in list(_workers.values()):
-        w.join(timeout=5)
+    for pool in list(_pools.values()):
+        for w in pool.workers:
+            if w.is_alive():
+                pool.jobs.put(None)
+    for pool in list(_pools.values()):
+        for w in pool.workers:
+            w.join(timeout=5)
     for proc, profile in list(_procs.items()):  # a worker stuck in a job
         _kill(proc, profile)
 
