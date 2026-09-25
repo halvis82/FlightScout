@@ -112,7 +112,7 @@ function SearchPage() {
       lastRun.current = JSON.stringify([f0.from, f0.to, f0.depart, f0.ret, f0.tripType, f0.flex, f0.retFlex, f0.cabin, f0.adults, f0.stops, f0.nearby]);
       setErr(null);
       setStale(true); // keep showing the previous results, dimmed
-      setPending(5);
+      setPending(PARTS.length);
       setPlan(null);
       setBusy(true);
       setElapsed(0);

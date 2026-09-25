@@ -175,3 +175,12 @@ def test_disable_switch_and_blocked_source_pause(monkeypatch):
     assert not s._cooling("booking")
     s._cool.clear()
     assert _t.time()
+
+
+def test_booking_sites_split_fast_and_slow(monkeypatch):
+    from flightscout import search as s
+
+    monkeypatch.setattr(s._browser, "available", lambda headful=False: True)
+    fast, slow, both = s.expand_sources(["otas_fast"]), s.expand_sources(["otas_slow"]), s.expand_sources(["otas"])
+    assert set(fast) == s.OTAS_FAST and not set(fast) & set(slow)
+    assert set(fast) | set(slow) == set(both) and "ita" in slow and "tripcom" in slow

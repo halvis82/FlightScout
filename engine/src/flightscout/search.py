@@ -89,6 +89,7 @@ OTAS_BROWSER = {
     "opodo": opodo.search, "almosafer": almosafer.search, "traveloka": traveloka.search, "cleartrip": cleartrip.search,
     "ixigo": ixigo_browser.search,
 }
+OTAS_FAST = {"booking", "expedia", "orbitz", "travelocity", "skiplagged", "easemytrip", "gotogate", "mytrip"}
 SOURCES.update(OTAS)
 SOURCES.update(OTAS_BROWSER)
 OTA_WAIT = float(os.environ.get("FLIGHTSCOUT_OTA_WAIT", "45"))
@@ -149,8 +150,13 @@ def expand_sources(names: list[str]) -> list[str]:
         out += [s for s in AIRLINES if s not in out]
     if ("airlines" in names or set(names) & _DIRECT) and _browser.available():
         out += [s for s in BROWSER_SOURCES if s not in out]
-    if "otas" in names:
-        out += [s for s in OTAS if s not in out]
+    # "otas" = all booking sites; the website asks for them in two parts so the
+    # fast ones (answer in 1 to 15 s) show before the slow ones (ITA Matrix,
+    # the polling metasearch sites and the browser ones, 20 to 90 s).
+    if "otas" in names or "otas_fast" in names:
+        out += [s for s in OTAS if s in OTAS_FAST and s not in out]
+    if "otas" in names or "otas_slow" in names:
+        out += [s for s in OTAS if s not in OTAS_FAST and s not in out]
         if _browser.available():
             out += [s for s in OTAS_BROWSER if s not in out]
     off = _disabled()
