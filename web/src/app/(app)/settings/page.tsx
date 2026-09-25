@@ -109,8 +109,8 @@ function OwnIpSection() {
             <span className="text-muted">using the shared server</span>
           )}
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl border border-border p-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="min-w-0 rounded-xl border border-border p-3">
             <div className="flex items-center justify-between">
               <div className="font-medium">Browser extension</div>
               {ext ? <Badge tone="good">Installed {ext}</Badge> : <Badge>Recommended</Badge>}
@@ -130,7 +130,7 @@ function OwnIpSection() {
               <li>Reload this page. The header shows Your IP when it&apos;s working.</li>
             </ol>
           </div>
-          <div className="rounded-xl border border-border p-3">
+          <div className="min-w-0 rounded-xl border border-border p-3">
             <div className="flex items-center justify-between">
               <div className="font-medium">Local runner</div>
               {lr.active ? <Badge tone="good">Running {lr.version ?? ""}</Badge> : <Badge>For the CLI</Badge>}
