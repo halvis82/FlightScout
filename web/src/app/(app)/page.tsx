@@ -14,7 +14,7 @@ import { api } from "@/lib/client";
 import { extensionVersion } from "@/lib/extension";
 import { localRunnerActive } from "@/lib/local-runner";
 import { PARTS, PART_LABELS, searchPart, type PartState } from "@/lib/live-search";
-import { airport, expandCodes } from "@/lib/airports-client";
+import { airport, expandCodes, loadAirports, nearestAirport } from "@/lib/airports-client";
 import { RouteMap } from "@/components/route-map";
 import { addDays, dayDiff } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -72,7 +72,48 @@ function startOrigin(defaults: string[], places: { kind: string; codes: string[]
     /* ignore */
   }
   const home = places.find((p) => p.kind === "home");
-  return home ? home.codes.slice(0, 1) : [];
+  if (home) return home.codes.slice(0, 1);
+  // nothing chosen yet: the airport nearest to where the visitor is (by IP)
+  try {
+    const geo = typeof window !== "undefined" ? JSON.parse(localStorage.getItem(GEO_FROM) ?? "null") : null;
+    if (geo?.code && Date.now() - geo.at < 7 * 86400_000) return [geo.code];
+  } catch {
+    /* ignore */
+  }
+  return [];
+}
+
+const GEO_FROM = "fs.geoFrom";
+
+// Finds the nearest airport once (cached a week) for visitors with no default,
+// no last search and no home, so the first screen shows real suggestions.
+function useNearestAirport(needed: boolean, onFound: () => void) {
+  useEffect(() => {
+    if (!needed) return;
+    try {
+      const geo = JSON.parse(localStorage.getItem(GEO_FROM) ?? "null");
+      if (geo && Date.now() - geo.at < 7 * 86400_000) return;
+    } catch {
+      /* ignore */
+    }
+    let gone = false;
+    (async () => {
+      try {
+        const loc = (await (await fetch("/api/v1/geo", { cache: "no-store" })).json()) as { lat?: number; lon?: number };
+        if (loc.lat == null || loc.lon == null) return;
+        const a = nearestAirport(await loadAirports(), loc.lat, loc.lon);
+        if (!a || gone) return;
+        localStorage.setItem(GEO_FROM, JSON.stringify({ code: a.iata, at: Date.now() }));
+        onFound();
+      } catch {
+        /* no suggestion then */
+      }
+    })();
+    return () => {
+      gone = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needed]);
 }
 
 function SearchPage() {
@@ -84,7 +125,9 @@ function SearchPage() {
   const hasQuery = Boolean(params.get("from")) || fresh;
   const [edited, setForm] = useState<SearchForm | null>(() => (hasQuery ? null : loadSaved().form));
   // Until the user edits, the form comes from the URL (or their defaults).
+  const [, bump] = useState(0);
   const form = edited ?? (settings ? paramsToForm(params, defaultForm(currency, startOrigin(settings.defaultOrigins, places))) : null);
+  useNearestAirport(Boolean(settings && !edited && !hasQuery && form && !form.from.length), () => bump((x) => x + 1));
   const [result, setResult] = useState<SearchResult | null>(() => (hasQuery ? null : loadSaved().result));
   const [plan, setPlan] = useState<PlanResult | null>(() => (hasQuery ? null : loadSaved().plan));
   useEffect(() => {

@@ -146,3 +146,24 @@ export function airportWithCity(code: string) {
   const short = shortAirportName(a.name);
   return city && short !== city ? `${short} (${city})` : short;
 }
+
+// Nearest airport with real service to a point: a large one within 150 km
+// (so San Diego gives SAN, not a strip), else the nearest medium one.
+export function nearestAirport(rows: AirportRow[], lat: number, lon: number): AirportRow | null {
+  const rad = Math.PI / 180;
+  const km = (r: AirportRow) => {
+    const dLat = (r.lat - lat) * rad;
+    const dLon = (r.lon - lon) * rad;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat * rad) * Math.cos(r.lat * rad) * Math.sin(dLon / 2) ** 2;
+    return 12742 * Math.asin(Math.sqrt(a));
+  };
+  let bestL: [number, AirportRow] | null = null;
+  let bestAny: [number, AirportRow] | null = null;
+  for (const r of rows) {
+    const d = km(r);
+    if (r.size === "L" && (!bestL || d < bestL[0])) bestL = [d, r];
+    if (!bestAny || d < bestAny[0]) bestAny = [d, r];
+  }
+  if (bestL && bestL[0] <= 150) return bestL[1];
+  return bestAny?.[1] ?? null;
+}
