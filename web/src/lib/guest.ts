@@ -215,7 +215,9 @@ function watchFromInput(p: Record<string, unknown>, base?: Watch): Watch {
     name: String(pick("name", base?.name ?? "") || `${origins.join("/")} to ${destinations.join("/")}`).slice(0, 120),
     origins,
     destinations,
-    tripType: pick("trip_type", base?.tripType ?? "roundtrip") === "oneway" ? "oneway" : "roundtrip",
+    tripType: ((t) => (t === "oneway" || t === "multicity" ? t : "roundtrip"))(pick("trip_type", base?.tripType ?? "roundtrip")),
+    // multi city watches keep their legs (same as the server)
+    legs: pick<unknown>("legs", base?.legs ?? null) ?? undefined,
     departStart,
     departEnd,
     nightsMin: pick("nights_min", base?.nightsMin ?? null),
@@ -317,6 +319,12 @@ async function recordObservations(w: Watch, obs: ObservationInput[], serverFetch
 
 async function checkWatch(w: Watch, serverFetch: ServerFetch) {
   const s = guestSettings();
+  if (w.tripType === "multicity" && Array.isArray(w.legs) && w.legs.length) {
+    // the whole multi city trip, like the server's tracker does
+    const plan = await serverFetch<PlanResult>("/multicity", { body: { legs: w.legs, currency: w.currency, cabin: w.cabin, adults: w.adults } });
+    const out = await recordObservations(w, tripsToObservations(plan.trips.slice(0, 5), w.destinations), serverFetch);
+    return { ...out, trips: plan.trips.length, errors: plan.errors ?? {} };
+  }
   const q = watchToQuery(w);
   const res = await serverFetch<SearchResult>("/search", { body: { ...q, sellerRules: s.sellerRules } });
   let trips: Trip[] = res.trips;

@@ -1,4 +1,5 @@
 "use client";
+import { watchHref } from "@/lib/watch-slug";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
@@ -156,6 +157,7 @@ export function WatchlistPanel() {
             <WatchRowCard
               key={w.id}
               w={w}
+              all={data}
               checking={checking === w.id}
               onCheck={() => check(w.id)}
               onToggle={async () => {
@@ -171,13 +173,13 @@ export function WatchlistPanel() {
   );
 }
 
-function WatchRowCard({ w, onCheck, onToggle, checking }: { w: WatchRow; onCheck: () => void; onToggle: () => void; checking: boolean }) {
+function WatchRowCard({ w, all, onCheck, onToggle, checking }: { w: WatchRow; all?: WatchRow[]; onCheck: () => void; onToggle: () => void; checking: boolean }) {
   const { money } = useApp();
   const delta = w.bestPrice != null && w.prevPrice != null ? w.bestPrice - w.prevPrice : null;
   const pct = delta != null && w.prevPrice ? (delta / w.prevPrice) * 100 : null;
   return (
     <div className={cn("rounded-2xl border border-border bg-surface p-3 shadow-[var(--shadow)] transition-colors hover:border-border-strong", !w.active && "opacity-60")}>
-      <Link href={`/watches/${w.id}`} onClick={() => openPanel(null)} className="block">
+      <Link href={watchHref(w, all)} onClick={() => openPanel(null)} className="block">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             {w.tripType === "multicity" ? (

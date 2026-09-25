@@ -12,7 +12,7 @@ Runs on: server, extension (Google) or local runner.
 | `kiwi` | Kiwi.com through its public MCP endpoint (https://mcp.kiwi.com, keyless). Kiwi is the main source of self transfer (virtual interlining) fares, flexible date ranges and "anywhere" exploration. |
 | `kiwiweb` | Kiwi.com through the GraphQL backend its own website uses (api.skypicker.com/umbrella/v2/graphql, keyless, Chrome TLS impersonation). |
 
-## Airlines direct, plain HTTP (21)
+## Airlines direct, plain HTTP (25)
 
 Runs on: server or local runner.
 
@@ -39,8 +39,12 @@ Runs on: server or local runner.
 | `jazeera` | Jazeera Airways (J9) direct from jazeeraairways.com. Kuwait based low cost carrier (Gulf, Levant, Egypt, Turkey, Central and South Asia, a few European summer routes) that Kiwi covers only partly. |
 | `flysafair` | FlySafair (FA) direct from flysafair.co.za. South Africa's largest low cost carrier (domestic trunk routes plus a few regional ones). Kiwi and Google often show only part of its schedule or stale prices. |
 | `airnewzealand` | Air New Zealand (NZ) direct from airnewzealand.co.nz, New Zealand domestic flights only. |
+| `biman` | Biman Bangladesh Airlines (BG) direct from booking.biman-airlines.com. Bangladesh's flag carrier (Dhaka hub: Gulf, India, South East Asia, London, Manchester, Rome, Toronto, Tokyo), thinly covered by Kiwi and the OTAs. |
+| `flyarystan` | FlyArystan (FS) direct from its Hitit Crane booking engine. Kazakhstan's low cost carrier (Air Astana group): dense domestic network plus Central Asia, the Caucasus, Turkey, the Gulf and India. Kiwi and Google see only p... |
+| `starair` | Star Air (S5) direct from its Hitit Crane booking engine (book-sdg.crane.aero). Regional Indian airline (Embraer jets, UDAN routes from Bengaluru, Mumbai, Hyderabad, Ahmedabad, ...) that Kiwi and most OTAs don't sell. |
+| `allianceair` | Alliance Air (9I) direct from bookme.allianceair.in. India's state owned regional airline (ATR turboprops on 50 odd airports, many UDAN routes to small towns) that Kiwi and most OTAs don't sell. |
 
-## Airlines direct, headless Chrome (27)
+## Airlines direct, headless Chrome (28)
 
 Runs on: local runner only.
 
@@ -73,6 +77,7 @@ Runs on: local runner only.
 | `zipair` | ZIPAIR (ZG) direct from zipair.net through the shared real Chrome (see _browser.py). ZIPAIR sells only on its own site (no GDS), so Google and Kiwi often lack its fares, including its self sold connections via Narita. |
 | `jejuair` | Jeju Air (7C) direct from jejuair.net through the shared real Chrome (see _browser.py). Korea's biggest low cost carrier; Google Flights often shows it without a price and Kiwi only sells part of its network. |
 | `virginaustralia` | Virgin Australia (VA) direct from virginaustralia.com through the shared real Chrome (see _browser.py). The booking app (Sabre Digital Experience, book.virginaustralia.com/dx/VADX) sits behind Imperva, which answers plai... |
+| `fly91` | FLY91 (IC) direct from fly91.in through the shared headless Chrome (see _browser.py). Goa based regional airline (ATR 72s from Goa Mopa, Pune, Hyderabad, Bengaluru, Sindhudurg, Jalgaon, Agatti, ...) that Kiwi and most OT... |
 
 ## Booking sites, plain HTTP (11)
 

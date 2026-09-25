@@ -7,7 +7,19 @@ export type Cell = { depart: string; nights: number | null; value: number; url?:
 
 // Depart date (columns) by trip length (rows), colored green (cheapest) to
 // red like every other price in the app. Latest known price per cell.
-export function DateHeatmap({ cells, format }: { cells: Cell[]; format: (v: number) => string }) {
+// With onPick, clicking a cell selects it (e.g. to load that date's flights)
+// instead of opening its fare.
+export function DateHeatmap({
+  cells,
+  format,
+  onPick,
+  selected,
+}: {
+  cells: Cell[];
+  format: (v: number) => string;
+  onPick?: (c: Cell) => void;
+  selected?: { depart: string; nights: number | null } | null;
+}) {
   const [hover, setHover] = useState<Cell | null>(null);
   if (!cells.length) return <div className="py-8 text-center text-sm text-muted">No date level prices yet.</div>;
   const departs = [...new Set(cells.map((c) => c.depart))].sort();
@@ -42,7 +54,19 @@ export function DateHeatmap({ cells, format }: { cells: Cell[]; format: (v: numb
                   const c = map.get(`${d}|${n}`);
                   return (
                     <td key={d} className="p-0">
-                      {c ? (
+                      {c && onPick ? (
+                        <button
+                          type="button"
+                          onClick={() => onPick(c)}
+                          onMouseEnter={() => setHover(c)}
+                          onMouseLeave={() => setHover(null)}
+                          className={`grid h-7 w-full min-w-11 place-items-center rounded-[3px] px-1 text-[10px] font-medium tabular-nums text-[#0b0d10] ring-offset-1 hover:ring-2 hover:ring-fg ${selected && selected.depart === c.depart && (selected.nights ?? -1) === (c.nights ?? -1) ? "ring-2 ring-fg" : ""}`}
+                          style={{ background: scale.solid(c.value) }}
+                          aria-label={`Show flights for ${formatDate(d)} ${n === -1 ? "" : n + " nights"} ${format(c.value)}`}
+                        >
+                          {short(c.value)}
+                        </button>
+                      ) : c ? (
                         <a
                           href={c.url ?? undefined}
                           target="_blank"

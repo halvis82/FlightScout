@@ -1,4 +1,5 @@
 "use client";
+import { watchHref } from "@/lib/watch-slug";
 import Link from "next/link";
 import useSWR from "swr";
 import { ArrowDownRight, ArrowUpRight, Pause, Play, Plus, RefreshCw } from "lucide-react";
@@ -82,7 +83,8 @@ export default function WatchesPage() {
       )}
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {data?.map((w) => (
-          <WatchCard key={w.id} w={w} checking={checking === w.id} onCheck={() => check(w.id)} onToggle={async () => {
+          <WatchCard key={w.id} w={w}
+            all={data} checking={checking === w.id} onCheck={() => check(w.id)} onToggle={async () => {
             await api(`/watches/${w.id}`, { method: "PATCH", body: { active: !w.active } });
             mutate();
           }} />
@@ -93,14 +95,14 @@ export default function WatchesPage() {
   );
 }
 
-function WatchCard({ w, onCheck, onToggle, checking }: { w: WatchRow; onCheck: () => void; onToggle: () => void; checking: boolean }) {
+function WatchCard({ w, all, onCheck, onToggle, checking }: { w: WatchRow; all?: WatchRow[]; onCheck: () => void; onToggle: () => void; checking: boolean }) {
   const { money } = useApp();
   const delta = w.bestPrice != null && w.prevPrice != null ? w.bestPrice - w.prevPrice : null;
   const pct = delta != null && w.prevPrice ? (delta / w.prevPrice) * 100 : null;
   return (
     <Card className={cn("flex flex-col p-3", !w.active && "opacity-60")}>
       <div className="flex items-start justify-between gap-2">
-        <Link href={`/watches/${w.id}`} className="min-w-0">
+        <Link href={watchHref(w, all)} className="min-w-0">
           <div className="truncate font-medium hover:text-accent">{w.name}</div>
           <div className="font-mono text-xs text-muted">
             {w.origins.join(" ")} {w.tripType === "roundtrip" ? "⇄" : "→"} {w.destinations.join(" ")}

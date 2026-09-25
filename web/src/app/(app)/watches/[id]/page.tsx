@@ -1,5 +1,5 @@
 "use client";
-import { use, useMemo, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
@@ -7,13 +7,15 @@ import { ExternalLink, Pause, Pencil, Play, RefreshCw, Search, Trash2 } from "lu
 import { useApp } from "@/components/app-context";
 import { DateHeatmap, type Cell } from "@/components/date-heatmap";
 import { PriceChart, type SeriesPoint } from "@/components/price-chart";
-import { TripCard } from "@/components/trip-card";
+import { ResultsView, mergeTrips } from "@/components/results-view";
 import { WatchDialog, type WatchForm } from "@/components/watch-dialog";
 import { Badge, Button, Card, Empty, ErrorNote, PageHeader, Segmented, Spinner } from "@/components/ui";
 import { api, fetcher } from "@/lib/client";
-import { dayDiff, formatDate, formatDuration, relativeTime } from "@/lib/format";
-import type { Trip } from "@/lib/types";
+import { addDays, dayDiff, formatDate, formatDuration, relativeTime } from "@/lib/format";
+import { useLiveSearch, type MulticityLeg } from "@/lib/live-search";
+import type { SearchQuery } from "@/lib/types";
 import type { WatchRow } from "@/lib/watch-types";
+import { resolveWatchParam, watchHref } from "@/lib/watch-slug";
 
 type Obs = {
   id: number;
@@ -34,10 +36,14 @@ const KIND = (k: string) => (k === "single" ? "One ticket" : "Smart route");
 const SOURCE = (s: string) => (s === "google" ? "Google Flights" : s === "kiwi" ? "Kiwi.com" : s.includes("+") ? "Mixed" : s);
 
 export default function WatchDetail({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+  const { id: param } = use(params);
   const router = useRouter();
   const { money, convert, currency } = useApp();
-  const { data, mutate, error } = useSWR<{ watch: WatchRow; observations: Obs[] }>(`/watches/${id}/history`, fetcher);
+  // /watches/lax-dps-2027-03-18-11n (readable) or /watches/6 (old links)
+  const { data: list } = useSWR<WatchRow[]>("/watches", fetcher, { revalidateOnFocus: false });
+  const id = resolveWatchParam(param, list);
+  const { data, mutate, error } = useSWR<{ watch: WatchRow; observations: Obs[] }>(id ? `/watches/${id}/history` : null, fetcher);
+  const [pick, setPick] = useState<{ depart: string; nights: number | null } | null>(null);
   const [by, setBy] = useState<"best" | "kind" | "source">("best");
   const [editing, setEditing] = useState(false);
   const [checking, setChecking] = useState(false);
@@ -94,7 +100,36 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
     }));
   }, [obs]);
 
+  // show the readable URL even when an old /watches/<id> link was opened
+  useEffect(() => {
+    if (w && list && /^\d+$/.test(param)) router.replace(watchHref(w, list), { scroll: false });
+  }, [w, list, param, router]);
+
+  // The flights shown below: the picked date, else the cheapest one seen.
+  const shown = useMemo(() => {
+    if (pick) return pick;
+    const best = [...cells].sort((a, b) => a.value - b.value)[0];
+    if (best) return { depart: best.depart, nights: best.nights };
+    return w ? { depart: w.departStart, nights: w.tripType === "roundtrip" ? (w.nightsMin ?? 7) : null } : null;
+  }, [pick, cells, w]);
+  const liveQ = useMemo<SearchQuery | null>(() => {
+    if (!w || !shown) return null;
+    return {
+      origins: w.origins,
+      destinations: w.destinations,
+      departure: shown.depart,
+      return_date: w.tripType === "roundtrip" && shown.nights != null ? addDays(shown.depart, shown.nights) : null,
+      adults: w.adults,
+      cabin: w.cabin as SearchQuery["cabin"],
+      max_stops: w.maxStops ?? null,
+      currency: w.currency,
+    };
+  }, [w, shown]);
+  const legs = w?.tripType === "multicity" && Array.isArray(w.legs) ? (w.legs as MulticityLeg[]) : null;
+  const live = useLiveSearch(liveQ, legs);
+
   if (error) return <ErrorNote>{(error as Error).message}</ErrorNote>;
+  if (list && !id) return <Empty title="Watch not found">It may have been deleted. <Link className="text-accent" href="/watches">All watches</Link></Empty>;
   if (!w) return <Spinner />;
 
   const delta = w.bestPrice != null && w.prevPrice != null ? w.bestPrice - w.prevPrice : null;
@@ -171,14 +206,14 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
       <PageHeader
         title={w.name}
         sub={
-          <span className="font-mono">
-            {w.origins.join(" ")} {w.tripType === "roundtrip" ? "⇄" : "→"} {w.destinations.join(" ")}
-            <span className="ml-2 font-sans">
-              {formatDate(w.departStart, false)}
-              {w.departEnd !== w.departStart && ` to ${formatDate(w.departEnd, false)}`}
-              {w.tripType === "roundtrip" && w.nightsMin != null && ` · ${w.nightsMin}${w.nightsMax && w.nightsMax !== w.nightsMin ? `–${w.nightsMax}` : ""} nights`}
-              {` · ${w.cabin} · ${w.adults} adult${w.adults > 1 ? "s" : ""}`}
-            </span>
+          <span>
+            {w.tripType === "roundtrip" ? "Round trip" : w.tripType === "oneway" ? "One way" : "Multi city"}
+            {w.tripType !== "multicity" && ` ${w.origins.join("/")} ${w.tripType === "roundtrip" ? "⇄" : "→"} ${w.destinations.join("/")}`},{" "}
+            leaving {formatDate(w.departStart, false)}
+            {w.departEnd !== w.departStart && ` to ${formatDate(w.departEnd, false)}`}
+            {w.tripType === "roundtrip" && w.nightsMin != null && `, ${w.nightsMin}${w.nightsMax && w.nightsMax !== w.nightsMin ? ` to ${w.nightsMax}` : ""} nights`}
+            {`, ${w.cabin}, ${w.adults} adult${w.adults > 1 ? "s" : ""}. `}
+            {w.active ? "Prices are checked twice a day." : "Paused."}
           </span>
         }
         actions={
@@ -253,25 +288,56 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Card className="p-4">
           <h2 className="font-semibold">Prices by date</h2>
-          <p className="mb-3 text-xs text-muted">Latest known price for each departure date{w.tripType === "roundtrip" && " and trip length"}. Click a cell to open the fare.</p>
-          <DateHeatmap cells={cells} format={(v) => money(v, w.currency)} />
+          <p className="mb-3 text-xs text-muted">
+            Latest known price for each departure date{w.tripType === "roundtrip" && " and trip length"}. Click one to see its flights below.
+          </p>
+          <DateHeatmap cells={cells} format={(v) => money(v, w.currency)} onPick={(c) => setPick({ depart: c.depart, nights: c.nights })} selected={shown} />
         </Card>
-        <div className="space-y-2">
-          <h2 className="font-semibold">Best option found</h2>
-          {w.bestTrip ? (
-            <TripCard trip={w.bestTrip as Trip} />
-          ) : (
-            <Empty title="Nothing found yet" />
-          )}
-          {w.notes && <p className="text-sm text-muted">{w.notes}</p>}
-        </div>
+        <Card className="space-y-2 p-4 text-sm">
+          <h2 className="font-semibold">How this watch works</h2>
+          <p className="text-muted">
+            Twice a day FlightScout searches every date in this window (Google Flights and Kiwi, plus split tickets if you turned
+            them on) and records the cheapest prices. The chart and the grid show those checks. Below are the live flights for one
+            date, exactly like a normal search.
+          </p>
+          <p className="text-muted">
+            Alerts: {w.alertBelow != null ? `when it drops below ${money(w.alertBelow, w.currency)}` : w.alertDropPct != null ? `when it drops ${w.alertDropPct}% or more` : "none set"}.
+          </p>
+          {w.notes && <p className="text-muted">Notes: {w.notes}</p>}
+        </Card>
       </div>
 
-      <Card className="overflow-hidden">
-        <div className="border-b border-border px-4 py-3">
-          <h2 className="font-semibold">Observations</h2>
-          <p className="text-xs text-muted">Every price recorded for this watch, newest first.</p>
+      <section className="space-y-2">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-semibold">
+            Flights {legs ? "for this multi city trip" : shown ? `for ${formatDate(shown.depart, false)}${shown.nights != null && w.tripType === "roundtrip" ? `, ${shown.nights} nights` : ""}` : ""}
+            {!pick && !legs && <span className="ml-2 text-xs font-normal text-muted">(the cheapest date found)</span>}
+          </h2>
+          {live.pending > 0 && (
+            <span className="inline-flex items-center gap-1.5 text-xs text-muted">
+              <Spinner className="size-3.5" /> searching
+            </span>
+          )}
         </div>
+        {live.error && <ErrorNote>{live.error}</ErrorNote>}
+        {live.result || live.plan ? (
+          <ResultsView
+            trips={mergeTrips(live.result, live.plan)}
+            query={live.result?.query ?? { origins: w.origins, destinations: w.destinations }}
+            errors={{ ...(live.result?.errors ?? {}), ...(live.plan?.errors ?? {}) }}
+            googleUrl={live.result?.google_url}
+            plan={live.plan}
+          />
+        ) : (
+          live.pending > 0 && <div className="h-40 animate-pulse rounded-2xl bg-surface-2" />
+        )}
+      </section>
+
+      <details className="group rounded-2xl border border-border bg-surface shadow-[var(--shadow)]">
+        <summary className="cursor-pointer list-none px-4 py-3">
+          <span className="font-semibold">Price history</span>{" "}
+          <span className="text-xs text-muted">every price recorded by the checks, newest first ({obs.length})</span>
+        </summary>
         <div className="max-h-[480px] overflow-auto">
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-surface-2 text-left text-xs text-muted">
@@ -312,7 +378,7 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
             </tbody>
           </table>
         </div>
-      </Card>
+      </details>
       <WatchDialog open={editing} onClose={() => setEditing(false)} initial={form} watchId={w.id} onSaved={() => mutate()} />
     </div>
   );

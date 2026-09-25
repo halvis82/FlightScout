@@ -1,4 +1,5 @@
 "use client";
+import { watchHref } from "@/lib/watch-slug";
 import useSWR, { mutate } from "swr";
 import Link from "next/link";
 import { Check, Eye } from "lucide-react";
@@ -116,7 +117,7 @@ function WatchFormBody({
       }
       onClose();
       if (onSaved) onSaved(row.id);
-      else router.push(`/watches/${row.id}`);
+      else router.push(watchHref(row as never));
     } catch (e) {
       setErr((e as Error).message);
     } finally {
@@ -261,7 +262,7 @@ export function WatchButton({ watch, seed, label = "Watch this search" }: { watc
   if (existing)
     return (
       <Link
-        href={`/watches/${existing.id}`}
+        href={watchHref(existing as never, list as never)}
         // the rest of a double or triple click that saved it must not navigate away
         onClick={(e) => {
           if (Date.now() - savedAt.current < 1500) e.preventDefault();
@@ -318,7 +319,7 @@ export function useWatchDialog() {
         toast(
           {
             text: row.existing ? `Already watching ${body.name}.` : `Watching ${body.name}. Prices are checked twice a day.`,
-            action: { label: "Open", href: `/watches/${row.id}` },
+            action: { label: "Open", href: watchHref(row as never) },
             tone: "good",
           },
           5000,

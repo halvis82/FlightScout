@@ -41,6 +41,10 @@ export const POST = route(async (req) => {
   const cols = toColumns(p, false) as typeof schema.watches.$inferInsert;
   const signature = watchSignature({ ...cols, departStart: cols.departStart as string });
   // Same search saved twice (double click, retry, CLI): return the existing one.
+  // Rows saved before signatures were canonical are compared recomputed.
+  const mine = await db.select().from(schema.watches).where(eq(schema.watches.userId, userId));
+  const same = mine.find((w) => w.signature === signature || watchSignature({ ...w, departStart: String(w.departStart), departEnd: w.departEnd ? String(w.departEnd) : null }) === signature);
+  if (same) return json({ ...same, existing: true }, 200);
   const [row] = await db
     .insert(schema.watches)
     .values({ ...cols, userId, signature })

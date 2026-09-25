@@ -115,3 +115,30 @@ test("multi city after a round trip: edit the form and Search shows results", as
   await expect(page.getByText("CUN → MLM → TIJ")).toBeVisible({ timeout: 180_000 });
   await expect(page.getByText(/\d+ flights/)).toBeVisible();
 });
+
+// Watching works before searching, a watched search shows as watched (never
+// "Watch this search" again), and the watch page reads well: a readable URL
+// and the full list of flights, not just one.
+test("watch before searching, stays watched, readable watch page with all flights", async ({ page }) => {
+  test.setTimeout(240_000);
+  const legs = [
+    { to: ["MLM"], date: "2026-12-30", flex: 0 },
+    { to: ["TIJ"], date: "2027-01-09", flex: 1 },
+  ];
+  await page.goto(`/?from=CUN&tt=multicity&d=2026-12-30&ml=${encodeURIComponent(JSON.stringify(legs))}`);
+  // no search has run, the watch button is already there
+  await page.getByRole("button", { name: "Watch this search" }).click();
+  const watching = page.getByRole("link", { name: /Watching/ });
+  await expect(watching).toBeVisible({ timeout: 30_000 });
+  // searching the same thing keeps it watched
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(page.getByText("CUN → MLM → TIJ").first()).toBeVisible({ timeout: 180_000 });
+  await expect(page.getByRole("button", { name: "Watch this search" })).toHaveCount(0);
+  await expect(watching).toBeVisible();
+  // the watch page
+  await page.waitForTimeout(1600); // past the double click guard on the Watching link
+  await watching.click();
+  await expect(page).toHaveURL(/\/watches\/cun-mlm-tij-2026-12-30/);
+  await expect(page.getByText("Flights for this multi city trip")).toBeVisible();
+  await expect(page.getByText(/\d+ flights/)).toBeVisible({ timeout: 180_000 });
+});
