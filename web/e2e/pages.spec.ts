@@ -51,7 +51,7 @@ test("watch this search saves once, even when clicked repeatedly, and then shows
   await expect(page.getByText(/\d+ flights/)).toBeVisible();
   const btn = page.getByRole("button", { name: "Watch this search" });
   await btn.click({ clickCount: 3 }); // triple click
-  await btn.click({ force: true }).catch(() => {}); // and again while saving
+  await btn.click({ force: true, timeout: 1000 }).catch(() => {}); // and again while saving (it may already be "Watching")
   await expect(page.getByRole("link", { name: /Watching/ })).toBeVisible();
   const n = await page.evaluate(async () => (await (await fetch("/api/v1/watches")).json()).length ?? 0).catch(() => null);
   // guests keep watches in the browser: count them there
