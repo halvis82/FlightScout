@@ -5,7 +5,7 @@ import { TripCard } from "./trip-card";
 import { RouteMap, type MapArc, type MapPoint } from "./route-map";
 import { useApp } from "./app-context";
 import { useWatchDialog } from "./watch-dialog";
-import { Empty, Segmented, Select, Switch } from "./ui";
+import { Button, Empty, Segmented, Select, Switch } from "./ui";
 import { tripBlocked } from "@/lib/sellers";
 import { parseLocal, dayDiff } from "@/lib/format";
 import type { PlanResult, SearchQuery, SearchResult, Trip } from "@/lib/types";
@@ -55,6 +55,7 @@ export function ResultsView({
   const [sources, setSources] = useState<string[]>([]);
   const [hover, setHover] = useState<Trip | null>(null);
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const [limit, setLimit] = useState(60);
   const { money } = useApp();
   const priceRange = useMemo(() => {
     const ps = trips.map((t) => convert(t.total_price, t.currency));
@@ -117,7 +118,7 @@ export function ResultsView({
     return order.map((k) => byOut.get(k)!);
   }, [list]);
 
-  const shown = grouped.slice(0, 80).map((g) => g.trip);
+  const shown = grouped.slice(0, limit).map((g) => g.trip);
   const focus = hover ?? shown[0];
 
   const { arcs, points } = useMemo(() => {
@@ -265,7 +266,7 @@ export function ResultsView({
           <Empty title="No flights match">Try loosening the filters, adding nearby airports, or turning on smart routes.</Empty>
         ) : (
           <div className="space-y-2">
-            {grouped.slice(0, 80).map(({ trip: t, alts }) => (
+            {grouped.slice(0, limit).map(({ trip: t, alts }) => (
               <TripCard
                 key={t.id}
                 trip={t}
@@ -293,6 +294,11 @@ export function ResultsView({
                 }}
               />
             ))}
+            {grouped.length > limit && (
+              <Button className="w-full" onClick={() => setLimit(grouped.length)}>
+                Show all {grouped.length} results
+              </Button>
+            )}
           </div>
         )}
       </div>

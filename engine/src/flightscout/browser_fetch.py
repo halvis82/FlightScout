@@ -55,6 +55,11 @@ _fli_flights.parallel_map = _pm("pm_flights")
 _fli_dates.parallel_map = _pm("pm_dates")
 
 
+def active() -> bool:
+    """True inside browser_pages() (Google pages come from the visitor)."""
+    return _state.get() is not None
+
+
 class NeedPages(Exception):
     def __init__(self, urls: list[str]):
         super().__init__(f"{len(urls)} pages needed")
