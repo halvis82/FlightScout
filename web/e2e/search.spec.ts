@@ -97,7 +97,10 @@ test("recent searches: one click repeats a past search", async ({ page }) => {
 
 test("streams results with a clear searching and complete state", async ({ page }) => {
   test.setTimeout(200_000);
-  await page.goto("/?from=SEA&to=SFO&tt=oneway&d=2026-12-17&smart=0");
+  // a date nobody searched in the last 20 minutes, so it isn't answered from the cache at once
+  const day = String(1 + Math.floor(Math.random() * 27)).padStart(2, "0");
+  const month = ["2027-01", "2027-02", "2027-03"][Math.floor(Math.random() * 3)];
+  await page.goto(`/?from=SEA&to=SFO&tt=oneway&d=${month}-${day}&smart=0`);
   await expect(page.getByText("Searching, results appear as each source answers")).toBeVisible({ timeout: 30_000 });
   const chips = page.getByLabel("Sources");
   await expect(chips.getByText("Google Flights")).toBeVisible();
