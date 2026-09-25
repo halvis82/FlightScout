@@ -1,0 +1,778 @@
+{
+ "data": {
+  "routes": [
+   {
+    "origin": {
+     "type": "Airport",
+     "code": "MTY",
+     "name": "Monterrey",
+     "countryCode": "MX"
+    },
+    "destination": {
+     "type": "Airport",
+     "code": "TIJ",
+     "name": "Tijuana",
+     "countryCode": "MX"
+    },
+    "requestedDate": "2026-11-06",
+    "journeys": [
+     {
+      "key": "VkJ_NDA4MH4gfn5NVFl_MTEvMDYvMjAyNiAwNjowMn5USUp_MTEvMDYvMjAyNiAwNjo1NH5_",
+      "origin": {
+       "type": "Airport",
+       "code": "MTY",
+       "name": "Monterrey",
+       "countryCode": "MX"
+      },
+      "destination": {
+       "type": "Airport",
+       "code": "TIJ",
+       "name": "Tijuana",
+       "countryCode": "MX"
+      },
+      "departureDate": "2026-11-06T06:02:00",
+      "arrivalDate": "2026-11-06T06:54:00",
+      "transportationType": "Air",
+      "lowestFareKey": "MH5Xfn5WQn5XTFNPMDBOflZCTFN_fjB_M35_WCExOA--",
+      "journeyDuration": "02:52:00",
+      "isSoldout": false,
+      "travelType": "NonStop",
+      "stops": 0,
+      "isInternational": false,
+      "tuaDifference": null,
+      "fares": [
+       {
+        "fareWithTua": {
+         "amount": 78.8,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 266,
+         "pointAmount": 51172
+        },
+        "key": "MH5Xfn5WQn5XTFNPMDBOflZCTFN_fjB_M35_WCExOA--",
+        "fare": {
+         "amount": 78.8,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 266,
+         "pointAmount": 51172
+        },
+        "fareBase": {
+         "amount": 5.57,
+         "pointAmount": 3619
+        },
+        "bundleDifference": null,
+        "fareType": "VC",
+        "fareCode": "WLSO00N",
+        "classOfService": "W",
+        "availableCount": 11,
+        "labels": [],
+        "originalFare": {
+         "amount": 78.8,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 0,
+         "pointAmount": 51172
+        },
+        "vivaFanFare": {
+         "amount": 78.8,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 266,
+         "pointAmount": 51172
+        },
+        "notifications": [],
+        "taxes": [],
+        "offers": [],
+        "fareSource": "N",
+        "fareBookingType": "Points",
+        "minimumPointAmount": 1000,
+        "excludedMinimumAmount": {
+         "amount": 77.26,
+         "pointAmount": 50172
+        }
+       },
+       {
+        "fareWithTua": {
+         "amount": 78.8,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 266,
+         "pointAmount": 51172
+        },
+        "key": "MH5Xfn5WQn5XTFNPMDBOflZCTFN_fjB_M35_WCExOA--",
+        "fare": {
+         "amount": 78.8,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 266,
+         "pointAmount": 51172
+        },
+        "fareBase": {
+         "amount": 5.57,
+         "pointAmount": 3619
+        },
+        "bundleDifference": null,
+        "fareType": "VC",
+        "fareCode": "WLSO00N",
+        "classOfService": "W",
+        "availableCount": 11,
+        "labels": [],
+        "originalFare": {
+         "amount": 78.8,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 0,
+         "pointAmount": 51172
+        },
+        "vivaFanFare": {
+         "amount": 78.8,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 266,
+         "pointAmount": 51172
+        },
+        "notifications": [],
+        "taxes": [],
+        "offers": [],
+        "fareSource": "N",
+        "fareBookingType": "Regular",
+        "minimumPointAmount": 0,
+        "excludedMinimumAmount": null
+       }
+      ],
+      "segments": [
+       {
+        "key": "VkJ_NDA4MH4gfn5NVFl_MTEvMDYvMjAyNiAwNjowMn5USUp_MTEvMDYvMjAyNiAwNjo1NH5_",
+        "origin": {
+         "type": "Airport",
+         "code": "MTY",
+         "name": "Monterrey",
+         "countryCode": "MX"
+        },
+        "destination": {
+         "type": "Airport",
+         "code": "TIJ",
+         "name": "Tijuana",
+         "countryCode": "MX"
+        },
+        "departureDate": "2026-11-06T06:02:00",
+        "arrivalDate": "2026-11-06T06:54:00",
+        "transportationType": "Air",
+        "operatingCarrier": "VB",
+        "operatingCode": "4080",
+        "marketingCarrier": "VB",
+        "marketingCode": "4080",
+        "segmentDuration": "02:52:00",
+        "layoverTime": "00:00:00",
+        "subjectToGovernmentApproval": false,
+        "segmentType": "NonStop",
+        "flightNumber": "VB4080",
+        "departureTerminal": "A",
+        "arrivalTerminal": null,
+        "notifications": [],
+        "equipmentType": "321VB",
+        "cabinAmenities": [],
+        "serviceAvailability": null
+       }
+      ],
+      "notifications": [
+       {
+        "code": "TuaPriceInPoints",
+        "description": "25713"
+       },
+       {
+        "code": "TuaPrice",
+        "description": "44.16"
+       },
+       {
+        "code": "TuaPreAdded",
+        "description": "TUA amount pre-added in fare price"
+       }
+      ]
+     },
+     {
+      "key": "VkJ_NDA4NH4gfn5NVFl_MTEvMDYvMjAyNiAxMjo0N35USUp_MTEvMDYvMjAyNiAxMzozN35_",
+      "origin": {
+       "type": "Airport",
+       "code": "MTY",
+       "name": "Monterrey",
+       "countryCode": "MX"
+      },
+      "destination": {
+       "type": "Airport",
+       "code": "TIJ",
+       "name": "Tijuana",
+       "countryCode": "MX"
+      },
+      "departureDate": "2026-11-06T12:47:00",
+      "arrivalDate": "2026-11-06T13:37:00",
+      "transportationType": "Air",
+      "lowestFareKey": "MH5MMX5YflZCfkwxTFNPMDBOflZCTFN_fjB_NX5_WCEw",
+      "journeyDuration": "02:50:00",
+      "isSoldout": false,
+      "travelType": "NonStop",
+      "stops": 0,
+      "isInternational": false,
+      "tuaDifference": null,
+      "fares": [
+       {
+        "fareWithTua": {
+         "amount": 60.3,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 116,
+         "pointAmount": 35106
+        },
+        "key": "MH5MMX5YflZCfkwxTFNPMDBOflZCTFN_fjB_NX5_WCEw",
+        "fare": {
+         "amount": 60.3,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 116,
+         "pointAmount": 35106
+        },
+        "fareBase": {
+         "amount": 13.74,
+         "pointAmount": 7999
+        },
+        "bundleDifference": null,
+        "fareType": "VC",
+        "fareCode": "L1LSO00N",
+        "classOfService": "L1",
+        "availableCount": 9,
+        "labels": [
+         {
+          "labelId": "RewardFare",
+          "description": "Doters Label",
+          "type": "PromoClassOfService"
+         }
+        ],
+        "originalFare": {
+         "amount": 60.3,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 0,
+         "pointAmount": 35106
+        },
+        "vivaFanFare": {
+         "amount": 60.3,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 116,
+         "pointAmount": 35106
+        },
+        "notifications": [],
+        "taxes": [],
+        "offers": [],
+        "fareSource": "N",
+        "fareBookingType": "Points",
+        "minimumPointAmount": 7999,
+        "excludedMinimumAmount": {
+         "amount": 46.56,
+         "pointAmount": 27107
+        }
+       },
+       {
+        "fareWithTua": {
+         "amount": 114.93,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 559,
+         "pointAmount": 74634
+        },
+        "key": "MH5Gfn5WQn5GTFNPMDBOflZCTFN_fjB_M35_WCEx",
+        "fare": {
+         "amount": 114.93,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 559,
+         "pointAmount": 74634
+        },
+        "fareBase": {
+         "amount": 40.31,
+         "pointAmount": 26178
+        },
+        "bundleDifference": null,
+        "fareType": "VC",
+        "fareCode": "FLSO00N",
+        "classOfService": "F",
+        "availableCount": 2,
+        "labels": [
+         {
+          "labelId": "HotelPlus",
+          "description": "Hotel plus offer",
+          "type": "HotelPlus"
+         }
+        ],
+        "originalFare": {
+         "amount": 114.93,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 0,
+         "pointAmount": 74634
+        },
+        "vivaFanFare": {
+         "amount": 114.93,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 559,
+         "pointAmount": 74634
+        },
+        "notifications": [
+         {
+          "code": "CapacityLeft",
+          "description": "Capacity left below warning threshold"
+         }
+        ],
+        "taxes": [],
+        "offers": [
+         {
+          "type": "HotelPlus",
+          "discountPercent": 36.48,
+          "discountWithTuaPercent": 36.48,
+          "discountFareAmount": 40.31,
+          "discountTaxAmount": 1.61
+         }
+        ],
+        "fareSource": "N",
+        "fareBookingType": "Regular",
+        "minimumPointAmount": 0,
+        "excludedMinimumAmount": null
+       }
+      ],
+      "segments": [
+       {
+        "key": "VkJ_NDA4NH4gfn5NVFl_MTEvMDYvMjAyNiAxMjo0N35USUp_MTEvMDYvMjAyNiAxMzozN35_",
+        "origin": {
+         "type": "Airport",
+         "code": "MTY",
+         "name": "Monterrey",
+         "countryCode": "MX"
+        },
+        "destination": {
+         "type": "Airport",
+         "code": "TIJ",
+         "name": "Tijuana",
+         "countryCode": "MX"
+        },
+        "departureDate": "2026-11-06T12:47:00",
+        "arrivalDate": "2026-11-06T13:37:00",
+        "transportationType": "Air",
+        "operatingCarrier": "VB",
+        "operatingCode": "4084",
+        "marketingCarrier": "VB",
+        "marketingCode": "4084",
+        "segmentDuration": "02:50:00",
+        "layoverTime": "00:00:00",
+        "subjectToGovernmentApproval": false,
+        "segmentType": "NonStop",
+        "flightNumber": "VB4084",
+        "departureTerminal": "A",
+        "arrivalTerminal": null,
+        "notifications": [],
+        "equipmentType": "320VB2",
+        "cabinAmenities": [],
+        "serviceAvailability": null
+       }
+      ],
+      "notifications": [
+       {
+        "code": "TuaPriceInPoints",
+        "description": "25713"
+       },
+       {
+        "code": "TuaPrice",
+        "description": "44.16"
+       },
+       {
+        "code": "TuaPreAdded",
+        "description": "TUA amount pre-added in fare price"
+       }
+      ]
+     }
+    ],
+    "notifications": [],
+    "vivaFanFareAvailable": false
+   },
+   {
+    "origin": {
+     "type": "Airport",
+     "code": "TIJ",
+     "name": "Tijuana",
+     "countryCode": "MX"
+    },
+    "destination": {
+     "type": "Airport",
+     "code": "MTY",
+     "name": "Monterrey",
+     "countryCode": "MX"
+    },
+    "requestedDate": "2026-11-10",
+    "journeys": [
+     {
+      "key": "VkJ_NzQwMH4gfn5USUp_MTEvMTAvMjAyNiAwNzo0NH5NVFl_MTEvMTAvMjAyNiAxMjoyOH5_",
+      "origin": {
+       "type": "Airport",
+       "code": "TIJ",
+       "name": "Tijuana",
+       "countryCode": "MX"
+      },
+      "destination": {
+       "type": "Airport",
+       "code": "MTY",
+       "name": "Monterrey",
+       "countryCode": "MX"
+      },
+      "departureDate": "2026-11-10T07:44:00",
+      "arrivalDate": "2026-11-10T12:28:00",
+      "transportationType": "Air",
+      "lowestFareKey": "MH5Xfn5WQn5XTFNPMDBOflZCTFN_fjB_NH5_WCE2OQ--",
+      "journeyDuration": "02:44:00",
+      "isSoldout": false,
+      "travelType": "NonStop",
+      "stops": 0,
+      "isInternational": false,
+      "tuaDifference": null,
+      "fares": [
+       {
+        "fareWithTua": {
+         "amount": 71.06,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 276,
+         "pointAmount": 46144
+        },
+        "key": "MH5Xfn5WQn5XTFNPMDBOflZCTFN_fjB_NH5_WCE2OQ--",
+        "fare": {
+         "amount": 71.06,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 276,
+         "pointAmount": 46144
+        },
+        "fareBase": {
+         "amount": 7.2,
+         "pointAmount": 4675
+        },
+        "bundleDifference": null,
+        "fareType": "VC",
+        "fareCode": "WLSO00N",
+        "classOfService": "W",
+        "availableCount": 11,
+        "labels": [],
+        "originalFare": {
+         "amount": 71.06,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 0,
+         "pointAmount": 46144
+        },
+        "vivaFanFare": {
+         "amount": 71.06,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 276,
+         "pointAmount": 46144
+        },
+        "notifications": [],
+        "taxes": [],
+        "offers": [],
+        "fareSource": "N",
+        "fareBookingType": "Points",
+        "minimumPointAmount": 1000,
+        "excludedMinimumAmount": {
+         "amount": 69.52,
+         "pointAmount": 45144
+        }
+       },
+       {
+        "fareWithTua": {
+         "amount": 71.06,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 276,
+         "pointAmount": 46144
+        },
+        "key": "MH5Xfn5WQn5XTFNPMDBOflZCTFN_fjB_NH5_WCE2OQ--",
+        "fare": {
+         "amount": 71.06,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 276,
+         "pointAmount": 46144
+        },
+        "fareBase": {
+         "amount": 7.2,
+         "pointAmount": 4675
+        },
+        "bundleDifference": null,
+        "fareType": "VC",
+        "fareCode": "WLSO00N",
+        "classOfService": "W",
+        "availableCount": 11,
+        "labels": [],
+        "originalFare": {
+         "amount": 71.06,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 0,
+         "pointAmount": 46144
+        },
+        "vivaFanFare": {
+         "amount": 71.06,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 276,
+         "pointAmount": 46144
+        },
+        "notifications": [],
+        "taxes": [],
+        "offers": [],
+        "fareSource": "N",
+        "fareBookingType": "Regular",
+        "minimumPointAmount": 0,
+        "excludedMinimumAmount": null
+       }
+      ],
+      "segments": [
+       {
+        "key": "VkJ_NzQwMH4gfn5USUp_MTEvMTAvMjAyNiAwNzo0NH5NVFl_MTEvMTAvMjAyNiAxMjoyOH5_",
+        "origin": {
+         "type": "Airport",
+         "code": "TIJ",
+         "name": "Tijuana",
+         "countryCode": "MX"
+        },
+        "destination": {
+         "type": "Airport",
+         "code": "MTY",
+         "name": "Monterrey",
+         "countryCode": "MX"
+        },
+        "departureDate": "2026-11-10T07:44:00",
+        "arrivalDate": "2026-11-10T12:28:00",
+        "transportationType": "Air",
+        "operatingCarrier": "VB",
+        "operatingCode": "7400",
+        "marketingCarrier": "VB",
+        "marketingCode": "7400",
+        "segmentDuration": "02:44:00",
+        "layoverTime": "00:00:00",
+        "subjectToGovernmentApproval": false,
+        "segmentType": "NonStop",
+        "flightNumber": "VB7400",
+        "departureTerminal": null,
+        "arrivalTerminal": "A",
+        "notifications": [],
+        "equipmentType": "321VB",
+        "cabinAmenities": [],
+        "serviceAvailability": null
+       }
+      ],
+      "notifications": [
+       {
+        "code": "TuaPriceInPoints",
+        "description": "21330"
+       },
+       {
+        "code": "TuaPrice",
+        "description": "36.64"
+       },
+       {
+        "code": "TuaPreAdded",
+        "description": "TUA amount pre-added in fare price"
+       }
+      ]
+     },
+     {
+      "key": "VkJ_NDA4NX4gfn5USUp_MTEvMTAvMjAyNiAxNDoyN35NVFl_MTEvMTAvMjAyNiAxOToxNH5_",
+      "origin": {
+       "type": "Airport",
+       "code": "TIJ",
+       "name": "Tijuana",
+       "countryCode": "MX"
+      },
+      "destination": {
+       "type": "Airport",
+       "code": "MTY",
+       "name": "Monterrey",
+       "countryCode": "MX"
+      },
+      "departureDate": "2026-11-10T14:27:00",
+      "arrivalDate": "2026-11-10T19:14:00",
+      "transportationType": "Air",
+      "lowestFareKey": "MH5MMX5YflZCfkwxTFNPMDBOflZCTFN_fjB_Nn5_WCE3MQ--",
+      "journeyDuration": "02:47:00",
+      "isSoldout": false,
+      "travelType": "NonStop",
+      "stops": 0,
+      "isInternational": false,
+      "tuaDifference": null,
+      "fares": [
+       {
+        "fareWithTua": {
+         "amount": 51.34,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 116,
+         "pointAmount": 29891
+        },
+        "key": "MH5MMX5YflZCfkwxTFNPMDBOflZCTFN_fjB_Nn5_WCE3MQ--",
+        "fare": {
+         "amount": 51.34,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 116,
+         "pointAmount": 29891
+        },
+        "fareBase": {
+         "amount": 13.74,
+         "pointAmount": 7999
+        },
+        "bundleDifference": null,
+        "fareType": "VC",
+        "fareCode": "L1LSO00N",
+        "classOfService": "L1",
+        "availableCount": 17,
+        "labels": [
+         {
+          "labelId": "RewardFare",
+          "description": "Doters Label",
+          "type": "PromoClassOfService"
+         }
+        ],
+        "originalFare": {
+         "amount": 51.34,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 0,
+         "pointAmount": 29891
+        },
+        "vivaFanFare": {
+         "amount": 51.34,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 116,
+         "pointAmount": 29891
+        },
+        "notifications": [],
+        "taxes": [],
+        "offers": [],
+        "fareSource": "N",
+        "fareBookingType": "Points",
+        "minimumPointAmount": 7999,
+        "excludedMinimumAmount": {
+         "amount": 37.6,
+         "pointAmount": 21892
+        }
+       },
+       {
+        "fareWithTua": {
+         "amount": 75.3,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 311,
+         "pointAmount": 48903
+        },
+        "key": "MH5Bfn5WQn5BTFNPMDBOflZCTFN_fjB_NH5_WCE3MA--",
+        "fare": {
+         "amount": 75.3,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 311,
+         "pointAmount": 48903
+        },
+        "fareBase": {
+         "amount": 11.28,
+         "pointAmount": 7328
+        },
+        "bundleDifference": null,
+        "fareType": "VC",
+        "fareCode": "ALSO00N",
+        "classOfService": "A",
+        "availableCount": 25,
+        "labels": [],
+        "originalFare": {
+         "amount": 75.3,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 0,
+         "pointAmount": 48903
+        },
+        "vivaFanFare": {
+         "amount": 75.3,
+         "taxAmount": 0.0,
+         "cashBackValue": 0.0,
+         "earnedPoints": 311,
+         "pointAmount": 48903
+        },
+        "notifications": [],
+        "taxes": [],
+        "offers": [],
+        "fareSource": "N",
+        "fareBookingType": "Regular",
+        "minimumPointAmount": 0,
+        "excludedMinimumAmount": null
+       }
+      ],
+      "segments": [
+       {
+        "key": "VkJ_NDA4NX4gfn5USUp_MTEvMTAvMjAyNiAxNDoyN35NVFl_MTEvMTAvMjAyNiAxOToxNH5_",
+        "origin": {
+         "type": "Airport",
+         "code": "TIJ",
+         "name": "Tijuana",
+         "countryCode": "MX"
+        },
+        "destination": {
+         "type": "Airport",
+         "code": "MTY",
+         "name": "Monterrey",
+         "countryCode": "MX"
+        },
+        "departureDate": "2026-11-10T14:27:00",
+        "arrivalDate": "2026-11-10T19:14:00",
+        "transportationType": "Air",
+        "operatingCarrier": "VB",
+        "operatingCode": "4085",
+        "marketingCarrier": "VB",
+        "marketingCode": "4085",
+        "segmentDuration": "02:47:00",
+        "layoverTime": "00:00:00",
+        "subjectToGovernmentApproval": false,
+        "segmentType": "NonStop",
+        "flightNumber": "VB4085",
+        "departureTerminal": null,
+        "arrivalTerminal": "A",
+        "notifications": [],
+        "equipmentType": "321VB",
+        "cabinAmenities": [],
+        "serviceAvailability": null
+       }
+      ],
+      "notifications": [
+       {
+        "code": "TuaPriceInPoints",
+        "description": "21330"
+       },
+       {
+        "code": "TuaPrice",
+        "description": "36.64"
+       },
+       {
+        "code": "TuaPreAdded",
+        "description": "TUA amount pre-added in fare price"
+       }
+      ]
+     }
+    ],
+    "notifications": [],
+    "vivaFanFareAvailable": false
+   }
+  ],
+  "currencyCode": "USD"
+ },
+ "type": "SUCCESS",
+ "action": "CONTINUE"
+}

@@ -1,0 +1,418 @@
+{
+ "data": {
+  "airBoundGroups": [
+   {
+    "boundDetails": {
+     "originLocationCode": "OSL",
+     "destinationLocationCode": "BCN",
+     "duration": 20700,
+     "ranking": 3,
+     "segments": [
+      {
+       "flightId": "SEG-DY820-OSLARN-2026-11-05-1700",
+       "connectionTime": 3900
+      },
+      {
+       "flightId": "SEG-D85503-ARNBCN-2026-11-05-1905"
+      }
+     ]
+    },
+    "airBounds": [
+     {
+      "airBoundId": "BC1-1-1I0DYZ_TSZ0M7R4OYK8E857N5TPWV1RBIE9",
+      "fareFamilyCode": "LOWFARE",
+      "isCheapestOffer": true,
+      "availabilityDetails": [
+       {
+        "flightId": "SEG-DY820-OSLARN-2026-11-05-1700",
+        "cabin": "eco",
+        "bookingClass": "Q",
+        "statusCode": "HK",
+        "quota": 9
+       },
+       {
+        "flightId": "SEG-D85503-ARNBCN-2026-11-05-1905",
+        "cabin": "eco",
+        "bookingClass": "P",
+        "statusCode": "HK",
+        "quota": 5
+       }
+      ],
+      "fareInfos": [
+       {
+        "fareType": "public",
+        "fareClass": "PKDLF",
+        "pricedPassengerTypeCodes": [
+         "ADT"
+        ],
+        "travelerIds": [
+         "ADT-1"
+        ],
+        "flightIds": [
+         "SEG-D85503-ARNBCN-2026-11-05-1905"
+        ]
+       },
+       {
+        "fareType": "public",
+        "fareClass": "QCADLF",
+        "pricedPassengerTypeCodes": [
+         "ADT"
+        ],
+        "travelerIds": [
+         "ADT-1"
+        ],
+        "flightIds": [
+         "SEG-DY820-OSLARN-2026-11-05-1700"
+        ]
+       }
+      ],
+      "prices": {
+       "unitPrices": [
+        {
+         "travelerIds": [
+          "ADT-1"
+         ],
+         "prices": [
+          {
+           "base": 10300,
+           "total": 14871,
+           "currencyCode": "EUR",
+           "taxes": [
+            {
+             "value": 0,
+             "currencyCode": "EUR",
+             "code": "YQYR"
+            }
+           ],
+           "totalTaxes": 4571
+          }
+         ]
+        }
+       ],
+       "totalPrices": [
+        {
+         "base": 10300,
+         "total": 14871,
+         "currencyCode": "EUR",
+         "taxes": [
+          {
+           "value": 0,
+           "currencyCode": "EUR",
+           "code": "YQYR"
+          }
+         ],
+         "totalTaxes": 4571
+        }
+       ]
+      }
+     },
+     {
+      "airBoundId": "BC1-1-1I0DYZ_WIYN7Q8UF53UWNI1OLPK64SDBA6S",
+      "fareFamilyCode": "LOWPLUS",
+      "availabilityDetails": [
+       {
+        "flightId": "SEG-DY820-OSLARN-2026-11-05-1700",
+        "cabin": "eco",
+        "bookingClass": "Q",
+        "statusCode": "HK",
+        "quota": 9
+       },
+       {
+        "flightId": "SEG-D85503-ARNBCN-2026-11-05-1905",
+        "cabin": "eco",
+        "bookingClass": "P",
+        "statusCode": "HK",
+        "quota": 5
+       }
+      ],
+      "fareInfos": [
+       {
+        "fareType": "public",
+        "fareClass": "QCADLP",
+        "pricedPassengerTypeCodes": [
+         "ADT"
+        ],
+        "travelerIds": [
+         "ADT-1"
+        ],
+        "flightIds": [
+         "SEG-DY820-OSLARN-2026-11-05-1700"
+        ]
+       },
+       {
+        "fareType": "public",
+        "fareClass": "PKDLP",
+        "pricedPassengerTypeCodes": [
+         "ADT"
+        ],
+        "travelerIds": [
+         "ADT-1"
+        ],
+        "flightIds": [
+         "SEG-D85503-ARNBCN-2026-11-05-1905"
+        ]
+       }
+      ],
+      "prices": {
+       "unitPrices": [
+        {
+         "travelerIds": [
+          "ADT-1"
+         ],
+         "prices": [
+          {
+           "base": 16600,
+           "total": 21171,
+           "currencyCode": "EUR",
+           "taxes": [
+            {
+             "value": 0,
+             "currencyCode": "EUR",
+             "code": "YQYR"
+            }
+           ],
+           "totalTaxes": 4571
+          }
+         ]
+        }
+       ],
+       "totalPrices": [
+        {
+         "base": 16600,
+         "total": 21171,
+         "currencyCode": "EUR",
+         "taxes": [
+          {
+           "value": 0,
+           "currencyCode": "EUR",
+           "code": "YQYR"
+          }
+         ],
+         "totalTaxes": 4571
+        }
+       ]
+      }
+     }
+    ]
+   },
+   {
+    "boundDetails": {
+     "originLocationCode": "OSL",
+     "destinationLocationCode": "BCN",
+     "duration": 12600,
+     "ranking": 1,
+     "segments": [
+      {
+       "flightId": "SEG-D85523-OSLBCN-2026-11-05-1920"
+      }
+     ]
+    },
+    "airBounds": [
+     {
+      "airBoundId": "BC1-1-1I0DYZ_SY1L94P286U8EYBLRBVY80JHKXYS",
+      "fareFamilyCode": "LOWFARE",
+      "availabilityDetails": [
+       {
+        "flightId": "SEG-D85523-OSLBCN-2026-11-05-1920",
+        "cabin": "eco",
+        "bookingClass": "M",
+        "statusCode": "HK",
+        "quota": 9
+       }
+      ],
+      "fareInfos": [
+       {
+        "fareType": "public",
+        "fareClass": "MKDLF",
+        "pricedPassengerTypeCodes": [
+         "ADT"
+        ],
+        "travelerIds": [
+         "ADT-1"
+        ],
+        "flightIds": [
+         "SEG-D85523-OSLBCN-2026-11-05-1920"
+        ]
+       }
+      ],
+      "prices": {
+       "unitPrices": [
+        {
+         "travelerIds": [
+          "ADT-1"
+         ],
+         "prices": [
+          {
+           "base": 14500,
+           "total": 16676,
+           "currencyCode": "EUR",
+           "taxes": [
+            {
+             "value": 0,
+             "currencyCode": "EUR",
+             "code": "YQYR"
+            }
+           ],
+           "totalTaxes": 2176
+          }
+         ]
+        }
+       ],
+       "totalPrices": [
+        {
+         "base": 14500,
+         "total": 16676,
+         "currencyCode": "EUR",
+         "taxes": [
+          {
+           "value": 0,
+           "currencyCode": "EUR",
+           "code": "YQYR"
+          }
+         ],
+         "totalTaxes": 2176
+        }
+       ]
+      }
+     },
+     {
+      "airBoundId": "BC1-1-1I0DYZ_VBOZGRIDH4LHTZIWC1DDJ33X3JAF",
+      "fareFamilyCode": "LOWPLUS",
+      "availabilityDetails": [
+       {
+        "flightId": "SEG-D85523-OSLBCN-2026-11-05-1920",
+        "cabin": "eco",
+        "bookingClass": "M",
+        "statusCode": "HK",
+        "quota": 9
+       }
+      ],
+      "fareInfos": [
+       {
+        "fareType": "public",
+        "fareClass": "MKDLP",
+        "pricedPassengerTypeCodes": [
+         "ADT"
+        ],
+        "travelerIds": [
+         "ADT-1"
+        ],
+        "flightIds": [
+         "SEG-D85523-OSLBCN-2026-11-05-1920"
+        ]
+       }
+      ],
+      "prices": {
+       "unitPrices": [
+        {
+         "travelerIds": [
+          "ADT-1"
+         ],
+         "prices": [
+          {
+           "base": 18700,
+           "total": 20876,
+           "currencyCode": "EUR",
+           "taxes": [
+            {
+             "value": 0,
+             "currencyCode": "EUR",
+             "code": "YQYR"
+            }
+           ],
+           "totalTaxes": 2176
+          }
+         ]
+        }
+       ],
+       "totalPrices": [
+        {
+         "base": 18700,
+         "total": 20876,
+         "currencyCode": "EUR",
+         "taxes": [
+          {
+           "value": 0,
+           "currencyCode": "EUR",
+           "code": "YQYR"
+          }
+         ],
+         "totalTaxes": 2176
+        }
+       ]
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "dictionaries": {
+  "currency": {
+   "EUR": {
+    "name": "EURO",
+    "decimalPlaces": 2
+   }
+  },
+  "airline": {
+   "D8": "NORWEGIAN AIR SWEDEN AOC AB",
+   "DY": "NORWEGIAN AIR SHUTTLE AOC AS"
+  },
+  "flight": {
+   "SEG-DY820-OSLARN-2026-11-05-1700": {
+    "marketingAirlineCode": "DY",
+    "operatingAirlineCode": "D8",
+    "marketingFlightNumber": "820",
+    "departure": {
+     "locationCode": "OSL",
+     "dateTime": "2026-11-05T17:00:00.000+01:00"
+    },
+    "arrival": {
+     "locationCode": "ARN",
+     "dateTime": "2026-11-05T18:00:00.000+01:00",
+     "terminal": "5"
+    },
+    "aircraftCode": "7M8",
+    "duration": 3600,
+    "isOpenSegment": false,
+    "secureFlightIndicator": false
+   },
+   "SEG-D85523-OSLBCN-2026-11-05-1920": {
+    "marketingAirlineCode": "D8",
+    "operatingAirlineCode": "D8",
+    "marketingFlightNumber": "5523",
+    "departure": {
+     "locationCode": "OSL",
+     "dateTime": "2026-11-05T19:20:00.000+01:00"
+    },
+    "arrival": {
+     "locationCode": "BCN",
+     "dateTime": "2026-11-05T22:50:00.000+01:00",
+     "terminal": "2"
+    },
+    "aircraftCode": "73H",
+    "duration": 12600,
+    "isOpenSegment": false,
+    "secureFlightIndicator": false
+   },
+   "SEG-D85503-ARNBCN-2026-11-05-1905": {
+    "marketingAirlineCode": "D8",
+    "operatingAirlineCode": "D8",
+    "marketingFlightNumber": "5503",
+    "departure": {
+     "locationCode": "ARN",
+     "dateTime": "2026-11-05T19:05:00.000+01:00",
+     "terminal": "5"
+    },
+    "arrival": {
+     "locationCode": "BCN",
+     "dateTime": "2026-11-05T22:45:00.000+01:00",
+     "terminal": "2"
+    },
+    "aircraftCode": "73H",
+    "duration": 13200,
+    "isOpenSegment": false,
+    "secureFlightIndicator": false
+   }
+  }
+ }
+}

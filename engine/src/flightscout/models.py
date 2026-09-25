@@ -11,7 +11,9 @@ from typing import Literal
 from pydantic import BaseModel, Field, computed_field, model_validator
 
 Source = Literal["google", "kiwi", "ryanair", "serpapi", "volaris", "wideroe", "skyairline", "norse", "volotea",
-                 "condor", "flair", "wizzair", "vivaaerobus", "kiwiweb", "kayak", "skyscanner"]
+                 "condor", "flair", "wizzair", "vivaaerobus", "kiwiweb", "kayak", "skyscanner",
+                 # direct airline sources that need a real browser (sources/_browser.py)
+                 "transavia", "norwegian", "southwest", "allegiant"]
 Cabin = Literal["economy", "premium", "business", "first"]
 
 

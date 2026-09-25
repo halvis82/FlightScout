@@ -10,8 +10,10 @@ from concurrent.futures import ThreadPoolExecutor
 from . import airports, fx, sellers
 from .models import Itinerary, SearchQuery, SearchResult, Trip
 from .models import DatePrice
-from .sources import (condor, flair, google, kiwi, kiwiweb, norse, serpapi, skyairline, skyscanner, vivaaerobus,
-                      volaris, volotea, wideroe, wizzair)
+from .sources import (_browser, condor, flair, google, kiwi, kiwiweb, norse, serpapi, skyairline, skyscanner,
+                      vivaaerobus, volaris, volotea, wideroe, wizzair)
+from .sources import (allegiant_browser, norwegian_browser, southwest_browser, transavia_browser,
+                      vivaaerobus_browser)
 
 log = logging.getLogger(__name__)
 
@@ -20,6 +22,20 @@ SOURCES = {
     "wideroe": wideroe.search, "skyairline": skyairline.search, "norse": norse.search,
     "volotea": volotea.search, "condor": condor.search, "flair": flair.search, "kiwiweb": kiwiweb.search,
 }
+
+# Airlines that block plain HTTP clients, read through one shared real Chrome
+# (sources/_browser.py). Not in the default source list (Vercel has no
+# browser): search() adds them by itself wherever Chrome and Playwright are
+# installed (local runner, CLI, GitHub tracker) and the query asks for direct
+# airline sources. Each one also gates itself on its own network. Set
+# FLIGHTSCOUT_BROWSER=0 to turn them off.
+BROWSER_SOURCES = {
+    "transavia": transavia_browser.search, "norwegian": norwegian_browser.search,
+    "southwest": southwest_browser.search, "vivaaerobus": vivaaerobus_browser.search,
+    "allegiant": allegiant_browser.search,
+}
+SOURCES.update(BROWSER_SOURCES)
+_DIRECT = {"volaris", "wideroe", "skyairline", "norse", "volotea", "condor", "flair"}
 
 # Airline low fare calendars (one way, cheapest fare per day). Each module
 # gates itself with relevant(), so only carriers that fly the market are asked.
@@ -138,6 +154,8 @@ def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> Search
         "destinations": airports.expand_nearby(q.destinations, q.nearby_km),
     })
     srcs = [s for s in q.sources if s in SOURCES and (s != "serpapi" or serpapi.enabled())]
+    if set(q.sources) & _DIRECT and _browser.available():
+        srcs += [s for s in BROWSER_SOURCES if s not in srcs]
     errors: dict[str, str] = {}
     found: list[Itinerary] = []
     with ThreadPoolExecutor(max_workers=len(srcs) or 1) as ex:

@@ -1,0 +1,202 @@
+{
+ "data": {
+  "flights": {
+   "departing": [
+    {
+     "id": "2026-11-06-G4-282",
+     "flight": {
+      "id": "2026-11-06-G4-282",
+      "number": "282",
+      "operatedBy": null,
+      "origin": {
+       "displayName": "Harry Reid International Airport (LAS)",
+       "code": "LAS",
+       "__typename": "Airport"
+      },
+      "destination": {
+       "code": "BLI",
+       "displayName": "Bellingham International Airport (BLI)",
+       "__typename": "Airport"
+      },
+      "departingTime": "2026-11-06T06:00:00",
+      "arrivalTime": "2026-11-06T08:47:00",
+      "isOvernight": false,
+      "providerId": "other",
+      "__typename": "Flight"
+     },
+     "strikethruPrice": 51,
+     "price": 41,
+     "baseFare": 3.6,
+     "availableSeatsCount": 5,
+     "discountType": "ROUND_TRIP",
+     "totalDiscountValue": 10,
+     "incentiveType": null,
+     "incentiveSavedAmount": null,
+     "incentiveReturnDate": null,
+     "flightFares": [
+      {
+       "fareName": "DF",
+       "strikethruPrice": 51,
+       "price": 41,
+       "baseFare": 3.6,
+       "availableSeatsCount": 5,
+       "discountType": "ROUND_TRIP",
+       "totalDiscountValue": 10,
+       "incentiveType": null,
+       "incentiveSavedAmount": null,
+       "incentiveReturnDate": null,
+       "__typename": "FlightFare"
+      }
+     ],
+     "__typename": "FlightOption"
+    },
+    {
+     "id": "2026-11-06-G4-272",
+     "flight": {
+      "id": "2026-11-06-G4-272",
+      "number": "272",
+      "operatedBy": null,
+      "origin": {
+       "displayName": "Harry Reid International Airport (LAS)",
+       "code": "LAS",
+       "__typename": "Airport"
+      },
+      "destination": {
+       "code": "BLI",
+       "displayName": "Bellingham International Airport (BLI)",
+       "__typename": "Airport"
+      },
+      "departingTime": "2026-11-06T17:24:00",
+      "arrivalTime": "2026-11-06T20:11:00",
+      "isOvernight": false,
+      "providerId": "other",
+      "__typename": "Flight"
+     },
+     "strikethruPrice": 65,
+     "price": 55,
+     "baseFare": 17.6,
+     "availableSeatsCount": 5,
+     "discountType": "ROUND_TRIP",
+     "totalDiscountValue": 10,
+     "incentiveType": null,
+     "incentiveSavedAmount": null,
+     "incentiveReturnDate": null,
+     "flightFares": [
+      {
+       "fareName": "DF",
+       "strikethruPrice": 65,
+       "price": 55,
+       "baseFare": 17.6,
+       "availableSeatsCount": 5,
+       "discountType": "ROUND_TRIP",
+       "totalDiscountValue": 10,
+       "incentiveType": null,
+       "incentiveSavedAmount": null,
+       "incentiveReturnDate": null,
+       "__typename": "FlightFare"
+      }
+     ],
+     "__typename": "FlightOption"
+    }
+   ],
+   "returning": [
+    {
+     "id": "2026-11-09-G4-273",
+     "flight": {
+      "id": "2026-11-09-G4-273",
+      "number": "273",
+      "operatedBy": null,
+      "origin": {
+       "displayName": "Bellingham International Airport (BLI)",
+       "code": "BLI",
+       "__typename": "Airport"
+      },
+      "destination": {
+       "code": "LAS",
+       "displayName": "Harry Reid International Airport (LAS)",
+       "__typename": "Airport"
+      },
+      "departingTime": "2026-11-09T20:59:00",
+      "arrivalTime": "2026-11-09T23:36:00",
+      "isOvernight": false,
+      "providerId": "other",
+      "__typename": "Flight"
+     },
+     "strikethruPrice": 54,
+     "price": 44,
+     "baseFare": 6.6,
+     "availableSeatsCount": 9,
+     "discountType": "ROUND_TRIP",
+     "totalDiscountValue": 10,
+     "incentiveType": null,
+     "incentiveSavedAmount": null,
+     "incentiveReturnDate": null,
+     "flightFares": [
+      {
+       "fareName": "DF",
+       "strikethruPrice": 54,
+       "price": 44,
+       "baseFare": 6.6,
+       "availableSeatsCount": 9,
+       "discountType": "ROUND_TRIP",
+       "totalDiscountValue": 10,
+       "incentiveType": null,
+       "incentiveSavedAmount": null,
+       "incentiveReturnDate": null,
+       "__typename": "FlightFare"
+      }
+     ],
+     "__typename": "FlightOption"
+    },
+    {
+     "id": "2026-11-09-G4-271",
+     "flight": {
+      "id": "2026-11-09-G4-271",
+      "number": "271",
+      "operatedBy": null,
+      "origin": {
+       "displayName": "Bellingham International Airport (BLI)",
+       "code": "BLI",
+       "__typename": "Airport"
+      },
+      "destination": {
+       "code": "LAS",
+       "displayName": "Harry Reid International Airport (LAS)",
+       "__typename": "Airport"
+      },
+      "departingTime": "2026-11-09T09:37:00",
+      "arrivalTime": "2026-11-09T12:14:00",
+      "isOvernight": false,
+      "providerId": "other",
+      "__typename": "Flight"
+     },
+     "strikethruPrice": 91,
+     "price": 81,
+     "baseFare": 43.6,
+     "availableSeatsCount": 2,
+     "discountType": "ROUND_TRIP",
+     "totalDiscountValue": 10,
+     "incentiveType": null,
+     "incentiveSavedAmount": null,
+     "incentiveReturnDate": null,
+     "flightFares": [
+      {
+       "fareName": "DF",
+       "strikethruPrice": 91,
+       "price": 81,
+       "baseFare": 43.6,
+       "availableSeatsCount": 2,
+       "discountType": "ROUND_TRIP",
+       "totalDiscountValue": 10,
+       "incentiveType": null,
+       "incentiveSavedAmount": null,
+       "incentiveReturnDate": null,
+       "__typename": "FlightFare"
+      }
+     ],
+     "__typename": "FlightOption"
+    }
+   ]
+  }
+ }
+}

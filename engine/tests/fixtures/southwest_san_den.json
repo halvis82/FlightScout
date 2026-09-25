@@ -1,0 +1,551 @@
+{
+ "data": {
+  "searchResults": {
+   "airProducts": [
+    {
+     "containsAfterSix": true,
+     "containsAvailability": false,
+     "containsBeforeNoon": true,
+     "containsDirect": true,
+     "containsNonstop": true,
+     "containsNoonToSix": true,
+     "containsStops": true,
+     "containsTimeOfDay": true,
+     "containsOnlyPlaneChange": false,
+     "fastestDuration": "140",
+     "lowestFare": {
+      "currencyCode": "USD",
+      "value": "108.40",
+      "fareFamily": "WGA"
+     },
+     "originationAirportCode": "SAN",
+     "destinationAirportCode": "DEN",
+     "details": [
+      {
+       "nextDay": false,
+       "totalDuration": 140,
+       "filterTags": [
+        "NOON_TO_SIX",
+        "NONSTOP",
+        "AVAILABLE"
+       ],
+       "fareProducts": {
+        "ADULT": {
+         "WGA": {
+          "productId": "WGA|DLNWH2F,D,SAN,DEN,2026-11-06T13:25-08:00,2026-11-06T16:45-07:00,WN,WN,3700,7M8",
+          "cabinInfo": [
+           {
+            "segmentIdentifier": "WN3700SANDEN20261106",
+            "cabin": "ECO"
+           }
+          ],
+          "pricingContext": {
+           "cff": "CFFREV",
+           "flowType": "REVENUE",
+           "paxType": "ADT",
+           "prcPaxType": "ADT",
+           "pricingFlow": "REV"
+          },
+          "fare": {
+           "accrualPoints": "174",
+           "baseFare": {
+            "currencyCode": "USD",
+            "value": "86.51"
+           },
+           "fareType": "NONDISCOUNT",
+           "totalFare": {
+            "currencyCode": "USD",
+            "value": "108.40"
+           },
+           "totalTaxesAndFees": {
+            "currencyCode": "USD",
+            "value": "21.89"
+           }
+          },
+          "availabilityStatus": "AVAILABLE",
+          "passengerType": "ADULT"
+         },
+         "PLU": {
+          "productId": "PLU|DLNWH4F,D,SAN,DEN,2026-11-06T13:25-08:00,2026-11-06T16:45-07:00,WN,WN,3700,7M8",
+          "cabinInfo": [
+           {
+            "segmentIdentifier": "WN3700SANDEN20261106",
+            "cabin": "ECO"
+           }
+          ],
+          "pricingContext": {
+           "cff": "CFFREV",
+           "flowType": "REVENUE",
+           "paxType": "ADT",
+           "prcPaxType": "ADT",
+           "pricingFlow": "REV"
+          },
+          "fare": {
+           "accrualPoints": "743",
+           "baseFare": {
+            "currencyCode": "USD",
+            "value": "123.72"
+           },
+           "fareType": "NONDISCOUNT",
+           "totalFare": {
+            "currencyCode": "USD",
+            "value": "148.40"
+           },
+           "totalTaxesAndFees": {
+            "currencyCode": "USD",
+            "value": "24.68"
+           },
+           "totalFareBaselineDifference": {
+            "value": "40.00",
+            "currencyCode": "USD"
+           }
+          },
+          "availabilityStatus": "AVAILABLE",
+          "passengerType": "ADULT"
+         }
+        }
+       },
+       "originationAirportCode": "SAN",
+       "destinationAirportCode": "DEN",
+       "flightNumbers": [
+        "3700"
+       ],
+       "departureDateTime": "2026-11-06T13:25:00.000-08:00",
+       "arrivalDateTime": "2026-11-06T16:45:00.000-07:00",
+       "departureTime": "13:25",
+       "arrivalTime": "16:45",
+       "segments": [
+        {
+         "operatingCarrierCode": "WN",
+         "stopsDetails": [
+          {
+           "arrivalTime": "16:45",
+           "changePlanes": false,
+           "departureTime": "13:25",
+           "legDuration": 140,
+           "stopDuration": 0,
+           "originationAirportCode": "SAN",
+           "destinationAirportCode": "DEN",
+           "departureDateTime": "2026-11-06T13:25:00.000-08:00",
+           "arrivalDateTime": "2026-11-06T16:45:00.000-07:00",
+           "flightNumber": "3700"
+          }
+         ],
+         "wifiOnBoard": true,
+         "originationAirportCode": "SAN",
+         "destinationAirportCode": "DEN",
+         "departureDateTime": "2026-11-06T13:25:00.000-08:00",
+         "departureTime": "13:25",
+         "arrivalDateTime": "2026-11-06T16:45:00.000-07:00",
+         "arrivalTime": "16:45",
+         "marketingCarrierCode": "WN",
+         "flightNumber": "3700",
+         "duration": "02:20",
+         "numberOfStops": 0,
+         "aircraftEquipmentType": "7M8"
+        }
+       ]
+      },
+      {
+       "nextDay": false,
+       "totalDuration": 140,
+       "filterTags": [
+        "NOON_TO_SIX",
+        "NONSTOP",
+        "AVAILABLE"
+       ],
+       "fareProducts": {
+        "ADULT": {
+         "WGA": {
+          "productId": "WGA|DLNWH2F,D,SAN,DEN,2026-11-06T14:40-08:00,2026-11-06T18:00-07:00,WN,WN,1094,73H",
+          "cabinInfo": [
+           {
+            "segmentIdentifier": "WN1094SANDEN20261106",
+            "cabin": "ECO"
+           }
+          ],
+          "pricingContext": {
+           "cff": "CFFREV",
+           "flowType": "REVENUE",
+           "paxType": "ADT",
+           "prcPaxType": "ADT",
+           "pricingFlow": "REV"
+          },
+          "fare": {
+           "accrualPoints": "174",
+           "baseFare": {
+            "currencyCode": "USD",
+            "value": "86.51"
+           },
+           "fareType": "NONDISCOUNT",
+           "totalFare": {
+            "currencyCode": "USD",
+            "value": "108.40"
+           },
+           "totalTaxesAndFees": {
+            "currencyCode": "USD",
+            "value": "21.89"
+           }
+          },
+          "availabilityStatus": "AVAILABLE",
+          "passengerType": "ADULT"
+         },
+         "PLU": {
+          "productId": "PLU|DLNWH4F,D,SAN,DEN,2026-11-06T14:40-08:00,2026-11-06T18:00-07:00,WN,WN,1094,73H",
+          "cabinInfo": [
+           {
+            "segmentIdentifier": "WN1094SANDEN20261106",
+            "cabin": "ECO"
+           }
+          ],
+          "pricingContext": {
+           "cff": "CFFREV",
+           "flowType": "REVENUE",
+           "paxType": "ADT",
+           "prcPaxType": "ADT",
+           "pricingFlow": "REV"
+          },
+          "fare": {
+           "accrualPoints": "743",
+           "baseFare": {
+            "currencyCode": "USD",
+            "value": "123.72"
+           },
+           "fareType": "NONDISCOUNT",
+           "totalFare": {
+            "currencyCode": "USD",
+            "value": "148.40"
+           },
+           "totalTaxesAndFees": {
+            "currencyCode": "USD",
+            "value": "24.68"
+           },
+           "totalFareBaselineDifference": {
+            "value": "40.00",
+            "currencyCode": "USD"
+           }
+          },
+          "availabilityStatus": "AVAILABLE",
+          "passengerType": "ADULT"
+         }
+        }
+       },
+       "originationAirportCode": "SAN",
+       "destinationAirportCode": "DEN",
+       "flightNumbers": [
+        "1094"
+       ],
+       "departureDateTime": "2026-11-06T14:40:00.000-08:00",
+       "arrivalDateTime": "2026-11-06T18:00:00.000-07:00",
+       "departureTime": "14:40",
+       "arrivalTime": "18:00",
+       "segments": [
+        {
+         "operatingCarrierCode": "WN",
+         "stopsDetails": [
+          {
+           "arrivalTime": "18:00",
+           "changePlanes": false,
+           "departureTime": "14:40",
+           "legDuration": 140,
+           "stopDuration": 0,
+           "originationAirportCode": "SAN",
+           "destinationAirportCode": "DEN",
+           "departureDateTime": "2026-11-06T14:40:00.000-08:00",
+           "arrivalDateTime": "2026-11-06T18:00:00.000-07:00",
+           "flightNumber": "1094"
+          }
+         ],
+         "wifiOnBoard": true,
+         "originationAirportCode": "SAN",
+         "destinationAirportCode": "DEN",
+         "departureDateTime": "2026-11-06T14:40:00.000-08:00",
+         "departureTime": "14:40",
+         "arrivalDateTime": "2026-11-06T18:00:00.000-07:00",
+         "arrivalTime": "18:00",
+         "marketingCarrierCode": "WN",
+         "flightNumber": "1094",
+         "duration": "02:20",
+         "numberOfStops": 0,
+         "aircraftEquipmentType": "73H"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "containsAfterSix": true,
+     "containsAvailability": false,
+     "containsBeforeNoon": true,
+     "containsDirect": true,
+     "containsNonstop": true,
+     "containsNoonToSix": true,
+     "containsStops": true,
+     "containsTimeOfDay": true,
+     "containsOnlyPlaneChange": false,
+     "fastestDuration": "140",
+     "lowestFare": {
+      "currencyCode": "USD",
+      "value": "98.40",
+      "fareFamily": "WGA"
+     },
+     "originationAirportCode": "DEN",
+     "destinationAirportCode": "SAN",
+     "details": [
+      {
+       "nextDay": false,
+       "totalDuration": 140,
+       "filterTags": [
+        "BEFORE_NOON",
+        "AVAILABLE",
+        "NONSTOP"
+       ],
+       "fareProducts": {
+        "ADULT": {
+         "WGA": {
+          "productId": "WGA|VDNWH2F,V,DEN,SAN,2026-11-10T08:50-07:00,2026-11-10T10:10-08:00,WN,WN,1308,73H",
+          "cabinInfo": [
+           {
+            "segmentIdentifier": "WN1308DENSAN20261110",
+            "cabin": "ECO"
+           }
+          ],
+          "pricingContext": {
+           "cff": "CFFREV",
+           "flowType": "REVENUE",
+           "paxType": "ADT",
+           "prcPaxType": "ADT",
+           "pricingFlow": "REV"
+          },
+          "fare": {
+           "accrualPoints": "155",
+           "baseFare": {
+            "currencyCode": "USD",
+            "value": "77.21"
+           },
+           "fareType": "NONDISCOUNT",
+           "totalFare": {
+            "currencyCode": "USD",
+            "value": "98.40"
+           },
+           "totalTaxesAndFees": {
+            "currencyCode": "USD",
+            "value": "21.19"
+           }
+          },
+          "availabilityStatus": "AVAILABLE",
+          "passengerType": "ADULT"
+         },
+         "PLU": {
+          "productId": "PLU|VDNWH4F,V,DEN,SAN,2026-11-10T08:50-07:00,2026-11-10T10:10-08:00,WN,WN,1308,73H",
+          "cabinInfo": [
+           {
+            "segmentIdentifier": "WN1308DENSAN20261110",
+            "cabin": "ECO"
+           }
+          ],
+          "pricingContext": {
+           "cff": "CFFREV",
+           "flowType": "REVENUE",
+           "paxType": "ADT",
+           "prcPaxType": "ADT",
+           "pricingFlow": "REV"
+          },
+          "fare": {
+           "accrualPoints": "687",
+           "baseFare": {
+            "currencyCode": "USD",
+            "value": "114.42"
+           },
+           "fareType": "NONDISCOUNT",
+           "totalFare": {
+            "currencyCode": "USD",
+            "value": "138.40"
+           },
+           "totalTaxesAndFees": {
+            "currencyCode": "USD",
+            "value": "23.98"
+           },
+           "totalFareBaselineDifference": {
+            "value": "40.00",
+            "currencyCode": "USD"
+           }
+          },
+          "availabilityStatus": "AVAILABLE",
+          "passengerType": "ADULT"
+         }
+        }
+       },
+       "originationAirportCode": "DEN",
+       "destinationAirportCode": "SAN",
+       "flightNumbers": [
+        "1308"
+       ],
+       "departureDateTime": "2026-11-10T08:50:00.000-07:00",
+       "arrivalDateTime": "2026-11-10T10:10:00.000-08:00",
+       "departureTime": "08:50",
+       "arrivalTime": "10:10",
+       "segments": [
+        {
+         "operatingCarrierCode": "WN",
+         "stopsDetails": [
+          {
+           "arrivalTime": "10:10",
+           "changePlanes": false,
+           "departureTime": "08:50",
+           "legDuration": 140,
+           "stopDuration": 0,
+           "originationAirportCode": "DEN",
+           "destinationAirportCode": "SAN",
+           "departureDateTime": "2026-11-10T08:50:00.000-07:00",
+           "arrivalDateTime": "2026-11-10T10:10:00.000-08:00",
+           "flightNumber": "1308"
+          }
+         ],
+         "wifiOnBoard": true,
+         "originationAirportCode": "DEN",
+         "destinationAirportCode": "SAN",
+         "departureDateTime": "2026-11-10T08:50:00.000-07:00",
+         "departureTime": "08:50",
+         "arrivalDateTime": "2026-11-10T10:10:00.000-08:00",
+         "arrivalTime": "10:10",
+         "marketingCarrierCode": "WN",
+         "flightNumber": "1308",
+         "duration": "02:20",
+         "numberOfStops": 0,
+         "aircraftEquipmentType": "73H"
+        }
+       ]
+      },
+      {
+       "nextDay": false,
+       "totalDuration": 145,
+       "filterTags": [
+        "NOON_TO_SIX",
+        "NONSTOP",
+        "AVAILABLE"
+       ],
+       "fareProducts": {
+        "ADULT": {
+         "WGA": {
+          "productId": "WGA|VDNWH2F,V,DEN,SAN,2026-11-10T12:05-07:00,2026-11-10T13:30-08:00,WN,WN,24,73H",
+          "cabinInfo": [
+           {
+            "segmentIdentifier": "WN24DENSAN20261110",
+            "cabin": "ECO"
+           }
+          ],
+          "pricingContext": {
+           "cff": "CFFREV",
+           "flowType": "REVENUE",
+           "paxType": "ADT",
+           "prcPaxType": "ADT",
+           "pricingFlow": "REV"
+          },
+          "fare": {
+           "accrualPoints": "155",
+           "baseFare": {
+            "currencyCode": "USD",
+            "value": "77.21"
+           },
+           "fareType": "NONDISCOUNT",
+           "totalFare": {
+            "currencyCode": "USD",
+            "value": "98.40"
+           },
+           "totalTaxesAndFees": {
+            "currencyCode": "USD",
+            "value": "21.19"
+           }
+          },
+          "availabilityStatus": "AVAILABLE",
+          "passengerType": "ADULT"
+         },
+         "PLU": {
+          "productId": "PLU|VDNWH4F,V,DEN,SAN,2026-11-10T12:05-07:00,2026-11-10T13:30-08:00,WN,WN,24,73H",
+          "cabinInfo": [
+           {
+            "segmentIdentifier": "WN24DENSAN20261110",
+            "cabin": "ECO"
+           }
+          ],
+          "pricingContext": {
+           "cff": "CFFREV",
+           "flowType": "REVENUE",
+           "paxType": "ADT",
+           "prcPaxType": "ADT",
+           "pricingFlow": "REV"
+          },
+          "fare": {
+           "accrualPoints": "687",
+           "baseFare": {
+            "currencyCode": "USD",
+            "value": "114.42"
+           },
+           "fareType": "NONDISCOUNT",
+           "totalFare": {
+            "currencyCode": "USD",
+            "value": "138.40"
+           },
+           "totalTaxesAndFees": {
+            "currencyCode": "USD",
+            "value": "23.98"
+           },
+           "totalFareBaselineDifference": {
+            "value": "40.00",
+            "currencyCode": "USD"
+           }
+          },
+          "availabilityStatus": "AVAILABLE",
+          "passengerType": "ADULT"
+         }
+        }
+       },
+       "originationAirportCode": "DEN",
+       "destinationAirportCode": "SAN",
+       "flightNumbers": [
+        "24"
+       ],
+       "departureDateTime": "2026-11-10T12:05:00.000-07:00",
+       "arrivalDateTime": "2026-11-10T13:30:00.000-08:00",
+       "departureTime": "12:05",
+       "arrivalTime": "13:30",
+       "segments": [
+        {
+         "operatingCarrierCode": "WN",
+         "stopsDetails": [
+          {
+           "arrivalTime": "13:30",
+           "changePlanes": false,
+           "departureTime": "12:05",
+           "legDuration": 145,
+           "stopDuration": 0,
+           "originationAirportCode": "DEN",
+           "destinationAirportCode": "SAN",
+           "departureDateTime": "2026-11-10T12:05:00.000-07:00",
+           "arrivalDateTime": "2026-11-10T13:30:00.000-08:00",
+           "flightNumber": "24"
+          }
+         ],
+         "wifiOnBoard": true,
+         "originationAirportCode": "DEN",
+         "destinationAirportCode": "SAN",
+         "departureDateTime": "2026-11-10T12:05:00.000-07:00",
+         "departureTime": "12:05",
+         "arrivalDateTime": "2026-11-10T13:30:00.000-08:00",
+         "arrivalTime": "13:30",
+         "marketingCarrierCode": "WN",
+         "flightNumber": "24",
+         "duration": "02:25",
+         "numberOfStops": 0,
+         "aircraftEquipmentType": "73H"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "success": true
+}
