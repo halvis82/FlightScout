@@ -12,8 +12,12 @@ export const GET = route(async (req) => {
     .slice(0, 6);
   if (!origins.length) return json({ items: [], updated_at: null });
   const rows = await db.select().from(schema.exploreCache).where(inArray(schema.exploreCache.origin, origins));
-  return json({
-    items: rows.flatMap((r) => r.items as unknown[]),
-    updated_at: rows.map((r) => r.updatedAt).sort()[0] ?? null,
-  });
+  // public data refreshed twice a day by the tracker: cache at the edge
+  return json(
+    {
+      items: rows.flatMap((r) => r.items as unknown[]),
+      updated_at: rows.map((r) => r.updatedAt).sort()[0] ?? null,
+    },
+    { headers: { "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600" } },
+  );
 });
