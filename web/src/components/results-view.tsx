@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { ExternalLink, Info } from "lucide-react";
 import { TripCard } from "./trip-card";
 import { RouteMap, type MapArc, type MapPoint } from "./route-map";
@@ -17,6 +17,13 @@ const SOURCE_NAMES: Record<string, string> = { google: "Google Flights", kiwi: "
 function tripDuration(t: Trip) {
   if (t.tickets.length === 1) return t.tickets[0].slices[0].duration_min;
   return t.travel_min;
+}
+
+// Position on Google's "Best" tab: top flights first, then its other flights.
+function googleRank(t: Trip) {
+  const tk = t.tickets.length === 1 ? t.tickets[0] : null;
+  if (!tk || tk.source !== "google" || tk.google_rank == null) return Infinity;
+  return (tk.google_top ? 0 : 10_000) + tk.google_rank;
 }
 
 function tripStops(t: Trip) {
@@ -93,6 +100,12 @@ export function ResultsView({
       if (sort === "price") return convert(a.total_price, a.currency, "USD") - convert(b.total_price, b.currency, "USD");
       if (sort === "duration") return tripDuration(a) - tripDuration(b);
       if (sort === "departure") return a.departure.localeCompare(b.departure);
+      // Best: Google's own "Best" order first (top flights, then the rest of
+      // its list), everything else after by price and time.
+      const ra = googleRank(a);
+      const rb = googleRank(b);
+      if (ra !== rb) return ra - rb;
+      if (ra !== Infinity) return convert(a.total_price, a.currency, "USD") - convert(b.total_price, b.currency, "USD");
       return score(a) - score(b);
     });
   }, [trips, rules, showSplit, hideSelfTransfer, maxStops, sources, timeOfDay, sort, convert, maxPrice]);
@@ -150,6 +163,15 @@ export function ResultsView({
   }, [shown, focus, query]);
 
   const splitCount = trips.filter((t) => t.tickets.length > 1).length;
+  // Like Google's "Cheapest from $X" tab
+  const low = list.length ? Math.min(...list.map((t) => convert(t.total_price, t.currency))) : null;
+  const cheapestLabel =
+    low == null ? "Cheapest" : (
+      <>
+        Cheapest <span className="font-normal text-muted">from</span> {money(low, settings?.currency ?? "USD")}
+      </>
+    );
+  const hasTop = sort === "best" && grouped.some((g) => g.trip.tickets[0]?.google_top);
   const direct = plan?.direct;
 
   return (
@@ -161,7 +183,7 @@ export function ResultsView({
             value={sort}
             onChange={setSort}
             options={[
-              { value: "price", label: "Cheapest" },
+              { value: "price", label: cheapestLabel },
               { value: "best", label: "Best" },
               { value: "duration", label: "Fastest" },
               { value: "departure", label: "Earliest" },
@@ -266,9 +288,17 @@ export function ResultsView({
           <Empty title="No flights match">Try loosening the filters, adding nearby airports, or turning on smart routes.</Empty>
         ) : (
           <div className="space-y-2">
-            {grouped.slice(0, limit).map(({ trip: t, alts }) => (
+            {grouped.slice(0, limit).map(({ trip: t, alts }, i, arr) => (
+              <Fragment key={t.id}>
+                {hasTop && i === 0 && t.tickets[0]?.google_top && (
+                  <h3 className="px-1 pt-1 text-sm font-semibold">
+                    Top departing flights <span className="font-normal text-muted">as ranked on Google Flights</span>
+                  </h3>
+                )}
+                {hasTop && !t.tickets[0]?.google_top && (i === 0 || arr[i - 1].trip.tickets[0]?.google_top) && (
+                  <h3 className="px-1 pt-3 text-sm font-semibold">Other departing flights</h3>
+                )}
               <TripCard
-                key={t.id}
                 trip={t}
                 alts={alts}
                 highlight={hover?.id === t.id}
@@ -293,6 +323,7 @@ export function ResultsView({
                   }, trips);
                 }}
               />
+              </Fragment>
             ))}
             {grouped.length > limit && (
               <Button className="w-full" onClick={() => setLimit(grouped.length)}>

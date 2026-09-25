@@ -74,3 +74,20 @@ def test_one_way_adds_rows_only_the_page_list_has(monkeypatch):
     its = google.search(q)
     assert len(its) == 3  # the two embedded rows plus the one only the page list had, no duplicates
     assert min(i.price for i in its) == 727.0
+
+
+def test_top_departing_flights_are_marked_in_google_order(monkeypatch):
+    # ds:1 [2] holds Google's "Top departing flights", [3] the other flights
+    inner = [None, None, [[ROWS[1]]], [[ROWS[0], ROWS[2]]]]
+    monkeypatch.setattr(google._fli_flights, "fetch_payload", lambda client, url: inner)
+    google._hook_page_fetch()
+    google._fli_flights.fetch_payload(None, "u")
+    top_key = google._legs_key(parse_flight_row(ROWS[1]))
+    assert google._TOP["u"] == {top_key}
+
+    class C:
+        rank = {top_key: 0}
+        top = {top_key}
+
+    assert google._ranked(C, parse_flight_row(ROWS[1])) == {"google_rank": 0, "google_top": True}
+    assert google._ranked(C, parse_flight_row(ROWS[0])) == {"google_rank": None, "google_top": False}

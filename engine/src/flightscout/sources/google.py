@@ -58,6 +58,39 @@ def _diverse(flights: list, n: int) -> list:
     return (first + rest)[: max(n, 1)] + (first + rest)[max(n, 1):]
 
 
+# page URL -> legs keys of the rows in Google's "Top departing flights"
+# (the page's ds:1 [2] block). Filled by a hook on fli's page fetch, which is
+# (re)installed per search because browser_fetch patches the same function.
+_TOP: dict[str, set] = {}
+
+
+def _hook_page_fetch() -> None:
+    cur = _fli_flights.fetch_payload
+    if getattr(cur, "_fs_top", False):
+        return
+
+    def fetch(client, url):
+        inner = cur(client, url)
+        try:
+            from fli.search._decoders import parse_flight_row
+
+            keys = set()
+            for r in (inner[2][0] if isinstance(inner[2], list) else []):
+                try:
+                    keys.add(_legs_key(parse_flight_row(r)))
+                except Exception:
+                    pass
+            if len(_TOP) > 500:
+                _TOP.clear()
+            _TOP[url] = keys
+        except Exception:
+            pass
+        return inner
+
+    fetch._fs_top = True
+    _fli_flights.fetch_payload = fetch
+
+
 class _DiverseSearch(SearchFlights):
     """Expands the cheapest outbound per airline first, and remembers every
     outbound option so the unexpanded ones can still be listed."""
@@ -65,6 +98,23 @@ class _DiverseSearch(SearchFlights):
     outbounds: list = []
     filters = None
     wide = True  # slice the outbound search to cover Google's Cheapest tab
+
+    rank: dict = {}  # outbound legs key -> position on Google's "Best" list
+    top: set = set()  # outbounds in Google's "Top departing flights"
+
+    def _base(self, filters, capture_session, **kw):
+        """The plain search, in Google's own "Best" order. For the outbound
+        list, remember that order and which rows Google showed on top."""
+        rows = super()._fetch_flights(filters, capture_session=capture_session, **kw) or []
+        if capture_session:
+            from fli.search._tfs import build_tfs
+
+            url = _fli_flights.page_url(build_tfs(filters), kw.get("currency"), kw.get("language"), kw.get("country"))
+            self.top = _TOP.get(url, set())
+            self.rank = {}
+            for i, f in enumerate(rows):
+                self.rank.setdefault(_legs_key(f), i)
+        return rows
 
     def _fetch_flights(self, filters, *, capture_session, **kw):
         """For the outbound list, also fetch a few slices of the search (1 stop
@@ -74,7 +124,7 @@ class _DiverseSearch(SearchFlights):
         84 itineraries covering 42 of 43 Cheapest tab departures, vs 49)."""
         if (not self.wide or not capture_session or filters.stops != MaxStops.ANY or filters.alliances
                 or filters.airlines or filters.alliances_exclude):
-            return super()._fetch_flights(filters, capture_session=capture_session, **kw)
+            return self._base(filters, capture_session, **kw)
         from copy import deepcopy
 
         from fli.models import Alliance
@@ -92,7 +142,9 @@ class _DiverseSearch(SearchFlights):
 
         def one(f, first=False):
             try:
-                return super(_DiverseSearch, self)._fetch_flights(f, capture_session=first, **kw) or []
+                if first:
+                    return self._base(f, True, **kw)
+                return super(_DiverseSearch, self)._fetch_flights(f, capture_session=False, **kw) or []
             except Exception:
                 if first:
                     raise
@@ -129,6 +181,11 @@ class _DiverseSearch(SearchFlights):
                 rest = [f for f in ordered[top_n:] if not any(f is e for e in extra)]
                 ordered, top_n = head + extra + rest, top_n + len(extra)
         return super()._expand_multi_leg(ordered, filters, top_n=top_n, **kw)
+
+
+def _ranked(client, outbound) -> dict:
+    k = _legs_key(outbound)
+    return {"google_rank": client.rank.get(k), "google_top": k in client.top}
 
 
 def _legs_key(f) -> tuple:
@@ -276,8 +333,9 @@ def search(q: SearchQuery, top_n: int = 8, wide: bool = True) -> list[Itinerary]
         seat_type=_SEAT[q.cabin],
         sort_by=SortBy.CHEAPEST,
     )
+    _hook_page_fetch()
     client = _DiverseSearch()
-    client.outbounds = []
+    client.outbounds, client.rank, client.top = [], {}, set()
     client.wide = wide
     # the full Cheapest list (see below) loads in parallel with the search
     pool = ThreadPoolExecutor(1)
@@ -332,6 +390,7 @@ def search(q: SearchQuery, top_n: int = 8, wide: bool = True) -> list[Itinerary]
                 seller="Google Flights",
                 seller_kind="metasearch",
                 warnings=[] if len(carriers) == 1 else [],
+                **_ranked(client, parts[0]),
             )
         )
     have = {_legs_key(r[0] if isinstance(r, tuple) else r) for r in results
@@ -345,7 +404,7 @@ def search(q: SearchQuery, top_n: int = 8, wide: bool = True) -> list[Itinerary]
                 source="google", price=float(f.price), currency=f.currency or q.currency, slices=[_slice(f)],
                 booking_url=client.build_flight_booking_url(f, currency=q.currency, seat_type=_SEAT[q.cabin],
                                                             passenger_info=filters.passenger_info),
-                seller="Google Flights", seller_kind="metasearch",
+                seller="Google Flights", seller_kind="metasearch", **_ranked(client, f),
             ))
     # Every other outbound option with its round trip price (Google's list),
     # return to be picked on Google. Also an expanded outbound whose listed
@@ -373,6 +432,7 @@ def search(q: SearchQuery, top_n: int = 8, wide: bool = True) -> list[Itinerary]
             out.append(Itinerary(
                 source="google", price=float(price), currency=ob.currency or q.currency, slices=[_slice(ob)],
                 booking_url=url, seller="Google Flights", seller_kind="metasearch", return_pending=True,
+                **_ranked(client, ob),
             ))
     cache.put(key, [i.model_dump(mode="json") for i in out])
     return out

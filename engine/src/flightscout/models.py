@@ -104,6 +104,10 @@ class Itinerary(BaseModel):
     # Round trip where only the outbound is known: the price is Google's round
     # trip "from" price and the return is picked on the booking page.
     return_pending: bool = False
+    # Where Google Flights ranks the outbound on its "Best" tab (0 = first)
+    # and whether it is in "Top departing flights". None/False for others.
+    google_rank: int | None = None
+    google_top: bool = False
     baggage: dict | None = None
     offers: list[Offer] | None = None  # seller breakdown, when fetched
     price_insight: str | None = None  # e.g. "$461 is low, usually $680 to $2,850"
