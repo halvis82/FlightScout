@@ -1,6 +1,6 @@
 # FlightScout
 
-End to end flight finder for people who fly a lot. One search asks Google Flights, Kiwi.com, 48 airlines directly and 18 booking sites (Booking.com, Expedia, KAYAK, Priceline, Trip.com...) at once, builds cheaper routes out of separate tickets (self transfers, stopovers, nested round trips, multi city trips), shows where you can go cheaply, and tracks the routes you care about twice a day so you get price history and alerts. Every result links straight to the page where you can book it, and every source's prices were checked against that site's own booking page.
+End to end flight finder for people who fly a lot. One search asks Google Flights, ITA Matrix, Kiwi.com, 62 airlines directly and 22 booking sites (Booking.com, Expedia, KAYAK, Priceline, Trip.com, Skiplagged...) at once, builds cheaper routes out of separate tickets (self transfers, stopovers, nested round trips, multi city trips), shows where you can go cheaply, and tracks the routes you care about twice a day so you get price history and alerts. Every result links straight to the page where you can book it, and every source's prices were checked against that site's own booking page.
 
 Three ways to use it, all sharing one account and database:
 
@@ -31,9 +31,9 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [engine/README.md](engine
 |---|---|---|
 | Google Flights | every airline Google sells, both its "Best" and "Cheapest" lists, price calendar | server, your browser (extension) or your computer |
 | Kiwi.com | self transfer combinations, flexible dates, "anywhere" explore | server or your computer |
-| Airlines direct (21 over plain HTTP) | Volaris, Frontier, JetBlue, Alaska, Breeze, Aeroméxico, Arajet, Aerolíneas Argentinas, Flair, Sky, Norse, Condor, Widerøe, Volotea, Jet2, Aer Lingus, Vueling, SKY express, Jazeera, FlySafair, Air New Zealand | server or your computer |
-| Airlines direct (27 that need a real browser) | United, Southwest, Qatar, Etihad, Air France/KLM, Finnair, TAP, Norwegian, Transavia, WestJet, Porter, VietJet, SpiceJet, Virgin Australia... | your computer only (headless Chrome) |
-| Booking sites (11 over HTTP, 7 in a browser) | Booking.com, Expedia, Orbitz, Travelocity, Priceline, KAYAK, momondo, Cheapflights, Wego, Gotogate, Mytrip; Trip.com, Aviasales, eDreams, Opodo, Almosafer, Traveloka, Cleartrip | HTTP ones on the server or your computer, browser ones on your computer |
+| Airlines direct (27 over plain HTTP) | Volaris, Frontier, JetBlue, Alaska, Breeze, Aeroméxico, Arajet, Aerolíneas Argentinas, Flair, Sky, Norse, Condor, Widerøe, Volotea, Jet2, Aer Lingus, Vueling, SKY express, Jazeera, FlySafair, Air New Zealand, Biman, FlyArystan, Star Air, Alliance Air, Nok Air, Spring | server or your computer |
+| Airlines direct (35 that need a real browser) | United, Southwest, Qatar, Etihad, Air France/KLM, Finnair, TAP, SAS, Norwegian, Transavia, WestJet, Porter, Avianca, Vietnam Airlines, Philippine Airlines, VietJet, SpiceJet, Virgin Australia... | your computer only (headless Chrome) |
+| Booking sites and fare engines (15 over HTTP, 8 in a browser) | ITA Matrix, Skiplagged (incl. hidden city, clearly marked), Booking.com, Expedia, Orbitz, Travelocity, Priceline, KAYAK, momondo, Cheapflights, Agoda, Wego, Gotogate, Mytrip, EaseMyTrip; Trip.com, Aviasales, eDreams, Opodo, Almosafer, Traveloka, Cleartrip, ixigo | HTTP ones on the server or your computer, browser ones on your computer |
 | Fare calendars | Wizz Air, Ryanair, VivaAerobus, Volotea, LEVEL, flydubai, Skyscanner | server or your computer |
 
 The full list with methods and caveats: [docs/SOURCES.md](docs/SOURCES.md). Some airline sources need the public key their own website sends to every browser; those keys aren't in this repo (set the env vars in [engine/README.md](engine/README.md)), without them those sources stay off. Booking site prices far below what Google, Kiwi or the airline ask for the same flights are flagged, since they tend to grow at checkout.
