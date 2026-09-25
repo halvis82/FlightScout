@@ -264,7 +264,7 @@ export function WatchButton({ watch, seed, label = "Watch this search" }: { watc
         href={`/watches/${existing.id}`}
         // the rest of a double or triple click that saved it must not navigate away
         onClick={(e) => {
-          if (Date.now() - savedAt.current < 1200) e.preventDefault();
+          if (Date.now() - savedAt.current < 1500) e.preventDefault();
         }}
         title="On your watchlist. Open it."
         className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-good/40 bg-good-soft/40 px-3 text-sm font-medium text-good"
@@ -280,6 +280,7 @@ export function WatchButton({ watch, seed, label = "Watch this search" }: { watc
         loading={busy}
         onClick={async () => {
           if (busy) return;
+          savedAt.current = Date.now(); // the Watching link can appear before this returns
           setBusy(true);
           await w.open(watch, seed);
           savedAt.current = Date.now();
