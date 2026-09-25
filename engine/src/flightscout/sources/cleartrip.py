@@ -81,14 +81,22 @@ def parse(data: dict, url: str = "") -> list[Itinerary]:
 
 
 def _fetch(url: str) -> dict:
-    def job(page) -> str:
-        got = _browser.capture(page, lambda: page.goto(url, wait_until="commit", timeout=45000),
-                               lambda u: "/flight/search/v2" in u, timeout=45)
-        return got[-1][1] if got else ""
+    def job(page) -> tuple[str, int | None]:
+        refused: list[int] = []
+        # capture() only keeps successful answers: note a refusal so it's
+        # reported as a block (and the source gets paused, not retried)
+        on = lambda r: "/flight/search/v2" in r.url and not r.ok and refused.append(r.status)  # noqa: E731
+        page.on("response", on)
+        try:
+            got = _browser.capture(page, lambda: page.goto(url, wait_until="commit", timeout=45000),
+                                   lambda u: "/flight/search/v2" in u, timeout=45, stop=lambda: bool(refused))
+        finally:
+            page.remove_listener("response", on)
+        return (got[-1][1] if got else ""), (refused[0] if refused else None)
 
-    txt = _browser.run(job, "cleartrip", timeout=120)
+    txt, status = _browser.run(job, "cleartrip", timeout=120)
     if not txt:
-        raise RuntimeError("cleartrip: no search response")
+        raise RuntimeError(f"cleartrip: search refused (HTTP {status})" if status else "cleartrip: no search response")
     return json.loads(txt)
 
 
