@@ -245,8 +245,9 @@ class SearchQuery(BaseModel):
     cabin: Cabin = "economy"
     max_stops: int | None = None
     currency: str = "USD"
-    sources: list[Source] = Field(default_factory=lambda: [
-        "google", "kiwi", "kiwiweb", "volaris", "wideroe", "skyairline", "norse", "volotea", "condor"])
+    # "airlines" = every direct airline source that flies the route
+    sources: list[Source | Literal["airlines"]] = Field(default_factory=lambda: [
+        "google", "kiwi", "kiwiweb", "airlines"])
     departure_flex_days: int = 0
     return_flex_days: int = 0
     nearby_km: int = 0  # also search airports within this radius of each side

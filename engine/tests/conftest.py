@@ -30,6 +30,28 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(skip)
 
 
+# Airline and booking sites wall off datacenter IPs (GitHub runners) with
+# 403s, Cloudflare/Akamai/Kasada pages or empty answers, while they work from
+# home. On CI such a live failure is reported as a skip, so the nightly stays
+# green; anywhere else (run the live tests from home before changing a
+# source) it still fails. Real breakage (parse errors, wrong data) fails
+# everywhere.
+_WALLED = ("403", "429", "forbidden", "security verification", "just a moment", "access denied", "captcha",
+           "unusual traffic", "rate_limited", "no availability response", "blocked", "cloudflare", "akamai")
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    rep = outcome.get_result()
+    if (rep.when == "call" and rep.failed and "live" in item.keywords and os.environ.get("GITHUB_ACTIONS")
+            and call.excinfo is not None):
+        text = str(call.excinfo.value).lower()
+        if any(w in text for w in _WALLED):
+            rep.outcome = "skipped"
+            rep.longrepr = (str(item.path), item.location[1] or 0, f"walled on CI: {text.splitlines()[0][:160]}")
+
+
 FIXTURES = Path(__file__).parent / "fixtures"
 
 

@@ -182,7 +182,7 @@ function SearchPage() {
       // Stream: ask each group of sources separately and show results as each
       // arrives. Earlier results stay on screen (dimmed) until the first part
       // of the new search lands.
-      const PARTS: string[][] = [["google"], ["kiwiweb"], ["volaris", "wideroe", "skyairline", "norse", "volotea", "condor"], ["kiwi"]];
+      const PARTS: string[][] = [["google"], ["kiwiweb"], ["airlines"], ["kiwi"]];
       const runId = ++runSeq.current;
       let acc: SearchResult | null = null;
       let pending = PARTS.length;

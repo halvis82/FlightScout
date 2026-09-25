@@ -35,7 +35,20 @@ BROWSER_SOURCES = {
     "allegiant": allegiant_browser.search,
 }
 SOURCES.update(BROWSER_SOURCES)
-_DIRECT = {"volaris", "wideroe", "skyairline", "norse", "volotea", "condor", "flair"}
+# Direct airline sources over plain HTTP. Each gates itself on its network.
+AIRLINES = ["volaris", "wideroe", "skyairline", "norse", "volotea", "condor", "flair"]
+_DIRECT = set(AIRLINES)
+
+
+def expand_sources(names: list[str]) -> list[str]:
+    """Resolve the "airlines" group (and legacy explicit airline lists) to
+    every direct airline source, plus the browser ones where Chrome is here."""
+    out = [s for s in names if s in SOURCES and (s != "serpapi" or serpapi.enabled())]
+    if "airlines" in names:
+        out += [s for s in AIRLINES if s not in out]
+    if ("airlines" in names or set(names) & _DIRECT) and _browser.available():
+        out += [s for s in BROWSER_SOURCES if s not in out]
+    return out
 
 # Airline low fare calendars (one way, cheapest fare per day). Each module
 # gates itself with relevant(), so only carriers that fly the market are asked.
@@ -153,9 +166,7 @@ def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> Search
         "origins": airports.expand_nearby(q.origins, q.nearby_km),
         "destinations": airports.expand_nearby(q.destinations, q.nearby_km),
     })
-    srcs = [s for s in q.sources if s in SOURCES and (s != "serpapi" or serpapi.enabled())]
-    if set(q.sources) & _DIRECT and _browser.available():
-        srcs += [s for s in BROWSER_SOURCES if s not in srcs]
+    srcs = expand_sources(list(q.sources))
     errors: dict[str, str] = {}
     found: list[Itinerary] = []
     with ThreadPoolExecutor(max_workers=len(srcs) or 1) as ex:
