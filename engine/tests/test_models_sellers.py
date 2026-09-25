@@ -51,3 +51,14 @@ def test_far_below_market_ota_price_gets_a_warning(dt):
     _flag_outliers([g, bait, fair])
     assert any("Far cheaper" in w for w in bait.warnings)
     assert not fair.warnings and not g.warnings
+
+
+def test_hidden_city_fare_does_not_replace_the_normal_ticket(dt):
+    from conftest import ticket
+    from flightscout.search import merge
+
+    normal = ticket(["SAN", "SEA"], dt, price=120.0, source="google").model_copy(update={"seller_kind": "ota"})
+    hidden = ticket(["SAN", "SEA"], dt, price=79.0, source="skiplagged").model_copy(
+        update={"seller_kind": "ota", "warnings": ["hidden city: don't check bags, final leg must be skipped."]})
+    out = merge([normal, hidden])
+    assert sorted(i.price for i in out) == [79.0, 120.0]

@@ -46,7 +46,7 @@ Runs on: server or local runner.
 | `nokair` | Nok Air (DD, Thailand) direct from its own booking app (booking.nokair.com, Sabre EzyCommerce). Thai domestic out of Don Mueang plus a few regional routes (Yangon, Chennai, ...), thin on Google and Kiwi. |
 | `spring` | Spring Airlines (9C, China) direct from en.ch.com. Shanghai based low cost carrier that sells mostly on its own site (thin on Google and Kiwi): Chinese domestic plus Japan, Korea and Southeast Asia from Shanghai and othe... |
 
-## Airlines direct, headless Chrome (33)
+## Airlines direct, headless Chrome (35)
 
 Runs on: local runner only.
 
@@ -85,8 +85,10 @@ Runs on: local runner only.
 | `vietnamairlines` | Vietnam Airlines (VN) direct from vietnamairlines.com through the shared headless Chrome (see _browser.py). Vietnam's flag carrier (with its Pacific Airlines arm): the dense domestic network plus Asia, Europe, Australia ... |
 | `philippineairlines` | Philippine Airlines (PR) direct from philippineairlines.com through the shared headless Chrome (see _browser.py). Flag carrier of the Philippines: domestic out of Manila and Cebu plus Asia, Australia, the Middle East and... |
 | `bangkokair` | Bangkok Airways (PG) direct from bangkokair.com through the shared headless Chrome (see _browser.py). "Asia's boutique airline": Bangkok to Samui (which it mostly owns), Chiang Mai, Phuket, Krabi and regional routes to C... |
+| `avianca` | Avianca (AV) through its own booking site in the shared headless Chrome. |
+| `sas` | SAS (SK) through flysas.com's own flight selection page in the shared headless Chrome. The page (behind Cloudflare) loads its offers from /api/offers/flights; we read that answer, or, when the page stalls on "Searching" ... |
 
-## Booking sites, plain HTTP (11)
+## Booking sites, plain HTTP (15)
 
 Runs on: server or local runner.
 
@@ -103,8 +105,12 @@ Runs on: server or local runner.
 | `wego` | Wego (metasearch, strongest in the Middle East and Asia) through the JSON API its own website polls (srv.wego.com/v2/metasearch, keyless, Chrome TLS impersonation, no browser). |
 | `gotogate` | Gotogate (and its sister brand Mytrip, see mytrip.py), both Etraveli Group OTAs, through the GraphQL endpoint their own result page calls (POST /graphql/SearchOnResultPage, keyless, Chrome TLS impersonation). About one s... |
 | `mytrip` | Mytrip, Etraveli Group's sister brand of Gotogate: same backend and GraphQL endpoint (see gotogate.py), its own prices and booking pages. |
+| `skiplagged` | Skiplagged (skiplagged.com): normal fares plus "hidden city" (skiplagging) fares, through the JSON endpoint its own results page calls, /api/search.php (keyless; Cloudflare lets Chrome TLS through, curl_cffi). |
+| `easemytrip` | EaseMyTrip (easemytrip.com, India) through the JSON endpoint its own results page posts to: flightservice-node.easemytrip.com/AirAvail_Lights/ AirBus_New (keyless, Chrome TLS impersonation, plain HTTP). |
+| `agoda` | Agoda Flights (flights.agoda.com): a KAYAK white label on KAYAK's own search backend (same results page, same CSRF ``formtoken``, same /i/api/search/dynamic/flights/poll answer), so it reuses kayakweb's fetch and parser ... |
+| `ita` | ITA Matrix (matrix.itasoftware.com), Google's QPX fare engine, over the JSON RPC its own web app calls: priced, availability checked itineraries on every airline sold through the GDSs (not most low cost carriers). |
 
-## Booking sites, headless Chrome (7)
+## Booking sites, headless Chrome (8)
 
 Runs on: local runner only.
 
@@ -117,6 +123,7 @@ Runs on: local runner only.
 | `almosafer` | Almosafer (Saudi Arabia / Gulf OTA, Seera Group) through the shared real Chrome (see _browser.py). Its search API wants a session token the page mints, so we open the site's own one way results page headless and read the... |
 | `traveloka` | Traveloka (Southeast Asia OTA) through the shared real Chrome (see _browser.py). Plain HTTP clients get DataDome and AWS WAF challenges; a headless Chrome passes them. We open the site's own one way results page (en-id, ... |
 | `cleartrip` | Cleartrip (India OTA, Flipkart group) through the shared real Chrome (see _browser.py). Its search API sits behind Akamai (plain HTTP gets "Access Denied"), so we open the site's own one way results page headless and cap... |
+| `ixigo` | ixigo (ixigo.com, India) through its results page in the shared headless Chrome: the page streams its offers from /flights/v2/search/stream (text/event-stream, 2 events, about 600 kB) and we read that answer. The stream ... |
 
 ## Fare calendars (11)
 

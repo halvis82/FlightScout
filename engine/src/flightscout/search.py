@@ -21,6 +21,7 @@ from .sources import aerolineas, aeromexico, alaska, arajet, breeze, frontier, j
 from .sources import aerlingus, airnewzealand, flysafair, jazeera, jet2, skyexpress, vueling
 from .sources import allianceair, biman, fly91_browser, flyarystan, starair
 from .sources import nokair, spring
+from .sources import agoda, avianca_browser, easemytrip, ita, ixigo_browser, sas_browser, skiplagged
 from .sources import (airniugini_browser, bangkokair_browser, linkairways_browser, philippineairlines_browser,
                       vietnamairlines_browser)
 from .sources import (aegean_browser, afklm_browser, akasa_browser, etihad_browser, finnair_browser,
@@ -60,7 +61,7 @@ BROWSER_SOURCES = {
     "virginaustralia": virginaustralia_browser.search, "fly91": fly91_browser.search,
     "linkairways": linkairways_browser.search, "airniugini": airniugini_browser.search,
     "vietnamairlines": vietnamairlines_browser.search, "philippineairlines": philippineairlines_browser.search,
-    "bangkokair": bangkokair_browser.search,
+    "bangkokair": bangkokair_browser.search, "avianca": avianca_browser.search, "sas": sas_browser.search,
 }
 SOURCES.update(BROWSER_SOURCES)
 SOURCES.update({
@@ -79,14 +80,19 @@ OTAS = {
     "cheapflights": kayakweb.search_cheapflights, "expedia": expedia.search, "orbitz": expedia.search_orbitz,
     "travelocity": expedia.search_travelocity, "priceline": priceline.search, "wego": wego.search,
     "gotogate": gotogate.search, "mytrip": mytrip.search,
+    "skiplagged": skiplagged.search, "easemytrip": easemytrip.search, "agoda": agoda.search,
+    # ITA Matrix (Google's fare engine): every airline, real fares, slow (25 to 50 s)
+    "ita": ita.search,
 }
 OTAS_BROWSER = {
     "tripcom": tripcom_browser.search, "aviasales": aviasales_browser.search, "edreams": edreams.search,
     "opodo": opodo.search, "almosafer": almosafer.search, "traveloka": traveloka.search, "cleartrip": cleartrip.search,
+    "ixigo": ixigo_browser.search,
 }
 SOURCES.update(OTAS)
 SOURCES.update(OTAS_BROWSER)
 OTA_WAIT = float(os.environ.get("FLIGHTSCOUT_OTA_WAIT", "45"))
+SLOW_WAIT = {"ita": 90.0}  # sources that need longer than OTA_WAIT
 # Direct airline sources over plain HTTP. Each gates itself on its network.
 AIRLINES = ["volaris", "wideroe", "skyairline", "norse", "volotea", "condor", "flair",
             "frontier", "breeze", "jetblue", "alaska", "arajet", "aeromexico", "aerolineas",
@@ -216,9 +222,12 @@ def merge(items: list[Itinerary]) -> list[Itinerary]:
     """Same flights from the same kind of seller collapse into the cheapest.
     The same flights sold by an OTA and via Google both stay, since they are
     genuinely different purchases."""
-    best: dict[tuple[str, str], Itinerary] = {}
+    best: dict[tuple, Itinerary] = {}
     for it in items:
-        k = (it.flight_key, it.seller_kind)
+        # a hidden city ticket lists only the flights you fly, so it would look
+        # like (and replace) the normal ticket for them: keep both
+        hidden = any(w.lower().startswith("hidden city") for w in it.warnings)
+        k = (it.flight_key, it.seller_kind, hidden)
         if k not in best or it.price < best[k].price:
             best[k] = it
     return sorted(best.values(), key=lambda i: i.price)
@@ -302,7 +311,8 @@ def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> Search
     for s, f in futs.items():
         try:
             if s in OTAS or s in OTAS_BROWSER or s in BROWSER_SOURCES:
-                found.extend(f.result(timeout=max(0.0, deadline - time.monotonic())))
+                until = deadline + SLOW_WAIT.get(s, OTA_WAIT) - OTA_WAIT
+                found.extend(f.result(timeout=max(0.0, until - time.monotonic())))
             else:
                 found.extend(f.result())
             _note(s, None)
