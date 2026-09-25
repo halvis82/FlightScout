@@ -55,6 +55,18 @@ _fli_flights.parallel_map = _pm("pm_flights")
 _fli_dates.parallel_map = _pm("pm_dates")
 
 
+def page(url: str) -> Any | None:
+    """A page the visitor's browser sent, or None (and asked for) if it
+    hasn't yet. For keys the engine consumes directly (e.g. "list:<url>")."""
+    st = _state.get()
+    if st is None:
+        return None
+    if url in st["pages"]:
+        return st["pages"][url]
+    st["need"].append(url)
+    return None
+
+
 def active() -> bool:
     """True inside browser_pages() (Google pages come from the visitor)."""
     return _state.get() is not None

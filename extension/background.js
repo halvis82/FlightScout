@@ -25,7 +25,71 @@ function extract(html) {
   return null;
 }
 
+// "list:<google flights url>": the full, priced flight list Google's own
+// JavaScript loads for that search, captured from a hidden frame that uses
+// your Google session (offscreen.js + google-hook.js).
+let offscreenReady = null;
+async function ensureOffscreen() {
+  if (!offscreenReady) {
+    offscreenReady = (async () => {
+      // Google forbids framing its pages; lift that only for frames this
+      // extension opens itself.
+      await chrome.declarativeNetRequest.updateSessionRules({
+        removeRuleIds: [1],
+        addRules: [
+          {
+            id: 1,
+            priority: 1,
+            action: {
+              type: "modifyHeaders",
+              // Google answers framed loads with 403: present it as a normal page load
+              requestHeaders: [
+                { header: "sec-fetch-dest", operation: "set", value: "document" },
+                { header: "sec-fetch-site", operation: "set", value: "none" },
+              ],
+              responseHeaders: [
+                { header: "x-frame-options", operation: "remove" },
+                { header: "content-security-policy", operation: "remove" },
+              ],
+            },
+            condition: {
+              urlFilter: "|https://www.google.com/travel/flights",
+              resourceTypes: ["sub_frame"],
+              initiatorDomains: [chrome.runtime.id],
+            },
+          },
+        ],
+      });
+      if (!(await chrome.offscreen.hasDocument?.())) {
+        await chrome.offscreen.createDocument({
+          url: "offscreen.html",
+          reasons: ["IFRAME_SCRIPTING"],
+          justification: "Load Google Flights with the user's session to read its flight list",
+        });
+      }
+    })().catch((e) => {
+      offscreenReady = null;
+      throw e;
+    });
+  }
+  return offscreenReady;
+}
+
+async function fetchList(url) {
+  try {
+    await ensureOffscreen();
+    const res = await chrome.runtime.sendMessage({ target: "offscreen", type: "captureList", url });
+    return res?.rows?.length ? res.rows : null;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchOne(url) {
+  if (url.startsWith("list:")) {
+    const u = url.slice(5);
+    return [url, ALLOWED.test(u) ? await fetchList(u) : null];
+  }
   if (!ALLOWED.test(url)) return [url, null];
   try {
     const res = await fetch(url, { credentials: "include", headers: { "Accept-Language": "en-US,en;q=0.9" } });

@@ -91,3 +91,21 @@ def test_top_departing_flights_are_marked_in_google_order(monkeypatch):
 
     assert google._ranked(C, parse_flight_row(ROWS[1])) == {"google_rank": 0, "google_top": True}
     assert google._ranked(C, parse_flight_row(ROWS[0])) == {"google_rank": None, "google_top": False}
+
+
+def test_extension_list_is_requested_then_used(monkeypatch):
+    from flightscout import browser_fetch
+
+    filters = object()
+    monkeypatch.setattr("fli.search._tfs.build_tfs", lambda f: "T")
+    monkeypatch.setattr(google._fli_flights, "page_url", lambda tfs, cur, *a: f"https://www.google.com/travel/flights?tfs={tfs}")
+    url = "list:https://www.google.com/travel/flights?tfs=T"
+    try:
+        with browser_fetch.browser_pages({}):
+            assert google._page_rows(filters, "USD") == []
+        raise AssertionError("expected NeedPages")
+    except browser_fetch.NeedPages as e:
+        assert e.urls == [url]
+    with browser_fetch.browser_pages({url: ROWS}):
+        rows = google._page_rows(filters, "USD")
+    assert sorted(r.price for r in rows) == sorted(parse_flight_row(r).price for r in ROWS)

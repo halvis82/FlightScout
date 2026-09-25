@@ -93,6 +93,7 @@ export default function SettingsPage() {
 
 function OwnIpSection() {
   const ext = useExtension();
+  const EXT_LATEST = "1.1.0";
   const lr = useLocalRunner();
   const active = lr.active ? "local runner" : ext ? "extension" : null;
   return (
@@ -113,9 +114,20 @@ function OwnIpSection() {
           <div className="min-w-0 rounded-xl border border-border p-3">
             <div className="flex items-center justify-between">
               <div className="font-medium">Browser extension</div>
-              {ext ? <Badge tone="good">Installed {ext}</Badge> : <Badge>Recommended</Badge>}
+              {ext ? (
+                ext < EXT_LATEST ? (
+                  <Badge tone="warn">Update to {EXT_LATEST}</Badge>
+                ) : (
+                  <Badge tone="good">Installed {ext}</Badge>
+                )
+              ) : (
+                <Badge>Recommended</Badge>
+              )}
             </div>
-            <p className="mt-1 text-xs text-muted">For Chrome, Edge, Brave and Arc. Nothing else to install or run.</p>
+            <p className="mt-1 text-xs text-muted">
+              For Chrome, Edge, Brave and Arc. Prices then match what you see on Google Flights yourself.
+              {ext && ext < EXT_LATEST && " To update: download it again, unzip over the old folder, and click reload on chrome://extensions."}
+            </p>
             <ol className="mt-2 list-decimal space-y-0.5 pl-4 text-xs text-muted">
               <li>
                 <a className="text-accent hover:underline" href="/flightscout-helper.zip" download>

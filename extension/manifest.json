@@ -1,16 +1,43 @@
 {
   "manifest_version": 3,
   "name": "FlightScout Helper",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Lets FlightScout search Google Flights from your own browser and IP, so searches stay fast and never get blocked.",
-  "icons": { "128": "icon128.png" },
-  "host_permissions": ["https://www.google.com/*"],
-  "background": { "service_worker": "background.js" },
+  "icons": {
+    "128": "icon128.png"
+  },
+  "host_permissions": [
+    "https://www.google.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
-      "matches": ["https://flightscout-app.vercel.app/*", "https://*.vercel.app/*", "http://localhost:3000/*"],
-      "js": ["content.js"],
+      "matches": [
+        "https://flightscout-app.vercel.app/*",
+        "https://*.vercel.app/*",
+        "http://localhost:3000/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://www.google.com/travel/flights*"
+      ],
+      "js": [
+        "google-hook.js"
+      ],
+      "all_frames": true,
+      "world": "MAIN",
       "run_at": "document_start"
     }
+  ],
+  "permissions": [
+    "offscreen",
+    "declarativeNetRequestWithHostAccess"
   ]
 }

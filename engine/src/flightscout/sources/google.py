@@ -210,8 +210,16 @@ def _page_rows(filters, currency: str) -> list:
 
     url = _fli_flights.page_url(build_tfs(filters), currency)
     if browser_fetch.active():
-        # Extension mode runs on the server: the visitor's IP got the rows
-        # unpriced, but the server's usually gets them priced. One page load.
+        # Extension mode: the extension (1.1+) loads the page in the visitor's
+        # own Google session and hands over the list its JavaScript fetched,
+        # so prices match what they see on Google.
+        got = browser_fetch.page(f"list:{url}")
+        if got is None:
+            return []  # asked for; the next round has it
+        if isinstance(got, list) and got and all(isinstance(r, list) for r in got):
+            return _priced(got, parse_flight_row)
+        # Older extension: the server's own page load fills in instead (the
+        # visitor's IP got some rows unpriced, the server's usually priced).
         try:
             from fli.search.client import get_client
 
