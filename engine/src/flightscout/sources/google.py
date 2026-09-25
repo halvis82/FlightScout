@@ -3,7 +3,9 @@ results page, so it survives Google's August 2026 API lockdown)."""
 
 from __future__ import annotations
 
+import contextvars
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, timedelta
 
 from fli.core.links import google_flights_url
@@ -136,12 +138,12 @@ def _legs_key(f) -> tuple:
 _SOCS = {"name": "SOCS", "value": "CAESEwgDEgk0ODE3Nzk3MjQaAmVuIAEaBgiA_LyaBg", "domain": ".google.com", "path": "/"}
 
 
-def _browser_prices(filters, currency: str) -> dict[tuple, float]:
-    """Prices for the outbound rows Google embedded without one (it depends
-    on the asking IP). The page's JavaScript fetches them (GetShoppingResults,
-    which only a real browser can sign), so load the page in the shared
-    Chrome and read that response. In extension mode the server's own page
-    load fills them instead. Empty when neither works."""
+def _page_rows(filters, currency: str) -> list:
+    """Google's full, priced outbound list (its Cheapest tab), as the page's
+    JavaScript fetches it (GetShoppingResults, which only a real browser can
+    sign): load the page in the shared Chrome and read that response. In
+    extension mode the server's own page load stands in for it. Empty when
+    neither works (Vercel itself already gets the full list embedded)."""
     from . import _browser
     from .. import browser_fetch
 
@@ -159,11 +161,11 @@ def _browser_prices(filters, currency: str) -> dict[tuple, float]:
             inner = browser_fetch._orig["flights"](get_client(), url)
             rows = [r for i in (2, 3) if isinstance(inner[i], list) for r in inner[i][0]]
         except Exception as e:
-            log.info("google: server prices unavailable: %s", e)
-            return {}
+            log.info("google: server page unavailable: %s", e)
+            return []
         return _priced(rows, parse_flight_row)
     if not _browser.available():
-        return {}
+        return []
 
     def job(page) -> str:
         # A fresh context each time: in the long lived shared profile Google
@@ -185,20 +187,20 @@ def _browser_prices(filters, currency: str) -> dict[tuple, float]:
                 for i in (2, 3) if isinstance(inner[i], list) and inner[i] and isinstance(inner[i][0], list)
                 for r in inner[i][0]]
     except Exception as e:
-        log.info("google: browser prices unavailable: %s", e)
-        return {}
+        log.info("google: browser page unavailable: %s", e)
+        return []
     return _priced(rows, parse_flight_row)
 
 
-def _priced(rows: list, parse) -> dict[tuple, float]:
-    out: dict[tuple, float] = {}
+def _priced(rows: list, parse) -> list:
+    out = []
     for row in rows:
         try:
             f = parse(row)
         except Exception:
             continue
         if f.price is not None:
-            out[_legs_key(f)] = float(f.price)
+            out.append(f)
     return out
 
 
@@ -277,6 +279,10 @@ def search(q: SearchQuery, top_n: int = 8, wide: bool = True) -> list[Itinerary]
     client = _DiverseSearch()
     client.outbounds = []
     client.wide = wide
+    # the full Cheapest list (see below) loads in parallel with the search
+    pool = ThreadPoolExecutor(1)
+    early = pool.submit(contextvars.copy_context().run, _page_rows, filters, q.currency) if wide else None
+    pool.shutdown(wait=False)
     try:
         results = client.search(filters, top_n=top_n, currency=q.currency) or []
     except Exception as e:
@@ -285,16 +291,31 @@ def search(q: SearchQuery, top_n: int = 8, wide: bool = True) -> list[Itinerary]
             raise RuntimeError("rate_limited: Google is throttling this server. Try the local runner "
                                "(`flightscout serve`) or again later.") from e
         raise
-    # Rows Google listed without a price (see _expand_multi_leg) get it from
-    # the page's own JavaScript in a real Chrome, where one is installed.
+    # What Google embeds in the page depends on the asking IP: from some
+    # (home connections) the cheapest rows come without a price and whole
+    # connections are left out (42 of 128 rows SJC-LAX). The page's own
+    # JavaScript then fetches the full Cheapest list. Read that list too where
+    # a real Chrome is installed (or, in extension mode, the server's page).
     obs = client.outbounds or [r for r in results if not isinstance(r, tuple)]
-    fill = _browser_prices(filters, q.currency) if any(o.price is None for o in obs) else {}
+    if early is not None:
+        try:
+            page = early.result(timeout=90)
+        except Exception as e:
+            log.info("google: page list failed: %s", e)
+            page = []
+    else:
+        page = _page_rows(filters, q.currency) if any(o.price is None for o in obs) else []
+    fill: dict[tuple, float] = {}
+    for f in page:
+        k = _legs_key(f)
+        fill[k] = min(f.price, fill.get(k, f.price))
     out: list[Itinerary] = []
     for r in results:
         parts = list(r) if isinstance(r, tuple) else [r]
         price = parts[0].price
-        if price is None and not isinstance(r, tuple):
-            price = fill.get(_legs_key(r))
+        if not isinstance(r, tuple) and _legs_key(r) in fill:
+            # the full list can be cheaper than the embedded row (IP dependent)
+            price = fill[_legs_key(r)] if price is None else min(price, fill[_legs_key(r)])
         if price is None:
             continue
         url = client.build_flight_booking_url(
@@ -313,20 +334,40 @@ def search(q: SearchQuery, top_n: int = 8, wide: bool = True) -> list[Itinerary]
                 warnings=[] if len(carriers) == 1 else [],
             )
         )
+    have = {_legs_key(r[0] if isinstance(r, tuple) else r) for r in results
+            if (r[0] if isinstance(r, tuple) else r).price is not None}
+    if not q.return_date:
+        for f in page:
+            if _legs_key(f) in have:
+                continue
+            have.add(_legs_key(f))
+            out.append(Itinerary(
+                source="google", price=float(f.price), currency=f.currency or q.currency, slices=[_slice(f)],
+                booking_url=client.build_flight_booking_url(f, currency=q.currency, seat_type=_SEAT[q.cabin],
+                                                            passenger_info=filters.passenger_info),
+                seller="Google Flights", seller_kind="metasearch",
+            ))
     # Every other outbound option with its round trip price (Google's list),
-    # return to be picked on Google.
-    if q.return_date and client.outbounds:
-        expanded = {_legs_key(r[0] if isinstance(r, tuple) else r) for r in results
-                    if (r[0] if isinstance(r, tuple) else r).price is not None}
+    # return to be picked on Google. Also an expanded outbound whose listed
+    # "from" price beats every pairing we got (its return page came back
+    # without the cheapest returns).
+    if q.return_date and (client.outbounds or page):
+        best: dict[tuple, float] = {}
+        for r in results:
+            if isinstance(r, tuple) and r[0].price is not None:
+                k = _legs_key(r[0])
+                best[k] = min(r[0].price, best.get(k, r[0].price))
+        expanded = {k for k in have if k not in fill or best.get(k, 0) <= fill[k] + 1}
         listed = set()
-        for ob in client.outbounds:
+        for ob in [*client.outbounds, *page]:
             k = _legs_key(ob)
-            price = ob.price if ob.price is not None else fill.get(k)
+            price = min(p for p in (ob.price, fill.get(k)) if p is not None) \
+                if ob.price is not None or k in fill else None
             if k in expanded or k in listed or price is None:
                 continue
             listed.add(k)
             try:
-                url = _return_page_url(client.filters, ob, q.currency)
+                url = _return_page_url(client.filters or filters, ob, q.currency)
             except Exception:
                 url = search_url(q)
             out.append(Itinerary(
