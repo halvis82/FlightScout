@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import * as maplibregl from "maplibre-gl";
 import type { GeoJSONSource, Map as MLMap, Marker } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { loadAirports, airport } from "@/lib/airports-client";
@@ -19,8 +18,23 @@ export type MapPoint = {
   dot?: boolean; // render a small colored dot instead of a label (declutter)
 };
 
-// Served from public/maplibre (copied on postinstall), see scripts/copy-maplibre-worker.mjs.
-maplibregl.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
+// MapLibre is ~1 MB of JS: load it on its own after the page is interactive
+// (idle time, or when a map mounts) instead of in the first bundle.
+type MapLib = typeof import("maplibre-gl");
+let libP: Promise<MapLib> | null = null;
+function loadLib(): Promise<MapLib> {
+  libP ??= import("maplibre-gl").then((m) => {
+    const lib = ((m as unknown as { default?: MapLib }).default ?? m) as MapLib;
+    // Served from public/maplibre (copied on postinstall), see scripts/copy-maplibre-worker.mjs.
+    lib.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
+    return lib;
+  });
+  return libP;
+}
+if (typeof window !== "undefined") {
+  const idle = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 1500));
+  idle(() => void loadLib());
+}
 
 const LIGHT = "https://tiles.openfreemap.org/styles/positron";
 const DARK = "https://tiles.openfreemap.org/styles/dark";
@@ -74,7 +88,8 @@ export function RouteMap({
 }) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MLMap | null>(null);
-  const keyed = useRef(new Map<string, { marker: maplibregl.Marker; node: HTMLButtonElement }>());
+  const keyed = useRef(new Map<string, { marker: Marker; node: HTMLButtonElement }>());
+  const lib = useRef<MapLib | null>(null);
   const handlers = useRef(new Map<string, (() => void) | undefined>());
   const markers = useRef<Marker[]>([]);
   const [ready, setReady] = useState(false);
@@ -84,9 +99,23 @@ export function RouteMap({
 
   useEffect(() => {
     loadAirports().then(() => setAirportsLoaded(true));
-    if (!el.current) return;
+    let cleanup: (() => void) | null = null;
+    let gone = false;
+    loadLib().then((maplibregl) => {
+      if (gone || !el.current) return;
+      lib.current = maplibregl;
+      cleanup = mount(maplibregl, el.current);
+    });
+    return () => {
+      gone = true;
+      cleanup?.();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function mount(maplibregl: MapLib, container: HTMLDivElement) {
     const m = new maplibregl.Map({
-      container: el.current,
+      container,
       style: isDark() ? DARK : LIGHT,
       center: [0, 30],
       zoom: 1,
@@ -110,8 +139,7 @@ export function RouteMap({
       m.remove();
       map.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }
 
   function coord(p: { code: string; lat?: number | null; lon?: number | null }): [number, number] | null {
     if (p.lat != null && p.lon != null) return [p.lon, p.lat];
@@ -177,7 +205,7 @@ export function RouteMap({
           e.stopPropagation();
           handlers.current.get(key)?.();
         });
-        entry = { marker: new maplibregl.Marker({ element: node }).setLngLat(c).addTo(m), node };
+        entry = { marker: new lib.current!.Marker({ element: node }).setLngLat(c).addTo(m), node };
         keyed.current.set(key, entry);
       } else entry.marker.setLngLat(c);
       const node = entry.node;
@@ -248,7 +276,7 @@ export function RouteMap({
       if (c) coords.push(c);
     }
     if (!coords.length) return;
-    const b = new maplibregl.LngLatBounds(coords[0], coords[0]);
+    const b = new lib.current!.LngLatBounds(coords[0], coords[0]);
     coords.forEach((c) => b.extend(c));
     m.fitBounds(b, { padding: 64, maxZoom: 6, duration: 600 });
   }
@@ -263,7 +291,6 @@ export function RouteMap({
       m.off("moveend", h);
       m.off("zoomend", h);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
   useEffect(() => {
