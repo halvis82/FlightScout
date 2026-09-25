@@ -120,7 +120,13 @@ function CurrencyPicker() {
       {open && (
         <div className="pop-in absolute right-0 z-50 mt-1 w-44 overflow-hidden rounded-xl border border-border bg-surface p-1 shadow-[var(--shadow-lg)]">
           {CURRENCIES.map((c) => (
-            <button key={c} onClick={() => pick(c)} className="flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-sm hover:bg-surface-2">
+            <button
+              key={c}
+              role="menuitemradio"
+              aria-checked={c === cur}
+              onClick={() => pick(c)}
+              className="flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-sm hover:bg-surface-2"
+            >
               <span>
                 <span className="font-semibold">{c}</span> <span className="text-muted">{CURRENCY_NAMES[c]}</span>
               </span>

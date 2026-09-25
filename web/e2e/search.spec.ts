@@ -63,3 +63,23 @@ test.describe("search", () => {
     await expect(page.getByText("SAN → JFK → SAN")).toBeVisible();
   });
 });
+
+test("switching currency converts every price on screen", async ({ page }) => {
+  await page.goto("/?from=OSL&to=CPH&tt=oneway&d=2026-11-19");
+  await expect(page.getByText(/\d+ flights/)).toBeVisible();
+  await page.getByRole("button", { name: /^Currency:/ }).first().click();
+  await page.getByRole("menuitemradio", { name: /NOK/ }).first().click();
+  await expect(page.locator("main").getByText(/NOK\s?[\d,]+|kr\s?[\d,]+|[\d,]+\s?kr/).first()).toBeVisible();
+  const usd = await page.locator("main").getByText(/^\$[\d,]+$/).count();
+  expect(usd).toBe(0);
+});
+
+test("keyboard only: type an airport and press Enter", async ({ page }) => {
+  await page.goto("/?new=1");
+  await expect(page.locator("form").getByText("From", { exact: true }).first()).toBeVisible();
+  const to = page.getByPlaceholder("Anywhere (explore)");
+  await to.click();
+  await to.pressSequentially("lisbon", { delay: 30 });
+  await page.keyboard.press("Enter");
+  await expect(page.locator("form")).toContainText("LIS");
+});
