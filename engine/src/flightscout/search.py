@@ -142,6 +142,25 @@ def to_currency(it: Itinerary, cur: str) -> Itinerary:
     return it
 
 
+_TRUSTED = {"google", "kiwi", "kiwiweb", "serpapi"}
+
+
+def _flag_outliers(items: list[Itinerary]) -> list[Itinerary]:
+    """A booking site quoting far below what Google, Kiwi or the airline
+    itself ask for the very same flights is usually a bait price that grows at
+    checkout. Keep it (error fares happen) but say so."""
+    ref: dict[str, float] = {}
+    for i in items:
+        if i.source in _TRUSTED or i.seller_kind == "airline":
+            ref[i.flight_key] = min(i.price, ref.get(i.flight_key, i.price))
+    for i in items:
+        r = ref.get(i.flight_key)
+        if i.seller_kind == "ota" and r and i.price < 0.6 * r:
+            i.warnings.append(f"Far cheaper than other sellers ({i.price:.0f} vs {r:.0f} {i.currency}) for the same "
+                              "flights: check the final price before paying.")
+    return items
+
+
 def merge(items: list[Itinerary]) -> list[Itinerary]:
     """Same flights from the same kind of seller collapse into the cheapest.
     The same flights sold by an OTA and via Google both stay, since they are
@@ -238,7 +257,7 @@ def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> Search
             log.warning("source %s failed: %s", s, e)
             errors[s] = str(e)[:300]
     ex.shutdown(wait=False)
-    items = merge([sellers.annotate(to_currency(i, q.currency)) for i in found])
+    items = merge(_flag_outliers([sellers.annotate(to_currency(i, q.currency)) for i in found]))
     trips = [Trip(tickets=[i], total_price=i.price, currency=i.currency, kind="single",
                   risks=list(i.warnings)) for i in items]
     trips = sellers.apply_rules(trips, seller_rules)

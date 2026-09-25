@@ -39,3 +39,15 @@ def test_seller_rules_block_and_warn(dt):
     assert [t.tickets[0].seller for t in kept] == ["Google Flights"]
     warned = sellers.apply_rules(trips, None)  # Kiwi is on the default warn list
     assert any("warning list" in w for w in warned[0].tickets[0].warnings)
+
+
+def test_far_below_market_ota_price_gets_a_warning(dt):
+    from conftest import ticket
+    from flightscout.search import _flag_outliers
+
+    g = ticket(["LIS", "OPO"], dt, price=60.0, source="google")
+    bait = ticket(["LIS", "OPO"], dt, price=9.0, source="wego").model_copy(update={"seller_kind": "ota"})
+    fair = ticket(["LIS", "OPO"], dt, price=55.0, source="booking").model_copy(update={"seller_kind": "ota"})
+    _flag_outliers([g, bait, fair])
+    assert any("Far cheaper" in w for w in bait.warnings)
+    assert not fair.warnings and not g.warnings

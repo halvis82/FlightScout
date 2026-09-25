@@ -122,15 +122,24 @@ def parse(data: dict, q: SearchQuery, currency: str, url: str, limit: int = 60) 
     trips = {x["id"]: x for x in data.get("trips") or []}
     provs = {x["code"]: x for x in data.get("providers") or []}
     names = {a["code"]: a.get("name") for a in data.get("airlines") or [] if a.get("code")}
-    best: dict[str, dict] = {}
+    per_trip: dict[str, list[dict]] = {}
     for f in data.get("fares") or []:
         if any("CACHE" in t for t in f.get("legsSourceTypes") or []):
             continue  # a provider's stored price, not a live quote
         price = (f.get("price") or {}).get("totalAmount")
         if not price or f.get("tripId") not in trips:
             continue
-        if f["tripId"] not in best or price < best[f["tripId"]]["price"]["totalAmount"]:
-            best[f["tripId"]] = f
+        per_trip.setdefault(f["tripId"], []).append(f)
+    best: dict[str, dict] = {}
+    for tid, fs in per_trip.items():
+        fs.sort(key=lambda f: f["price"]["totalAmount"])
+        if len(fs) >= 3:
+            # A far-below-market quote from one small seller is bait (seen:
+            # EUR 9 for Lisbon-Porto where every other seller asked 60+).
+            # Real cheap fares show up at several sellers, so drop outliers.
+            mid = fs[len(fs) // 2]["price"]["totalAmount"]
+            fs = [f for f in fs if f["price"]["totalAmount"] >= 0.6 * mid] or fs
+        best[tid] = fs[0]
     out: list[Itinerary] = []
     for tid, f in sorted(best.items(), key=lambda kv: kv[1]["price"]["totalAmount"]):
         tl = [legs.get(x) for x in trips[tid].get("legIds") or []]
