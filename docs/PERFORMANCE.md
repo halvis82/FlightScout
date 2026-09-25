@@ -27,10 +27,15 @@ Server time for a dynamic API call is about 50 ms (the rest is the network round
 | Booking sites (18) | the slowest one held the search (137 s) | at most 45 s, late ones fill the cache | per source deadline |
 | Browser jobs on a local runner (Google list, browser airlines, browser booking sites) | one at a time in one tab | up to 4 at once as tabs of the same headless Chrome | worker pool over CDP, one Chrome process |
 | Watch check (tracker) | 12 Google searches one after another plus Kiwi | 5 at a time, Kiwi in parallel | thread pool |
+| Currency conversion (hundreds of prices per search) | a disk cache read each, or an HTTP call each in extension mode (49 s in one search) | 1 ms per 1,000 | rates kept in memory for 12 h |
+| Full search, every group at once (CLI, uncached) | 78 to 94 s | 46 s | the currency fix plus the 45 s booking site cap |
 | CLI startup (`flightscout --help`) | 0.30 s | 0.15 s | httpx imported only when a request is made |
 | Engine import | 0.18 s, 79 MB | same | fine |
 | Heavy search (2x2 airports, round trip, Google + Kiwi web + airlines) | | 168 MB peak, 0.65 s CPU | the rest is network wait |
 | Engine cold start on Vercel | | no measurable penalty | Fluid compute |
+
+Bait price guard: Wego drops a seller's quote below 60% of the other sellers' median for the same trip, and any
+booking site far below Google, Kiwi or the airline for the same flights gets a warning (no speed cost).
 
 Tried and rejected: blocking images, fonts and CSS in the Google browser page (both Playwright routing and Chrome's
 own URL blocking made Google's page about twice as slow).
