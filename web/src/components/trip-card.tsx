@@ -410,7 +410,7 @@ function SliceTimeline({ slice, label }: { slice: Slice; label?: string }) {
 function SegmentRow({ seg }: { seg: Segment }) {
   const plus = dayDiff(seg.departure, seg.arrival);
   return (
-    <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 text-sm">
+    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 text-sm">
       <div className="w-24 font-mono tabular-nums">
         {formatTime(seg.departure)}–{formatTime(seg.arrival)}
         {plus > 0 && <sup className="text-[10px] text-warn">+{plus}</sup>}

@@ -91,7 +91,7 @@ export default function TripBuilder() {
           <div className="space-y-2">
             <div className="text-[11px] font-medium uppercase tracking-wide text-muted">Places to visit</div>
             {stops.map((s, i) => (
-              <div key={i} className="grid grid-cols-[auto_1fr_auto] items-start gap-2 sm:grid-cols-[auto_1fr_150px_auto]">
+              <div key={i} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-2 sm:grid-cols-[auto_minmax(0,1fr)_150px_auto]">
                 <span className="mt-2 w-5 text-right text-sm text-muted">{i + 1}.</span>
                 <div>
                   <AirportInput value={s.place} onChange={(place) => setStop(i, { place })} single placeholder="City or airport" />
