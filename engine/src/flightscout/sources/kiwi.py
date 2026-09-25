@@ -134,9 +134,10 @@ def _itins(data: dict) -> list[Itinerary]:
 
 
 def search(q: SearchQuery) -> list[Itinerary]:
-    out: list[Itinerary] = []
     # Kiwi takes one place per side; query each origin/destination pair
-    # (metro expansion is kept small by the caller).
+    # (metro expansion is kept small by the caller). A call takes ~10 s on
+    # Kiwi's side, so pairs run in parallel (bounded by _slots).
+    calls: list[dict] = []
     for o in q.origins[:3]:
         for d in q.destinations[:3]:
             args = {
@@ -148,7 +149,11 @@ def search(q: SearchQuery) -> list[Itinerary]:
             if q.return_date:
                 args["returnDate"] = _d(q.return_date)
                 args["returnDateFlexDays"] = min(q.return_flex_days, 10)
-            out.extend(_itins(_call(args)))
+            calls.append(args)
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=len(calls) or 1) as ex:
+        out: list[Itinerary] = [i for data in ex.map(_call, calls) for i in _itins(data)]
     if q.max_stops is not None:
         out = [i for i in out if all(s.stops <= q.max_stops for s in i.slices)]
     return out
