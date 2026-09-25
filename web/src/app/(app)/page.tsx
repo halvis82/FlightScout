@@ -150,14 +150,25 @@ function SearchPage() {
           };
         });
         const runId = ++runSeq.current;
-        await api<PlanResult>("/multicity", { body: { legs, currency: f.currency, cabin: f.cabin, adults: f.adults } })
+        setPlanBusy(false); // a still running smart route search belongs to the old form
+        // never hang silently: give up with a message after 4 minutes
+        const ctl = new AbortController();
+        const limit = setTimeout(() => ctl.abort(), 240_000);
+        await api<PlanResult>("/multicity", {
+          body: { legs, currency: f.currency, cabin: f.cabin, adults: f.adults },
+          signal: ctl.signal,
+        })
           .then((r) => {
             if (runSeq.current !== runId) return;
             setResult(null); // never show a previous one way / round trip search under a multi city heading
             setPlan(r);
           })
-          .catch((e) => setErr((e as Error).message))
+          .catch((e) => {
+            if (runSeq.current !== runId) return;
+            setErr(ctl.signal.aborted ? "The multi city search took too long. Try again, or with fewer flexible days." : (e as Error).message);
+          })
           .finally(() => {
+            clearTimeout(limit);
             if (runSeq.current !== runId) return;
             setStale(false);
             setBusy(false);
@@ -238,13 +249,19 @@ function SearchPage() {
             max_stopover_days: Math.min(p.max_stopover_days ?? 2, 2),
           },
         })
-          .then(setPlan)
+          // a newer search (or a switch to multi city) owns the results now
+          .then((r) => {
+            if (runSeq.current === runId) setPlan(r);
+          })
           .catch((e) => {
             // smart routes are a bonus: never let their limit or failure look like an error
             const msg = (e as Error).message;
-            if (!/limit|429|too many/i.test(msg)) setErr((x) => (x ? x + " · " : "") + `Smart routes: ${msg}`);
+            if (runSeq.current === runId && !/limit|429|too many/i.test(msg))
+              setErr((x) => (x ? x + " · " : "") + `Smart routes: ${msg}`);
           })
-          .finally(() => setPlanBusy(false));
+          .finally(() => {
+            if (runSeq.current === runId) setPlanBusy(false);
+          });
       }
       await Promise.all([searchP, planP]);
       clearInterval(timer);

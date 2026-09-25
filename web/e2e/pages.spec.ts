@@ -90,3 +90,28 @@ test("multi city: switching clears old results, and it can be watched", async ({
   await expect(page.getByText("OSL → CPH → OSL")).toBeVisible({ timeout: 90_000 });
   await expect(page.getByRole("button", { name: "Watch this search" })).toBeVisible({ timeout: 90_000 });
 });
+
+// The way people actually get there: a round trip search (with smart routes
+// still running), then switching to multi city and editing it in the form.
+test("multi city after a round trip: edit the form and Search shows results", async ({ page }) => {
+  test.setTimeout(240_000);
+  await page.goto("/?from=LAX&to=DPS&d=2027-03-18&r=2027-03-29&tt=roundtrip&smart=1");
+  await expect(page.getByText(/\d+ flights/)).toBeVisible({ timeout: 120_000 });
+  await page.getByRole("radio", { name: "Multi-city" }).click();
+  const pick = async (input: import("@playwright/test").Locator, code: string) => {
+    await input.click();
+    await input.fill(code);
+    await page.locator("[role=listbox] [role=option]").first().click();
+    await page.keyboard.press("Escape");
+  };
+  await page.getByRole("button", { name: "Remove LAX" }).first().click();
+  await pick(page.locator("form input").first(), "CUN");
+  await page.getByRole("button", { name: "Remove DPS" }).first().click();
+  await pick(page.getByPlaceholder("Next stop").first(), "MLM");
+  // the return leg the round trip left behind becomes Tijuana
+  await page.getByRole("button", { name: "Remove LAX" }).first().click();
+  await pick(page.getByPlaceholder("Next stop").first(), "TIJ");
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(page.getByText("CUN → MLM → TIJ")).toBeVisible({ timeout: 180_000 });
+  await expect(page.getByText(/\d+ flights/)).toBeVisible();
+});
