@@ -50,6 +50,7 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
   const [checkErr, setCheckErr] = useState<string | null>(null);
 
   const w = data?.watch;
+  const tripType = w?.tripType;
   const obs = useMemo(() => data?.observations ?? [], [data]);
 
   const { chart, series } = useMemo(() => {
@@ -91,14 +92,16 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
       if (!cur || o.observed_at.slice(0, 10) > cur.observed_at.slice(0, 10) || (o.observed_at.slice(0, 10) === cur.observed_at.slice(0, 10) && o.value < cur.value))
         latest.set(k, o);
     }
-    return [...latest.values()].map((o) => ({
+    // a round trip watch has no one way prices: points recorded without their
+    // return date (before that was stored) stay in the chart, not the grid
+    return [...latest.values()].filter((o) => tripType !== "roundtrip" || o.return_date).map((o) => ({
       depart: o.depart_date,
       nights: o.return_date ? dayDiff(o.depart_date, o.return_date) : null,
       value: o.value,
       url: o.booking_url,
       observed: o.observed_at,
     }));
-  }, [obs]);
+  }, [obs, tripType]);
 
   // show the readable URL even when an old /watches/<id> link was opened
   useEffect(() => {
@@ -109,7 +112,7 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
   const shown = useMemo(() => {
     if (pick) return pick;
     const best = [...cells].sort((a, b) => a.value - b.value)[0];
-    if (best) return { depart: best.depart, nights: best.nights };
+    if (best) return { depart: best.depart, nights: w?.tripType === "roundtrip" ? (best.nights ?? w.nightsMin ?? 7) : best.nights };
     return w ? { depart: w.departStart, nights: w.tripType === "roundtrip" ? (w.nightsMin ?? 7) : null } : null;
   }, [pick, cells, w]);
   const liveQ = useMemo<SearchQuery | null>(() => {
@@ -118,7 +121,8 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
       origins: w.origins,
       destinations: w.destinations,
       departure: shown.depart,
-      return_date: w.tripType === "roundtrip" && shown.nights != null ? addDays(shown.depart, shown.nights) : null,
+      // a round trip watch always searches round trips
+      return_date: w.tripType === "roundtrip" ? addDays(shown.depart, shown.nights ?? w.nightsMin ?? 7) : null,
       adults: w.adults,
       cabin: w.cabin as SearchQuery["cabin"],
       max_stops: w.maxStops ?? null,

@@ -62,3 +62,16 @@ def test_hidden_city_fare_does_not_replace_the_normal_ticket(dt):
         update={"seller_kind": "ota", "warnings": ["hidden city: don't check bags, final leg must be skipped."]})
     out = merge([normal, hidden])
     assert sorted(i.price for i in out) == [79.0, 120.0]
+
+
+def test_round_trip_from_prices_keep_their_return_date(monkeypatch, dt):
+    from conftest import ticket
+    from flightscout import search as s
+    from flightscout.models import SearchQuery
+
+    it = ticket(["LAX", "DPS"], dt, price=927.0).model_copy(update={"return_pending": True})
+    monkeypatch.setitem(s.SOURCES, "google", lambda q: [it.model_copy()])
+    q = SearchQuery(origins=["LAX"], destinations=["DPS"], departure=dt.date(),
+                    return_date=dt.date().replace(day=min(dt.day + 1, 28)), sources=["google"])
+    res = s.search(q)
+    assert res.trips[0].tickets[0].pending_return == q.return_date

@@ -22,3 +22,17 @@ describe("watchSignature", () => {
     expect(watchSignature({ ...base, legs: a })).not.toBe(watchSignature({ ...base, legs: b }));
   });
 });
+
+import { tripsToObservations } from "@/lib/watch-logic";
+
+describe("tripsToObservations", () => {
+  it("keeps a round trip 'from' price on its round trip, not as one way", () => {
+    const trip = {
+      id: "x", kind: "single", total_price: 927, currency: "USD", route: ["LAX", "DPS"], departure: "2027-03-18T22:00:00", travel_min: 2000,
+      tickets: [{ source: "google", return_pending: true, pending_return: "2027-03-29", booking_url: "u",
+        slices: [{ departure: "2027-03-18T22:00:00", origin: "LAX", destination: "DPS" }] }],
+    };
+    const [o] = tripsToObservations([trip as never], ["DPS"]);
+    expect(o.return_date).toBe("2027-03-29");
+  });
+});

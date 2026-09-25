@@ -122,6 +122,8 @@ class Itinerary(BaseModel):
     # Round trip where only the outbound is known: the price is Google's round
     # trip "from" price and the return is picked on the booking page.
     return_pending: bool = False
+    # with return_pending: the return date that "from" price was searched for
+    pending_return: date | None = None
     # Where Google Flights ranks the outbound on its "Best" tab (0 = first)
     # and whether it is in "Top departing flights". None/False for others.
     google_rank: int | None = None

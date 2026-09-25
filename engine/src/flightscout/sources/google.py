@@ -459,6 +459,7 @@ def search(q: SearchQuery, top_n: int = 8, wide: bool = True) -> list[Itinerary]
             out.append(Itinerary(
                 source="google", price=float(price), currency=ob.currency or q.currency, slices=[_slice(ob)],
                 booking_url=url, seller="Google Flights", seller_kind="metasearch", return_pending=True,
+                pending_return=q.return_date,
                 **_ranked(client, ob),
             ))
     cache.put(key, [i.model_dump(mode="json") for i in out])

@@ -329,6 +329,9 @@ def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> Search
             errors[s] = str(e)[:300]
             _note(s, e)
     ex.shutdown(wait=False)
+    for i in found:  # round trip "from" prices: remember which return they were for
+        if i.return_pending and i.pending_return is None:
+            i.pending_return = q.return_date
     items = merge(_flag_outliers([sellers.annotate(to_currency(i, q.currency)) for i in found]))
     trips = [Trip(tickets=[i], total_price=i.price, currency=i.currency, kind="single",
                   risks=list(i.warnings)) for i in items]

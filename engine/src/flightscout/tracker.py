@@ -32,7 +32,7 @@ def _obs(it_or_trip: Itinerary | Trip, kind: str | None = None) -> dict:
     if isinstance(it_or_trip, Trip):
         t = it_or_trip
         first = t.tickets[0]
-        ret = None
+        ret = first.pending_return.isoformat() if first.return_pending and first.pending_return else None
         if t.kind == "single" and len(first.slices) > 1:
             ret = first.slices[1].departure.date().isoformat()
         elif len(t.tickets) > 1:

@@ -74,9 +74,12 @@ export function tripsToObservations(trips: Trip[], destinations: string[] = [], 
       ? (slices.find((s) => destinations.includes(s.origin)) ?? slices.findLast((s) => s.destination === home))
       : undefined;
     const sources = [...new Set(t.tickets.map((x) => x.source))];
+    // a round trip "from" price (return picked on the booking page) still
+    // belongs to the return date it was searched for, not to "one way"
+    const pendingReturn = t.tickets[0]?.return_pending ? (t.tickets[0].pending_return ?? null) : null;
     return {
       depart_date: (slices[0]?.departure ?? t.departure).slice(0, 10),
-      return_date: back ? back.departure.slice(0, 10) : null,
+      return_date: back ? back.departure.slice(0, 10) : pendingReturn,
       price: t.total_price,
       currency: t.currency,
       source: sources.length === 1 ? sources[0] : sources.join("+"),
