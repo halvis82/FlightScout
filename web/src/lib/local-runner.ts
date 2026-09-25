@@ -40,6 +40,20 @@ export function setLocalRunnerDisabled(off: boolean) {
   emit({ disabled: off });
 }
 
+// Chrome (142+) asks once before a public site may reach this computer
+// ("Local network access"). Probing when the answer is still open would show
+// that prompt to every visitor, so unknown visitors are only probed when it
+// was already granted; Settings has a Connect button that asks on purpose.
+export type LocalAccess = "granted" | "prompt" | "denied" | "unsupported";
+export async function localAccess(): Promise<LocalAccess> {
+  try {
+    const s = await navigator.permissions.query({ name: "local-network-access" as PermissionName });
+    return s.state as LocalAccess;
+  } catch {
+    return "unsupported"; // browsers without the permission just connect
+  }
+}
+
 export function localRunnerActive() {
   return state.available && !state.disabled;
 }
@@ -51,6 +65,13 @@ export async function runnerKnown(): Promise<void> {
   if (typeof window === "undefined" || state.checked) return;
   if (lsGet(SEEN) !== "1") return;
   await (inflight ?? probeLocalRunner());
+}
+
+// Settings' Connect button: probing from a click lets Chrome ask for access.
+export async function connectLocalRunner(): Promise<boolean> {
+  const ok = await probeLocalRunner();
+  if (ok) lsSet(SEEN, "1");
+  return ok;
 }
 
 let inflight: Promise<boolean> | null = null;
@@ -122,7 +143,14 @@ export function startLocalRunnerProbe() {
     return;
   }
   let last = Date.now();
-  probeAndRemember().then((ok) => {
+  const go = seen
+    ? probeAndRemember()
+    : localAccess().then((a) => {
+        if (a === "granted" || a === "unsupported") return probeAndRemember();
+        emit({ ...state, checked: true }); // don't pop Chrome's prompt at strangers
+        return false;
+      });
+  go.then((ok) => {
     if (!ok && !seen) return;
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible" && Date.now() - last > 5 * 60_000) {

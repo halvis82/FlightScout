@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useSWR from "swr";
 import { Check, Copy, Fingerprint, KeyRound, Plus, Trash2 } from "lucide-react";
 import { AirportInput } from "@/components/airport-input";
@@ -7,7 +7,7 @@ import { useApp } from "@/components/app-context";
 import { cn } from "@/lib/utils";
 import { cityOf } from "@/lib/airports-client";
 import { useExtension } from "@/lib/extension";
-import { useLocalRunner } from "@/lib/local-runner";
+import { connectLocalRunner, localAccess, useLocalRunner, type LocalAccess } from "@/lib/local-runner";
 import { PlainButton, Badge, Button, Card, ErrorNote, Field, Input, PageHeader, Select, Switch } from "@/components/ui";
 import { api, fetcher } from "@/lib/client";
 import { authClient } from "@/lib/auth-client";
@@ -158,6 +158,7 @@ function OwnIpSection() {
               Remove with <code>flightscout serve --uninstall</code>. Windows: run <code>flightscout serve</code> while you
               search.
             </p>
+            <RunnerConnect active={lr.active} />
           </div>
           <div className="min-w-0 rounded-xl border border-border p-3">
             <div className="flex items-center justify-between">
@@ -201,6 +202,46 @@ function OwnIpSection() {
           </a>
         </p>
       </Section>
+    </div>
+  );
+}
+
+// Chrome asks once ("Local network access") before this site may reach the
+// runner on your computer. Show where that stands and ask on purpose.
+function RunnerConnect({ active }: { active: boolean }) {
+  const [access, setAccess] = useState<LocalAccess | null>(null);
+  const [tried, setTried] = useState(false);
+  useEffect(() => {
+    localAccess().then(setAccess);
+  }, [active]);
+  if (active) return <p className="mt-2 text-xs text-good">Connected: searches run on this computer.</p>;
+  if (access === "denied")
+    return (
+      <p className="mt-2 text-xs text-warn">
+        Your browser is blocking this site from reaching your computer. Click the icon left of the address bar, Site
+        settings, set Local network access to Allow, then reload.
+      </p>
+    );
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+      <Button
+        size="sm"
+        variant="soft"
+        onClick={async () => {
+          await connectLocalRunner();
+          setTried(true);
+          setAccess(await localAccess());
+        }}
+      >
+        Connect to my computer
+      </Button>
+      <span className="text-muted">
+        {tried
+          ? "Not found yet: run the command above, then try again."
+          : access === "prompt"
+            ? "Your browser will ask once to allow local network access."
+            : "After installing, click to connect."}
+      </span>
     </div>
   );
 }
