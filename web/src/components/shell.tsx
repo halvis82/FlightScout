@@ -14,6 +14,7 @@ import { GuestBanner, ImportGuestData } from "./guest-ui";
 import { openPanel, toastStore } from "./stores";
 import { PlainButton, Tip, useDismiss } from "./ui";
 import { WatchlistButton, WatchlistPanel } from "./watchlist-panel";
+import { KeepAlive } from "./keep-alive";
 
 const NAV = [
   { href: "/", label: "Search" },
@@ -72,6 +73,7 @@ export function Shell({ children }: { children: ReactNode }) {
       </header>
       <GuestBanner />
       <ImportGuestData />
+      <KeepAlive />
       <main className="mx-auto w-full max-w-7xl flex-1 px-3 pt-5 pb-10 sm:px-4">{children}</main>
       <footer className="mx-auto flex w-full max-w-7xl flex-wrap gap-x-4 gap-y-1 px-3 pb-8 text-xs text-faint sm:px-4">
         <a href="https://github.com/halvis82/FlightScout" target="_blank" rel="noopener noreferrer" className="hover:text-fg">

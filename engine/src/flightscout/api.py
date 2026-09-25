@@ -96,6 +96,13 @@ class ExploreResult(BaseModel):
     errors: dict[str, str]
 
 
+# The website pings this while it's open (unlike /health it counts as use), so
+# an on demand runner lives exactly as long as a FlightScout tab is open.
+@app.get("/alive")
+def alive() -> dict:
+    return {"ok": True}
+
+
 @app.get("/health")
 @app.get("/api/health")
 def health() -> dict:

@@ -400,3 +400,7 @@ Pre-compute explore results for everyone's home airports into the shared cache (
 ## `flightscout status`
 
 Login, local runner, scheduled watch checks and browser support at a glance.
+
+## `flightscout local`
+
+The whole FlightScout on this computer, running only while it's open in your browser.

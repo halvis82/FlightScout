@@ -15,6 +15,7 @@ from . import account, flights, places_cmds, system
 from .common import con
 from .common import parse_date as _date  # noqa: F401  (kept for older imports and tests)
 from .lists import places_app, watch_app
+from .local import local_app
 
 app = typer.Typer(
     no_args_is_help=True,
@@ -33,6 +34,7 @@ app.add_typer(watch_app, name="watch", rich_help_panel="Track")
 app.add_typer(places_app, name="places", rich_help_panel="Track")
 account.register(app)
 system.register(app)
+app.add_typer(local_app, name="local", rich_help_panel="Run")
 
 
 def main() -> None:
