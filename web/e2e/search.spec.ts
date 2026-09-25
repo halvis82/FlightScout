@@ -83,3 +83,14 @@ test("keyboard only: type an airport and press Enter", async ({ page }) => {
   await page.keyboard.press("Enter");
   await expect(page.locator("form")).toContainText("LIS");
 });
+
+test("recent searches: one click repeats a past search", async ({ page }) => {
+  await page.goto("/?from=OSL&to=CPH&tt=oneway&d=2026-11-19");
+  await expect(page.getByText(/\d+ flights/)).toBeVisible();
+  await page.getByRole("link", { name: "FlightScout" }).first().click();
+  await expect(page.locator("form")).not.toContainText("CPH");
+  await page.getByRole("button", { name: /Oslo → Copenhagen/ }).first().click();
+  await expect(page.locator("form")).toContainText("CPH");
+  await expect(page.getByText(/\d+ flights/)).toBeVisible(); // searched by itself
+  await expect(page.getByRole("link", { name: "All history" })).toBeVisible();
+});

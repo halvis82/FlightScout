@@ -344,6 +344,9 @@ function MultiCityLegs({ f, set, busy }: { f: SearchForm; set: (p: Partial<Searc
         );
       })}
       <div className="flex flex-wrap items-center justify-between gap-2">
+        <a href="/trip" className="text-xs text-muted hover:text-fg">
+          Not sure about the order? Let FlightScout plan it
+        </a>
         <Button
           type="button"
           size="sm"

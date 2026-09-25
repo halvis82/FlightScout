@@ -4,6 +4,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles } from "lucide-react";
 import { useApp } from "@/components/app-context";
 import { ExplorePanel } from "@/components/explore-panel";
+import { RecentRow } from "@/components/recent-row";
+import { pushRecent } from "@/lib/recent";
 import { ResultsView, mergeTrips } from "@/components/results-view";
 import { SearchFormView, defaultForm, formToParams, paramsToForm, type SearchForm } from "@/components/search-form";
 import { WatchButton } from "@/components/watch-dialog";
@@ -119,6 +121,8 @@ function SearchPage() {
       } catch {
         /* ignore */
       }
+      if (f0.tripType !== "multicity" && f0.to.length)
+        pushRecent({ from: f0.from, to: f0.to, tripType: f0.tripType, depart: f0.depart, ret: f0.ret });
       const f = { ...f0, currency };
       lastRun.current = JSON.stringify([f0.from, f0.to, f0.depart, f0.ret, f0.tripType, f0.flex, f0.retFlex, f0.cabin, f0.adults, f0.stops, f0.nearby]);
       setErr(null);
@@ -316,6 +320,12 @@ function SearchPage() {
           run(form);
         }}
         busy={busy}
+      />
+      <RecentRow
+        onPick={(r) => {
+          const next: SearchForm = { ...form, from: r.from, to: r.to, tripType: r.tripType, depart: r.depart, ret: r.ret };
+          setForm(next);
+        }}
       />
       {(busy || planBusy) && (
         <div className="flex items-center gap-2 text-sm text-muted">

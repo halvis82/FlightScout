@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
-import { Check, ChevronDown, LogIn, LogOut, Monitor, Moon, Plane, Settings, Sun, User, X } from "lucide-react";
+import { Check, ChevronDown, History, LogIn, LogOut, Monitor, Moon, Plane, Settings, Sun, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/client";
 import { signOut } from "@/lib/auth-client";
@@ -230,6 +230,9 @@ function AccountMenu() {
             </div>
             <Link href="/settings" onClick={close} className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm hover:bg-surface-2">
               <Settings className="size-4 text-muted" /> Settings
+            </Link>
+            <Link href="/history" onClick={close} className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm hover:bg-surface-2">
+              <History className="size-4 text-muted" /> History
             </Link>
             {me?.guest ? (
               <Link href="/login" onClick={close} className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium text-accent hover:bg-surface-2">
