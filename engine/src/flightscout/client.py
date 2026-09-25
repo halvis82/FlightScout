@@ -5,7 +5,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import httpx
 
 from . import config
 
@@ -50,6 +49,8 @@ class Client:
             headers["Authorization"] = f"Bearer {self.token}"
         if self.tracker_key:
             headers["x-tracker-key"] = self.tracker_key
+        import httpx  # lazy: keeps CLI startup fast (~90 ms)
+
         r = httpx.request(method, f"{self.base}/api/v1{path}", headers=headers, timeout=60, **kw)
         if r.status_code == 401:
             raise NotLoggedIn("The web app rejected the token. Create a new one in Settings, API tokens.")
