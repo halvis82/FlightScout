@@ -91,6 +91,10 @@ def _hook_page_fetch() -> None:
     _fli_flights.fetch_payload = fetch
 
 
+SLICE_GRACE = 2.5  # seconds to wait for coverage slices after the base page
+PAGE_GRACE = 4.0  # seconds to wait for the real browser Cheapest list after the search
+
+
 class _DiverseSearch(SearchFlights):
     """Expands the cheapest outbound per airline first, and remembers every
     outbound option so the unexpanded ones can still be listed."""
@@ -150,7 +154,19 @@ class _DiverseSearch(SearchFlights):
                     raise
                 return []
 
-        results = _fli_flights.parallel_map(lambda i: one(variants[i], i == 0), list(range(len(variants))))
+        # The base search is required; the slices only add coverage. Google
+        # sometimes takes 5+ s on one page, so don't let a straggling slice
+        # hold the whole search: wait for slices at most SLICE_GRACE seconds
+        # after the base page is in (a late one keeps running, unused).
+        import contextvars
+        from concurrent.futures import ThreadPoolExecutor, wait
+
+        ex = ThreadPoolExecutor(max_workers=len(variants))
+        futs = [ex.submit(contextvars.copy_context().run, one, v, i == 0) for i, v in enumerate(variants)]
+        base = futs[0].result()
+        wait(futs[1:], timeout=SLICE_GRACE)
+        ex.shutdown(wait=False)
+        results = [base] + [f.result() if f.done() else [] for f in futs[1:]]
         merged, seen = [], set()
         for rows in results:
             for fl in rows:
@@ -238,9 +254,10 @@ def _page_rows(filters, currency: str) -> list:
         ctx = page.context.browser.new_context(locale="en-US")
         try:
             ctx.add_cookies([_SOCS])
+            # (blocking images/CSS was tried: it made Google's page twice as slow)
             pg = ctx.new_page()
             got = _browser.capture(pg, lambda: pg.goto(url, wait_until="commit", timeout=30000),
-                                   lambda u: "GetShoppingResults" in u, timeout=20)
+                                   lambda u: "GetShoppingResults" in u, timeout=12)
             return got[-1][1] if got else ""
         finally:
             ctx.close()
@@ -365,7 +382,9 @@ def search(q: SearchQuery, top_n: int = 8, wide: bool = True) -> list[Itinerary]
     obs = client.outbounds or [r for r in results if not isinstance(r, tuple)]
     if early is not None:
         try:
-            page = early.result(timeout=90)
+            # usually ready with the base search (~2.5 s); never hold the
+            # search more than a few seconds for it
+            page = early.result(timeout=PAGE_GRACE)
         except Exception as e:
             log.info("google: page list failed: %s", e)
             page = []
