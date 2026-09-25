@@ -404,7 +404,7 @@ function urlB64ToUint8Array(base64: string) {
 }
 
 function AlertsSection() {
-  const { me, settings, refreshMe, places } = useApp();
+  const { me, settings, refreshMe } = useApp();
   const [err, setErr] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   if (!me?.user || !settings) return null;

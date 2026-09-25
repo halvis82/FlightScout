@@ -9,7 +9,7 @@ import { pushRecent } from "@/lib/recent";
 import { ResultsView, mergeTrips } from "@/components/results-view";
 import { SearchFormView, defaultForm, formToParams, paramsToForm, type SearchForm } from "@/components/search-form";
 import { WatchButton } from "@/components/watch-dialog";
-import { Button, Empty, ErrorNote, Spinner } from "@/components/ui";
+import { Empty, ErrorNote, Spinner } from "@/components/ui";
 import { api } from "@/lib/client";
 import { extensionVersion } from "@/lib/extension";
 import { localRunnerActive } from "@/lib/local-runner";
@@ -96,7 +96,7 @@ function SearchPage() {
   const [elapsed, setElapsed] = useState(0);
   const runSeq = useRef(0);
   const [stale, setStale] = useState(false);
-  const [pending, setPending] = useState(0);
+  const [, setPending] = useState(0);
   const [parts, setParts] = useState<PartState[]>([]);
   const [finished, setFinished] = useState<{ secs: number; failed: number } | null>(null);
   const lastRun = useRef<string | null>(null);
