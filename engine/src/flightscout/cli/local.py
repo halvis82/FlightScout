@@ -62,7 +62,6 @@ def _site_env(c: dict) -> dict[str, str]:
         "ENGINE_KEY": "local",
         "TRACKER_KEY": "local-" + _secret()[:16],
         "FLIGHTSCOUT_NO_RATE_LIMIT": "1",
-        "NODE_ENV": "production",
         "NEXT_TELEMETRY_DISABLED": "1",
     }
     if c["mode"] == "shared":
@@ -89,7 +88,9 @@ def _node(c: dict) -> tuple[str, str]:
 def _build(c: dict) -> None:
     web = Path(c["repo"]) / "web"
     node, npm = _node(c)
-    env = {**os.environ, **_site_env(c), "PATH": f"{Path(node).parent}:{os.environ.get('PATH', '')}"}
+    # no NODE_ENV here: npm would skip the build tools (next build sets production itself)
+    env = {**{k: v for k, v in os.environ.items() if k != "NODE_ENV"}, **_site_env(c),
+           "PATH": f"{Path(node).parent}:{os.environ.get('PATH', '')}"}
     out.print("Installing the website's packages (first time takes a minute)")
     subprocess.run([npm, "ci", "--no-audit", "--no-fund", "--loglevel=error"], cwd=web, env=env, check=True)
     out.print("Building the website")
@@ -108,7 +109,7 @@ def _run_site(listen: socket.socket, c: dict) -> None:
     s.bind(("127.0.0.1", 0))
     inner = s.getsockname()[1]
     s.close()
-    env = {**os.environ, **_site_env(c), "PATH": f"{Path(node).parent}:{os.environ.get('PATH', '')}"}
+    env = {**os.environ, **_site_env(c), "NODE_ENV": "production", "PATH": f"{Path(node).parent}:{os.environ.get('PATH', '')}"}
     proc = subprocess.Popen([node, str(web / "node_modules" / "next" / "dist" / "bin" / "next"), "start",
                              "-p", str(inner), "-H", "127.0.0.1"], cwd=web, env=env,
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
