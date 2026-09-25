@@ -1,7 +1,7 @@
 "use client";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Sparkles } from "lucide-react";
+import { Check, Sparkles, X } from "lucide-react";
 import { useApp } from "@/components/app-context";
 import { ExplorePanel } from "@/components/explore-panel";
 import { RecentRow } from "@/components/recent-row";
@@ -13,10 +13,11 @@ import { Button, Empty, ErrorNote, Spinner } from "@/components/ui";
 import { api } from "@/lib/client";
 import { extensionVersion } from "@/lib/extension";
 import { localRunnerActive } from "@/lib/local-runner";
-import { PARTS, searchPart } from "@/lib/live-search";
+import { PARTS, PART_LABELS, searchPart, type PartState } from "@/lib/live-search";
 import { airport, expandCodes } from "@/lib/airports-client";
 import { RouteMap } from "@/components/route-map";
 import { addDays, dayDiff } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import type { PlanResult, SearchQuery, SearchResult } from "@/lib/types";
 
 export default function Page() {
@@ -96,6 +97,8 @@ function SearchPage() {
   const runSeq = useRef(0);
   const [stale, setStale] = useState(false);
   const [pending, setPending] = useState(0);
+  const [parts, setParts] = useState<PartState[]>([]);
+  const [finished, setFinished] = useState<{ secs: number; failed: number } | null>(null);
   const lastRun = useRef<string | null>(null);
 
   const run = useCallback(
@@ -115,6 +118,7 @@ function SearchPage() {
       setPending(PARTS.length);
       setPlan(null);
       setBusy(true);
+      setFinished(null);
       setElapsed(0);
       const t0 = Date.now();
       const timer = setInterval(() => setElapsed(Math.round((Date.now() - t0) / 1000)), 1000);
@@ -147,6 +151,7 @@ function SearchPage() {
             if (runSeq.current !== runId) return;
             setResult(null); // never show a previous one way / round trip search under a multi city heading
             setPlan(r);
+            setFinished({ secs: Math.round((Date.now() - t0) / 1000), failed: 0 });
           })
           .catch((e) => {
             if (runSeq.current !== runId) return;
@@ -181,11 +186,15 @@ function SearchPage() {
       const runId = ++runSeq.current;
       let acc: SearchResult | null = null;
       let pending = PARTS.length;
+      const states: PartState[] = PARTS.map(() => ({ state: "searching", n: 0 }));
+      setParts([...states]);
+      setFinished(null);
       const searchP = Promise.all(
         PARTS.map((sources, part) =>
           searchPart(q, sources, part)
             .then((r) => {
               if (runSeq.current !== runId) return;
+              states[part] = { state: "done", n: r.trips.length };
               if (!acc) acc = r;
               else {
                 const seen = new Set(acc.trips.map((t) => t.id));
@@ -193,12 +202,14 @@ function SearchPage() {
               }
             })
             .catch((e) => {
+              states[part] = { state: "failed", n: 0 };
               if (runSeq.current === runId && part === 0) setErr((e as Error).message);
             })
             .finally(() => {
               pending -= 1;
               if (runSeq.current !== runId) return;
               setPending(pending);
+              setParts([...states]);
               // swap in new results once some flights arrived (or all parts are done)
               if (acc && (acc.trips.length || pending === 0)) {
                 setResult(acc);
@@ -208,6 +219,7 @@ function SearchPage() {
                 if (!acc) setResult(null);
                 setStale(false);
                 setBusy(false);
+                setFinished({ secs: Math.round((Date.now() - t0) / 1000), failed: states.filter((x) => x.state === "failed").length });
               }
             }),
         ),
@@ -328,25 +340,61 @@ function SearchPage() {
           setForm(next);
         }}
       />
-      {(busy || planBusy) && (
+      {form.tripType !== "multicity" && parts.length > 0 && (busy || finished) && (
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+            {busy ? (
+              <span className="inline-flex items-center gap-2 text-muted">
+                <Spinner /> Searching, results appear as each source answers
+                <span className="tabular-nums text-faint">{elapsed}s</span>
+              </span>
+            ) : (
+              finished && (
+                <span className="inline-flex items-center gap-1.5 font-medium text-good">
+                  <Check className="size-4" /> Search complete: {result?.trips.length ?? 0} flights in {finished.secs}s
+                  {finished.failed > 0 && <span className="font-normal text-faint">({finished.failed} source group{finished.failed > 1 ? "s" : ""} didn&apos;t answer)</span>}
+                </span>
+              )
+            )}
+            {busy && !extensionVersion() && !localRunnerActive() && elapsed >= 4 && (
+              <a href="/settings#own-ip" className="text-xs text-faint underline-offset-2 hover:text-fg hover:underline">
+                Faster: search from your own IP
+              </a>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-1.5" aria-label="Sources">
+            {parts.map((p, i) => (
+              <span
+                key={i}
+                className={cn(
+                  "inline-flex h-6 items-center gap-1 rounded-full border px-2 text-xs",
+                  p.state === "searching" && "border-border text-muted",
+                  p.state === "done" && "border-good/30 bg-good-soft/40 text-good",
+                  p.state === "failed" && "border-border text-faint line-through",
+                )}
+                title={p.state === "failed" ? "Didn't answer this time" : undefined}
+              >
+                {p.state === "searching" ? <Spinner className="size-3" /> : p.state === "done" ? <Check className="size-3" /> : <X className="size-3" />}
+                {PART_LABELS[i]}
+                {p.state === "done" && <span className="tabular-nums opacity-70">{p.n}</span>}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      {form.tripType === "multicity" && busy && (
         <div className="flex items-center gap-2 text-sm text-muted">
-          <Spinner />
-          {busy
-            ? stale
-              ? "Searching Google Flights, Kiwi.com and airlines directly"
-              : `More results coming in (${pending} source group${pending === 1 ? "" : "s"} left)`
-            : "Direct results ready."}
-          {planBusy && (
-            <span className="inline-flex items-center gap-1">
-              <Sparkles className="size-3.5 text-info" /> Looking for cheaper combinations (separate tickets, nearby gateways, stopovers). About a minute.
-            </span>
-          )}
-          <span className="tabular-nums text-faint">{elapsed}s</span>
-          {!extensionVersion() && !localRunnerActive() && elapsed >= 4 && (
-            <a href="/settings#own-ip" className="text-xs text-faint underline-offset-2 hover:text-fg hover:underline">
-              Faster: search from your own IP
-            </a>
-          )}
+          <Spinner /> Searching every flight of the trip <span className="tabular-nums text-faint">{elapsed}s</span>
+        </div>
+      )}
+      {form.tripType === "multicity" && !busy && finished && plan && (
+        <div className="inline-flex items-center gap-1.5 text-sm font-medium text-good">
+          <Check className="size-4" /> Search complete: {plan.trips.length} trips in {finished.secs}s
+        </div>
+      )}
+      {planBusy && (
+        <div className="flex items-center gap-2 text-sm text-muted">
+          <Sparkles className="size-3.5 text-info" /> Also looking for cheaper combinations (separate tickets, nearby gateways, stopovers). About a minute.
         </div>
       )}
       {err && <ErrorNote>{err}</ErrorNote>}

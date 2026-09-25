@@ -94,3 +94,15 @@ test("recent searches: one click repeats a past search", async ({ page }) => {
   await expect(page.getByText(/\d+ flights/)).toBeVisible(); // searched by itself
   await expect(page.getByRole("link", { name: "All history" })).toBeVisible();
 });
+
+test("streams results with a clear searching and complete state", async ({ page }) => {
+  test.setTimeout(200_000);
+  await page.goto("/?from=SEA&to=SFO&tt=oneway&d=2026-12-17&smart=0");
+  await expect(page.getByText("Searching, results appear as each source answers")).toBeVisible({ timeout: 30_000 });
+  const chips = page.getByLabel("Sources");
+  await expect(chips.getByText("Google Flights")).toBeVisible();
+  // results show before everything has answered
+  await expect(page.getByText(/\d+ flights/).first()).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText(/Search complete: \d+ flights in \d+s/)).toBeVisible({ timeout: 180_000 });
+  await expect(page.getByText("Searching, results appear as each source answers")).toHaveCount(0);
+});

@@ -313,10 +313,12 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
             Flights {legs ? "for this multi city trip" : shown ? `for ${formatDate(shown.depart, false)}${shown.nights != null && w.tripType === "roundtrip" ? `, ${shown.nights} nights` : ""}` : ""}
             {!pick && !legs && <span className="ml-2 text-xs font-normal text-muted">(the cheapest date found)</span>}
           </h2>
-          {live.pending > 0 && (
+          {live.pending > 0 ? (
             <span className="inline-flex items-center gap-1.5 text-xs text-muted">
-              <Spinner className="size-3.5" /> searching
+              <Spinner className="size-3.5" /> searching, {live.pending} source group{live.pending > 1 ? "s" : ""} still answering
             </span>
+          ) : (
+            (live.result || live.plan) && <span className="text-xs font-medium text-good">Search complete</span>
           )}
         </div>
         {live.error && <ErrorNote>{live.error}</ErrorNote>}

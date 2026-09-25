@@ -11,6 +11,8 @@ import type { PlanResult, SearchQuery, SearchResult } from "./types";
 // fastest first; booking sites in two parts so the quick ones don't wait for
 // ITA Matrix and the polling metasearch sites
 export const PARTS: string[][] = [["google"], ["kiwiweb"], ["airlines"], ["kiwi"], ["otas_fast"], ["otas_slow"]];
+export const PART_LABELS = ["Google Flights", "Kiwi.com", "Airlines direct", "Kiwi.com deals", "Booking sites", "More booking sites, ITA Matrix"];
+export type PartState = { state: "searching" | "done" | "failed"; n: number };
 
 // Google via the visitor's own browser when the FlightScout Helper extension is
 // installed (and the local runner isn't running, which already uses their IP).
