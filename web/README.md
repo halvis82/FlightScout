@@ -16,10 +16,9 @@ It talks to the Python engine (`../engine`, FastAPI) server side for every fligh
 cd web
 npm install                  # also copies the MapLibre worker into public/maplibre
 cp .env.example .env.local   # then fill in secrets
-# Postgres: any Postgres works. With colima or Docker:
-docker run -d --name flightscout-pg -e POSTGRES_USER=flightscout -e POSTGRES_PASSWORD=flightscout \
-  -e POSTGRES_DB=flightscout -p 5433:5432 postgres:17
-# or no server at all: DATABASE_URL=pglite:./.pglite
+# Database: embedded Postgres (PGlite), no server or VM needed
+#   DATABASE_URL=pglite:./.pglite
+# (any real Postgres URL works too, e.g. a free Neon branch)
 npm run db:migrate
 npm run dev                  # http://localhost:3000
 ```
