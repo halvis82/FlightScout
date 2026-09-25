@@ -50,13 +50,16 @@ def search(
     no_self_transfer: bool = typer.Option(False, "--no-self-transfer", help="Hide self transfer itineraries."),
     sellers: int = typer.Option(0, "--sellers", help="Seller and fare breakdown for the top N Google results (browser)."),
     open_n: Optional[int] = typer.Option(None, "--open", help="Open the booking page of result N in your browser."),
+    airline_links: bool = typer.Option(False, "--airline-links", help="Also print links to each airline's own site, pre-filled."),
+    watch: bool = typer.Option(False, "--watch", help="Also add this search to your watchlist (same as the website button)."),
     limit: int = typer.Option(15, help="Rows to show."),
     currency: Optional[str] = CurOpt,
     fmt: Fmt = FmtOpt,
     as_json: bool = JsonOpt,
     keep: bool = SaveOpt,
 ):
-    """Search flights across Google Flights, Kiwi.com and airlines directly.
+    """Search flights across Google Flights (including the long, cheap connections from its Cheapest tab),
+    Kiwi.com and airlines directly.
 
     Examples:
       flightscout search SAN OSL 2026-12-18 -r 2027-01-04
@@ -121,16 +124,51 @@ def search(
                     for o in tk.offers:
                         tag = "[green]airline[/green]" if o.is_airline else "[yellow]agency[/yellow]"
                         out.print(f"   {o.seller} ({tag}): " + ", ".join(f"{x.name or 'fare'} {x.price:,.0f}" for x in o.fares))
+    if airline_links:
+        _print_airline_links(trips[:limit])
     if res.errors:
         con.print(f"[dim]some sources didn't respond: {', '.join(res.errors)}[/dim]")
     if res.google_url:
         out.print(f"Google Flights: {res.google_url}")
+    if watch:
+        _watch(name=f"{','.join(q.origins)} to {','.join(q.destinations)}", origins=q.origins, destinations=q.destinations,
+               trip_type="roundtrip" if r else "oneway", depart_start=(d - timedelta(days=df)).isoformat(),
+               depart_end=(d + timedelta(days=df)).isoformat(),
+               nights_min=max(0, (r - d).days - df - rf) if r else None, nights_max=(r - d).days + df + rf if r else None,
+               currency=q.currency, cabin=cabin, adults=adults, include_split=smart)
     if open_n:
         if 1 <= open_n <= len(trips):
             for tk in trips[open_n - 1].tickets:
                 open_url(tk.booking_url)
         else:
             con.print(f"[yellow]no result #{open_n}[/yellow]")
+
+
+def _watch(**body) -> None:
+    from .common import client
+
+    w = client().add_watch(**body)
+    if w.get("existing"):
+        out.print(f"[green]Already watching[/green] {w.get('name')} (id {w['id']}).")
+    else:
+        out.print(f"[green]Watching[/green] {w.get('name')} (id {w['id']}). Prices are checked twice a day.")
+
+
+def _print_airline_links(trips) -> None:
+    from .. import airlines as directory
+
+    for i, t in enumerate(trips, 1):
+        parts = []
+        for tk in t.tickets:
+            sl = tk.slices[0]
+            back = tk.slices[1].departure.date() if len(tk.slices) > 1 else None
+            for code in sorted({s.carrier for x in tk.slices for s in x.segments}):
+                a = directory.get(code)
+                if a:
+                    url, pre = directory.link(a, sl.origin, sl.destination, sl.departure.date(), back)
+                    parts.append(f"[link={url}]{a['name']}{'' if pre else ' (site)'}[/link]")
+        if parts:
+            out.print(f"#{i} check on the airline: " + ", ".join(dict.fromkeys(parts)))
 
 
 def plan(
@@ -193,6 +231,7 @@ def multicity(
     cabin: str = typer.Option("economy"),
     adults: int = typer.Option(1),
     min_gap: float = typer.Option(4.0, "--min-gap", help="Hours needed between landing and the next flight."),
+    watch: bool = typer.Option(False, "--watch", help="Also add this multi city trip to your watchlist."),
     limit: int = typer.Option(10),
     fmt: Fmt = FmtOpt,
     as_json: bool = JsonOpt,
@@ -230,6 +269,10 @@ def multicity(
     show_trips(res.trips, fmt_of(fmt, as_json), limit, route, payload=res)
     for k, v in res.errors.items():
         con.print(f"[yellow]{k}: {v}[/yellow]")
+    if watch:
+        _watch(name=route, origins=codes(start), destinations=parsed[-1].destinations, trip_type="multicity",
+               depart_start=parsed[0].date.isoformat(), depart_end=parsed[-1].date.isoformat(),
+               legs=[{**lg.model_dump(mode="json")} for lg in parsed], currency=req.currency, cabin=cabin, adults=adults)
 
 
 def trip(

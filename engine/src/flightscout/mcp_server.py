@@ -155,6 +155,62 @@ def find_airports(query: str) -> list[dict]:
 
 
 @mcp.tool()
+def multicity_trip(start: str, legs: list[dict], currency: str | None = None, cabin: str = "economy",
+                   adults: int = 1, watch: bool = False) -> dict:
+    """Multi city trip in a fixed order. legs: [{"to": "JFK", "date": "2026-11-03", "flex_days": 2},
+    {"to": "CDG", "date": "2026-11-15", "arrive_by": true}, ...]. Each flight is priced in its own date window
+    (± flex_days, or any day from the previous flight up to "date" when arrive_by). watch=true also adds it to the
+    user's watchlist."""
+    from .multicity import Leg, MultiRequest, plan_multicity
+
+    parsed, prev, prev_date = [], [start.upper()], None
+    for lg in legs:
+        d = date.fromisoformat(lg["date"])
+        by = bool(lg.get("arrive_by"))
+        n = int(lg.get("flex_days") or 0)
+        parsed.append(Leg(origins=prev, destinations=[lg["to"].upper()], date=d,
+                          before=((d - prev_date).days if prev_date else 14) if by else n,
+                          after=0 if by else n, arrive_by=d if by else None))
+        prev, prev_date = [lg["to"].upper()], d
+    req = MultiRequest(legs=parsed, currency=_cur(currency), cabin=cabin, adults=adults)
+    res = plan_multicity(req).model_dump(mode="json")
+    _save("multicity", req.model_dump(mode="json"), res)
+    out = {"trips": _compact(res["trips"], 8), "errors": res["errors"]}
+    if watch:
+        route = " → ".join([start.upper()] + [lg["to"].upper() for lg in legs])
+        out["watch"] = Client().add_watch(name=route, origins=[start.upper()], destinations=parsed[-1].destinations,
+                                          trip_type="multicity", depart_start=parsed[0].date.isoformat(),
+                                          depart_end=parsed[-1].date.isoformat(),
+                                          legs=[lg.model_dump(mode="json") for lg in parsed], currency=req.currency)
+    return out
+
+
+@mcp.tool()
+def airline_links(origin: str | None = None, destination: str | None = None, depart: date | None = None,
+                  return_date: date | None = None, region: str | None = None, query: str = "") -> list[dict]:
+    """Airline directory: airlines (by region, name or tag) with links into each airline's own search, pre-filled
+    with the route when origin, destination and depart are given. Regions: global, nordics, europe, us_domestic,
+    north_america, mexico, central_america_caribbean, south_america, middle_east, africa, asia, oceania."""
+    from . import airlines as directory
+
+    rows = []
+    for a in directory.find(query, region)[:60]:
+        url, pre = directory.link(a, origin, destination, depart, return_date)
+        rows.append({"iata": a["iata"], "name": a["name"], "category": a["category"], "tags": a.get("tags", []),
+                     "url": url, "prefilled": pre})
+    return rows
+
+
+@mcp.tool()
+def check_watch(watch_id: str) -> dict:
+    """Price a watch right now (runs on the FlightScout server) and return the updated watch."""
+    c = Client()
+    c._req("POST", f"/watches/{watch_id}/check")
+    w = c.watch(watch_id)
+    return {k: v for k, v in w.items() if k not in ("best_trip", "user_id")}
+
+
+@mcp.tool()
 def list_watches() -> list[dict]:
     """The user's watchlist (tracked routes) with best price found so far."""
     drop = {"best_trip", "user_id", "sparkline"}

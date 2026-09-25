@@ -53,6 +53,16 @@ flightscout dates TIJ GDL --from 2026-11-01 --to 2026-11-30 -c MXN
 # Who sells it and what the fare includes (bags, changes, refunds)
 flightscout search JFK LAX +30 --sellers 3
 
+# Watch straight from a search (same as the website's button; saving twice is a no-op)
+flightscout search SAN OSL 2026-12-18 -r 2027-01-04 --watch
+flightscout multicity SAN JFK@2026-11-03~2 SAN@2026-11-10~1 --watch
+
+# Airline sites for the flights you found, pre-filled
+flightscout search OSL CPH 2026-11-20 --airline-links
+
+# Everything at a glance: login, local runner, scheduled checks
+flightscout status
+
 # Track a route, get alerts, see the trend
 flightscout watch add SAN OSL --from 2026-12-15 --to 2026-12-20 --nights 10-14 --alert-below 900
 flightscout watch check && flightscout watch history 1
@@ -71,8 +81,8 @@ flightscout explore SAN --format csv > destinations.csv
 claude mcp add flightscout -- flightscout mcp
 ```
 
-Tools: `search_flights`, `plan_routes`, `build_trip`, `explore_destinations`, `price_calendar`, `find_airports`,
-`list_watches`, `add_watch`, `watch_history`, `list_places`. Agents can also call any command below with `--json`.
+Tools: `search_flights`, `plan_routes`, `multicity_trip`, `build_trip`, `explore_destinations`, `price_calendar`,
+`find_airports`, `airline_links`, `list_watches`, `add_watch`, `check_watch`, `watch_history`, `list_places`. Agents can also call any command below with `--json`.
 
 ## Local runner
 
@@ -87,7 +97,8 @@ Generated from the code by `engine/scripts/gen_cli_docs.py`. Run `flightscout <c
 
 ## `flightscout search`
 
-Search flights across Google Flights, Kiwi.com and airlines directly.
+Search flights across Google Flights (including the long, cheap connections from its Cheapest tab),
+Kiwi.com and airlines directly.
 
 ```sh
 flightscout search SAN OSL 2026-12-18 -r 2027-01-04
@@ -118,6 +129,8 @@ flightscout search LAX DPS +60 -r +71 --depart-flex 3 --smart --sort best
 | `--no-self-transfer` | flag | Hide self transfer itineraries. |
 | `--sellers` | int | Seller and fare breakdown for the top N Google results (browser). |
 | `--open` | int | Open the booking page of result N in your browser. |
+| `--airline-links` | flag | Also print links to each airline's own site, pre-filled. |
+| `--watch` | flag | Also add this search to your watchlist (same as the website button). |
 | `--limit` | int (default `15`) | Rows to show. |
 | `--currency`, `-c` | str | NOK, EUR, USD, GBP, MXN... Default: your configured currency. |
 | `--format`, `-f` | choice (default `table`) | table (default), json (for agents and scripts) or csv. |
@@ -175,6 +188,7 @@ flightscout multicity SAN JFK@2026-11-03±2 OSL@2026-11-07±3 CDG@by2026-11-15 S
 | `--cabin` | str (default `economy`) |  |
 | `--adults` | int (default `1`) |  |
 | `--min-gap` | float (default `4.0`) | Hours needed between landing and the next flight. |
+| `--watch` | flag | Also add this multi city trip to your watchlist. |
 | `--limit` | int (default `10`) |  |
 | `--format`, `-f` | choice (default `table`) | table (default), json (for agents and scripts) or csv. |
 | `--json` | flag | Shortcut for --format json. |
@@ -380,3 +394,7 @@ Pre-compute explore results for everyone's home airports into the shared cache (
 |---|---|---|
 | `--currency` | str (default `USD`) |  |
 | `-v` | flag |  |
+
+## `flightscout status`
+
+Login, local runner, scheduled watch checks and browser support at a glance.

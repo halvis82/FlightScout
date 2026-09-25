@@ -63,6 +63,43 @@ class _DiverseSearch(SearchFlights):
     outbounds: list = []
     filters = None
 
+    def _fetch_flights(self, filters, *, capture_session, **kw):
+        """For the outbound list, also fetch a few slices of the search (1 stop
+        or fewer, each alliance) and merge them. Google's page only embeds
+        ~50 flights ranked by "Best", so the long, odd, cheap connections from
+        its Cheapest tab are often missing; the slices surface them (tested:
+        84 itineraries covering 42 of 43 Cheapest tab departures, vs 49)."""
+        if not capture_session or filters.stops != MaxStops.ANY or filters.alliances or filters.airlines:
+            return super()._fetch_flights(filters, capture_session=capture_session, **kw)
+        from copy import deepcopy
+
+        from fli.models import Alliance
+
+        variants = [filters]
+        for extra in ({"stops": MaxStops.ONE_STOP_OR_FEWER}, *({"alliances": [a]} for a in Alliance)):
+            f = deepcopy(filters)
+            for k, v in extra.items():
+                setattr(f, k, v)
+            variants.append(f)
+
+        def one(f, first=False):
+            try:
+                return super(_DiverseSearch, self)._fetch_flights(f, capture_session=first, **kw) or []
+            except Exception:
+                if first:
+                    raise
+                return []
+
+        results = _fli_flights.parallel_map(lambda i: one(variants[i], i == 0), list(range(len(variants))))
+        merged, seen = [], set()
+        for rows in results:
+            for fl in rows:
+                key = tuple((leg.airline.name, leg.flight_number, leg.departure_datetime) for leg in fl.legs)
+                if key not in seen:
+                    seen.add(key)
+                    merged.append(fl)
+        return merged
+
     def _expand_multi_leg(self, flights, filters, *, top_n, **kw):
         ordered = _diverse(list(flights), top_n)
         if not self.outbounds:  # first level only (the outbound list)

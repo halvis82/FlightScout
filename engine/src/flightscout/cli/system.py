@@ -20,6 +20,7 @@ PLIST = "com.flightscout.runner"
 
 
 def register(app: typer.Typer) -> None:
+    app.command(rich_help_panel="Run")(status)
     app.command(rich_help_panel="Run")(serve)
     app.command(rich_help_panel="Run")(mcp)
     app.command("setup-browser", rich_help_panel="Run")(setup_browser)
@@ -98,6 +99,36 @@ def serve(port: int = typer.Option(8787, help="Port (the website looks for 8787)
 
     out.print(f"FlightScout local runner on http://127.0.0.1:{port}. The website will use it automatically.")
     uvicorn.run(api_app, host="127.0.0.1", port=port, log_level="warning")
+
+
+def status():
+    """Login, local runner, scheduled watch checks and browser support at a glance."""
+    import httpx
+
+    c = Client()
+    who = "not logged in (flightscout login)"
+    if c.ready and c.token:
+        try:
+            who = f"{c.me().get('user', {}).get('email')} on {c.base}"
+        except Exception as e:
+            who = f"token rejected by {c.base}: {e}"
+    try:
+        h = httpx.get("http://127.0.0.1:8787/health", timeout=1.5).json()
+        runner = f"running (version {h.get('version')})" if h.get("local") else "port 8787 is used by something else"
+    except Exception:
+        runner = "not running (flightscout serve --install)"
+    la = Path.home() / "Library" / "LaunchAgents"
+    try:
+        import playwright  # noqa: F401
+        browser = "installed (seller breakdowns, Google Explore)"
+    except ImportError:
+        browser = "not installed (optional: flightscout setup-browser)"
+    rows = [("account", who), ("local runner", runner),
+            ("starts at login", "yes" if (la / f"{PLIST}.plist").exists() else "no"),
+            ("watch checks from this Mac", "07:05 and 19:05" if (la / f"{TRACK_PLIST}.plist").exists() else "no"),
+            ("browser support", browser)]
+    for k, v in rows:
+        out.print(f"{k:28} {v}")
 
 
 def mcp():

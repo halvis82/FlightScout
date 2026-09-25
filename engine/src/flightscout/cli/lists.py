@@ -153,12 +153,21 @@ def watch_rm(watch_id: str, yes: bool = typer.Option(False, "--yes", "-y", help=
 @watch_app.command("check")
 def watch_check(watch_id: Optional[str] = typer.Argument(None, help="Only this watch (default: all active)."),
                 budget: int = typer.Option(12, help="Google searches per watch."),
+                server: bool = typer.Option(False, "--server", help="Let the website's server check it (like its Check now)."),
                 fmt: Fmt = FmtOpt, as_json: bool = JsonOpt):
     """Price watches now from this computer (your IP) and save the results."""
     from ..tracker import run_all
 
     c = client()
     only = _resolve(c, watch_id) if watch_id else None
+    if server:
+        ids = [only] if only else [w["id"] for w in c.watches() if w.get("active", True)]
+        with con.status("checking on the server..."):
+            res = {i: c._req("POST", f"/watches/{i}/check") for i in ids}
+        if fmt_of(fmt, as_json) == Fmt.json:
+            return emit_json(res)
+        out.print(f"Checked {len(ids)} watch(es) on the server.")
+        return
     with con.status("checking watches..."):
         summary = run_all(c, only=only, budget=budget)
     if fmt_of(fmt, as_json) == Fmt.json:
@@ -226,6 +235,19 @@ def places_add(label: str = typer.Argument(..., help="Name, e.g. Home or Paris."
         out.print(f"Already saved as {p['label']} ({', '.join(p['codes'])}).")
     else:
         out.print(f"Added {p['label']} ({', '.join(p['codes'])}).")
+
+
+@places_app.command("star")
+def places_star(code: str = typer.Argument(..., help="Airport code to favorite, e.g. LIS."),
+                kind: str = typer.Option("frequent", help="frequent (favorite), home or interested (want to go).")):
+    """Favorite an airport in one step (labelled with its city), like the star on the website."""
+    from .. import airports as ap
+
+    a = ap.get(code)
+    if not a:
+        raise typer.BadParameter(f"unknown airport {code}")
+    p = client().add_place(label=a.city, codes=[a.iata], kind=kind)
+    out.print(("Already a favorite: " if p.get("existing") else "Starred ") + f"{a.city} ({a.iata}).")
 
 
 @places_app.command("set")

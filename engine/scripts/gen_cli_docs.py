@@ -72,6 +72,16 @@ flightscout dates TIJ GDL --from 2026-11-01 --to 2026-11-30 -c MXN
 # Who sells it and what the fare includes (bags, changes, refunds)
 flightscout search JFK LAX +30 --sellers 3
 
+# Watch straight from a search (same as the website's button; saving twice is a no-op)
+flightscout search SAN OSL 2026-12-18 -r 2027-01-04 --watch
+flightscout multicity SAN JFK@2026-11-03~2 SAN@2026-11-10~1 --watch
+
+# Airline sites for the flights you found, pre-filled
+flightscout search OSL CPH 2026-11-20 --airline-links
+
+# Everything at a glance: login, local runner, scheduled checks
+flightscout status
+
 # Track a route, get alerts, see the trend
 flightscout watch add SAN OSL --from 2026-12-15 --to 2026-12-20 --nights 10-14 --alert-below 900
 flightscout watch check && flightscout watch history 1
@@ -90,8 +100,8 @@ flightscout explore SAN --format csv > destinations.csv
 claude mcp add flightscout -- flightscout mcp
 ```
 
-Tools: `search_flights`, `plan_routes`, `build_trip`, `explore_destinations`, `price_calendar`, `find_airports`,
-`list_watches`, `add_watch`, `watch_history`, `list_places`. Agents can also call any command below with `--json`.
+Tools: `search_flights`, `plan_routes`, `multicity_trip`, `build_trip`, `explore_destinations`, `price_calendar`,
+`find_airports`, `airline_links`, `list_watches`, `add_watch`, `check_watch`, `watch_history`, `list_places`. Agents can also call any command below with `--json`.
 
 ## Local runner
 
