@@ -18,6 +18,7 @@ from .lists import places_app, watch_app
 
 app = typer.Typer(
     no_args_is_help=True,
+    pretty_exceptions_enable=False,
     add_completion=True,
     rich_markup_mode="rich",
     context_settings={"help_option_names": ["-h", "--help"]},
@@ -35,8 +36,22 @@ system.register(app)
 
 
 def main() -> None:
+    from pydantic import ValidationError
+
     try:
         app()
     except NotLoggedIn as e:
         con.print(f"[red]{e}[/red]")
+        sys.exit(1)
+    except ValidationError as e:
+        # "the departure date ... is in the past" instead of a traceback
+        msgs = [err.get("msg", "").removeprefix("Value error, ") for err in e.errors()]
+        con.print("[red]" + "; ".join(dict.fromkeys(msgs)) + "[/red]")
+        sys.exit(2)
+    except KeyboardInterrupt:
+        sys.exit(130)
+    except Exception as e:  # network down, a source changed...: one clear line, no traceback
+        con.print(f"[red]{type(e).__name__}: {e}[/red]")
+        if "--debug" in sys.argv:
+            raise
         sys.exit(1)

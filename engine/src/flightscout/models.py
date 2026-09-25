@@ -8,7 +8,7 @@ import hashlib
 from datetime import date, datetime, timezone
 from typing import Literal
 
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field, computed_field, model_validator
 
 Source = Literal["google", "kiwi", "ryanair", "serpapi", "volaris", "wideroe", "skyairline", "norse", "volotea",
                  "condor", "flair", "wizzair", "vivaaerobus", "kiwiweb", "kayak", "skyscanner"]
@@ -244,6 +244,20 @@ class SearchQuery(BaseModel):
     departure_flex_days: int = 0
     return_flex_days: int = 0
     nearby_km: int = 0  # also search airports within this radius of each side
+
+    @model_validator(mode="after")
+    def _sane(self) -> "SearchQuery":
+        from datetime import date as _d, timedelta as _td
+
+        if not self.origins or not self.destinations:
+            raise ValueError("pick where you fly from and to")
+        if self.departure < _d.today() - _td(days=1):
+            raise ValueError(f"the departure date {self.departure} is in the past")
+        if self.return_date and self.return_date < self.departure:
+            raise ValueError("the return date is before the departure date")
+        if not 1 <= self.adults <= 9:
+            raise ValueError("1 to 9 adults")
+        return self
 
 
 class SearchResult(BaseModel):

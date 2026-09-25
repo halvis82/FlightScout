@@ -24,7 +24,10 @@ export async function engine<T>(path: string, payload?: unknown, timeoutMs = 280
       try {
         const j = JSON.parse(text);
         msg = j.detail ?? j.error ?? text;
+        // FastAPI validation errors: [{msg: "Value error, the return date is before..."}] -> plain sentence
+        if (Array.isArray(msg)) msg = [...new Set(msg.map((d: { msg?: string }) => String(d.msg ?? "").replace(/^Value error, /, "")))].join("; ");
       } catch {}
+      if (res.status === 422) throw new HttpError(400, String(msg).slice(0, 300));
       throw new HttpError(res.status >= 500 ? 502 : res.status, `engine: ${typeof msg === "string" ? msg : JSON.stringify(msg)}`.slice(0, 500));
     }
     return JSON.parse(text) as T;
