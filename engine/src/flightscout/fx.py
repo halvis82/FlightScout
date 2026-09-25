@@ -3,38 +3,61 @@ Rates are cached on disk for 12 hours."""
 
 from __future__ import annotations
 
-import httpx
+import threading
+import time
 
 from . import cache
 
 SUPPORTED = ["NOK", "EUR", "USD", "GBP", "MXN"]
 
 
+# In memory first: a search converts hundreds of prices, and the disk cache
+# (off entirely in browser mode) would mean a file read, or an HTTP call, each.
+_TTL = 12 * 3600
+_mem: dict[str, tuple[float, dict[str, float]]] = {}
+_lock = threading.Lock()
+
+
+def _cached(key: str, fetch) -> dict[str, float]:
+    hit = _mem.get(key)
+    if hit and time.time() - hit[0] < _TTL:
+        return hit[1]
+    with _lock:  # one fetch even when many threads convert at once
+        hit = _mem.get(key)
+        if hit and time.time() - hit[0] < _TTL:
+            return hit[1]
+        data = cache.get(key, ttl=_TTL)
+        if not data:
+            data = fetch()
+            cache.put(key, data)
+        _mem[key] = (time.time(), data)
+        return data
+
+
 def rates(base: str = "EUR") -> dict[str, float]:
-    key = f"fx:{base}"
-    hit = cache.get(key, ttl=12 * 3600)
-    if hit:
-        return hit
-    r = httpx.get(f"https://api.frankfurter.dev/v1/latest?base={base}", timeout=15)
-    r.raise_for_status()
-    data = r.json()["rates"]
-    data[base] = 1.0
-    cache.put(key, data)
-    return data
+    def fetch():
+        import httpx
+
+        r = httpx.get(f"https://api.frankfurter.dev/v1/latest?base={base}", timeout=15)
+        r.raise_for_status()
+        data = r.json()["rates"]
+        data[base] = 1.0
+        return data
+
+    return _cached(f"fx:{base}", fetch)
 
 
 def _wide_rates() -> dict[str, float]:
     """EUR based rates for currencies the ECB does not publish (CLP, PEN,
     ARS, COP...), from open.er-api.com (free, no key, daily)."""
-    key = "fx-wide:EUR"
-    hit = cache.get(key, ttl=12 * 3600)
-    if hit:
-        return hit
-    r = httpx.get("https://open.er-api.com/v6/latest/EUR", timeout=15)
-    r.raise_for_status()
-    data = r.json()["rates"]
-    cache.put(key, data)
-    return data
+    def fetch():
+        import httpx
+
+        r = httpx.get("https://open.er-api.com/v6/latest/EUR", timeout=15)
+        r.raise_for_status()
+        return r.json()["rates"]
+
+    return _cached("fx-wide:EUR", fetch)
 
 
 def convert(amount: float, frm: str, to: str) -> float:
