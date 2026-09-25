@@ -1,0 +1,30 @@
+{
+ "OB": [
+  {
+   "dep": "08:45 Thu, 22 Oct 2026 Link Airways, FC 883 Brisbane Airport",
+   "arr": "10:55 Thu, 22 Oct 2026 Duration : 01h 10mins Armidale Airport",
+   "stops": "Direct Flight",
+   "aircraft": "Metro 23",
+   "fares": [
+    "AUD 315.00",
+    "AUD 375.00",
+    "AUD 445.01",
+    "AUD 555.01"
+   ]
+  }
+ ],
+ "IB": [
+  {
+   "dep": "11:25 Tue, 27 Oct 2026 Link Airways, FC 884 Armidale Airport",
+   "arr": "11:35 Tue, 27 Oct 2026 Duration : 01h 10mins Brisbane Airport",
+   "stops": "Direct Flight",
+   "aircraft": "Metro 23",
+   "fares": [
+    "AUD 315.00",
+    "AUD 375.00",
+    "AUD 445.01",
+    "AUD 555.01"
+   ]
+  }
+ ]
+}

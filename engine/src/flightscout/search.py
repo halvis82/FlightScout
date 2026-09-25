@@ -20,6 +20,9 @@ from .sources import (allegiant_browser, norwegian_browser, southwest_browser, t
 from .sources import aerolineas, aeromexico, alaska, arajet, breeze, frontier, jetblue
 from .sources import aerlingus, airnewzealand, flysafair, jazeera, jet2, skyexpress, vueling
 from .sources import allianceair, biman, fly91_browser, flyarystan, starair
+from .sources import nokair, spring
+from .sources import (airniugini_browser, bangkokair_browser, linkairways_browser, philippineairlines_browser,
+                      vietnamairlines_browser)
 from .sources import (aegean_browser, afklm_browser, akasa_browser, etihad_browser, finnair_browser,
                       flydubai_browser, jejuair_browser, level_browser, qatar_browser, spicejet_browser,
                       tap_browser, tigerair_browser, vietjet_browser, virginaustralia_browser, zipair_browser)
@@ -55,6 +58,9 @@ BROWSER_SOURCES = {
     "akasa": akasa_browser.search, "vietjet": vietjet_browser.search, "tigerair": tigerair_browser.search,
     "zipair": zipair_browser.search, "jejuair": jejuair_browser.search,
     "virginaustralia": virginaustralia_browser.search, "fly91": fly91_browser.search,
+    "linkairways": linkairways_browser.search, "airniugini": airniugini_browser.search,
+    "vietnamairlines": vietnamairlines_browser.search, "philippineairlines": philippineairlines_browser.search,
+    "bangkokair": bangkokair_browser.search,
 }
 SOURCES.update(BROWSER_SOURCES)
 SOURCES.update({
@@ -63,7 +69,7 @@ SOURCES.update({
     "jet2": jet2.search, "aerlingus": aerlingus.search, "vueling": vueling.search, "skyexpress": skyexpress.search,
     "jazeera": jazeera.search, "flysafair": flysafair.search, "airnewzealand": airnewzealand.search,
     "biman": biman.search, "flyarystan": flyarystan.search, "starair": starair.search,
-    "allianceair": allianceair.search,
+    "allianceair": allianceair.search, "nokair": nokair.search, "spring": spring.search,
 })
 # Booking sites (OTAs and metasearch), each verified against its own results
 # page. The "otas" group: plain HTTP ones everywhere, the headless Chrome ones
@@ -85,7 +91,7 @@ OTA_WAIT = float(os.environ.get("FLIGHTSCOUT_OTA_WAIT", "45"))
 AIRLINES = ["volaris", "wideroe", "skyairline", "norse", "volotea", "condor", "flair",
             "frontier", "breeze", "jetblue", "alaska", "arajet", "aeromexico", "aerolineas",
             "jet2", "aerlingus", "vueling", "skyexpress", "jazeera", "flysafair", "airnewzealand",
-            "biman", "flyarystan", "starair", "allianceair"]
+            "biman", "flyarystan", "starair", "allianceair", "nokair", "spring"]
 _DIRECT = set(AIRLINES)
 
 
