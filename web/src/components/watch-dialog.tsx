@@ -16,6 +16,7 @@ import { api } from "@/lib/client";
 import { addDays, isoDate } from "@/lib/format";
 import { CURRENCIES, type Trip } from "@/lib/types";
 import { tripsToObservations } from "@/lib/watch-logic";
+import { checkNote } from "@/lib/watch-logic";
 
 export type WatchForm = {
   name: string;
@@ -71,7 +72,7 @@ export function WatchDialog({
   onClose: () => void;
   initial: WatchForm;
   watchId?: number;
-  onSaved?: (id: number) => void;
+  onSaved?: (row: { id: number } & Record<string, unknown>) => void;
   seedTrips?: Trip[];
 }) {
   return (
@@ -91,7 +92,7 @@ function WatchFormBody({
   initial: WatchForm;
   watchId?: number;
   onClose: () => void;
-  onSaved?: (id: number) => void;
+  onSaved?: (row: { id: number } & Record<string, unknown>) => void;
   seedTrips?: Trip[];
 }) {
   const router = useRouter();
@@ -106,8 +107,9 @@ function WatchFormBody({
     try {
       const body = { ...f, name: f.name || `${f.origins.join("/")} to ${f.destinations.join("/")}` };
       const row = watchId
-        ? await api<{ id: number }>(`/watches/${watchId}`, { method: "PATCH", body })
-        : await api<{ id: number }>("/watches", { body });
+        ? await api<{ id: number } & Record<string, unknown>>(`/watches/${watchId}`, { method: "PATCH", body })
+        : await api<{ id: number } & Record<string, unknown>>("/watches", { body });
+      await mutate("/watches");
       // Start the price history with the results the watch was created from.
       if (!watchId && seedTrips?.length) {
         const obs = tripsToObservations(seedTrips, body.destinations).filter(
@@ -116,7 +118,7 @@ function WatchFormBody({
         if (obs.length) await api(`/watches/${row.id}/observations`, { body: obs }).catch(() => {});
       }
       onClose();
-      if (onSaved) onSaved(row.id);
+      if (onSaved) onSaved(row);
       else router.push(watchHref(row as never));
     } catch (e) {
       setErr((e as Error).message);
@@ -131,6 +133,21 @@ function WatchFormBody({
         <Field label="Name" className="sm:col-span-2">
           <Input value={f.name} onChange={(e) => set({ name: e.target.value })} placeholder={`${f.origins.join("/") || "From"} to ${f.destinations.join("/") || "To"}`} />
         </Field>
+        {f.trip_type === "multicity" ? (
+          <div className="rounded-lg bg-surface-2 p-3 text-sm sm:col-span-2">
+            <div className="font-medium">Multi city</div>
+            <div className="mt-1 text-muted">
+              {(f.legs ?? []).map((l, i) => (
+                <div key={i}>
+                  {l.origins.join("/")} → {l.destinations.join("/")}, {l.date}
+                  {l.after ? ` ±${l.after}` : ""}
+                </div>
+              ))}
+            </div>
+            <p className="mt-1 text-xs text-faint">To change the flights, search that trip and watch it again. Everything below can be changed here.</p>
+          </div>
+        ) : (
+          <>
         <Field label="From">
           <AirportInput value={f.origins} onChange={(origins) => set({ origins })} />
           <PlaceChips onPick={(c) => set({ origins: [...new Set([...f.origins, ...c])] })} />
@@ -155,6 +172,8 @@ function WatchFormBody({
         <Field label="and">
           <Input type="date" value={f.depart_end} min={f.depart_start} onChange={(e) => set({ depart_end: e.target.value })} />
         </Field>
+          </>
+        )}
         {f.trip_type === "roundtrip" && (
           <>
             <Field label="Nights at destination, min">
@@ -296,7 +315,7 @@ export function WatchButton({ watch, seed, label = "Watch this search" }: { watc
 }
 
 export function useWatchDialog() {
-  const { currency } = useApp();
+  const { currency, me } = useApp();
   const [state, setState] = useState<{ open: boolean; initial: WatchForm; seed?: Trip[] }>({ open: false, initial: defaultWatch(currency) });
   return {
     // One click: create the watch right away (sensible defaults), seed it
@@ -318,7 +337,7 @@ export function useWatchDialog() {
         await mutate("/watches");
         toast(
           {
-            text: row.existing ? `Already watching ${body.name}.` : `Watching ${body.name}. Prices are checked twice a day.`,
+            text: row.existing ? `Already watching ${body.name}.` : `Watching ${body.name}. ${checkNote(Boolean(me?.guest))}`,
             action: { label: "Open", href: watchHref(row as never) },
             tone: "good",
           },

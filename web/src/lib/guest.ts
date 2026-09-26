@@ -220,8 +220,9 @@ function watchFromInput(p: Record<string, unknown>, base?: Watch): Watch {
     legs: pick<unknown>("legs", base?.legs ?? null) ?? undefined,
     departStart,
     departEnd,
-    nightsMin: pick("nights_min", base?.nightsMin ?? null),
-    nightsMax: pick("nights_max", base?.nightsMax ?? null),
+    // a one way watch has no trip length (also when edited from round trip)
+    nightsMin: pick("trip_type", base?.tripType) === "oneway" ? null : pick("nights_min", base?.nightsMin ?? null),
+    nightsMax: pick("trip_type", base?.tripType) === "oneway" ? null : pick("nights_max", base?.nightsMax ?? null),
     cabin: pick("cabin", base?.cabin ?? "economy"),
     adults: Math.max(1, Math.min(9, Number(pick("adults", base?.adults ?? 1)))),
     maxStops: pick("max_stops", base?.maxStops ?? null),

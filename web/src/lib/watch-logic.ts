@@ -112,5 +112,21 @@ export function queryMatchesWatch(q: SearchQuery, w: WatchLike & { active?: bool
   if (q.departure < w.departStart || q.departure > w.departEnd) return false;
   if ((w.tripType === "roundtrip") !== Boolean(q.return_date)) return false;
   if (w.cabin !== (q.cabin ?? "economy")) return false;
+  // prices are for the whole party and depend on stops and trip length
+  if ((w.adults ?? 1) !== (q.adults ?? 1)) return false;
+  if ((w.maxStops ?? null) !== (q.max_stops ?? null)) return false;
+  if (w.tripType === "roundtrip" && q.return_date) {
+    const n = Math.round((Date.parse(q.return_date) - Date.parse(q.departure)) / 86400_000);
+    if (w.nightsMin != null && n < w.nightsMin) return false;
+    if (w.nightsMax != null && n > w.nightsMax) return false;
+  }
   return true;
+}
+
+// How often a watch is checked, honestly: accounts get the twice daily
+// tracker, guest watches live in the browser.
+export function checkNote(guest: boolean) {
+  return guest
+    ? "Prices are recorded when you search it or press Check now; sign in for automatic checks twice a day."
+    : "Prices are checked twice a day.";
 }

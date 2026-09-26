@@ -2,7 +2,7 @@
 import { use, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import useSWR from "swr";
+import useSWR, { mutate as globalMutate } from "swr";
 import { ExternalLink, Pause, Pencil, Play, RefreshCw, Search, Trash2 } from "lucide-react";
 import { useApp } from "@/components/app-context";
 import { DateHeatmap, type Cell } from "@/components/date-heatmap";
@@ -16,6 +16,7 @@ import { useLiveSearch, type MulticityLeg } from "@/lib/live-search";
 import type { SearchQuery } from "@/lib/types";
 import type { WatchRow } from "@/lib/watch-types";
 import { resolveWatchParam, watchHref } from "@/lib/watch-slug";
+import { checkNote } from "@/lib/watch-logic";
 
 type Obs = {
   id: number;
@@ -38,12 +39,17 @@ const SOURCE = (s: string) => (s === "google" ? "Google Flights" : s === "kiwi" 
 export default function WatchDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id: param } = use(params);
   const router = useRouter();
-  const { money, convert, currency } = useApp();
+  const { money, convert, currency, me } = useApp();
   // /watches/lax-dps-2027-03-18-11n (readable) or /watches/6 (old links)
   const { data: list } = useSWR<WatchRow[]>("/watches", fetcher, { revalidateOnFocus: false });
   const id = resolveWatchParam(param, list);
   const { data, mutate, error } = useSWR<{ watch: WatchRow; observations: Obs[] }>(id ? `/watches/${id}/history` : null, fetcher);
   const [pick, setPick] = useState<{ depart: string; nights: number | null } | null>(null);
+  // the watchlist panel and the alert dot show the same watches
+  const refreshLists = () => {
+    globalMutate("/watches");
+    globalMutate("/alerts");
+  };
   const [by, setBy] = useState<"best" | "kind" | "source">("best");
   const [editing, setEditing] = useState(false);
   const [checking, setChecking] = useState(false);
@@ -147,17 +153,13 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
     cabin: w.cabin,
     adults: String(w.adults),
     flex: String(Math.min(7, Math.ceil(dayDiff(w.departStart, w.departEnd) / 2))),
+    stops: w.maxStops == null ? "any" : String(w.maxStops),
+    smart: w.includeSplit ? "1" : "0",
   });
-  if (w.tripType === "roundtrip") {
-    const mid = Math.floor(dayDiff(w.departStart, w.departEnd) / 2);
-    const dep = new Date(w.departStart + "T00:00:00Z");
-    dep.setUTCDate(dep.getUTCDate() + mid);
-    searchParams.set("d", dep.toISOString().slice(0, 10));
-    const ret = new Date(dep);
-    ret.setUTCDate(ret.getUTCDate() + (w.nightsMin ?? 7));
-    searchParams.set("r", ret.toISOString().slice(0, 10));
-  }
-  if (w.includeSplit) searchParams.set("smart", "1");
+  // the middle of the window, with the flexibility covering all of it (one way too)
+  const mid = addDays(w.departStart, Math.floor(dayDiff(w.departStart, w.departEnd) / 2));
+  searchParams.set("d", mid);
+  if (w.tripType === "roundtrip") searchParams.set("r", addDays(mid, w.nightsMin ?? 7));
   if (w.tripType === "multicity" && Array.isArray(w.legs)) {
     // back to the multi city form: each leg's destination, date and flexibility
     searchParams.set("to", "");
@@ -190,6 +192,7 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
     alert_below: w.alertBelow,
     alert_drop_pct: w.alertDropPct,
     notes: w.notes,
+    legs: (w.legs as WatchForm["legs"]) ?? null,
   };
 
   async function check() {
@@ -198,6 +201,7 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
     try {
       await api(`/watches/${id}/check`, { body: {} });
       mutate();
+      refreshLists();
     } catch (e) {
       setCheckErr((e as Error).message);
     } finally {
@@ -217,7 +221,7 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
             {w.departEnd !== w.departStart && ` to ${formatDate(w.departEnd, false)}`}
             {w.tripType === "roundtrip" && w.nightsMin != null && `, ${w.nightsMin}${w.nightsMax && w.nightsMax !== w.nightsMin ? ` to ${w.nightsMax}` : ""} nights`}
             {`, ${w.cabin}, ${w.adults} adult${w.adults > 1 ? "s" : ""}. `}
-            {w.active ? "Prices are checked twice a day." : "Paused."}
+            {w.active ? checkNote(Boolean(me?.guest)) : "Paused."}
           </span>
         }
         actions={
@@ -235,6 +239,7 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
               onClick={async () => {
                 await api(`/watches/${id}`, { method: "PATCH", body: { active: !w.active } });
                 mutate();
+                refreshLists();
               }}
             >
               {w.active ? <Pause className="size-4" /> : <Play className="size-4" />} {w.active ? "Pause" : "Resume"}
@@ -385,7 +390,18 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
           </table>
         </div>
       </details>
-      <WatchDialog open={editing} onClose={() => setEditing(false)} initial={form} watchId={w.id} onSaved={() => mutate()} />
+      <WatchDialog
+        open={editing}
+        onClose={() => setEditing(false)}
+        initial={form}
+        watchId={w.id}
+        onSaved={(row) => {
+          mutate();
+          refreshLists();
+          // the readable URL follows the edited route and dates
+          router.replace(watchHref(row as never), { scroll: false });
+        }}
+      />
     </div>
   );
 }

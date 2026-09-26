@@ -36,3 +36,17 @@ describe("tripsToObservations", () => {
     expect(o.return_date).toBe("2027-03-29");
   });
 });
+
+import { queryMatchesWatch } from "@/lib/watch-logic";
+
+describe("queryMatchesWatch", () => {
+  const w = { origins: ["SAN"], destinations: ["OSL"], tripType: "roundtrip" as const, departStart: "2026-11-10", departEnd: "2026-11-14",
+    nightsMin: 7, nightsMax: 10, cabin: "economy", adults: 1, maxStops: null, currency: "USD", alertBelow: null, alertDropPct: null };
+  const q = { origins: ["SAN"], destinations: ["OSL"], departure: "2026-11-12", return_date: "2026-11-20", cabin: "economy", adults: 1 };
+  it("matches the same search", () => expect(queryMatchesWatch(q as never, w as never)).toBe(true));
+  it("ignores other party sizes, stops and trip lengths", () => {
+    expect(queryMatchesWatch({ ...q, adults: 2 } as never, w as never)).toBe(false);
+    expect(queryMatchesWatch({ ...q, max_stops: 0 } as never, w as never)).toBe(false);
+    expect(queryMatchesWatch({ ...q, return_date: "2026-11-30" } as never, w as never)).toBe(false);
+  });
+});

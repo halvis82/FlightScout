@@ -491,6 +491,7 @@ function SearchPage() {
                     currency: form.currency,
                     cabin: form.cabin,
                     adults: form.adults,
+                    max_stops: form.stops === "any" ? null : Number(form.stops),
                     include_split: form.smart,
                   }
             }

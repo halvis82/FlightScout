@@ -11,6 +11,7 @@ import { Badge, Button, Card, Empty, PageHeader, Spinner } from "@/components/ui
 import { api, fetcher } from "@/lib/client";
 import { formatDate, relativeTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { checkNote } from "@/lib/watch-logic";
 
 export type WatchRow = {
   id: number;
@@ -41,6 +42,7 @@ export type WatchRow = {
 
 export default function WatchesPage() {
   const { data, mutate, isLoading } = useSWR<WatchRow[]>("/watches", fetcher);
+  const { me } = useApp();
   const watch = useWatchDialog();
   const [checking, setChecking] = useState<number | null>(null);
 
@@ -60,7 +62,7 @@ export default function WatchesPage() {
     <div>
       <PageHeader
         title="Watchlist"
-        sub="Routes FlightScout checks every day. Prices build up into history you can chart and compare."
+        sub={`Routes you watch. ${checkNote(Boolean(me?.guest))} Prices build up into history you can chart and compare.`}
         actions={
           <Button variant="primary" onClick={() => watch.open()}>
             <Plus className="size-4" /> New watch

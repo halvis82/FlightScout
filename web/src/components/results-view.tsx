@@ -316,7 +316,9 @@ export function ResultsView({
                 onWatch={(trip) => {
                   const out = trip.tickets.flatMap((x) => x.slices).sort((a, b) => a.departure.localeCompare(b.departure));
                   const dep = out[0].departure.slice(0, 10);
-                  const ret = trip.route.at(-1) === trip.route[0] ? out.at(-1)!.departure.slice(0, 10) : null;
+                  // the search's own trip type (a return to another airport of the same city is still a round trip)
+                  const rt = query?.return_date != null || trip.route.at(-1) === trip.route[0];
+                  const ret = rt ? (out.length > 1 ? out.at(-1)!.departure.slice(0, 10) : (query?.return_date ?? null)) : null;
                   const nights = ret ? dayDiff(dep, ret) : null;
                   watch.open({
                     origins: query?.origins ?? [trip.route[0]],
@@ -330,6 +332,8 @@ export function ResultsView({
                     include_split: trip.tickets.length > 1,
                     alert_below: Math.floor(trip.total_price * 0.9),
                     cabin: query?.cabin ?? "economy",
+                    adults: query?.adults ?? 1,
+                    max_stops: query?.max_stops ?? null,
                   }, trips);
                 }}
               />

@@ -14,6 +14,7 @@ import { api, fetcher } from "@/lib/client";
 import { formatDate, relativeTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { WatchRow } from "@/lib/watch-types";
+import { checkNote } from "@/lib/watch-logic";
 
 type Alert = { id: number; message: string; watchId: number | null; createdAt: string; readAt: string | null };
 
@@ -47,6 +48,7 @@ export function WatchlistButton() {
 
 export function WatchlistPanel() {
   const open = panelStore.use() === "watchlist";
+  const { me } = useApp();
   const { data, mutate, isLoading } = useWatches();
   const { data: alerts, mutate: mutateAlerts } = useAlerts();
   const watch = useWatchDialog();
@@ -91,7 +93,7 @@ export function WatchlistPanel() {
             <h2 className="flex items-center gap-2 text-base font-semibold">
               <Star className="size-4 text-accent" /> Watchlist
             </h2>
-            <p className="text-xs text-muted">Checked twice a day. Use Watch on any search or result to add one.</p>
+            <p className="text-xs text-muted">{checkNote(Boolean(me?.guest))} Use Watch on any search or result to add one.</p>
           </div>
           <div className="flex items-center gap-1">
             <Button size="sm" variant="soft" onClick={() => watch.open()}>
