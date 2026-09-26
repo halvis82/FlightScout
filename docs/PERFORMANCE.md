@@ -10,6 +10,8 @@ us-east-1 / iad1, so no request crosses regions.
 | First load JS on the search page | 518 KB compressed | 253 KB | MapLibre (1 MB raw) loads after the page is interactive, the calendar (react-day-picker + date-fns) on first open (preloaded on hover or focus) |
 | Home, first visit: DOM ready / load / LCP | 435 / 550 / 552 ms | 221 / 285 / 228 ms | same |
 | Search link, first visit: load / LCP | 303 / 224 ms | 168 / 116 ms | same |
+| Pages without a map (Settings, Watchlist...) | 544 KB of scripts (MapLibre preloaded in idle time) | 261 KB | 2026-09-26: the map library loads only when a map mounts (Next prefetched the preloading module for links on every page) |
+| `/watches` list | every watch's full best trip JSON | without it | the list never showed it |
 | `/api/v1/fx` | about 120 ms at the function | about 40 ms from the edge | `s-maxage=3600, stale-while-revalidate` |
 | `/api/v1/explore/cached` | about 150 ms | edge cached | `s-maxage=600` |
 | airports.json (417 KB), airlines.json, map worker | revalidated on every view | cached in the browser for a day | `Cache-Control` in next.config.ts |
