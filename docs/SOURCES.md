@@ -12,7 +12,7 @@ Runs on: server, extension (Google) or local runner.
 | `kiwi` | Kiwi.com through its public MCP endpoint (https://mcp.kiwi.com, keyless). Kiwi is the main source of self transfer (virtual interlining) fares, flexible date ranges and "anywhere" exploration. |
 | `kiwiweb` | Kiwi.com through the GraphQL backend its own website uses (api.skypicker.com/umbrella/v2/graphql, keyless, Chrome TLS impersonation). |
 
-## Airlines direct, plain HTTP (27)
+## Airlines direct, plain HTTP (28)
 
 Runs on: server or local runner.
 
@@ -45,6 +45,7 @@ Runs on: server or local runner.
 | `allianceair` | Alliance Air (9I) direct from bookme.allianceair.in. India's state owned regional airline (ATR turboprops on 50 odd airports, many UDAN routes to small towns) that Kiwi and most OTAs don't sell. |
 | `nokair` | Nok Air (DD, Thailand) direct from its own booking app (booking.nokair.com, Sabre EzyCommerce). Thai domestic out of Don Mueang plus a few regional routes (Yangon, Chennai, ...), thin on Google and Kiwi. |
 | `spring` | Spring Airlines (9C, China) direct from en.ch.com. Shanghai based low cost carrier that sells mostly on its own site (thin on Google and Kiwi): Chinese domestic plus Japan, Korea and Southeast Asia from Shanghai and othe... |
+| `ryanair` | Ryanair's public fare finder API (no key). Great for cheap European hops and for exploring every destination from a Ryanair base. |
 
 ## Airlines direct, headless Chrome (35)
 

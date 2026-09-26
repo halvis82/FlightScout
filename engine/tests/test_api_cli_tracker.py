@@ -25,13 +25,13 @@ def test_search_merges_sources_and_converts_currency(monkeypatch, dt):
     a = ticket(["SAN", "LAX"], dt, price=50)
     b = ticket(["SAN", "LAX"], dt, price=40, source="kiwi").model_copy(update={"seller_kind": "ota", "currency": "EUR"})
     monkeypatch.setattr(search_mod, "SOURCES", {"google": lambda q: [a], "kiwi": lambda q: [b],
-                                                "ryanair": lambda q: (_ for _ in ()).throw(RuntimeError("down"))})
+                                                "booking": lambda q: (_ for _ in ()).throw(RuntimeError("down"))})
     monkeypatch.setattr(search_mod.fx, "convert", lambda amt, frm, to: amt * 2 if frm != to else amt)
     q = search_mod.SearchQuery(origins=["SAN"], destinations=["LAX"], departure=dt.date(), currency="USD",
-                               sources=["google", "kiwi", "ryanair"])
+                               sources=["google", "kiwi", "booking"])
     r = search_mod.search(q)
     assert [t.total_price for t in r.trips] == [50, 80]  # EUR converted, sorted
-    assert "ryanair" in r.errors  # one failing source doesn't sink the search
+    assert "booking" in r.errors  # one failing source doesn't sink the search
 
 
 def test_tracker_sampling_never_divides_by_zero():

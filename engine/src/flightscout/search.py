@@ -21,7 +21,7 @@ from .sources import (allegiant_browser, norwegian_browser, southwest_browser, t
 from .sources import aerolineas, aeromexico, alaska, arajet, breeze, frontier, jetblue
 from .sources import aerlingus, airnewzealand, flysafair, jazeera, jet2, skyexpress, vueling
 from .sources import allianceair, biman, fly91_browser, flyarystan, starair
-from .sources import nokair, spring
+from .sources import nokair, ryanair, spring
 from .sources import agoda, avianca_browser, easemytrip, ita, ixigo_browser, sas_browser, skiplagged
 from .sources import (airniugini_browser, bangkokair_browser, linkairways_browser, philippineairlines_browser,
                       vietnamairlines_browser)
@@ -72,6 +72,7 @@ SOURCES.update({
     "jazeera": jazeera.search, "flysafair": flysafair.search, "airnewzealand": airnewzealand.search,
     "biman": biman.search, "flyarystan": flyarystan.search, "starair": starair.search,
     "allianceair": allianceair.search, "nokair": nokair.search, "spring": spring.search,
+    "ryanair": ryanair.search,
 })
 # Booking sites (OTAs and metasearch), each verified against its own results
 # page. The "otas" group: plain HTTP ones everywhere, the headless Chrome ones
@@ -99,7 +100,7 @@ SLOW_WAIT = {"ita": 90.0}  # sources that need longer than OTA_WAIT
 AIRLINES = ["volaris", "wideroe", "skyairline", "norse", "volotea", "condor", "flair",
             "frontier", "breeze", "jetblue", "alaska", "arajet", "aeromexico", "aerolineas",
             "jet2", "aerlingus", "vueling", "skyexpress", "jazeera", "flysafair", "airnewzealand",
-            "biman", "flyarystan", "starair", "allianceair", "nokair", "spring"]
+            "biman", "flyarystan", "starair", "allianceair", "nokair", "spring", "ryanair"]
 _DIRECT = set(AIRLINES)
 
 
@@ -171,7 +172,7 @@ AIRLINE_CODES = {
     "alaska": ["AS", "HA"], "arajet": ["DM"], "aeromexico": ["AM"], "aerolineas": ["AR"], "jet2": ["LS"],
     "aerlingus": ["EI"], "vueling": ["VY"], "skyexpress": ["GQ"], "jazeera": ["J9"], "flysafair": ["FA"],
     "airnewzealand": ["NZ"], "biman": ["BG"], "flyarystan": ["FS"], "starair": ["S5"], "allianceair": ["9I"],
-    "nokair": ["DD"], "spring": ["9C"],
+    "nokair": ["DD"], "spring": ["9C"], "ryanair": ["FR", "RK", "AL", "RR"],
     "transavia": ["HV", "TO"], "norwegian": ["DY", "D8"], "southwest": ["WN"], "vivaaerobus": ["VB"],
     "allegiant": ["G4"], "avelo": ["XP"], "united": ["UA"], "porter": ["PD"], "westjet": ["WS"],
     "caribbean": ["BW"], "caymanairways": ["KX"], "wingo": ["P5"], "finnair": ["AY"], "afklm": ["AF", "KL"],

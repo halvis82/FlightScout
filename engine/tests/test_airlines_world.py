@@ -926,3 +926,34 @@ def test_airnewzealand_live():
     its = airnewzealand.search(_q_h("AKL", "WLG", dep.isoformat(), (dep + timedelta(days=3)).isoformat()))
     assert its and all(i.currency == "NZD" and i.trip_type == "roundtrip" for i in its)
     assert min(i.price for i in its) > 40
+
+
+# --- Ryanair (fare finder: the cheapest flight of the day) ---------------------
+
+def test_ryanair_parse(monkeypatch):
+    from flightscout.sources import ryanair
+
+    monkeypatch.setattr(ryanair, "_airports", lambda: {"STN": "GBP", "DUB": "EUR"})
+    day = date.today() + timedelta(days=20)
+    fares = {("STN", "DUB"): {"segments": [{"origin": "STN", "destination": "DUB", "departure": f"{day}T06:35:00",
+                                            "arrival": f"{day}T07:55:00", "carrier": "FR", "number": "203"}],
+                              "total": 69.98, "seats": None, "currency": "GBP"},
+             ("DUB", "STN"): {"segments": [{"origin": "DUB", "destination": "STN", "departure": f"{day + timedelta(days=3)}T09:00:00",
+                                            "arrival": f"{day + timedelta(days=3)}T10:20:00", "carrier": "FR", "number": "204"}],
+                              "total": 50.0, "seats": None, "currency": "EUR"}}
+    monkeypatch.setattr(ryanair, "_cheapest", lambda o, d, day, adults, cur: fares.get((o, d)))
+    monkeypatch.setattr("flightscout.fx.convert", lambda v, a, b: v * 0.85 if (a, b) == ("EUR", "GBP") else v)
+    ow = ryanair.search(SearchQuery(origins=["STN"], destinations=["DUB"], departure=day, adults=2))
+    assert len(ow) == 1 and ow[0].price == 69.98 and ow[0].currency == "GBP" and "adults=2" in ow[0].booking_url
+    assert ow[0].slices[0].segments[0].flight_number == "203" and ow[0].seller_kind == "airline"
+    rt = ryanair.search(SearchQuery(origins=["STN"], destinations=["DUB"], departure=day, return_date=day + timedelta(days=3)))
+    assert len(rt) == 1 and rt[0].price == round(69.98 + 42.5, 2) and len(rt[0].slices) == 2
+    assert ryanair.search(SearchQuery(origins=["STN"], destinations=["JFK"], departure=day)) == []
+
+
+@pytest.mark.live
+def test_ryanair_live():
+    from flightscout.sources import ryanair
+
+    its = ryanair.search(SearchQuery(origins=["STN"], destinations=["DUB"], departure=date.today() + timedelta(days=25)))
+    assert its and its[0].slices[0].segments[0].carrier in ("FR", "RK", "AL", "RR") and its[0].price > 5
