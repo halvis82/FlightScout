@@ -43,7 +43,9 @@ _WALLED = ("403", "429", "forbidden", "security verification", "just a moment", 
            "no search response", "no flights response", "no search-flight response", "no flight search response",
            "did not create a session token", "err_http_response_code_failure",
            # a wall page where the site's API answers JSON (Porter, passed from home the same day)
-           "unexpected token '<'")
+           "unexpected token '<'",
+           # the connection is reset before any answer (LEVEL on GitHub's servers, passed from home 2026-09-26)
+           "reset by server")
 
 
 @pytest.hookimpl(hookwrapper=True)
