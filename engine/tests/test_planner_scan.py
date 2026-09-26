@@ -129,3 +129,33 @@ def test_trip_builder_only_swaps_in_flights_that_still_connect(world, monkeypatc
     for t in res.trips:
         legs = [tk.slices[0] for tk in t.tickets]
         assert all(b.departure > a.arrival for a, b in zip(legs, legs[1:]))
+
+
+def test_multicity_uses_every_source_and_keeps_the_order(world, monkeypatch):
+    from flightscout import multicity
+
+    at = datetime(world.year, world.month, world.day, 8)
+    later = world + timedelta(days=5)
+    at2 = datetime(later.year, later.month, later.day, 9)
+    monkeypatch.setattr(kiwi, "search_range", lambda *a, **k: [ticket(["OSL", "LON"], at, hours=2, price=120, source="kiwi")]
+                        if a[0] == "OSL" else [ticket(["LON", "OSL"], at2, hours=2, price=110, source="kiwi")])
+    # an earlier leg 2 flight that leaves before leg 1 lands must never be chosen
+    monkeypatch.setattr(kiwiweb, "search_window", lambda o, d, lo, hi, *a, **k:
+                        [ticket(["LON", "OSL"], at - timedelta(hours=5), hours=2, price=20, source="kiwiweb")] if o[0] != "OSL" else [])
+    monkeypatch.setattr(google, "dates", lambda *a, **k: [])
+    monkeypatch.setattr(google, "search", lambda q, top_n=3, wide=True: [])
+
+    def fake_full(q, seller_rules=None):  # the airline's own site: cheaper leg 1
+        if q.origins[0] == "OSL":
+            it = ticket(["OSL", "LON"], at, hours=2, price=60, source="ryanair")
+            return SearchResult(query=q, trips=[Trip(tickets=[it], total_price=60, currency="USD")])
+        return SearchResult(query=q, trips=[])
+
+    monkeypatch.setattr(multicity, "full_search", fake_full)
+    req = multicity.MultiRequest(legs=[multicity.Leg(origins=["OSL"], destinations=["LON"], date=world),
+                                       multicity.Leg(origins=["LON"], destinations=["OSL"], date=later)])
+    res = multicity.plan_multicity(req)
+    best = min(res.trips, key=lambda t: t.total_price)
+    assert best.total_price == 170 and best.tickets[0].source == "ryanair"
+    for t in res.trips:
+        assert t.tickets[1].slices[0].departure > t.tickets[0].slices[-1].arrival

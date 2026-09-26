@@ -8,16 +8,19 @@ between legs."""
 
 from __future__ import annotations
 
+import time
 from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FutureTimeout
 from datetime import date, datetime, timedelta
 
 from pydantic import BaseModel, Field, model_validator
 
 from . import airports, sellers
 from .models import Itinerary, SearchQuery, Stopover, Trip
-from .planner import PlanResult
-from .search import merge, to_currency
-from .sources import google, kiwi
+from .planner import PlanResult, _sane
+from .search import endpoint_note, merge, to_currency
+from .search import search as full_search
+from .sources import google, kiwi, kiwiweb
 
 
 class Leg(BaseModel):
@@ -98,14 +101,34 @@ def _leg_options(leg: Leg, req: MultiRequest, errors: dict[str, str]) -> list[It
                                              cabin=req.cabin, adults=req.adults), top_n=1, wide=False)
         return out
 
-    with ThreadPoolExecutor(max_workers=2) as ex:
-        jobs = {"kiwi": ex.submit(kiwi_range), "google": ex.submit(google_best)}
-        for name, f in jobs.items():
-            try:
-                found += f.result()
-            except Exception as e:
-                errors[f"{name} {o[0]}-{d[0]}"] = str(e)[:200]
-    items = merge([sellers.annotate(to_currency(i, req.currency)) for i in found])
+    def kiwi_window():
+        # every airport on both sides and the whole window, up to 100 tickets (incl. Kiwi's partners)
+        return kiwiweb.search_window(o[:6], d[:6], lo, hi, req.currency, req.adults, req.cabin)
+
+    def airlines_direct():
+        # the airlines' own sites for the main day (low cost carriers Google and Kiwi miss)
+        day = leg.date if lo <= leg.date <= hi else lo
+        q = SearchQuery(origins=o[:4], destinations=d[:4], departure=day, currency=req.currency,
+                        cabin=req.cabin, adults=req.adults, sources=["airlines"])
+        return [t.tickets[0] for t in full_search(q).trips]
+
+    ex = ThreadPoolExecutor(max_workers=4)
+    jobs = {"kiwi": ex.submit(kiwi_range), "kiwiweb": ex.submit(kiwi_window), "google": ex.submit(google_best),
+            "airlines": ex.submit(airlines_direct)}
+    end = time.monotonic() + 60
+    for name, f in jobs.items():
+        try:
+            found += f.result(timeout=max(0.1, end - time.monotonic()))
+        except FutureTimeout:
+            errors[f"{name} {o[0]}-{d[0]}"] = "still searching (skipped)"
+        except Exception as e:
+            errors[f"{name} {o[0]}-{d[0]}"] = str(e)[:200]
+    ex.shutdown(wait=False)
+    items = merge([sellers.annotate(to_currency(i, req.currency)) for i in found if _sane(i)])
+    # a "city" answer that leaves from or lands at another airport says so
+    for i in items:
+        if (n := endpoint_note(i, o, d)) and n not in i.warnings:
+            i.warnings.append(n)
     if leg.arrive_by:
         items = [i for i in items if i.slices[-1].arrival.date() <= leg.arrive_by]
     return items
@@ -115,7 +138,7 @@ def plan_multicity(req: MultiRequest) -> PlanResult:
     errors: dict[str, str] = {}
     with ThreadPoolExecutor(max_workers=4) as ex:
         options = list(ex.map(lambda lg: _leg_options(lg, req, errors), req.legs))
-    requests = sum(3 for _ in req.legs)
+    requests = sum(5 for _ in req.legs)
 
     # beam: (tickets, last arrival, cost)
     beam: list[tuple[list[Itinerary], datetime | None, float]] = [([], None, 0.0)]

@@ -284,8 +284,9 @@ def _oneway_via_hubs(ctx: _Ctx, o: list[str], d: list[str], dep: date, hubs: lis
                 by_hub[h].append(it)
     trips, hub_cost = [], {}
     for h in hubs:
-        leg1s = [i for i in merge(first_by[h]) if _sane(i)]
-        leg2s = [i for i in merge(by_hub[h]) if _sane(i)]
+        # split legs start and end exactly where asked (nearby airports are their own, labeled, strategy)
+        leg1s = [i for i in merge(first_by[h]) if _sane(i) and i.slices[0].origin in o]
+        leg2s = [i for i in merge(by_hub[h]) if _sane(i) and i.slices[-1].destination in d]
         if leg1s and leg2s:
             hub_cost[h] = min(i.price for i in leg1s) + min(i.price for i in leg2s)
         for a in _cheapest(leg1s, 5):
@@ -651,13 +652,21 @@ def build_trip(req: TripRequest) -> PlanResult:
                     st = seq[i - 1]
                     lo = arr.date() + timedelta(days=st.min_nights)
                     hi = arr.date() + timedelta(days=st.max_nights)
-                try:
-                    requests += 1
-                    opts = kiwi.search_range(prev, dest, lo, hi, req.currency, adults=req.adults)
-                except Exception as e:
-                    errors[f"{prev}-{dest}"] = str(e)[:200]
-                    opts = []
-                for it in _cheapest([sellers.annotate(to_currency(x, req.currency)) for x in opts if _sane(x)], req.beam):
+                opts = []
+                for name, fn in (("kiwi", lambda: kiwi.search_range(prev, dest, lo, hi, req.currency, adults=req.adults)),
+                                 ("kiwiweb", lambda: kiwiweb.search_window(airports.expand(prev)[:6], airports.expand(dest)[:6],
+                                                                           lo, hi, req.currency, req.adults))):
+                    try:
+                        requests += 1
+                        opts += fn()
+                    except Exception as e:
+                        errors[f"{name} {prev}-{dest}"] = str(e)[:200]
+                opts = merge(opts)
+                cands = [sellers.annotate(to_currency(x, req.currency)) for x in opts if _sane(x)]
+                for x in cands:
+                    if (n := endpoint_note(x, airports.expand(prev), airports.expand(dest))) and n not in x.warnings:
+                        x.warnings.append(n)
+                for it in _cheapest(cands, req.beam):
                     if arr and it.slices[0].departure <= arr:
                         continue
                     nxt.append((tickets + [it], it.slices[-1].arrival, cost + it.price))
