@@ -22,7 +22,7 @@ test.describe("explore", () => {
     await expect.poll(visible).toBeGreaterThanOrEqual(before);
     // one click on a list row searches it
     await rows.first().locator(".truncate").first().click();
-    await expect(page.getByText(/\d+ flights/)).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByText(/\d+ flights/).first()).toBeVisible({ timeout: 60_000 });
   });
 
   test("price slider and date toggle filter the list", async ({ page }) => {
@@ -43,7 +43,7 @@ test.describe("explore", () => {
 
   test("clearing the destination returns to explore @mobile", async ({ page }) => {
     await page.goto("/?from=OSL&to=CPH&tt=oneway&d=2026-11-19");
-    await expect(page.getByText(/\d+ flights/)).toBeVisible();
+    await expect(page.getByText(/\d+ flights/).first()).toBeVisible();
     await page.getByRole("button", { name: "Remove CPH" }).click();
     await expect(page.getByText(/Cheapest places from/)).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);

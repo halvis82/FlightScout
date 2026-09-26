@@ -179,7 +179,7 @@ export function ExplorePanel({
             <Info className="size-3.5" /> Some sources didn&apos;t respond, results may be incomplete
           </span>
         )}
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
           {range[1] > range[0] && (
             <label className="flex h-7 items-center gap-2 rounded-md bg-surface-2 px-2 text-xs text-muted">
               <span className="whitespace-nowrap">Under {money(maxPrice ?? range[1], currency)}</span>
@@ -190,7 +190,7 @@ export function ExplorePanel({
                 step={Math.max(1, Math.round((range[1] - range[0]) / 100))}
                 value={maxPrice ?? range[1]}
                 onChange={(e) => setMaxUsd(Number(e.target.value) >= range[1] ? null : convert(Number(e.target.value), currency, "USD"))}
-                className="w-28 accent-[var(--accent)]"
+                className="w-20 accent-[var(--accent)] min-[400px]:w-28"
                 aria-label="Maximum price"
               />
             </label>

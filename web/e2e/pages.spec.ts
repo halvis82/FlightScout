@@ -32,7 +32,7 @@ test("watchlist panel, settings and history open without errors", async ({ page 
 
 test("watch is one click for guests", async ({ page }) => {
   await page.goto("/?from=OSL&to=CPH&tt=oneway&d=2026-11-19");
-  await expect(page.getByText(/\d+ flights/)).toBeVisible();
+  await expect(page.getByText(/\d+ flights/).first()).toBeVisible();
   await page.getByRole("button", { name: "Watch this search" }).click();
   await expect(page.getByText(/Watching OSL to CPH/)).toBeVisible();
 });
@@ -48,7 +48,7 @@ test("signups are invite only", async ({ request, baseURL }) => {
 
 test("watch this search saves once, even when clicked repeatedly, and then shows Watching", async ({ page }) => {
   await page.goto("/?from=OSL&to=CPH&tt=oneway&d=2026-11-19");
-  await expect(page.getByText(/\d+ flights/)).toBeVisible();
+  await expect(page.getByText(/\d+ flights/).first()).toBeVisible();
   const btn = page.getByRole("button", { name: "Watch this search" });
   await btn.click({ clickCount: 3 }); // triple click
   await btn.click({ force: true, timeout: 1000 }).catch(() => {}); // and again while saving (it may already be "Watching")
@@ -78,7 +78,7 @@ test("favorite star double click does not flip twice", async ({ page }) => {
 
 test("multi city: switching clears old results, and it can be watched", async ({ page }) => {
   await page.goto("/?from=OSL&to=CPH&tt=oneway&d=2026-11-19");
-  await expect(page.getByText(/\d+ flights/)).toBeVisible();
+  await expect(page.getByText(/\d+ flights/).first()).toBeVisible();
   await page.getByRole("radio", { name: "Multi-city" }).click();
   await expect(page.getByText(/\d+ flights/)).toHaveCount(0);
   const legs = [
@@ -96,7 +96,7 @@ test("multi city: switching clears old results, and it can be watched", async ({
 test("multi city after a round trip: edit the form and Search shows results", async ({ page }) => {
   test.setTimeout(240_000);
   await page.goto("/?from=LAX&to=DPS&d=2027-03-18&r=2027-03-29&tt=roundtrip&smart=1");
-  await expect(page.getByText(/\d+ flights/)).toBeVisible({ timeout: 120_000 });
+  await expect(page.getByText(/\d+ flights/).first()).toBeVisible({ timeout: 120_000 });
   await page.getByRole("radio", { name: "Multi-city" }).click();
   const pick = async (input: import("@playwright/test").Locator, code: string) => {
     await input.click();
@@ -113,7 +113,7 @@ test("multi city after a round trip: edit the form and Search shows results", as
   await pick(page.getByPlaceholder("Next stop").first(), "TIJ");
   await page.getByRole("button", { name: "Search", exact: true }).click();
   await expect(page.getByText("CUN → MLM → TIJ")).toBeVisible({ timeout: 180_000 });
-  await expect(page.getByText(/\d+ flights/)).toBeVisible();
+  await expect(page.getByText(/\d+ flights/).first()).toBeVisible();
 });
 
 // Watching works before searching, a watched search shows as watched (never
@@ -140,7 +140,7 @@ test("watch before searching, stays watched, readable watch page with all flight
   await watching.click();
   await expect(page).toHaveURL(/\/watches\/cun-mlm-tij-2026-12-30/);
   await expect(page.getByText("Flights for this multi city trip")).toBeVisible();
-  await expect(page.getByText(/\d+ flights/)).toBeVisible({ timeout: 180_000 });
+  await expect(page.getByText(/\d+ flights/).first()).toBeVisible({ timeout: 180_000 });
 });
 
 test("airlines tab marks airlines searched directly, everywhere or only locally", async ({ page }) => {
