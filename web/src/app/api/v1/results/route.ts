@@ -4,7 +4,7 @@ import { recordFares } from "@/lib/fares";
 import type { Trip } from "@/lib/types";
 
 type In = {
-  kind: "search" | "plan" | "explore" | "dates" | "trip";
+  kind: "search" | "plan" | "explore" | "dates" | "trip" | "multicity";
   query: Record<string, unknown>;
   payload: unknown;
   origin?: "web" | "cli" | "mcp" | "local";
@@ -15,7 +15,7 @@ type In = {
 export const POST = route(async (req) => {
   const userId = await requireUser(req);
   const p = await body<In>(req);
-  if (!["search", "plan", "explore", "dates", "trip"].includes(p.kind)) throw new HttpError(400, "bad kind");
+  if (!["search", "plan", "explore", "dates", "trip", "multicity"].includes(p.kind)) throw new HttpError(400, "bad kind");
   if (!p.query || typeof p.query !== "object") throw new HttpError(400, "query is required");
   const payload = Array.isArray(p.payload) ? { items: p.payload } : p.payload;
   const origin = ["web", "cli", "mcp", "local"].includes(p.origin ?? "") ? p.origin! : "cli";

@@ -4,9 +4,12 @@ import { db, schema } from "./db";
 import { HttpError } from "./api";
 
 export type EngineKind = "search" | "plan" | "explore" | "dates" | "trip" | "multicity" | "browser";
+type LimitKind = EngineKind | "check";
 
 // Requests per hour. Guests are limited per IP, signed in users per account.
-const LIMITS: Record<EngineKind, { guest: number; user: number }> = {
+const LIMITS: Record<LimitKind, { guest: number; user: number }> = {
+  // "Check now" on a watch: a full search (and maybe a plan) from the server
+  check: { guest: 0, user: 30 },
   search: { guest: 60, user: 400 },
   plan: { guest: 12, user: 80 },
   trip: { guest: 5, user: 40 },
@@ -37,11 +40,21 @@ export function clientIp(req: Request) {
   );
 }
 
-export async function enforceRateLimit(req: Request, kind: EngineKind, userId: string | null, followUp = false) {
+// A streamed search asks in 6 parts: the first counts toward the normal
+// limit, the other 5 go to their own bucket sized for them.
+const PARTS_PER_SEARCH = 5;
+
+export async function enforceRateLimit(req: Request, kind: LimitKind, userId: string | null, followUp = false) {
   // Your own copy on your computer (scripts/run-local.sh): searches use your
   // IP and nobody else's quota, so there's nothing to limit.
   if (process.env.FLIGHTSCOUT_NO_RATE_LIMIT === "1") return;
-  const lim = followUp && kind === "explore" ? EXPLORE_MORE : LIMITS[kind];
+  const base = LIMITS[kind];
+  const lim =
+    followUp && kind === "explore"
+      ? EXPLORE_MORE
+      : followUp
+        ? { guest: base.guest * PARTS_PER_SEARCH, user: base.user * PARTS_PER_SEARCH }
+        : base;
   const limit = userId ? lim.user : lim.guest;
   const key = `${kind}${followUp ? "+" : ""}:${userId ? `u:${userId}` : `ip:${clientIp(req)}`}`;
   const windowStart = new Date(Math.floor(Date.now() / WINDOW_MS) * WINDOW_MS);

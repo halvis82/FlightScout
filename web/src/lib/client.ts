@@ -85,6 +85,25 @@ async function planHints(p: Record<string, unknown>): Promise<Record<string, unk
   }
 }
 
+// For the guest router's own engine calls (watch checks): the visitor's runner
+// when it's connected (their IP, no server limits), else the server.
+const engineOrServer: typeof serverFetch = async <T,>(path: string, init?: Init) => {
+  const p = path.split("?")[0];
+  if (ENGINE_KINDS.has(p) && localRunnerActive() && init?.body && typeof init.body === "object") {
+    try {
+      const body = { ...(init.body as Record<string, unknown>) };
+      delete body.sellerRules;
+      const rules = (init.body as { sellerRules?: SellerRule[] }).sellerRules;
+      const sr = rules ? rulesToEngine(rules) : undefined;
+      if (sr) body.seller_rules = sr;
+      return (await localEngine(p.slice(1), body)) as T;
+    } catch {
+      /* the server below */
+    }
+  }
+  return serverFetch<T>(path, init);
+};
+
 async function viaLocalRunner<T>(p: string, body: Record<string, unknown>, guest: boolean, signal?: AbortSignal): Promise<T> {
   const kind = p.slice(1);
   const quiet = body.quiet === true || (typeof body.part === "number" && body.part > 0);
@@ -146,9 +165,15 @@ export async function api<T = unknown>(path: string, init?: Init): Promise<T> {
   }
 
   if (guest) {
+    // a result found here, for a guest's own history (and watches)
+    if (p === "/results" && method === "POST") {
+      const b = (init?.body ?? {}) as { kind: string; query: Record<string, unknown>; payload: Record<string, unknown> };
+      const id = await afterGuestEngineCall(b.kind, b.query, b.payload, serverFetch).catch(() => null);
+      return { id } as T;
+    }
     if (isGuestRoute(path)) {
       try {
-        return (await guestApi(path, method, init?.body, serverFetch)) as T;
+        return (await guestApi(path, method, init?.body, engineOrServer)) as T;
       } catch (e) {
         if (e instanceof GuestError) throw new ApiError(e.status, e.message);
         throw e;

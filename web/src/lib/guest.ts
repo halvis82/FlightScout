@@ -2,6 +2,7 @@
 import { placeSignature, watchSignature } from "./signature";
 import { HttpError } from "./http-error";
 import { placeInput } from "./place-validate";
+import { addDays } from "./format";
 import { cleanCurrency, cleanOrigins, cleanPlanner, cleanSellerRules } from "./settings-validate";
 import { checkWatch as checkWatchFields, isDate, toColumns, type WatchIn } from "./watch-validate";
 // Guest mode: the same /api/v1 routes the server offers for signed in users,
@@ -392,11 +393,19 @@ async function checkWatch(w: Watch, serverFetch: ServerFetch) {
           destinations: w.destinations,
           depart_start: w.departStart,
           depart_end: w.departEnd,
+          // round trips come back after the watch's stay, like the server's check
+          return_start: q.return_date ? addDays(w.departStart, w.nightsMin ?? 7) : null,
+          return_end: q.return_date ? addDays(w.departEnd, w.nightsMax ?? w.nightsMin ?? 7) : null,
           currency: w.currency,
           cabin: w.cabin,
           adults: w.adults,
           sellerRules: s.sellerRules,
-          ...s.planner,
+          max_stopover_days: Math.min(s.planner.max_stopover_days, 3),
+          min_connection_hours: s.planner.min_connection_hours,
+          max_trip_days: s.planner.max_trip_days,
+          max_hubs: Math.min(s.planner.max_hubs, 6),
+          allow_self_transfer: s.planner.allow_self_transfer,
+          include_nested_roundtrips: s.planner.include_nested_roundtrips,
         },
       });
       trips = [...trips, ...plan.trips.filter((t) => t.tickets.length > 1)];

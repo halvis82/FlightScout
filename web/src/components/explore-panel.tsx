@@ -82,6 +82,7 @@ export function ExplorePanel({
         nights_min: nights ? Math.max(1, nights - spread) : null,
         nights_max: nights ? nights + spread : null,
         batch,
+        quiet: true, // suggestions shown by themselves, not searches to keep in history
       });
       // batch 0: fast worldwide sources (Kiwi web, KAYAK, Ryanair) in ~3 s;
       // batch 1: the slower Kiwi continent lookups for extra depth.

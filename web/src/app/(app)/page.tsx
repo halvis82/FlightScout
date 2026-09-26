@@ -331,6 +331,10 @@ function SearchPage() {
                 if (searchId != null && acc) {
                   const all = acc as SearchResult;
                   api(`/searches/${searchId}`, { method: "PATCH", body: { payload: { ...all, search_id: undefined } } }).catch(() => {});
+                } else if (acc && (acc as SearchResult).trips.length && states[0].state === "failed") {
+                  // Google (the part that saves) failed but others found flights: save them now
+                  const all = acc as SearchResult;
+                  api("/results", { body: { kind: "search", query: q, payload: { ...all, search_id: undefined }, origin: "web" } }).catch(() => {});
                 }
               }
             }),

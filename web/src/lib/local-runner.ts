@@ -189,12 +189,18 @@ export function normalizeEngine(kind: string, raw: unknown): Record<string, unkn
 
 // POST an engine call to the local runner. Throws on any failure so callers
 // can fall back to the server.
+// How long the runner may take before the search falls back to the server
+// (its own deadlines are 45 to 90 s per source; plans and trips run longer).
+const RUNNER_TIMEOUT_S: Record<string, number> = { search: 150, dates: 90, explore: 120, plan: 240, trip: 300, multicity: 300 };
+
 export async function localEngine(kind: string, payload: Record<string, unknown>, signal?: AbortSignal) {
+  const limit = AbortSignal.timeout((RUNNER_TIMEOUT_S[kind] ?? 150) * 1000);
   const res = await fetch(`${LOCAL_RUNNER_URL}/${kind}`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(payload),
-    signal,
+    // a hung runner must not leave the page spinning: time out, then the server takes over
+    signal: signal ? AbortSignal.any([signal, limit]) : limit,
     cache: "no-store",
   });
   const text = await res.text();
