@@ -126,7 +126,8 @@
    "deeplink_verified": false,
    "logo": "https://images.kiwi.com/airlines/64/AC.png",
    "notes": "Canada's flag carrier with free Wi-Fi for Aeroplan members and a large transborder US network.",
-   "verify_note": "Homepage 403 and deep link lands on a session expired error page in headless Chromium"
+   "verify_note": "Homepage 403 and deep link lands on a session expired error page in headless Chromium",
+   "oneway_deeplink": "https://www.aircanada.com/booking/ca/en/aco/search?org0={origin}&dest0={destination}&departureDate0={depart}&ADT={adults}&YTH=0&CHD=0&INF=0&INS=0&lang=en-CA&tripType=O&marketCode=TNB"
   },
   {
    "iata": "CA",
@@ -2308,7 +2309,8 @@
    "deeplink_verified": false,
    "logo": "https://images.kiwi.com/airlines/64/CM.png",
    "notes": "Panama City hub connects North and South America with a checked bag included on most fares outside Basic.",
-   "verify_note": "shopping.copaair.com returned 401 to headless Chromium, format is the widely shared public one"
+   "verify_note": "shopping.copaair.com returned 401 to headless Chromium, format is the widely shared public one",
+   "oneway_deeplink": "https://shopping.copaair.com/?roundtrip=false&adults={adults}&children=0&infants=0&date1={depart}&area1={origin}&area2={destination}&flexible_dates_v2=false&language=en&point_of_sale=US"
   },
   {
    "iata": "F8",
@@ -2374,7 +2376,8 @@
    "deeplink_verified": true,
    "logo": "https://images.kiwi.com/airlines/64/F9.png",
    "notes": "Ultra low fares with every extra sold separately, and bundles often beat buying a carry-on and seat alone.",
-   "verify_note": "Select page loaded with DEN to LAS prefilled for Nov 2026 dates"
+   "verify_note": "Select page loaded with DEN to LAS prefilled for Nov 2026 dates",
+   "oneway_deeplink": "https://booking.flyfrontier.com/Flight/InternalSelect?o1={origin}&d1={destination}&dd1={depart}&ADT={adults}&mon=true&ftype=GW"
   },
   {
    "iata": "G3",
@@ -2442,7 +2445,8 @@
    "deeplink_verified": false,
    "logo": "https://images.kiwi.com/airlines/64/B6.png",
    "notes": "Free fast Wi-Fi and the most legroom in US economy, plus Mint lie-flat seats on transcon and transatlantic routes.",
-   "verify_note": "Headless Chromium got a CAPTCHA page, not verifiable"
+   "verify_note": "Headless Chromium got a CAPTCHA page, not verifiable",
+   "oneway_deeplink": "https://www.jetblue.com/booking/flights?from={origin}&to={destination}&depart={depart}&isMultiCity=false&noOfRoute=1&adults={adults}&children=0&infants=0&sharedMarket=false&roundTripFaresFlag=false&usePoints=false"
   },
   {
    "iata": "PD",
@@ -3175,7 +3179,8 @@
    "deeplink_verified": false,
    "logo": "https://images.kiwi.com/airlines/64/AK.png",
    "notes": "Asia's largest low cost group, based at Kuala Lumpur KLIA Terminal 2.",
-   "verify_note": "Cloudflare challenge blocked headless browsers, so prefill was not confirmed."
+   "verify_note": "Cloudflare challenge blocked headless browsers, so prefill was not confirmed.",
+   "oneway_deeplink": "https://www.airasia.com/flights/search/?origin={origin}&destination={destination}&departDate={depart}&tripType=O&adult={adults}&child=0&infant=0&locale=en-gb&currency=MYR&cabinClass=economy"
   },
   {
    "iata": "D7",
@@ -3203,7 +3208,8 @@
    "deeplink_verified": false,
    "logo": "https://images.kiwi.com/airlines/64/D7.png",
    "notes": "Medium and long haul AirAsia arm flying A330s to Australia, Japan, Korea and beyond.",
-   "verify_note": "Same airasia.com search URL as AK. A Cloudflare challenge blocked headless browsers, so prefill was not confirmed."
+   "verify_note": "Same airasia.com search URL as AK. A Cloudflare challenge blocked headless browsers, so prefill was not confirmed.",
+   "oneway_deeplink": "https://www.airasia.com/flights/search/?origin={origin}&destination={destination}&departDate={depart}&tripType=O&adult={adults}&child=0&infant=0&locale=en-gb&currency=MYR&cabinClass=economy"
   },
   {
    "iata": "OZ",
@@ -3387,7 +3393,8 @@
    "deeplink_verified": false,
    "logo": "https://images.kiwi.com/airlines/64/JQ.png",
    "notes": "Qantas group low cost carrier across Australia, New Zealand and Asia.",
-   "verify_note": "www.jetstar.com/au/en/deeplinksv2 accepts these params and forwards to booking.jetstar.com, but the booking host returned an Akamai error page to headless browsers so prefill was not confirmed."
+   "verify_note": "www.jetstar.com/au/en/deeplinksv2 accepts these params and forwards to booking.jetstar.com, but the booking host returned an Akamai error page to headless browsers so prefill was not confirmed.",
+   "oneway_deeplink": "https://booking.jetstar.com/au/en/booking/search-flights?origin1={origin}&destination1={destination}&departuredate1={depart}&adults={adults}&children=0&infants=0&currency=AUD"
   },
   {
    "iata": "MH",
@@ -3548,7 +3555,8 @@
    "deeplink_verified": false,
    "logo": "https://images.kiwi.com/airlines/64/FD.png",
    "notes": "Thai arm of AirAsia flying from Bangkok Don Mueang, booked on airasia.com.",
-   "verify_note": "Same airasia.com search URL as AK. A Cloudflare challenge blocked headless browsers, so prefill was not confirmed."
+   "verify_note": "Same airasia.com search URL as AK. A Cloudflare challenge blocked headless browsers, so prefill was not confirmed.",
+   "oneway_deeplink": "https://www.airasia.com/flights/search/?origin={origin}&destination={destination}&departDate={depart}&tripType=O&adult={adults}&child=0&infant=0&locale=en-gb&currency=THB&cabinClass=economy"
   },
   {
    "iata": "TG",

@@ -94,6 +94,7 @@ export default function SettingsPage() {
 
 const REPO = "https://github.com/halvis82/FlightScout";
 const INSTALL = "curl -fsSL https://raw.githubusercontent.com/halvis82/FlightScout/main/scripts/install-runner.sh | sh";
+const INSTALL_LOCAL = "curl -fsSL https://raw.githubusercontent.com/halvis82/FlightScout/main/scripts/install-local.sh | sh";
 
 function OwnIpSection() {
   const ext = useExtension();
@@ -147,7 +148,13 @@ function OwnIpSection() {
           <div className="min-w-0 rounded-xl border border-border p-3">
             <div className="flex items-center justify-between">
               <div className="font-medium">Local runner</div>
-              {lr.active ? <Badge tone="good">In use {lr.version ?? ""}</Badge> : <Badge>Recommended</Badge>}
+              {lr.active ? (
+                <Badge tone="good">In use {lr.version ?? ""}</Badge>
+              ) : lr.outdated ? (
+                <Badge tone="warn">Update needed</Badge>
+              ) : (
+                <Badge>Recommended</Badge>
+              )}
             </div>
             <p className="mt-1 text-xs text-muted">
               Mac or Linux. Starts only when the website searches and stops after 10 quiet minutes, so nothing runs in the
@@ -158,7 +165,14 @@ function OwnIpSection() {
               Remove with <code>flightscout serve --uninstall</code>. Windows: run <code>flightscout serve</code> while you
               search.
             </p>
-            <RunnerConnect active={lr.active} />
+            {lr.outdated && !lr.active ? (
+              <p className="mt-2 text-xs text-warn">
+                Your runner ({lr.version ?? "old version"}) is older than this website, so searches use the server for now. Run the
+                command above again to update it.
+              </p>
+            ) : (
+              <RunnerConnect active={lr.active} />
+            )}
           </div>
           <div className="min-w-0 rounded-xl border border-border p-3">
             <div className="flex items-center justify-between">
@@ -191,9 +205,12 @@ function OwnIpSection() {
           </div>
         </div>
         <p className="mt-3 text-xs text-muted">
-          Want it all on your computer, website included (no server, no accounts)? Clone the repo and run{" "}
-          <code>./scripts/run-local.sh</code>.{" "}
-          <a className="text-accent hover:underline" href={`${REPO}#where-searches-run`} target="_blank" rel="noopener noreferrer">
+          Want it all on your computer, website included? One command installs it at http://localhost:3000, with accounts,
+          watchlist and every source, and it runs only while that page is open:
+        </p>
+        <pre className="mt-1.5 overflow-x-auto rounded-lg bg-surface-2 p-2 text-[11px] leading-relaxed">{INSTALL_LOCAL}</pre>
+        <p className="mt-1.5 text-xs text-muted">
+          <a className="text-accent hover:underline" href={`${REPO}#run-it-on-your-computer`} target="_blank" rel="noopener noreferrer">
             Setup guide
           </a>{" "}
           ·{" "}
@@ -247,7 +264,7 @@ function RunnerConnect({ active }: { active: boolean }) {
 }
 
 function FavoritesSection() {
-  const { places, refreshPlaces } = useApp();
+  const { places, refreshPlaces, refreshMe } = useApp();
   const [adding, setAdding] = useState<string[]>([]);
   async function add(codes: string[]) {
     for (const c of codes) {
@@ -289,6 +306,7 @@ function FavoritesSection() {
                 onClick={async () => {
                   await api(`/places/${p.id}`, { method: "DELETE" });
                   refreshPlaces();
+                  refreshMe(); // it may have been "Start searches from"
                 }}
               >
                 <Trash2 className="size-3.5" />

@@ -13,9 +13,14 @@ import { useSyncExternalStore } from "react";
 export const LOCAL_RUNNER_URL = "http://127.0.0.1:8787";
 const OFF_KEY = "fs.localRunner.off";
 
-type State = { available: boolean; version: string | null; checked: boolean; disabled: boolean };
+type State = { available: boolean; version: string | null; checked: boolean; disabled: boolean; outdated: boolean };
 
-let state: State = { available: false, version: null, checked: false, disabled: false };
+let state: State = { available: false, version: null, checked: false, disabled: false, outdated: false };
+
+// The runner's "api" level this website needs (engine/src/flightscout/api.py
+// API_LEVEL). An older runner answers but would reject searches, so it's
+// skipped and Settings asks for an update.
+const MIN_API = 2;
 const SERVER_STATE: State = state;
 const listeners = new Set<() => void>();
 
@@ -87,12 +92,13 @@ export function probeLocalRunner(): Promise<boolean> {
       // a known runner may be starting on demand; an unknown port fails fast anyway
       const t = setTimeout(() => ctrl.abort(), lsGet(SEEN) === "1" ? 8000 : 1500);
       const res = await fetch(`${LOCAL_RUNNER_URL}/health`, { signal: ctrl.signal, cache: "no-store", mode: "cors" }).finally(() => clearTimeout(t));
-      const j = res.ok ? ((await res.json()) as { ok?: boolean; local?: boolean; version?: string }) : null;
-      const ok = j?.local === true;
-      emit({ available: ok, version: ok ? (j?.version ?? null) : null, checked: true, disabled });
+      const j = res.ok ? ((await res.json()) as { ok?: boolean; local?: boolean; version?: string; api?: number }) : null;
+      const outdated = j?.local === true && (j.api ?? 1) < MIN_API;
+      const ok = j?.local === true && !outdated;
+      emit({ available: ok, version: j?.local ? (j?.version ?? null) : null, checked: true, disabled, outdated });
       return ok;
     } catch {
-      emit({ available: false, version: null, checked: true, disabled });
+      emit({ available: false, version: null, checked: true, disabled, outdated: false });
       return false;
     } finally {
       inflight = null;

@@ -374,7 +374,11 @@ function summarize(kind: SearchRow["kind"], q: Record<string, unknown>) {
 }
 
 export function saveSearch(kind: SearchRow["kind"], query: Record<string, unknown>, payload: unknown, summary?: string) {
-  const list = read<SearchRow[]>("searches", []);
+  let list = read<SearchRow[]>("searches", []);
+  // the same search again soon (a reload, back and forth) replaces its row
+  const last = list[0];
+  if (last && last.kind === kind && Date.now() - Date.parse(last.createdAt) < 30 * 60_000 && JSON.stringify(last.query) === JSON.stringify(query))
+    list = list.slice(1);
   const row: SearchRow = {
     id: nextId(),
     kind,
@@ -395,9 +399,13 @@ export function saveSearch(kind: SearchRow["kind"], query: Record<string, unknow
 
 // After a guest search, feed any matching local watches (like the server does).
 export async function afterGuestEngineCall(kind: string, query: Record<string, unknown>, result: Record<string, unknown>, serverFetch: ServerFetch) {
-  if (!["search", "plan", "explore", "dates", "trip", "multicity"].includes(kind)) return;
-  saveSearch(kind as SearchRow["kind"], query, result);
-  const trips = result.trips as Trip[] | undefined;
+  if (!["search", "plan", "explore", "dates", "trip", "multicity"].includes(kind)) return null;
+  const id = saveSearch(kind as SearchRow["kind"], query, result);
+  await feedGuestWatches(kind, query, result.trips as Trip[] | undefined, serverFetch);
+  return id;
+}
+
+async function feedGuestWatches(kind: string, query: Record<string, unknown>, trips: Trip[] | undefined, serverFetch: ServerFetch) {
   if ((kind !== "search" && kind !== "plan") || !trips?.length) return;
   const q: SearchQuery =
     kind === "search"
@@ -460,14 +468,23 @@ export async function guestApi(path: string, method: string, body: unknown, serv
         return row;
       }
       const id = Number(seg[1]);
+      // "Start searches from" holds a copy of a favorite's codes: keep it in step
+      const syncDefault = (old: string[], now: string[]) => {
+        const st = guestSettings();
+        if (st.defaultOrigins.length && placeSignature(st.defaultOrigins) === placeSignature(old)) write("settings", { ...st, defaultOrigins: now });
+      };
+      const prev = list.find((x) => x.id === id);
       if (method === "DELETE") {
         write("places", list.filter((x) => x.id !== id));
+        if (prev) syncDefault(prev.codes, []);
         return { ok: true };
       }
       if (method === "PATCH") {
         const next = list.map((x) => (x.id === id ? { ...x, ...b, codes: b.codes ? codes(b.codes) : x.codes } : x));
         write("places", next);
-        return next.find((x) => x.id === id);
+        const row = next.find((x) => x.id === id);
+        if (prev && row && b.codes) syncDefault(prev.codes, row.codes);
+        return row;
       }
       break;
     }
@@ -540,6 +557,16 @@ export async function guestApi(path: string, method: string, body: unknown, serv
       if (method === "DELETE") {
         write("searches", list.filter((r) => r.id !== id));
         return { ok: true };
+      }
+      if (method === "PATCH") {
+        // the whole streamed result, once every part is in
+        const row = list.find((r) => r.id === id);
+        const payload = b.payload as { trips?: Trip[] } | undefined;
+        if (!row || row.kind !== "search" || !Array.isArray(payload?.trips)) throw new GuestError(404, "not found");
+        const had = new Set(((row.payload as { trips?: Trip[] } | null)?.trips ?? []).map((t) => t.id));
+        write("searches", list.map((r) => (r.id === id ? { ...r, payload } : r)));
+        await feedGuestWatches("search", row.query, payload.trips.filter((t) => !had.has(t.id)), serverFetch);
+        return { id };
       }
       const row = list.find((r) => r.id === id);
       if (!row) throw new GuestError(404, "not found");

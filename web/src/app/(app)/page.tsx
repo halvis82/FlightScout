@@ -63,6 +63,14 @@ function persist(next: Saved) {
 // Where a fresh search starts: the default chosen in Settings, else wherever
 // you last searched from, else your first home.
 const LAST_FROM = "fs.lastFrom";
+// Smart routes fail in technical ways (timeouts, a busy server, a runner
+// hiccup): say what it means for the user, not the raw response.
+function friendlyPlanError(msg: string) {
+  if (/abort|time ?out|took too long|50[234]|failed to fetch|network/i.test(msg)) return "didn't finish in time. The flights above are complete. Search again to retry.";
+  if (/^\s*[{<]|\d{3}:/.test(msg) || msg.length > 140) return "something went wrong. The flights above are complete.";
+  return msg;
+}
+
 function startOrigin(defaults: string[], places: { kind: string; codes: string[] }[]): string[] {
   if (defaults.length) return defaults;
   try {
@@ -237,6 +245,7 @@ function SearchPage() {
       // of the new search lands.
       const runId = ++runSeq.current;
       let acc: SearchResult | null = null;
+      let searchId: number | null = null; // history row, saved with the first part
       let pending = PARTS.length;
       const states: PartState[] = PARTS.map(() => ({ state: "searching", n: 0 }));
       setParts([...states]);
@@ -247,6 +256,7 @@ function SearchPage() {
             .then((r) => {
               if (runSeq.current !== runId) return;
               states[part] = { state: "done", n: r.trips.length };
+              if (part === 0) searchId = (r as { search_id?: number | null }).search_id ?? null;
               if (!acc) acc = r;
               else {
                 const seen = new Set(acc.trips.map((t) => t.id));
@@ -272,6 +282,11 @@ function SearchPage() {
                 setStale(false);
                 setBusy(false);
                 setFinished({ secs: Math.round((Date.now() - t0) / 1000), failed: states.filter((x) => x.state === "failed").length });
+                // history keeps the whole result, not just the first part
+                if (searchId != null && acc) {
+                  const all = acc as SearchResult;
+                  api(`/searches/${searchId}`, { method: "PATCH", body: { payload: { ...all, search_id: undefined } } }).catch(() => {});
+                }
               }
             }),
         ),
@@ -305,7 +320,7 @@ function SearchPage() {
             // smart routes are a bonus: never let their limit or failure look like an error
             const msg = (e as Error).message;
             if (runSeq.current === runId && !/limit|429|too many/i.test(msg))
-              setErr((x) => (x ? x + " · " : "") + `Smart routes: ${msg}`);
+              setErr((x) => (x ? x + " · " : "") + `Smart routes: ${friendlyPlanError(msg)}`);
           })
           .finally(() => {
             if (runSeq.current === runId) setPlanBusy(false);

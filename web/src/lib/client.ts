@@ -67,10 +67,11 @@ async function viaLocalRunner<T>(p: string, body: Record<string, unknown>, guest
   const result = await localEngine(kind, payload, signal);
   if (quiet) return { ...result, search_id: null, watches_updated: 0, via: "local" } as T;
   if (guest) {
+    let id: number | null = null;
     try {
-      await afterGuestEngineCall(kind, query, result, serverFetch);
+      id = await afterGuestEngineCall(kind, query, result, serverFetch);
     } catch {}
-    return { ...result, search_id: null, watches_updated: 0, via: "local" } as T;
+    return { ...result, search_id: id, watches_updated: 0, via: "local" } as T;
   }
   let saved: { id?: number; watchesUpdated?: number } = {};
   try {
@@ -114,7 +115,8 @@ export async function api<T = unknown>(path: string, init?: Init): Promise<T> {
     const b = (init?.body ?? {}) as Record<string, unknown>;
     if (ENGINE_KINDS.has(p) && b.quiet !== true && !(typeof b.part === "number" && b.part > 0)) {
       try {
-        await afterGuestEngineCall(p.slice(1), b, res as Record<string, unknown>, serverFetch);
+        const id = await afterGuestEngineCall(p.slice(1), b, res as Record<string, unknown>, serverFetch);
+        if (id != null) (res as Record<string, unknown>).search_id = id;
       } catch {}
     }
     return res;

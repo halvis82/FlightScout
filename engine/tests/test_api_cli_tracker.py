@@ -12,7 +12,10 @@ from flightscout.cli import app as cli_app
 
 def test_health_and_engine_key(monkeypatch):
     c = TestClient(app)
-    assert c.get("/health").json()["ok"] is True
+    h = c.get("/health").json()
+    assert h["ok"] is True
+    # the website skips runners below its MIN_API (web/src/lib/local-runner.ts)
+    assert h["api"] >= 2
     monkeypatch.setenv("ENGINE_KEY", "secret")
     body = {"origins": ["SAN"], "destinations": ["LAX"], "departure": str(date.today() + timedelta(days=9))}
     assert c.post("/search", json=body).status_code == 401

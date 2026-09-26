@@ -10,7 +10,7 @@ import { useOnce } from "./ui";
 // Favorite airports and cities are saved places. Starring a code creates a
 // one airport place labeled with its city; unstarring removes it.
 export function useFavorites() {
-  const { places, refreshPlaces } = useApp();
+  const { places, refreshPlaces, refreshMe } = useApp();
   const find = (code: string) => places.find((p) => p.codes.length === 1 && p.codes[0] === code);
   const isStarred = (code: string) => Boolean(find(code)) || places.some((p) => p.codes.includes(code));
   async function toggle(code: string) {
@@ -18,6 +18,7 @@ export function useFavorites() {
     if (p) {
       await api(`/places/${p.id}`, { method: "DELETE" });
       toast({ text: `Removed ${p.label} from favorites` }, 2500);
+      refreshMe(); // it may have been "Start searches from"
     } else if (!places.some((x) => x.codes.includes(code))) {
       const label = cityOf(code) ?? code;
       await api("/places", { body: { label, codes: [code], kind: "frequent" } });

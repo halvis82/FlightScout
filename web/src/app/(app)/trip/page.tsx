@@ -1,5 +1,6 @@
 "use client";
-import { useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowDown, ArrowUp, Plus, Route, Trash2 } from "lucide-react";
 import { AirportInput, PlaceChips } from "@/components/airport-input";
 import { useApp } from "@/components/app-context";
@@ -13,16 +14,62 @@ import { CURRENCIES, type PlanResult } from "@/lib/types";
 
 type Stop = { place: string[]; min: number; max: number };
 
-export default function TripBuilder() {
+// The trip is kept in the URL (?s=SAN&p=CDG:2-4,FCO:3-5&f=...&t=...) so a
+// built trip survives a reload and can be shared. Anything invalid falls back
+// to the defaults.
+const CODE = /^[A-Z]{3,4}$/;
+function fromParams(q: URLSearchParams) {
+  const today = isoDate(new Date());
+  const code = (v: string | null) => (v && CODE.test(v.toUpperCase()) ? [v.toUpperCase()] : null);
+  const date = (v: string | null) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) && v >= today ? v : null);
+  const nights = (v: string | undefined, d: number) => (v && /^\d{1,2}$/.test(v) ? Number(v) : d);
+  const stops = (q.get("p") ?? "")
+    .split(",")
+    .map((x) => x.match(/^([A-Za-z]{3,4})(?::(\d{1,2})(?:-(\d{1,2}))?)?$/))
+    .filter((m): m is RegExpMatchArray => Boolean(m))
+    .slice(0, 8)
+    .map((m) => {
+      const min = nights(m[2], 2);
+      return { place: [m[1].toUpperCase()], min, max: Math.max(min, nights(m[3], Math.max(min, 4))) };
+    });
+  const from = date(q.get("f")) ?? addDays(today, 30);
+  const to = date(q.get("t"));
+  const max = q.get("m");
+  const cur = q.get("c")?.toUpperCase() ?? null;
+  return {
+    start: code(q.get("s")),
+    end: code(q.get("e")) ?? [],
+    stops: stops.length ? stops : [{ place: [], min: 2, max: 4 }],
+    from,
+    to: to && to >= from ? to : addDays(from, 7),
+    maxDays: max && /^\d{1,3}$/.test(max) ? max : "",
+    keepOrder: q.get("o") === "1",
+    cur: cur && (CURRENCIES as readonly string[]).includes(cur) ? cur : null,
+    ready: stops.length > 0 && Boolean(code(q.get("s"))),
+  };
+}
+
+export default function TripBuilderPage() {
+  return (
+    <Suspense>
+      <TripBuilder />
+    </Suspense>
+  );
+}
+
+function TripBuilder() {
   const { settings, currency } = useApp();
-  const [start, setStart] = useState<string[] | null>(null);
-  const [end, setEnd] = useState<string[]>([]);
-  const [stops, setStops] = useState<Stop[]>([{ place: [], min: 2, max: 4 }]);
-  const [from, setFrom] = useState(() => addDays(isoDate(new Date()), 30));
-  const [to, setTo] = useState(() => addDays(isoDate(new Date()), 37));
-  const [maxDays, setMaxDays] = useState<string>("");
-  const [keepOrder, setKeepOrder] = useState(false);
-  const [cur, setCur] = useState<string | null>(null);
+  const router = useRouter();
+  const params = useSearchParams();
+  const [init] = useState(() => fromParams(params));
+  const [start, setStart] = useState<string[] | null>(init.start);
+  const [end, setEnd] = useState<string[]>(init.end);
+  const [stops, setStops] = useState<Stop[]>(init.stops);
+  const [from, setFrom] = useState(init.from);
+  const [to, setTo] = useState(init.to);
+  const [maxDays, setMaxDays] = useState<string>(init.maxDays);
+  const [keepOrder, setKeepOrder] = useState(init.keepOrder);
+  const [cur, setCur] = useState<string | null>(init.cur);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [res, setRes] = useState<PlanResult | null>(null);
@@ -45,6 +92,16 @@ export default function TripBuilder() {
   }, [home, stops, end, keepOrder]);
 
   async function run() {
+    const q = new URLSearchParams();
+    if (home[0]) q.set("s", home[0]);
+    if (end[0]) q.set("e", end[0]);
+    q.set("p", stops.filter((x) => x.place.length).map((x) => `${x.place[0]}:${x.min}-${Math.max(x.min, x.max)}`).join(","));
+    q.set("f", from);
+    q.set("t", to);
+    if (maxDays) q.set("m", maxDays);
+    if (keepOrder) q.set("o", "1");
+    if (cur) q.set("c", cur);
+    router.replace(`/trip?${q.toString()}`, { scroll: false });
     setBusy(true);
     setErr(null);
     setRes(null);
@@ -70,6 +127,15 @@ export default function TripBuilder() {
   }
 
   const ready = home.length > 0 && stops.some((s) => s.place.length);
+
+  // opened from a link or a reload: build that trip again
+  const auto = useRef(init.ready);
+  useEffect(() => {
+    if (!auto.current) return;
+    auto.current = false;
+    run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="space-y-4">

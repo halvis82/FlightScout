@@ -103,12 +103,18 @@ def alive() -> dict:
     return {"ok": True}
 
 
+# Bumped when the website starts sending something older runners reject
+# (2: source groups otas_fast and otas_slow). The website skips older runners
+# and asks the user to update.
+API_LEVEL = 2
+
+
 @app.get("/health")
 @app.get("/api/health")
 def health() -> dict:
     from . import __version__
 
-    return {"ok": True, "local": LOCAL, "version": __version__}
+    return {"ok": True, "local": LOCAL, "version": __version__, "api": API_LEVEL}
 
 
 @app.post("/search", dependencies=[Depends(auth)])

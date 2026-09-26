@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { ArrowRight, ChevronDown, ExternalLink, Eye, Moon, TriangleAlert } from "lucide-react";
 import { Badge, Button } from "./ui";
 import { Code } from "./place";
@@ -86,7 +86,7 @@ export function TripCard({
               )}
               {trip.stopovers.map((s) => (
                 <span key={s.airport + s.hours}>
-                  {s.hours >= 20 ? `${Math.max(1, Math.round(s.hours / 24))} day${Math.round(s.hours / 24) > 1 ? "s" : ""}` : `${Math.round(s.hours)} h`} in <Code code={s.airport} compact />
+                  {stayLabel(s, slices)} in <Code code={s.airport} compact />
                 </span>
               ))}
               {badges.length > 0 && (
@@ -220,7 +220,20 @@ function OtherReturns({ trip, alts }: { trip: Trip; alts: Trip[] }) {
 
 // "Check on <airline>" links: each airline in the ticket, opened on its own
 // site with this ticket's route and dates pre-filled when the airline supports it.
+// A stay counts nights (calendar days between landing and flying on), like a
+// hotel booking; rounding hours would call the same 3 nights "3" or "4 days".
+function stayLabel(s: { airport: string; hours: number }, slices: Slice[]) {
+  if (s.hours < 20) return `${Math.round(s.hours)} h`;
+  const i = slices.findIndex((x, j) => x.destination === s.airport && slices[j + 1]?.origin === s.airport);
+  const n = i >= 0 ? dayDiff(slices[i].arrival, slices[i + 1].departure) : Math.round(s.hours / 24);
+  return n < 1 ? `${Math.round(s.hours)} h` : `${n} night${n > 1 ? "s" : ""}`;
+}
+
+// The search's party size, for airline links (set by the results list).
+export const PartySize = createContext(1);
+
 function AirlineLinks({ it }: { it: Itinerary }) {
+  const adults = useContext(PartySize);
   const list = useAirlines();
   if (!list) return null;
   const out = it.slices[0];
@@ -234,8 +247,8 @@ function AirlineLinks({ it }: { it: Itinerary }) {
       const segs = it.slices.flatMap((s) => s.segments).filter((x) => x.carrier === a.iata);
       const whole = segs.length === it.slices.reduce((n, s) => n + s.segments.length, 0);
       const q = whole
-        ? { origin: out.origin, destination: out.destination, depart: out.departure, ret: back?.departure ?? null }
-        : { origin: segs[0].origin, destination: segs[0].destination, depart: segs[0].departure, ret: null };
+        ? { origin: out.origin, destination: out.destination, depart: out.departure, ret: back?.departure ?? (it.return_pending ? (it.pending_return ?? null) : null), adults }
+        : { origin: segs[0].origin, destination: segs[0].destination, depart: segs[0].departure, ret: null, adults };
       const [url] = airlineLink(a, q);
       return { a, url };
     });

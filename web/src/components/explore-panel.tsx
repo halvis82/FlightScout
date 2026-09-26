@@ -67,7 +67,8 @@ export function ExplorePanel({
       // Instant: destinations pre-computed by the tracker (Google Explore).
       try {
         const cached = await api<{ items: Destination[] }>(`/explore/cached?origins=${codes.join(",")}`, { signal: ctl.signal });
-        cached.items.forEach(keep);
+        // only the same kind of trip: round trip prices in one way mode would look far too high (and the reverse too low)
+        cached.items.filter((d) => Boolean(d.return_date) === roundTrip).forEach(keep);
         if (merged.size) setItems(new Map(merged));
       } catch {
         /* no cache yet */

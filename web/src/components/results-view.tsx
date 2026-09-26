@@ -1,7 +1,7 @@
 "use client";
 import { Fragment, useMemo, useState } from "react";
 import { ExternalLink, Info } from "lucide-react";
-import { TripCard } from "./trip-card";
+import { PartySize, TripCard } from "./trip-card";
 import { RouteMap, type MapArc, type MapPoint } from "./route-map";
 import { useApp } from "./app-context";
 import { useWatchDialog } from "./watch-dialog";
@@ -184,6 +184,7 @@ export function ResultsView({
   const direct = plan?.direct;
 
   return (
+    <PartySize.Provider value={query?.adults ?? 1}>
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">
       <div className="min-w-0 space-y-3">
         <div className="flex flex-wrap items-center gap-2">
@@ -361,5 +362,6 @@ export function ResultsView({
       </div>
       {watch.element}
     </div>
+    </PartySize.Provider>
   );
 }
