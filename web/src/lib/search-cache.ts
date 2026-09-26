@@ -5,7 +5,7 @@ import { db, schema } from "./db";
 
 // How long a result may be reused. Prices move, so searches are short lived;
 // calendars and explore change slowly.
-const TTL_MIN: Record<string, number> = { search: 20, plan: 60, multicity: 30, trip: 60, dates: 360, explore: 180 };
+const TTL_MIN: Record<string, number> = { search: 20, plan: 60, multicity: 30, trip: 60, dates: 360, explore: 180, pages: 10 };
 
 function stable(v: unknown): unknown {
   if (Array.isArray(v)) return v.map(stable);

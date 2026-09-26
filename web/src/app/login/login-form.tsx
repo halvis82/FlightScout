@@ -15,6 +15,7 @@ export function LoginForm({ social }: { social: string[] }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function submit(e: React.FormEvent) {
@@ -27,6 +28,8 @@ export function LoginForm({ social }: { social: string[] }) {
         : await signUp.email({ email, password, name: name || email.split("@")[0] });
     setBusy(false);
     if (res.error) setErr(res.error.message ?? "Something went wrong");
+    // signed up, but the address must be confirmed first (when this site sends email)
+    else if (mode === "signup" && !(res.data as { token?: string | null } | null)?.token) setInfo(`We sent a link to ${email}. Open it to finish signing up.`);
     // full reload so the app leaves guest mode cleanly
     else window.location.href = next;
   }
@@ -78,6 +81,7 @@ export function LoginForm({ social }: { social: string[] }) {
               />
             </Field>
             {err && <ErrorNote>{err}</ErrorNote>}
+            {info && <p className="rounded-xl border border-good/30 bg-good-soft px-3.5 py-2.5 text-sm text-good">{info}</p>}
             <Button type="submit" variant="primary" className="w-full" loading={busy}>
               {mode === "signin" ? "Sign in" : "Create account"}
             </Button>

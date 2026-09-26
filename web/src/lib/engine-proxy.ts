@@ -48,7 +48,18 @@ export async function proxyEngine(req: Request, kind: EngineKind) {
   const quiet = q.quiet === true || part > 0;
   delete q.quiet;
   const payload = { ...q };
-  if ((kind === "search" || kind === "plan") && !payload.seller_rules) {
+  // Extension searches go in rounds: the browser sends only the pages it just
+  // fetched, the pages of earlier rounds are kept here for a few minutes.
+  if (kind === "browser" && typeof q.pages_id === "string" && /^[a-z0-9-]{8,64}$/i.test(q.pages_id)) {
+    const key = cacheKey("pages", { id: q.pages_id });
+    const earlier = ((await cacheGet("pages", key)) ?? {}) as Record<string, unknown>;
+    delete earlier.cached_at;
+    const pages = { ...earlier, ...((q.pages as Record<string, unknown>) ?? {}) };
+    await cachePut("pages", key, pages);
+    payload.pages = pages;
+  }
+  delete payload.pages_id;
+  if ((kind === "search" || kind === "plan" || kind === "browser") && !payload.seller_rules) {
     // guests send their rules inline; signed in users use saved settings
     const rules = Array.isArray(q.sellerRules)
       ? (q.sellerRules as SellerRule[])

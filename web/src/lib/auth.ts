@@ -5,6 +5,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { passkey } from "@better-auth/passkey";
 import { db, schema } from "./db";
+import { emailConfigured, sendEmail } from "./notify";
 
 const baseURL =
   process.env.BETTER_AUTH_URL ??
@@ -54,7 +55,24 @@ export const auth = betterAuth({
   }),
   // limits on sign in and sign up attempts, shared by every server instance
   rateLimit: { enabled: process.env.FLIGHTSCOUT_NO_RATE_LIMIT !== "1", storage: "database", window: 60, max: 30 },
-  emailAndPassword: { enabled: true, minPasswordLength: 8 },
+  // With an email service (RESEND_API_KEY + ALERT_FROM_EMAIL) an address must
+  // be confirmed before password sign in, so nobody can claim an allowlisted
+  // address they don't own. Accounts made before get the email on their next
+  // sign in. Without email (local copies) this stays off.
+  emailAndPassword: { enabled: true, minPasswordLength: 8, requireEmailVerification: emailConfigured() },
+  emailVerification: {
+    sendOnSignUp: emailConfigured(),
+    sendOnSignIn: emailConfigured(),
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      const safe = url.replace(/"/g, "%22");
+      await sendEmail(
+        user.email,
+        "Confirm your email for FlightScout",
+        `<p>Confirm this address to finish signing in to FlightScout:</p><p><a href="${safe}">Confirm my email</a></p><p>If you didn't try to sign up, ignore this email.</p>`,
+      );
+    },
+  },
   socialProviders,
   session: { expiresIn: 60 * 60 * 24 * 60, updateAge: 60 * 60 * 24 },
   trustedOrigins: [baseURL, "https://flightscout-app.vercel.app", "http://localhost:3000"],

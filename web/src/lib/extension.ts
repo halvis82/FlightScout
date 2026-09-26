@@ -60,15 +60,17 @@ export async function browserGoogleSearch<T>(
   query: Record<string, unknown>,
   post: (body: Record<string, unknown>) => Promise<T & { need?: string[] }>,
 ): Promise<T> {
-  const pages: Record<string, unknown> = {};
+  // each round sends only the pages it just fetched; the site keeps the rest
+  const pagesId = crypto.randomUUID();
+  let fresh: Record<string, unknown> = {};
   for (let round = 0; round < 4; round++) {
-    const r = await post({ ...query, pages });
+    const r = await post({ ...query, pages: fresh, pages_id: pagesId });
     if (!r.need?.length) return r;
     const got = await fetchPages(r.need);
     const missing = r.need.filter((u) => !(u in got));
     if (missing.length === r.need.length) throw new Error("the extension couldn't load Google Flights");
-    Object.assign(pages, got);
-    for (const u of missing) pages[u] = [null, null, null, null, null, null, null, null]; // count as "no flights"
+    fresh = { ...got };
+    for (const u of missing) fresh[u] = [null, null, null, null, null, null, null, null]; // count as "no flights"
   }
   throw new Error("too many rounds");
 }
