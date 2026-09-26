@@ -41,7 +41,9 @@ _WALLED = ("403", "429", "forbidden", "security verification", "just a moment", 
            # silent walls: these sites answer GitHub's servers with nothing (checked from home on
            # 2026-09-26: Avelo, United, VietJet, Akasa, Tigerair, Traveloka and Cleartrip all passed)
            "no search response", "no flights response", "no search-flight response", "no flight search response",
-           "did not create a session token", "err_http_response_code_failure")
+           "did not create a session token", "err_http_response_code_failure",
+           # a wall page where the site's API answers JSON (Porter, passed from home the same day)
+           "unexpected token '<'")
 
 
 @pytest.hookimpl(hookwrapper=True)
