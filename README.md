@@ -1,6 +1,6 @@
 # FlightScout
 
-End to end flight finder for people who fly a lot. One search asks Google Flights, ITA Matrix, Kiwi.com, 62 airlines directly and 22 booking sites (Booking.com, Expedia, KAYAK, Priceline, Trip.com, Skiplagged...) at once, builds cheaper routes out of separate tickets (self transfers, stopovers, nested round trips, multi city trips), shows where you can go cheaply, and tracks the routes you care about twice a day so you get price history and alerts. Every result links straight to the page where you can book it, and every source's prices were checked against that site's own booking page.
+End to end flight finder for people who fly a lot. One search asks Google Flights, ITA Matrix, Kiwi.com, 61 airlines directly and 22 booking sites (Booking.com, Expedia, KAYAK, Priceline, Trip.com, Skiplagged...) at once, builds cheaper routes out of separate tickets (self transfers, stopovers, nested round trips, multi city trips), shows where you can go cheaply, and tracks the routes you care about twice a day so you get price history and alerts. Every result links straight to the page where you can book it, and every source's prices were checked against that site's own booking page.
 
 Website: https://flightscout-app.vercel.app
 
@@ -13,12 +13,12 @@ Every way has every feature: search, smart routes, multi city, explore, the watc
 | Setup | nothing | one command, once | one command, once | one script, once |
 | Website | flightscout-app.vercel.app | flightscout-app.vercel.app | http://localhost:3000 | your-name.vercel.app |
 | Searches run from | FlightScout's server | **your IP** | **your IP** | your server |
-| Sources | Google, ITA Matrix, Kiwi, 27 airlines, 14 booking sites | **all**: + 35 airlines and 8 booking sites that need a browser | all | like "just the website" |
+| Sources | Google, ITA Matrix, Kiwi, 28 airlines, 14 booking sites | **all**: + 33 airlines and 8 booking sites that need a browser | all | like "just the website" |
 | Search limits | guests 60 an hour, accounts more | **none** (searches skip the server) | **none** | yours to set |
 | Account and data | online | online (same as the website) | on this computer, or `--shared` for the online one | your own database |
 | Runs in the background | nothing | nothing (starts when the website searches, stops after 10 idle minutes) | nothing (starts when you open localhost:3000, stops a couple of minutes after you close it) | your Vercel |
 
-**Recommendation:** use the website with the local runner. It's the same site and the same account, but faster, with all 62 airlines, no limits, and it keeps the shared server from getting blocked. Run everything on your computer when you want to be independent of the online site entirely.
+**Recommendation:** use the website with the local runner. It's the same site and the same account, but faster, with all 61 airlines, no limits, and it keeps the shared server from getting blocked. Run everything on your computer when you want to be independent of the online site entirely.
 
 ## Run it on your computer
 
@@ -96,8 +96,8 @@ Sites limit how often one address can search, and the server's address is shared
 | Google Flights | every airline Google sells, both its "Best" and "Cheapest" lists, price calendar | server, your browser (extension) or your computer |
 | ITA Matrix | Google's fare engine: real prices for any airline | server or your computer |
 | Kiwi.com | self transfer combinations, flexible dates, "anywhere" explore | server or your computer |
-| Airlines direct (27 over plain HTTP) | Volaris, Frontier, JetBlue, Alaska, Breeze, Aeroméxico, Arajet, Aerolíneas Argentinas, Flair, Sky, Norse, Condor, Widerøe, Volotea, Jet2, Aer Lingus, Vueling, SKY express, Jazeera, FlySafair, Air New Zealand, Biman, FlyArystan, Star Air, Alliance Air, Nok Air, Spring | server or your computer |
-| Airlines direct (35 that need a real browser) | United, Southwest, Qatar, Etihad, Air France/KLM, Finnair, TAP, SAS, Norwegian, Transavia, WestJet, Porter, Avianca, Vietnam Airlines, Philippine Airlines, VietJet, SpiceJet, Virgin Australia... | your computer (headless Chrome) |
+| Airlines direct (28 over plain HTTP) | Ryanair, Volaris, Frontier, JetBlue, Alaska, Breeze, Aeroméxico, Arajet, Aerolíneas Argentinas, Flair, Sky, Norse, Condor, Widerøe, Volotea, Jet2, Aer Lingus, Vueling, SKY express, Jazeera, FlySafair, Air New Zealand, Biman, FlyArystan, Star Air, Alliance Air, Nok Air, Spring | server or your computer |
+| Airlines direct (33 that need a real browser) | United, Southwest, Qatar, Etihad, Air France/KLM, Finnair, TAP, SAS, Norwegian, Transavia, WestJet, Porter, Avianca, Vietnam Airlines, Philippine Airlines, VietJet, SpiceJet, Virgin Australia... | your computer (headless Chrome) |
 | Booking sites (14 over HTTP, 8 in a browser) | Skiplagged, Booking.com, Expedia, Orbitz, Travelocity, Priceline, KAYAK, momondo, Cheapflights, Agoda, Wego, Gotogate, Mytrip, EaseMyTrip; Trip.com, Aviasales, eDreams, Opodo, Almosafer, Traveloka, Cleartrip, ixigo | HTTP ones on the server or your computer, browser ones on your computer |
 | Fare calendars | Wizz Air, Ryanair, VivaAerobus, Volotea, LEVEL, flydubai, Skyscanner, Kiwi | server or your computer |
 
