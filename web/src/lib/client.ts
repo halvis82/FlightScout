@@ -70,6 +70,21 @@ function rulesToEngine(rules: SellerRule[]) {
 // Engine call through the user's local runner. Mirrors the server proxy:
 // seller rules become `seller_rules`, results are saved to history (and feed
 // watches) through /results for signed in users, or locally for guests.
+// Fares the website has seen, as layover hints for smart routes run here.
+async function planHints(p: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const o = Array.isArray(p.origins) ? p.origins[0] : null;
+  const d = Array.isArray(p.destinations) ? p.destinations[0] : null;
+  const lo = typeof p.depart_start === "string" ? p.depart_start : null;
+  if (!o || !d || !lo) return {};
+  const hi = typeof p.depart_end === "string" && p.depart_end >= lo ? p.depart_end : lo;
+  const to = new Date(Date.parse(hi) + 4 * 86400_000).toISOString().slice(0, 10);
+  try {
+    return await rawFetch<Record<string, unknown>>(`/fares?origin=${o}&destination=${d}&from=${lo}&to=${to}`);
+  } catch {
+    return {};
+  }
+}
+
 async function viaLocalRunner<T>(p: string, body: Record<string, unknown>, guest: boolean, signal?: AbortSignal): Promise<T> {
   const kind = p.slice(1);
   const quiet = body.quiet === true || (typeof body.part === "number" && body.part > 0);
@@ -83,6 +98,7 @@ async function viaLocalRunner<T>(p: string, body: Record<string, unknown>, guest
     const sr = rulesToEngine(rules);
     if (sr) payload.seller_rules = sr;
   }
+  if (kind === "plan") Object.assign(payload, await planHints(payload));
   const result = await localEngine(kind, payload, signal);
   if (quiet) return { ...result, search_id: null, watches_updated: 0, via: "local" } as T;
   if (guest) {
