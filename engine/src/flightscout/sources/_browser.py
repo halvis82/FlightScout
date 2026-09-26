@@ -22,6 +22,7 @@ import os
 from collections import OrderedDict
 import platform
 import queue
+import re
 import shutil
 import socket
 import subprocess
@@ -329,9 +330,22 @@ def run(fn: Callable[[Any], Any], key: str, headful: bool = False, timeout: floa
         pool = _pools.get(headful)
         if pool is None:
             pool = _pools[headful] = _Pool(headful)
-    fut: Future = Future()
-    pool.submit((fn, key, fut))
-    return fut.result(timeout=timeout)
+    end = time.monotonic() + timeout
+    for attempt in range(2):
+        fut: Future = Future()
+        pool.submit((fn, key, fut))
+        try:
+            return fut.result(timeout=max(1.0, end - time.monotonic()))
+        except Exception as e:
+            # a dropped connection (reset, network change) gets one more try; anything else is real
+            if attempt or not _NET_ERR.search(str(e)) or end - time.monotonic() < 10:
+                raise
+            log.info("%s: network error, trying once more: %s", key, str(e).splitlines()[0][:120])
+    raise RuntimeError("unreachable")
+
+
+_NET_ERR = re.compile(r"ERR_(CONNECTION_RESET|CONNECTION_CLOSED|NETWORK_CHANGED|INTERNET_DISCONNECTED|"
+                      r"CONNECTION_REFUSED|EMPTY_RESPONSE|HTTP2_PROTOCOL_ERROR|SSL_PROTOCOL_ERROR)")
 
 
 def pass_cloudflare(page, timeout: float = 30) -> bool:
