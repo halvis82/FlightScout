@@ -48,8 +48,12 @@ async function rawFetch<T = unknown>(path: string, init?: Init): Promise<T> {
 // data from localStorage through the guest router.
 type MeLite = { user: unknown; settings?: { sellerRules?: SellerRule[] } };
 let mePromise: Promise<MeLite | null> | null = null;
+let meUnread = false; // mePromise hasn't been handed to a GET /me caller yet
 function loadMe() {
-  mePromise ??= serverFetch<MeLite>("/me").catch(() => null);
+  if (!mePromise) {
+    mePromise = serverFetch<MeLite>("/me").catch(() => null);
+    meUnread = true;
+  }
   return mePromise;
 }
 export function isGuest(): Promise<boolean> {
@@ -100,6 +104,13 @@ export async function api<T = unknown>(path: string, init?: Init): Promise<T> {
   if (p === "/settings" && method !== "GET") mePromise = null;
   // who is signed in: fetched once, and this request primes the cache used by isGuest()
   if (path === "/me" && method === "GET") {
+    // the first reader shares the request isGuest() already made; later ones (refreshes) fetch again
+    if (meUnread && mePromise) {
+      meUnread = false;
+      const m = await mePromise;
+      if (m) return m as T;
+    }
+    meUnread = false;
     const me = serverFetch<MeLite>("/me");
     mePromise = me.catch(() => null);
     return me as Promise<T>;
