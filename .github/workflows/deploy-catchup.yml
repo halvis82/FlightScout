@@ -24,7 +24,12 @@ jobs:
           HOOK_flightscout_engine: ${{ secrets.VERCEL_HOOK_ENGINE }}
         run: |
           sha=$(gh api "repos/${{ github.repository }}/commits/main" -q .sha)
+          # what's live right now (empty when unknown, e.g. before this endpoint was deployed)
+          live=$(curl -fsS -m 20 "${{ secrets.FLIGHTSCOUT_API_URL }}/api/v1/version" || echo '{}')
           for project in flightscout flightscout-engine; do
+            key=$([ "$project" = flightscout ] && echo web || echo engine)
+            deployed=$(echo "$live" | jq -r ".${key} // empty")
+            if [ "$deployed" = "$sha" ]; then echo "$project: main is live"; continue; fi
             line=$(gh api "repos/${{ github.repository }}/commits/$sha/status" \
               -q "[.statuses[] | select(.context == \"Vercel – $project\")][0] | \"\(.state)|\(.description)\"")
             state=${line%%|*}; desc=${line#*|}

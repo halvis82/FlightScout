@@ -146,7 +146,8 @@ API_LEVEL = 2
 def health() -> dict:
     from . import __version__
 
-    return {"ok": True, "local": LOCAL, "version": __version__, "api": API_LEVEL}
+    return {"ok": True, "local": LOCAL, "version": __version__, "api": API_LEVEL,
+            "commit": os.environ.get("VERCEL_GIT_COMMIT_SHA")}
 
 
 @app.post("/search", dependencies=[Depends(auth)])
