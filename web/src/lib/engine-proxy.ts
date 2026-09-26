@@ -6,6 +6,18 @@ import { saveSearch } from "./searches";
 import { cacheGet, cacheKey, cachePut } from "./search-cache";
 import { getSettings } from "./settings";
 import type { SellerRule } from "./db/schema";
+import { knownFares, recordFares } from "./fares";
+import type { Trip } from "./types";
+
+async function planHints(p: Record<string, unknown>) {
+  const o = Array.isArray(p.origins) ? String(p.origins[0] ?? "") : "";
+  const d = Array.isArray(p.destinations) ? String(p.destinations[0] ?? "") : "";
+  const lo = typeof p.depart_start === "string" ? p.depart_start : "";
+  if (!o || !d || !lo) return {};
+  const hi = typeof p.depart_end === "string" && p.depart_end >= lo ? p.depart_end : lo;
+  const until = new Date(Date.parse(hi) + 4 * 86400_000).toISOString().slice(0, 10); // second legs leave up to a few days later
+  return knownFares(o, d, lo, until);
+}
 
 // Engine endpoints that return lists get wrapped as {items, errors}.
 function normalize(kind: EngineKind, raw: unknown): Record<string, unknown> {
@@ -51,7 +63,10 @@ export async function proxyEngine(req: Request, kind: EngineKind) {
   let result = await cacheGet(kind, key);
   if (!result) {
     await enforceRateLimit(req, kind, userId, followUp);
-    result = normalize(kind, await engine<unknown>(kind === "browser" ? "/google/browser" : `/${kind}`, payload));
+    // smart routes: fares this site has seen help pick layovers (not part of the cache key)
+    const body = kind === "plan" ? { ...payload, ...(await planHints(payload)) } : payload;
+    result = normalize(kind, await engine<unknown>(kind === "browser" ? "/google/browser" : `/${kind}`, body));
+    if (kind === "search" || kind === "plan" || kind === "browser") await recordFares((result as { trips?: Trip[] }).trips);
     const errs = (result as { errors?: Record<string, string> }).errors ?? {};
     const trips = (result as { trips?: unknown[]; items?: unknown[] }).trips ?? (result as { items?: unknown[] }).items;
     // only cache complete, useful answers ("paused" and "still searching"

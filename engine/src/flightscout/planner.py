@@ -65,6 +65,10 @@ class PlanRequest(BaseModel):
     discover_hubs: bool = True  # add layovers found from real fares (explore from both ends, fare memory)
     nearby_km: float = 200  # also try leaving from / landing at airports this close (0: off)
     reprice_with_airlines: bool = True  # re-price the best combinations on the airlines' own sites
+    # fares the caller has seen (USD, cheapest per airport): origin to X and X
+    # to destination, e.g. from the website's shared fare memory
+    known_from_origin: dict[str, float] = Field(default_factory=dict)
+    known_to_dest: dict[str, float] = Field(default_factory=dict)
     value_of_time_per_hour: float = 15.0  # in `currency`, used for scoring only
     max_results: int = 40
     seller_rules: dict[str, str] | None = None
@@ -310,7 +314,8 @@ def _nested(ctx: _Ctx, o: list[str], d: list[str], dep: date, ret: date, hubs: l
 
 
 def discover_hubs(origin: str, dest: str, lo: date, hi: date, limit: int = 8,
-                  max_detour: float = 1.6) -> list[str]:
+                  max_detour: float = 1.6, known_from: dict[str, float] | None = None,
+                  known_to: dict[str, float] | None = None) -> list[str]:
     """Layovers that real fares say are cheap from both ends: Kiwi's cheapest
     flight to every city from the origin and from the destination (one request
     each, cached for hours), plus the fare memory of earlier searches. A city
@@ -336,6 +341,10 @@ def discover_hubs(origin: str, dest: str, lo: date, hi: date, limit: int = 8,
         a[h] = min(p, a.get(h, p))
     for h, p in farememory.to_dest(dest, lo, hi + timedelta(days=3)).items():
         b[h] = min(p, b.get(h, p))
+    for into, extra in ((a, known_from or {}), (b, known_to or {})):
+        for h, p in extra.items():
+            if isinstance(p, (int, float)) and p > 0:
+                into[h.upper()] = min(float(p), into.get(h.upper(), float(p)))
     scored = []
     for h in set(a) & set(b):
         if h in (origin, dest) or not airports.get(h):
@@ -446,7 +455,8 @@ def plan(req: PlanRequest) -> PlanResult:
     near = [g for g in airports.gateways_near(main_o) + airports.gateways_near(main_d) if g not in o and g not in d]
     static = airports.candidate_hubs(main_o, main_d, limit=req.max_hubs, extra=[h.upper() for h in req.hubs] + near)
     found = discover_hubs(main_o, main_d, dep_dates[0], dep_dates[-1] + timedelta(days=1),
-                          limit=max(2, req.max_hubs // 2)) if req.discover_hubs and req.allow_self_transfer else []
+                          limit=max(2, req.max_hubs // 2), known_from=req.known_from_origin,
+                          known_to=req.known_to_dest) if req.discover_hubs and req.allow_self_transfer else []
     # gateways near either end first, then layovers real fares found and hubs
     # on the map taking turns; found ones get up to two extra slots
     static = [h for h in static if h not in o and h not in d]

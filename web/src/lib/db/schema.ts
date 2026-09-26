@@ -10,6 +10,7 @@ import {
   index,
   uniqueIndex,
   serial,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 
 // ---------------------------------------------------------------------------
@@ -311,3 +312,18 @@ export const searchCache = pgTable("search_cache", {
   payload: jsonb("payload").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// The cheapest one way price seen per route and day (USD), from every saved
+// result, CLI push and tracker check. Smart routes use it to pick layovers
+// ("Rome to Oslo was 46 USD yesterday") without asking any site.
+export const fareMemory = pgTable(
+  "fare_memory",
+  {
+    origin: text("origin").notNull(),
+    dest: text("dest").notNull(),
+    day: date("day").notNull(),
+    usd: doublePrecision("usd").notNull(),
+    seenAt: timestamp("seen_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.origin, t.dest, t.day] }), index("fare_memory_dest").on(t.dest, t.day)],
+);

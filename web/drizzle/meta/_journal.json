@@ -43,6 +43,13 @@
       "when": 1790285078210,
       "tag": "0005_search_cache",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790438645753,
+      "tag": "0006_fare_memory",
+      "breakpoints": true
     }
   ]
 }

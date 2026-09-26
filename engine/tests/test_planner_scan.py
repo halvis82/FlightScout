@@ -88,3 +88,10 @@ def test_legs_with_absurd_detours_are_dropped():
     assert not planner._sane(ticket(["SAN", "DEN", "LAX"], at))  # 180 km flown via Denver
     assert planner._sane(ticket(["SAN", "LAX"], at))
     assert planner._sane(ticket(["SAN", "DEN", "KEF", "OSL"], at))  # long haul with normal connections
+
+
+def test_known_fares_from_the_website_find_layovers(world, monkeypatch):
+    monkeypatch.setattr(kiwiweb, "explore", lambda *a, **k: [])  # Kiwi knows nothing today
+    found = planner.discover_hubs("SAN", "OSL", world, world, known_from={"FCO": 200, "LAX": 90},
+                                  known_to={"FCO": 60, "fra": 150})
+    assert found == ["FCO"]  # LAX has no known leg on to Oslo, FRA none from San Diego
