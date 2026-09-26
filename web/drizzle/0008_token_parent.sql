@@ -1,0 +1,2 @@
+ALTER TABLE "api_tokens" ADD COLUMN "parent_id" integer;--> statement-breakpoint
+ALTER TABLE "api_tokens" ADD CONSTRAINT "api_tokens_parent_id_api_tokens_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."api_tokens"("id") ON DELETE cascade ON UPDATE no action;

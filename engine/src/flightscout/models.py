@@ -295,6 +295,14 @@ class SearchQuery(BaseModel):
         self.currency = self.currency.upper()
         self.origins = [c.strip().upper() for c in self.origins]
         self.destinations = [c.strip().upper() for c in self.destinations]
+        if len(self.origins) > 12 or len(self.destinations) > 12:
+            raise ValueError("at most 12 airports on each side")
+        if self.max_stops is not None and not 0 <= self.max_stops <= 3:
+            raise ValueError("max_stops must be 0 to 3")
+        # bounded work per search (the website offers up to 7 flexible days and 250 km)
+        self.departure_flex_days = max(0, min(self.departure_flex_days, 10))
+        self.return_flex_days = max(0, min(self.return_flex_days, 10))
+        self.nearby_km = max(0, min(self.nearby_km, 300))
         return self
 
 

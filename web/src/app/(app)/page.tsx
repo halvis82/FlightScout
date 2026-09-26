@@ -162,6 +162,7 @@ function SearchPage() {
   const [parts, setParts] = useState<PartState[]>([]);
   const [finished, setFinished] = useState<{ secs: number; failed: number } | null>(null);
   const lastRun = useRef<string | null>(null);
+  const clock = useRef<ReturnType<typeof setInterval> | null>(null);
   // Each new search is a browser history entry, so Back and Forward move
   // between searches: the address this page last wrote, to tell those apart.
   const paramStr = params.toString();
@@ -206,7 +207,7 @@ function SearchPage() {
       if (f0.tripType !== "multicity" && f0.to.length)
         pushRecent({ from: f0.from, to: f0.to, tripType: f0.tripType, depart: f0.depart, ret: f0.ret });
       const f = { ...f0, currency };
-      lastRun.current = JSON.stringify([f0.from, f0.to, f0.depart, f0.ret, f0.tripType, f0.flex, f0.retFlex, f0.cabin, f0.adults, f0.stops, f0.nearby]);
+      lastRun.current = JSON.stringify([f0.from, f0.to, f0.depart, f0.ret, f0.tripType, f0.flex, f0.retFlex, f0.cabin, f0.adults, f0.stops, f0.nearby, f0.smart]);
       setErr(null);
       setStale(true); // keep showing the previous results, dimmed
       setPending(PARTS.length);
@@ -215,7 +216,10 @@ function SearchPage() {
       setFinished(null);
       setElapsed(0);
       const t0 = Date.now();
+      // one clock at a time: a new search stops the last one's
+      if (clock.current) clearInterval(clock.current);
       const timer = setInterval(() => setElapsed(Math.round((Date.now() - t0) / 1000)), 1000);
+      clock.current = timer;
       go(formToParams(f).toString());
       if (f.tripType === "multicity") {
         // flights must be in date order; say which one isn't instead of searching
@@ -404,7 +408,7 @@ function SearchPage() {
   // Search by itself as soon as the form is complete (from, to, dates) and
   // whenever it changes: picking a destination, arrows, presets, flexibility.
   const formKey = form
-    ? JSON.stringify([form.from, form.to, form.depart, form.ret, form.tripType, form.flex, form.retFlex, form.cabin, form.adults, form.stops, form.nearby])
+    ? JSON.stringify([form.from, form.to, form.depart, form.ret, form.tripType, form.flex, form.retFlex, form.cabin, form.adults, form.stops, form.nearby, form.smart])
     : "";
   useEffect(() => {
     if (!form || form.tripType === "multicity" || !form.to.length || !form.from.length) return;

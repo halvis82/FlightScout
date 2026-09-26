@@ -35,6 +35,11 @@ export async function optionalUser(req: Request): Promise<string | null> {
 
 // Resolve the caller: a browser session cookie or a `Bearer fsk_...` API token.
 export async function requireUser(req?: Request): Promise<string> {
+  return (await requireCaller(req)).userId;
+}
+
+// Who is calling, and with which API token (null for a browser session).
+export async function requireCaller(req?: Request): Promise<{ userId: string; tokenId: number | null }> {
   const h = req ? req.headers : await headers();
   const authz = h.get("authorization");
   if (authz?.startsWith("Bearer ")) {
@@ -50,11 +55,11 @@ export async function requireUser(req?: Request): Promise<string> {
       .set({ lastUsedAt: new Date() })
       .where(eq(schema.apiTokens.id, row.id))
       .catch(() => {});
-    return row.userId;
+    return { userId: row.userId, tokenId: row.id };
   }
   const session = await auth.api.getSession({ headers: h });
   if (!session) throw new HttpError(401, "not signed in");
-  return session.user.id;
+  return { userId: session.user.id, tokenId: null };
 }
 
 export function requireTracker(req: Request) {

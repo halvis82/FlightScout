@@ -158,7 +158,10 @@ export function AirportInput({
                 } else if (e.key === "ArrowUp") {
                   e.preventDefault();
                   setHi((h) => Math.max(h - 1, 0));
-                } else if (e.key === "Enter" || e.key === "," || e.key === "Tab") {
+                } else if (e.key === "Tab") {
+                  // Tab adds the typed airport when it matches one, and always moves on
+                  if (q.trim() && options[0]) commitTyped();
+                } else if (e.key === "Enter" || e.key === ",") {
                   if (q.trim()) {
                     e.preventDefault();
                     commitTyped();

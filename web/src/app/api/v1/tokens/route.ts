@@ -1,6 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
-import { body, json, newToken, requireUser, route } from "@/lib/api";
+import { body, json, newToken, requireCaller, requireUser, route } from "@/lib/api";
 
 export const GET = route(async (req) => {
   const userId = await requireUser(req);
@@ -20,12 +20,12 @@ export const GET = route(async (req) => {
 
 // The raw token is returned once and never stored.
 export const POST = route(async (req) => {
-  const userId = await requireUser(req);
+  const { userId, tokenId } = await requireCaller(req);
   const { name } = await body<{ name?: string }>(req);
   const t = newToken();
   const [row] = await db
     .insert(schema.apiTokens)
-    .values({ userId, name: (name || "CLI").slice(0, 60), tokenHash: t.hash, prefix: t.prefix })
+    .values({ userId, name: String(name || "CLI").slice(0, 60), tokenHash: t.hash, prefix: t.prefix, parentId: tokenId })
     .returning({ id: schema.apiTokens.id, name: schema.apiTokens.name, prefix: schema.apiTokens.prefix });
   return json({ ...row, token: t.raw }, 201);
 });

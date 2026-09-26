@@ -57,6 +57,13 @@
       "when": 1790439577262,
       "tag": "0007_watch_prices_since",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790440257288,
+      "tag": "0008_token_parent",
+      "breakpoints": true
     }
   ]
 }

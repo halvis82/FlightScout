@@ -29,8 +29,13 @@ export default function Onboarding() {
           await api("/places", { body: { ...r, label: r.label || r.codes.join("/") } });
         }
       }
-      const homes = rows.filter((r) => r.kind === "home").flatMap((r) => r.codes);
-      await api("/settings", { method: "PATCH", body: { currency, onboarded: true, defaultOrigins: skip ? [] : homes } });
+      // the first home is where searches start (its own airports, like picking that place in Settings)
+      const home = rows.find((r) => r.kind === "home" && r.codes.length);
+      await api("/settings", {
+        method: "PATCH",
+        // skipping keeps whatever the account already has
+        body: skip ? { onboarded: true } : { currency, onboarded: true, defaultOrigins: home ? home.codes : [] },
+      });
       await Promise.all([refreshMe(), refreshPlaces()]);
       router.replace("/");
     } catch (e) {

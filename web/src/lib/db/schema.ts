@@ -11,6 +11,7 @@ import {
   uniqueIndex,
   serial,
   primaryKey,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 
 // ---------------------------------------------------------------------------
@@ -247,6 +248,9 @@ export const apiTokens = pgTable(
     name: text("name").notNull(),
     tokenHash: text("token_hash").notNull(),
     prefix: text("prefix").notNull(),
+    // made with another token (CLI `tokens create`): revoking that one revokes this too,
+    // so a leaked token can't mint replacements that outlive it
+    parentId: integer("parent_id").references((): AnyPgColumn => apiTokens.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
   },

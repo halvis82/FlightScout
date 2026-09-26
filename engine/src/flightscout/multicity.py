@@ -11,7 +11,7 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from . import airports, sellers
 from .models import Itinerary, SearchQuery, Stopover, Trip
@@ -28,6 +28,16 @@ class Leg(BaseModel):
     after: int = 0  # may depart this many days later
     arrive_by: date | None = None  # must land on or before this date
 
+    @model_validator(mode="after")
+    def _sane(self) -> "Leg":
+        if not self.origins or not self.destinations:
+            raise ValueError("each flight needs where it leaves from and where it goes")
+        if not (0 <= self.before <= 60 and 0 <= self.after <= 60):
+            raise ValueError("a flight's date window is at most 60 days either way")
+        self.origins = [c.strip().upper() for c in self.origins][:6]
+        self.destinations = [c.strip().upper() for c in self.destinations][:6]
+        return self
+
 
 class MultiRequest(BaseModel):
     legs: list[Leg]
@@ -39,6 +49,21 @@ class MultiRequest(BaseModel):
     max_results: int = 20
     seller_rules: dict[str, str] | None = None
     value_of_time_per_hour: float = 15.0
+
+    @model_validator(mode="after")
+    def _sane(self) -> "MultiRequest":
+        if not 1 <= len(self.legs) <= 8:
+            raise ValueError("a multi city trip has 1 to 8 flights")
+        if not 1 <= self.adults <= 9:
+            raise ValueError("1 to 9 adults")
+        if self.cabin not in ("economy", "premium", "business", "first"):
+            raise ValueError("cabin must be economy, premium, business or first")
+        if not (len(self.currency) == 3 and self.currency.isalpha()):
+            raise ValueError(f"{self.currency!r} is not a currency code")
+        self.currency = self.currency.upper()
+        self.beam = max(1, min(self.beam, 16))
+        self.max_results = max(1, min(self.max_results, 50))
+        return self
 
 
 def _window(leg: Leg) -> tuple[date, date]:

@@ -593,6 +593,8 @@ export async function guestApi(path: string, method: string, body: unknown, serv
         if (method === "DELETE") {
           write("watches", read<Watch[]>("watches", []).filter((x) => x.id !== id));
           remove(`obs.${id}`);
+          // its alerts go with it (the server cascades the same way)
+          write("alerts", read<Alert[]>("alerts", []).filter((a) => a.watchId !== id));
           return { ok: true };
         }
       }
