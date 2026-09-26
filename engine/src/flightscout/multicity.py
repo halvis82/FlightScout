@@ -106,16 +106,17 @@ def _leg_options(leg: Leg, req: MultiRequest, errors: dict[str, str]) -> list[It
         return kiwiweb.search_window(o[:6], d[:6], lo, hi, req.currency, req.adults, req.cabin)
 
     def airlines_direct():
-        # the airlines' own sites for the main day (low cost carriers Google and Kiwi miss)
+        # the airlines' own sites for the main day (low cost carriers Google and Kiwi miss);
+        # the fast ones only: the whole trip waits for every leg
         day = leg.date if lo <= leg.date <= hi else lo
         q = SearchQuery(origins=o[:4], destinations=d[:4], departure=day, currency=req.currency,
-                        cabin=req.cabin, adults=req.adults, sources=["airlines"])
+                        cabin=req.cabin, adults=req.adults, sources=["airlines_http"])
         return [t.tickets[0] for t in full_search(q).trips]
 
     ex = ThreadPoolExecutor(max_workers=4)
     jobs = {"kiwi": ex.submit(kiwi_range), "kiwiweb": ex.submit(kiwi_window), "google": ex.submit(google_best),
             "airlines": ex.submit(airlines_direct)}
-    end = time.monotonic() + 60
+    end = time.monotonic() + 40
     for name, f in jobs.items():
         try:
             found += f.result(timeout=max(0.1, end - time.monotonic()))

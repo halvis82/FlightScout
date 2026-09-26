@@ -152,6 +152,8 @@ def expand_sources(names: list[str]) -> list[str]:
     """Resolve the "airlines" group (and legacy explicit airline lists) to
     every direct airline source, plus the browser ones where Chrome is here."""
     out = [s for s in names if s in SOURCES and (s != "serpapi" or serpapi.enabled())]
+    if "airlines_http" in names:  # the fast ones only (no browser), e.g. for multi city legs
+        return [s for s in dict.fromkeys(out + AIRLINES) if s not in _disabled()]
     if "airlines" in names:
         out += [s for s in AIRLINES if s not in out]
     if ("airlines" in names or set(names) & _DIRECT) and _browser.available():
