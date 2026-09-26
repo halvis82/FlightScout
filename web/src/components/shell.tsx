@@ -34,7 +34,7 @@ export function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b border-border bg-surface/85 backdrop-blur-md">
-        <div className="mx-auto flex h-14 max-w-7xl items-center gap-1 px-3 sm:gap-2 sm:px-4">
+        <div className="mx-auto flex h-14 max-w-7xl items-center gap-1 px-2 min-[400px]:px-3 sm:gap-2 sm:px-4">
           <Link href="/?new=1" className="mr-2 flex shrink-0 items-center gap-2 text-[15px] font-semibold tracking-tight">
             <span className="grid size-8 place-items-center rounded-xl bg-gradient-to-br from-accent to-[oklch(0.55_0.2_290)] text-white shadow-[var(--shadow)]">
               <Plane className="size-4 -rotate-45" />
@@ -60,7 +60,7 @@ export function Shell({ children }: { children: ReactNode }) {
             {/* phones have no nav row: Airlines as an icon (Search is the logo) */}
             <Link
               href="/airlines"
-              className={cn("grid size-9 place-items-center rounded-lg text-muted hover:bg-surface-2 hover:text-fg sm:hidden", path.startsWith("/airlines") && "bg-surface-2 text-fg")}
+              className={cn("grid size-8 place-items-center rounded-lg text-muted hover:bg-surface-2 hover:text-fg sm:hidden", path.startsWith("/airlines") && "bg-surface-2 text-fg")}
               aria-label="Airlines"
               title="Airlines"
             >
@@ -70,7 +70,7 @@ export function Shell({ children }: { children: ReactNode }) {
             <WatchlistButton />
             <Link
               href="/settings"
-              className={cn("grid size-9 place-items-center rounded-lg text-muted hover:bg-surface-2 hover:text-fg", path.startsWith("/settings") && "bg-surface-2 text-fg")}
+              className={cn("grid size-8 place-items-center rounded-lg text-muted hover:bg-surface-2 hover:text-fg sm:size-9", path.startsWith("/settings") && "bg-surface-2 text-fg")}
               aria-label="Settings"
               title="Settings"
             >

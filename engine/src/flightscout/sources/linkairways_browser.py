@@ -107,17 +107,21 @@ def _fetch(o: str, d: str, dep: date, ret: date | None, adults: int) -> dict:
 
     def job(page) -> dict:
         page.goto(url, wait_until="domcontentloaded", timeout=45000)
-        end = time.time() + 40
+        # the first answer is an empty shell; the real page often takes 20 s or more
+        end = time.time() + 75
         while time.time() < end:
             if "Flight.aspx" in page.url and page.query_selector("#divOBFlightResults"):
                 break
+            # no flights that day: the site says so instead of showing results
+            if "Flight.aspx" in page.url and "do not operate on the date" in (page.evaluate("document.body ? document.body.innerText : ''") or ""):
+                return {"OB": [], "IB": []}
             page.wait_for_timeout(400)
         else:
             raise RuntimeError(f"linkairways: no results page ({page.url[:80]})")
         page.wait_for_timeout(800)
         return page.evaluate(_JS)
 
-    data = _browser.run(job, "linkairways", timeout=90)
+    data = _browser.run(job, "linkairways", timeout=120)
     cache.put(key, data)
     return data
 

@@ -37,7 +37,11 @@ def pytest_collection_modifyitems(config, items):
 # source) it still fails. Real breakage (parse errors, wrong data) fails
 # everywhere.
 _WALLED = ("403", "429", "forbidden", "security verification", "just a moment", "access denied", "captcha",
-           "unusual traffic", "rate_limited", "no availability response", "blocked", "cloudflare", "akamai")
+           "unusual traffic", "rate_limited", "no availability response", "blocked", "cloudflare", "akamai",
+           # silent walls: these sites answer GitHub's servers with nothing (checked from home on
+           # 2026-09-26: Avelo, United, VietJet, Akasa, Tigerair, Traveloka and Cleartrip all passed)
+           "no search response", "no flights response", "no search-flight response", "no flight search response",
+           "did not create a session token", "err_http_response_code_failure")
 
 
 @pytest.hookimpl(hookwrapper=True)
