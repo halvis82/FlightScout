@@ -2,6 +2,7 @@
 import { placeSignature, watchSignature } from "./signature";
 import { HttpError } from "./http-error";
 import { placeInput } from "./place-validate";
+import { checkWatch as checkWatchFields, isDate, toColumns, type WatchIn } from "./watch-validate";
 // Guest mode: the same /api/v1 routes the server offers for signed in users,
 // answered from localStorage. The client `api()` helper routes here when the
 // visitor has no session, so pages don't need to know which mode they're in.
@@ -10,7 +11,7 @@ import { placeInput } from "./place-validate";
 import { DEFAULT_PLANNER } from "./defaults";
 import type { PlannerDefaults, SellerRule } from "./db/schema";
 import type { PlanResult, SearchQuery, SearchResult, Trip } from "./types";
-import { alertReasons, queryMatchesWatch, tripsToObservations, watchToQuery, type ObservationInput } from "./watch-logic";
+import { alertReasons, queryMatchesWatch, tripsForWatch, tripsToObservations, watchToQuery, type ObservationInput } from "./watch-logic";
 
 const P = "fs.guest.";
 const MAX_OBS_PER_WATCH = 3000;
@@ -109,6 +110,7 @@ type Watch = {
   prevPrice: number | null;
   lowestPrice: number | null;
   bestTrip: unknown;
+  pricesSince?: string | null; // like the server: earlier prices describe another search
   notes: string | null;
   createdAt: string;
 };
@@ -200,11 +202,12 @@ let rates: Record<string, number> | null = null;
 async function getRates(serverFetch: ServerFetch) {
   if (rates) return rates;
   try {
-    rates = (await serverFetch<{ rates: Record<string, number> }>("/fx")).rates;
+    const got = (await serverFetch<{ rates: Record<string, number> }>("/fx")).rates;
+    if (got && typeof got.USD === "number") rates = got;
+    return got ?? { EUR: 1 };
   } catch {
-    rates = { EUR: 1 };
+    return { EUR: 1 }; // not remembered: the next call tries again
   }
-  return rates;
 }
 function conv(r: Record<string, number>, amount: number, from: string, to: string) {
   if (from === to || !r[from] || !r[to]) return amount;
@@ -221,44 +224,52 @@ const codes = (v: unknown) =>
     .filter((c) => /^[A-Z]{3,4}$/.test(c));
 
 function watchFromInput(p: Record<string, unknown>, base?: Watch): Watch {
-  const pick = <T,>(k: string, cur: T): T => (k in p ? (p[k] as T) : cur);
-  const origins = "origins" in p ? codes(p.origins) : (base?.origins ?? []);
-  const destinations = "destinations" in p ? codes(p.destinations) : (base?.destinations ?? []);
-  if (!origins.length || !destinations.length) throw new GuestError(400, "origins and destinations are required");
-  const departStart = pick<string>("depart_start", base?.departStart ?? "");
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(departStart)) throw new GuestError(400, "depart_start must be YYYY-MM-DD");
-  const departEnd = pick<string>("depart_end", base?.departEnd ?? departStart) || departStart;
-  if (departEnd < departStart) throw new GuestError(400, "depart_end is before depart_start");
-  return {
+  const c = checked(() => toColumns(p as WatchIn, Boolean(base))) as Partial<Watch>;
+  const next: Watch = {
     id: base?.id ?? nextId(),
     userId: "guest",
-    name: String(pick("name", base?.name ?? "") || `${origins.join("/")} to ${destinations.join("/")}`).slice(0, 120),
-    origins,
-    destinations,
-    tripType: ((t) => (t === "oneway" || t === "multicity" ? t : "roundtrip"))(pick("trip_type", base?.tripType ?? "roundtrip")),
-    // multi city watches keep their legs (same as the server)
-    legs: pick<unknown>("legs", base?.legs ?? null) ?? undefined,
-    departStart,
-    departEnd,
-    // a one way watch has no trip length (also when edited from round trip)
-    nightsMin: pick("trip_type", base?.tripType) === "oneway" ? null : pick("nights_min", base?.nightsMin ?? null),
-    nightsMax: pick("trip_type", base?.tripType) === "oneway" ? null : pick("nights_max", base?.nightsMax ?? null),
-    cabin: pick("cabin", base?.cabin ?? "economy"),
-    adults: Math.max(1, Math.min(9, Number(pick("adults", base?.adults ?? 1)))),
-    maxStops: pick("max_stops", base?.maxStops ?? null),
-    currency: pick("currency", base?.currency ?? guestSettings().currency),
-    includeSplit: Boolean(pick("include_split", base?.includeSplit ?? false)),
-    alertBelow: pick("alert_below", base?.alertBelow ?? null),
-    alertDropPct: pick("alert_drop_pct", base?.alertDropPct ?? null),
-    active: Boolean(pick("active", base?.active ?? true)),
-    lastCheckedAt: base?.lastCheckedAt ?? null,
-    bestPrice: base?.bestPrice ?? null,
-    prevPrice: base?.prevPrice ?? null,
-    lowestPrice: base?.lowestPrice ?? null,
-    bestTrip: base?.bestTrip ?? null,
-    notes: pick("notes", base?.notes ?? null),
-    createdAt: base?.createdAt ?? new Date().toISOString(),
+    name: "",
+    origins: [],
+    destinations: [],
+    tripType: "roundtrip",
+    legs: undefined,
+    departStart: "",
+    departEnd: "",
+    nightsMin: null,
+    nightsMax: null,
+    cabin: "economy",
+    adults: 1,
+    maxStops: null,
+    currency: guestSettings().currency,
+    includeSplit: false,
+    alertBelow: null,
+    alertDropPct: null,
+    active: true,
+    lastCheckedAt: null,
+    bestPrice: null,
+    prevPrice: null,
+    lowestPrice: null,
+    bestTrip: null,
+    pricesSince: null,
+    notes: null,
+    createdAt: new Date().toISOString(),
+    ...base,
+    ...Object.fromEntries(Object.entries(c).filter(([, v]) => v !== undefined)),
   };
+  next.name ||= `${next.origins.join("/")} to ${next.destinations.join("/")}`;
+  // a one way watch has no trip length (also when edited from round trip)
+  if (next.tripType === "oneway") next.nightsMin = next.nightsMax = null;
+  checked(() => checkWatchFields(next));
+  if (base) {
+    const sig = (w: Watch) => watchSignature(w);
+    if (sig(next) !== sig(base) || next.currency !== base.currency) {
+      // another search now: earlier prices no longer describe it
+      Object.assign(next, { pricesSince: new Date().toISOString(), bestPrice: null, prevPrice: null, lowestPrice: null, bestTrip: null });
+      if (next.currency !== base.currency && !("alert_below" in p) && base.alertBelow != null && rates)
+        next.alertBelow = Math.round(conv(rates, base.alertBelow, base.currency, next.currency));
+    }
+  }
+  return next;
 }
 
 function getWatch(id: number) {
@@ -276,21 +287,30 @@ function saveWatch(w: Watch) {
 }
 
 async function recordObservations(w: Watch, obs: ObservationInput[], serverFetch: ServerFetch) {
-  if (!obs.length) {
-    saveWatch({ ...w, lastCheckedAt: new Date().toISOString() });
-    return { inserted: 0, alerts: 0 };
-  }
   const r = await getRates(serverFetch);
   const now = new Date().toISOString();
+  const today = now.slice(0, 10);
+  // only real, future prices in a currency we can compare (like the server)
+  const good = obs.filter(
+    (o) => o && typeof o.price === "number" && Number.isFinite(o.price) && o.price > 0 && isDate(o.depart_date) && o.depart_date >= today && Boolean(r[String(o.currency).toUpperCase()]),
+  );
+  if (!good.length) {
+    saveWatch({ ...w, lastCheckedAt: now });
+    return { inserted: 0, alerts: 0 };
+  }
   const existing = read<Obs[]>(`obs.${w.id}`, []);
   let seq = existing.at(-1)?.id ?? 0;
-  const rows: Obs[] = obs.map((o) => ({
+  const clamp = (t?: string | null) => {
+    const ms = t ? Date.parse(t) : NaN;
+    return Number.isFinite(ms) ? new Date(Math.min(Date.now(), Math.max(Date.now() - 7 * 86400_000, ms))).toISOString() : now;
+  };
+  const rows: Obs[] = good.map((o) => ({
     id: ++seq,
-    observed_at: o.observed_at ?? now,
+    observed_at: clamp(o.observed_at),
     depart_date: o.depart_date,
-    return_date: o.return_date ?? null,
+    return_date: isDate(o.return_date) ? o.return_date : null,
     price: o.price,
-    currency: o.currency,
+    currency: o.currency.toUpperCase(),
     source: o.source,
     kind: o.kind ?? "single",
     route: o.route ?? null,
@@ -302,27 +322,37 @@ async function recordObservations(w: Watch, obs: ObservationInput[], serverFetch
   // On quota errors drop the oldest half and try again.
   while (!write(`obs.${w.id}`, all) && all.length > 50) all = all.slice(Math.floor(all.length / 2));
 
-  let best = obs[0];
+  // The current best is the cheapest fresh price (the last day, dates still
+  // ahead), not just this batch, so a narrow search can't fake a "drop" later.
+  const since = Math.max(Date.now() - 24 * 3600_000, w.pricesSince ? Date.parse(w.pricesSince) : 0);
+  let best: Obs | null = null;
   let bestVal = Infinity;
-  for (const o of obs) {
+  for (const o of all) {
+    if (Date.parse(o.observed_at) < since || o.depart_date < today) continue;
     const v = conv(r, o.price, o.currency, w.currency);
     if (v < bestVal) {
       bestVal = v;
       best = o;
     }
   }
+  if (!best) return { inserted: rows.length, alerts: 0 };
+  bestVal = Math.round(bestVal * 100) / 100;
+  const inBatch = rows.findIndex((x) => x.id === best!.id);
   const prev = w.bestPrice;
   saveWatch({
     ...w,
     prevPrice: prev,
     bestPrice: bestVal,
     lowestPrice: w.lowestPrice == null ? bestVal : Math.min(w.lowestPrice, bestVal),
-    bestTrip: best.trip ?? w.bestTrip,
+    bestTrip: inBatch >= 0 ? (good[inBatch].trip ?? w.bestTrip) : w.bestTrip,
     lastCheckedAt: now,
   });
   const reasons = alertReasons(w, bestVal, prev);
-  if (reasons.length) addAlert(w, reasons, bestVal, best.booking_url ?? null);
-  return { inserted: rows.length, alerts: reasons.length ? 1 : 0 };
+  // like the server: not the same alert again within 12 hours unless the price fell further
+  const recent = read<Alert[]>("alerts", []).find((a) => a.watchId === w.id && Date.now() - Date.parse(a.createdAt) < 12 * 3600_000);
+  const fire = reasons.length > 0 && !(recent && recent.price <= bestVal);
+  if (fire) addAlert(w, reasons, bestVal, best.booking_url ?? null);
+  return { inserted: rows.length, alerts: fire ? 1 : 0 };
 }
 
 function addAlert(w: Watch, reasons: string[], price: number, bookingUrl: string | null) {
@@ -373,7 +403,7 @@ async function checkWatch(w: Watch, serverFetch: ServerFetch) {
       errors.plan = (e as Error).message;
     }
   }
-  const out = await recordObservations(w, tripsToObservations(trips, w.destinations), serverFetch);
+  const out = await recordObservations(w, tripsToObservations(w.tripType === "multicity" ? trips : tripsForWatch(trips, w), w.destinations), serverFetch);
   saveSearch("search", q as unknown as Record<string, unknown>, { ...res, trips, errors }, `Watch check: ${w.name}`);
   return { ...out, trips: trips.length, errors };
 }
@@ -439,7 +469,9 @@ async function feedGuestWatches(kind: string, query: Record<string, unknown>, tr
           cabin: (query.cabin as SearchQuery["cabin"]) ?? "economy",
         };
   for (const w of read<Watch[]>("watches", [])) {
-    if (queryMatchesWatch(q, w)) await recordObservations(w, tripsToObservations(trips, w.destinations), serverFetch);
+    if (!queryMatchesWatch(q, w)) continue;
+    const mine = tripsForWatch(trips, w);
+    if (mine.length) await recordObservations(w, tripsToObservations(mine, w.destinations), serverFetch);
   }
 }
 

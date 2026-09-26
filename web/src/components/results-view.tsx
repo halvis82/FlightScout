@@ -81,6 +81,24 @@ export function ResultsView({
   const maxPrice = maxUsd == null ? null : convert(maxUsd, "USD");
   const [limit, setLimit] = useState(60);
   const { money } = useApp();
+  // a new search starts with clean filters (a source or price limit from the
+  // last one could hide every result, with its control no longer shown)
+  const searchKey = JSON.stringify([query?.origins, query?.destinations, query?.departure, query?.return_date, query?.adults]);
+  const [filtersFor, setFiltersFor] = useState(searchKey);
+  if (filtersFor !== searchKey) {
+    setFiltersFor(searchKey);
+    setSources([]);
+    setMaxUsd(null);
+    setLimit(60);
+  }
+  const resetFilters = () => {
+    setSources([]);
+    setMaxUsd(null);
+    setMaxStops("any");
+    setTimeOfDay("any");
+    setShowSplit(true);
+    setHideSelfTransfer(false);
+  };
   const priceRange = useMemo(() => {
     const ps = trips.map((t) => convert(t.total_price, t.currency));
     return ps.length ? [Math.floor(Math.min(...ps)), Math.ceil(Math.max(...ps))] : [0, 0];
@@ -89,17 +107,20 @@ export function ResultsView({
 
   const allSources = useMemo(() => [...new Set(trips.flatMap((t) => t.tickets.map(sourceGroup)))], [trips]);
   const blocked = trips.filter((t) => tripBlocked(rules, t)).length;
+  // only filters whose control is on screen apply
+  const activeKey = allSources.length > 1 ? sources.filter((s) => (allSources as string[]).includes(s)).join(",") : "";
+  const activeMax = priceRange[1] > priceRange[0] ? maxPrice : null;
 
   const list = useMemo(() => {
     const cheapest = Math.min(...trips.map((t) => convert(t.total_price, t.currency, "USD")));
     const fastest = Math.min(...trips.map(tripDuration));
     const f = trips.filter((t) => {
       if (tripBlocked(rules, t)) return false;
-      if (maxPrice != null && convert(t.total_price, t.currency) > maxPrice) return false;
+      if (activeMax != null && convert(t.total_price, t.currency) > activeMax) return false;
       if (!showSplit && t.tickets.length > 1) return false;
       if (hideSelfTransfer && t.tickets.some((x) => x.self_transfer)) return false;
       if (maxStops !== "any" && tripStops(t) > Number(maxStops)) return false;
-      if (sources.length && !t.tickets.every((x) => sources.includes(sourceGroup(x)))) return false;
+      if (activeKey && !t.tickets.every((x) => activeKey.split(",").includes(sourceGroup(x)))) return false;
       if (timeOfDay !== "any") {
         const h = parseLocal(t.departure).h;
         if (timeOfDay === "morning" && (h < 5 || h >= 12)) return false;
@@ -125,7 +146,7 @@ export function ResultsView({
       if (ra !== Infinity) return convert(a.total_price, a.currency, "USD") - convert(b.total_price, b.currency, "USD");
       return score(a) - score(b);
     });
-  }, [trips, rules, showSplit, hideSelfTransfer, maxStops, sources, timeOfDay, sort, convert, maxPrice]);
+  }, [trips, rules, showSplit, hideSelfTransfer, maxStops, activeKey, timeOfDay, sort, convert, activeMax]);
 
   // One row per outbound flight (like Google): the same outbound paired with
   // different returns collapses into its best pairing, the others become
@@ -307,7 +328,18 @@ export function ResultsView({
           );
         })()}
         {!shown.length ? (
-          <Empty title="No flights match">Try loosening the filters, adding nearby airports, or turning on smart routes.</Empty>
+          <Empty
+            title="No flights match"
+            action={
+              trips.length > blocked ? (
+                <Button size="sm" onClick={resetFilters}>
+                  Clear filters
+                </Button>
+              ) : undefined
+            }
+          >
+            {trips.length > blocked ? "The filters hide every flight." : "Try adding nearby airports or turning on smart routes."}
+          </Empty>
         ) : (
           <div className="space-y-2">
             {grouped.slice(0, limit).map(({ trip: t, alts }, i, arr) => (

@@ -1,5 +1,6 @@
 // Watch logic shared by the server (signed in users) and the browser (guests).
 import { addDays, dayDiff, formatPrice } from "./format";
+import { expandCodes } from "./metros";
 import type { Cabin, SearchQuery, Trip } from "./types";
 
 export type WatchLike = {
@@ -108,6 +109,8 @@ export function alertReasons(w: WatchLike, price: number, prev: number | null): 
 export function queryMatchesWatch(q: SearchQuery, w: WatchLike & { active?: boolean }) {
   const overlap = (a: string[], b: string[]) => a.some((x) => b.includes(x));
   if (w.active === false) return false;
+  // a multi city watch is priced leg by leg, never by an ordinary search
+  if (w.tripType === "multicity") return false;
   if (!overlap(q.origins, w.origins) || !overlap(q.destinations, w.destinations)) return false;
   if (q.departure < w.departStart || q.departure > w.departEnd) return false;
   if ((w.tripType === "roundtrip") !== Boolean(q.return_date)) return false;
@@ -121,6 +124,39 @@ export function queryMatchesWatch(q: SearchQuery, w: WatchLike & { active?: bool
     if (w.nightsMax != null && n > w.nightsMax) return false;
   }
   return true;
+}
+
+// The trips of a matching search that this watch actually covers: from one of
+// its airports to one of its destinations, leaving in its window, and for
+// round trips back home after a stay it allows. A search can cover more
+// (other airports, dates or trip lengths) than the watch does.
+export function tripsForWatch(trips: Trip[], w: WatchLike): Trip[] {
+  const from = new Set(expandCodes(w.origins));
+  const to = new Set(expandCodes(w.destinations));
+  return trips.filter((t) => {
+    const slices = t.tickets.flatMap((x) => x.slices).sort((a, b) => a.departure.localeCompare(b.departure));
+    if (!slices.length) return false;
+    const dep = slices[0].departure.slice(0, 10);
+    if (!from.has(slices[0].origin) || dep < w.departStart || dep > w.departEnd) return false;
+    const pending = t.tickets[0]?.return_pending;
+    // one way (also split into several tickets): ends at a destination
+    if (w.tripType === "oneway") return !pending && to.has(slices.at(-1)!.destination);
+    // round trip: out to a destination, then home again after the allowed stay
+    const out = slices.findIndex((s) => to.has(s.destination));
+    if (out < 0) return false;
+    let ret: string | null = null;
+    if (pending) ret = t.tickets[0].pending_return ?? null;
+    else {
+      const back = slices.slice(out + 1).find((s) => to.has(s.origin));
+      if (!back || !from.has(slices.at(-1)!.destination)) return false;
+      ret = back.departure.slice(0, 10);
+    }
+    if (!ret) return false;
+    const n = dayDiff(dep, ret);
+    if (w.nightsMin != null && n < w.nightsMin) return false;
+    if (w.nightsMax != null && n > w.nightsMax) return false;
+    return true;
+  });
 }
 
 // How often a watch is checked, honestly: accounts get the twice daily

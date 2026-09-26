@@ -1,0 +1,1 @@
+ALTER TABLE "watches" ADD COLUMN "prices_since" timestamp with time zone;

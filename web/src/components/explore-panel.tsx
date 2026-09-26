@@ -58,6 +58,7 @@ export function ExplorePanel({
     const ctl = new AbortController();
     const t = setTimeout(async () => {
       setItems(new Map());
+      setMaxUsd(null); // a price limit from the last search could hide every place
       setFailed([]);
       const merged = new Map<string, Destination>();
       const keep = (d: Destination) => {

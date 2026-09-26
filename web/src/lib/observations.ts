@@ -1,30 +1,44 @@
 import "server-only";
-import { and, desc, eq, gte } from "drizzle-orm";
+import { and, asc, desc, eq, gte } from "drizzle-orm";
 import { db, schema } from "./db";
-import { convertWith, getRates } from "./fx";
+import { convertWith, getRates, hasRate } from "./fx";
+import { isDate } from "./watch-validate";
 import { sendEmail, sendPush } from "./notify";
 import { getSettings } from "./settings";
 import { formatPrice } from "./format";
 import type { Trip, SearchQuery } from "./types";
-import { alertReasons, queryMatchesWatch, tripsToObservations, type ObservationInput } from "./watch-logic";
+import { alertReasons, queryMatchesWatch, tripsForWatch, tripsToObservations, type ObservationInput } from "./watch-logic";
 
 export type { ObservationInput };
 
 type Watch = typeof schema.watches.$inferSelect;
 
 export async function recordObservations(watch: Watch, obs: ObservationInput[]) {
-  if (!obs.length) return { inserted: 0, alerts: 0 };
   const rates = await getRates();
   const now = new Date();
-  const rows = obs.map((o) => ({
+  const today = now.toISOString().slice(0, 10);
+  // only real, future prices in a currency we can compare; timestamps can't
+  // be moved into the future or far back
+  const good = obs.filter(
+    (o) => o && typeof o.price === "number" && Number.isFinite(o.price) && o.price > 0 && isDate(o.depart_date) && o.depart_date >= today && hasRate(rates, o.currency),
+  );
+  if (!good.length) {
+    await db.update(schema.watches).set({ lastCheckedAt: now }).where(eq(schema.watches.id, watch.id));
+    return { inserted: 0, alerts: 0 };
+  }
+  const clamp = (t?: string | null) => {
+    const ms = t ? Date.parse(t) : NaN;
+    return Number.isFinite(ms) ? new Date(Math.min(now.getTime(), Math.max(now.getTime() - 7 * 86400_000, ms))) : now;
+  };
+  const rows = good.map((o) => ({
     watchId: watch.id,
-    observedAt: o.observed_at ? new Date(o.observed_at) : now,
+    observedAt: clamp(o.observed_at),
     departDate: o.depart_date,
-    returnDate: o.return_date ?? null,
+    returnDate: isDate(o.return_date) ? o.return_date : null,
     price: o.price,
-    currency: o.currency,
+    currency: o.currency.toUpperCase(),
     priceUsd: convertWith(rates, o.price, o.currency, "USD"),
-    source: o.source,
+    source: String(o.source ?? "").slice(0, 80),
     kind: o.kind ?? "single",
     route: o.route ?? null,
     durationMin: o.duration_min ?? null,
@@ -33,16 +47,18 @@ export async function recordObservations(watch: Watch, obs: ObservationInput[]) 
   }));
   await db.insert(schema.observations).values(rows);
 
-  // Current best of this batch, in the watch currency.
-  let best = obs[0];
-  let bestVal = Infinity;
-  for (const o of obs) {
-    const v = convertWith(rates, o.price, o.currency, watch.currency);
-    if (v < bestVal) {
-      bestVal = v;
-      best = o;
-    }
-  }
+  // The current best is the cheapest of every fresh price (the last day, for
+  // dates still ahead), not just this batch: a search covering one date must
+  // not make the watch look more expensive (and later "drop").
+  const since = new Date(Math.max(now.getTime() - 24 * 3600_000, watch.pricesSince ? new Date(watch.pricesSince).getTime() : 0));
+  const [top] = await db
+    .select()
+    .from(schema.observations)
+    .where(and(eq(schema.observations.watchId, watch.id), gte(schema.observations.observedAt, since), gte(schema.observations.departDate, today)))
+    .orderBy(asc(schema.observations.priceUsd))
+    .limit(1);
+  if (!top || top.priceUsd == null) return { inserted: rows.length, alerts: 0 };
+  const bestVal = Math.round(convertWith(rates, top.priceUsd, "USD", watch.currency) * 100) / 100;
   const prev = watch.bestPrice;
   const lowest = watch.lowestPrice == null ? bestVal : Math.min(watch.lowestPrice, bestVal);
   await db
@@ -51,12 +67,12 @@ export async function recordObservations(watch: Watch, obs: ObservationInput[]) 
       prevPrice: prev,
       bestPrice: bestVal,
       lowestPrice: lowest,
-      bestTrip: best.trip ?? watch.bestTrip,
+      bestTrip: top.trip ?? watch.bestTrip,
       lastCheckedAt: now,
     })
     .where(eq(schema.watches.id, watch.id));
 
-  const alerts = await evaluateAlerts(watch, bestVal, prev, best);
+  const alerts = await evaluateAlerts(watch, bestVal, prev, { booking_url: top.bookingUrl } as ObservationInput);
   return { inserted: rows.length, alerts };
 }
 
@@ -118,10 +134,11 @@ export async function feedMatchingWatches(userId: string, q: SearchQuery, trips:
     .where(and(eq(schema.watches.userId, userId), eq(schema.watches.active, true)));
   let n = 0;
   for (const w of ws) {
-    if (queryMatchesWatch(q, w)) {
-      await recordObservations(w, tripsToObservations(trips, w.destinations));
-      n++;
-    }
+    if (!queryMatchesWatch(q, w)) continue;
+    const mine = tripsForWatch(trips, w);
+    if (!mine.length) continue;
+    await recordObservations(w, tripsToObservations(mine, w.destinations));
+    n++;
   }
   return n;
 }

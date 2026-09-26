@@ -14,8 +14,9 @@ Google session and `google-hook.js` hands over that `GetShoppingResults` answer.
 you open yourself (it only runs inside a frame whose parent is this extension). A session rule lets only this
 extension's own frames load Google Flights (it drops `X-Frame-Options` and presents the load as a normal page load).
 
-Permissions: `https://www.google.com/*`, `offscreen` and `declarativeNetRequestWithHostAccess` (for the rule above), and it only answers FlightScout pages (flightscout-app.vercel.app,
-any *.vercel.app deployment, localhost:3000). It only fetches Google Flights URLs.
+Permissions: `https://www.google.com/*`, `offscreen` and `declarativeNetRequestWithHostAccess` (for the rule above), and it only answers FlightScout pages (flightscout-app.vercel.app and
+localhost:3000). It only fetches Google Flights URLs. Running your own copy on another address? Add it to
+`content_scripts[0].matches` in `manifest.json` before loading the folder.
 
 Install (Chrome, Edge, Brave, Arc): download `flightscout-helper.zip` from the site's Settings page (or use this
 folder), unzip, open `chrome://extensions`, enable Developer mode, Load unpacked, pick the folder.

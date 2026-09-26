@@ -185,6 +185,9 @@ export const watches = pgTable(
     prevPrice: doublePrecision("prev_price"),
     lowestPrice: doublePrecision("lowest_price"),
     bestTrip: jsonb("best_trip"),
+    // prices observed before this (the watch then had another route, dates,
+    // party or currency) no longer count toward best and alerts
+    pricesSince: timestamp("prices_since", { withTimezone: true }),
     notes: text("notes"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },

@@ -4,7 +4,7 @@ import { engine } from "./engine";
 import { addDays } from "./format";
 import { watchToQuery } from "./watch-logic";
 import { recordObservations } from "./observations";
-import { tripsToObservations } from "./watch-logic";
+import { tripsForWatch, tripsToObservations } from "./watch-logic";
 import { getSettings } from "./settings";
 import type { PlanResult, SearchResult, Trip } from "./types";
 
@@ -54,7 +54,7 @@ export async function checkWatch(w: Watch, userId: string) {
       errors.plan = (e as Error).message;
     }
   }
-  const result = await recordObservations(w, tripsToObservations(trips, w.destinations));
+  const result = await recordObservations(w, tripsToObservations(tripsForWatch(trips, w), w.destinations));
   await db.insert(schema.searches).values({
     userId,
     kind: "search",

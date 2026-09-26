@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "FlightScout Helper",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Lets FlightScout search Google Flights from your own browser and IP, so searches stay fast and never get blocked.",
   "icons": {
     "128": "icon128.png"
@@ -16,8 +16,8 @@
     {
       "matches": [
         "https://flightscout-app.vercel.app/*",
-        "https://*.vercel.app/*",
-        "http://localhost:3000/*"
+        "http://localhost:3000/*",
+        "http://127.0.0.1:3000/*"
       ],
       "js": [
         "content.js"

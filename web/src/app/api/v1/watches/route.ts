@@ -3,7 +3,7 @@ import { db, schema } from "@/lib/db";
 import { body, json, requireUser, route } from "@/lib/api";
 import { getRates, convertWith } from "@/lib/fx";
 import { getSettings } from "@/lib/settings";
-import { toColumns, type WatchIn } from "@/lib/watch-validate";
+import { checkWatch, toColumns, type WatchIn } from "@/lib/watch-validate";
 import { watchSignature } from "@/lib/signature";
 
 export const GET = route(async (req) => {
@@ -39,6 +39,7 @@ export const POST = route(async (req) => {
   const p = await body<WatchIn>(req);
   if (!p.currency) p.currency = (await getSettings(userId)).currency;
   const cols = toColumns(p, false) as typeof schema.watches.$inferInsert;
+  checkWatch(cols as { departStart: string; departEnd: string });
   const signature = watchSignature({ ...cols, departStart: cols.departStart as string });
   // Same search saved twice (double click, retry, CLI): return the existing one.
   // Rows saved before signatures were canonical are compared recomputed.

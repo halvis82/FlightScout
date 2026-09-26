@@ -107,7 +107,7 @@ const INSTALL_LOCAL = "curl -fsSL https://raw.githubusercontent.com/halvis82/Fli
 
 function OwnIpSection() {
   const ext = useExtension();
-  const EXT_LATEST = "1.1.0";
+  const EXT_LATEST = "1.1.1";
   const lr = useLocalRunner();
   const mode = lr.active ? "runner" : ext ? "extension" : "server";
   const where = {
