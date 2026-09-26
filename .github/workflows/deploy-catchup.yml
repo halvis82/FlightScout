@@ -1,0 +1,38 @@
+name: Catch up deploys
+
+# Vercel's free plan allows 100 deployments a day and doesn't retry the ones
+# it skipped. Every hour: if the newest commit on main wasn't deployed because
+# of that limit, ask Vercel again through each project's deploy hook (a hook
+# deploys main). A deploy that is still building is left alone.
+on:
+  schedule:
+    - cron: "23 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: read
+
+jobs:
+  catch-up:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Redeploy projects the daily limit skipped
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HOOK_flightscout: ${{ secrets.VERCEL_HOOK_WEB }}
+          HOOK_flightscout_engine: ${{ secrets.VERCEL_HOOK_ENGINE }}
+        run: |
+          sha=$(gh api "repos/${{ github.repository }}/commits/main" -q .sha)
+          for project in flightscout flightscout-engine; do
+            line=$(gh api "repos/${{ github.repository }}/commits/$sha/status" \
+              -q "[.statuses[] | select(.context == \"Vercel – $project\")][0] | \"\(.state)|\(.description)\"")
+            state=${line%%|*}; desc=${line#*|}
+            echo "$project: ${state:-no status} ${desc}"
+            if [ "$state" != "success" ] && [ "$state" != "pending" ] && echo "$desc" | grep -qi "rate limit"; then
+              var="HOOK_${project//-/_}"
+              if [ -n "${!var}" ]; then
+                curl -fsS -X POST "${!var}" > /dev/null && echo "  asked Vercel to deploy $project again"
+              fi
+            fi
+          done
