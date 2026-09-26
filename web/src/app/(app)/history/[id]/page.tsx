@@ -78,7 +78,12 @@ export default function HistoryDetail({ params }: { params: Promise<{ id: string
         // searches, smart routes, the trip builder and multi city trips all keep trips
         <ResultsView
           trips={trips}
-          query={data.kind === "search" ? (q as unknown as SearchQuery) : { origins: from, destinations: to }}
+          // empty lists would override the trip's own airports when watching it
+          query={
+            data.kind === "search" && from.length && to.length
+              ? { ...(q as unknown as SearchQuery), origins: from, destinations: to }
+              : { origins: from.length ? from : undefined, destinations: to.length ? to : undefined }
+          }
           errors={(payload.errors as Record<string, string>) ?? {}}
           googleUrl={typeof payload.google_url === "string" ? payload.google_url : null}
           plan={data.kind !== "search" ? (payload as unknown as PlanResult) : null}

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-export type AirportRow = { iata: string; name: string; city: string; country: string; lat: number; lon: number; size: "L" | "M"; alt?: string };
+export type AirportRow = { iata: string; name: string; city: string; country: string; lat: number; lon: number; size: "L" | "M" | "S"; alt?: string };
 
 export { METROS, expandCodes } from "./metros";
 import { METROS } from "./metros";
@@ -35,8 +35,15 @@ export function useAirports() {
 }
 
 // Accent and case insensitive: "cancun" finds Cancún.
+// letters that aren't an accent on another letter (Førde, Ærø, Łódź, Straße)
+const LETTERS: Record<string, string> = { ø: "o", æ: "ae", œ: "oe", ß: "ss", ł: "l", đ: "d", þ: "th", ð: "d", ı: "i" };
 export function fold(s: string) {
-  return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[øæœßłđþðı]/g, (c) => LETTERS[c])
+    .trim();
 }
 
 const folded = new WeakMap<AirportRow, { city: string; name: string }>();
@@ -63,7 +70,7 @@ export function searchAirports(rows: AirportRow[], q: string, limit = 8) {
     else if (name.includes(s)) score = 200;
     else if (city.includes(s)) score = 150;
     else if (r.alt && fold(r.alt).includes(s)) score = fold(r.alt).startsWith(s) ? 450 : 140; // local name, e.g. San José del Cabo
-    if (score >= 0) scored.push([score + (r.size === "L" ? 50 : 0), r]);
+    if (score >= 0) scored.push([score + (r.size === "L" ? 50 : r.size === "S" ? -20 : 0), r]);
   }
   scored.sort((a, b) => b[0] - a[0] || a[1].city.localeCompare(b[1].city));
   return scored.slice(0, limit).map((x) => x[1]);
@@ -139,7 +146,7 @@ export function nearestAirport(rows: AirportRow[], lat: number, lon: number): Ai
   for (const r of rows) {
     const d = km(r);
     if (r.size === "L" && (!bestL || d < bestL[0])) bestL = [d, r];
-    if (!bestAny || d < bestAny[0]) bestAny = [d, r];
+    if (r.size !== "S" && (!bestAny || d < bestAny[0])) bestAny = [d, r]; // a home airport has regular service
   }
   if (bestL && bestL[0] <= 150) return bestL[1];
   return bestAny?.[1] ?? null;

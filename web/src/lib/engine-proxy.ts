@@ -15,6 +15,7 @@ async function planHints(p: Record<string, unknown>) {
   const lo = typeof p.depart_start === "string" ? p.depart_start : "";
   if (!o || !d || !lo) return {};
   const hi = typeof p.depart_end === "string" && p.depart_end >= lo ? p.depart_end : lo;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(lo) || Number.isNaN(Date.parse(hi))) return {};
   const until = new Date(Date.parse(hi) + 4 * 86400_000).toISOString().slice(0, 10); // second legs leave up to a few days later
   return knownFares(o, d, lo, until);
 }
@@ -39,7 +40,8 @@ export async function proxyEngine(req: Request, kind: EngineKind) {
   const q = (await req.json().catch(() => ({}))) as Record<string, unknown>;
   // Streamed searches send several parts; only the first counts toward rate
   // limits and gets saved to history (it also feeds matching watches).
-  const part = typeof q.part === "number" ? q.part : 0;
+  // only a streamed search has parts (1 to 5 after the first); anything else counts in full
+  const part = (kind === "search" || kind === "browser") && Number.isInteger(q.part) && (q.part as number) >= 0 && (q.part as number) <= 5 ? (q.part as number) : 0;
   delete q.part;
   const followUp = (kind === "explore" && typeof q.batch === "number" && q.batch > 0) || part > 0;
   // `quiet` requests (calendar prices, date strips) are not saved to history

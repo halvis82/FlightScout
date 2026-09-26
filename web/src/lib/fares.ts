@@ -1,7 +1,8 @@
 import "server-only";
 import { and, between, eq, sql } from "drizzle-orm";
 import { db, schema } from "./db";
-import { convertWith, getRates } from "./fx";
+import { convertWith, getRates, hasRate } from "./fx";
+import { isDate } from "./watch-validate";
 import type { Trip } from "./types";
 
 // Shared fare memory (see schema.fareMemory): one way tickets from every
@@ -10,27 +11,31 @@ const KEEP_DAYS = 14;
 
 export async function recordFares(trips: Trip[] | undefined) {
   if (!Array.isArray(trips) || !trips.length) return;
-  const rates = await getRates();
-  const best = new Map<string, { origin: string; dest: string; day: string; usd: number }>();
-  for (const t of trips) {
-    for (const tk of t.tickets ?? []) {
-      if (tk.slices?.length !== 1 || tk.return_pending || !(tk.price > 0)) continue;
-      const sl = tk.slices[0];
-      const usd = convertWith(rates, tk.price, tk.currency, "USD");
-      if (!Number.isFinite(usd)) continue;
-      const row = { origin: sl.origin, dest: sl.destination, day: sl.departure.slice(0, 10), usd: Math.round(usd * 100) / 100 };
-      const k = `${row.origin}>${row.dest}@${row.day}`;
-      if (!best.has(k) || best.get(k)!.usd > row.usd) best.set(k, row);
-    }
-  }
-  if (!best.size) return;
   try {
+    const rates = await getRates();
+    const today = new Date().toISOString().slice(0, 10);
+    const best = new Map<string, { origin: string; dest: string; day: string; usd: number }>();
+    for (const t of trips) {
+      for (const tk of t?.tickets ?? []) {
+        // only well formed, future, convertible one way tickets (results can come from any client)
+        if (tk?.slices?.length !== 1 || tk.return_pending || !(typeof tk.price === "number" && tk.price > 0) || !hasRate(rates, tk.currency)) continue;
+        const sl = tk.slices[0];
+        const day = typeof sl?.departure === "string" ? sl.departure.slice(0, 10) : "";
+        if (!/^[A-Z]{3}$/.test(sl?.origin ?? "") || !/^[A-Z]{3}$/.test(sl?.destination ?? "") || !isDate(day) || day < today) continue;
+        const usd = convertWith(rates, tk.price, tk.currency, "USD");
+        if (!Number.isFinite(usd) || usd < 5 || usd > 50_000) continue;
+        const row = { origin: sl.origin, dest: sl.destination, day, usd: Math.round(usd * 100) / 100 };
+        const k = `${row.origin}>${row.dest}@${row.day}`;
+        if (!best.has(k) || best.get(k)!.usd > row.usd) best.set(k, row);
+      }
+    }
+    if (!best.size) return;
     await db
       .insert(schema.fareMemory)
       .values([...best.values()].slice(0, 500))
       .onConflictDoUpdate({
         target: [schema.fareMemory.origin, schema.fareMemory.dest, schema.fareMemory.day],
-        // a newer price replaces an older one (fares move), a cheaper one always wins the same day
+        // the cheapest of this batch replaces what was known (fares move)
         set: { usd: sql`excluded.usd`, seenAt: sql`now()` },
       });
     // prune now and then

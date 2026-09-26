@@ -14,7 +14,7 @@ import { api } from "@/lib/client";
 import { extensionVersion } from "@/lib/extension";
 import { localRunnerActive } from "@/lib/local-runner";
 import { PARTS, PART_LABELS, searchPart, type PartState } from "@/lib/live-search";
-import { METROS, airport, expandCodes, loadAirports, nearestAirport } from "@/lib/airports-client";
+import { airport, expandCodes, loadAirports, nearestAirport } from "@/lib/airports-client";
 import { RouteMap } from "@/components/route-map";
 import { addDays, dayDiff, isoDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -74,11 +74,7 @@ function friendlyPlanError(msg: string) {
 function formProblem(from: string[], to: string[]) {
   const same = expandCodes(from).filter((c) => expandCodes(to).includes(c));
   if (same.length) return `${same[0]} is both where you leave from and where you go. Pick a different airport.`;
-  // unknown codes (only once the airport list is loaded)
-  if (airport("LAX")) {
-    const bad = [...from, ...to].find((c) => !METROS[c] && !airport(c));
-    if (bad) return `${bad} isn't an airport FlightScout knows. Pick one from the list.`;
-  }
+  // (a code missing from our airport list is still searched: small airports are real too)
   return null;
 }
 

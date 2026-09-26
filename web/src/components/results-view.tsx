@@ -365,8 +365,8 @@ export function ResultsView({
                   const ret = rt ? (out.length > 1 ? out.at(-1)!.departure.slice(0, 10) : (query?.return_date ?? null)) : null;
                   const nights = ret ? dayDiff(dep, ret) : null;
                   watch.open({
-                    origins: query?.origins ?? [trip.route[0]],
-                    destinations: query?.destinations ?? [trip.route.at(-1)!],
+                    origins: query?.origins?.length ? query.origins : [trip.route[0]],
+                    destinations: query?.destinations?.length ? query.destinations : [trip.route.at(-1)!],
                     trip_type: ret ? "roundtrip" : "oneway",
                     depart_start: dep,
                     depart_end: dep,

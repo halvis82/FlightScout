@@ -268,7 +268,7 @@ function watchFromInput(p: Record<string, unknown>, base?: Watch): Watch {
     if (sig(next) !== sig(base) || next.currency !== base.currency) {
       // another search now: earlier prices no longer describe it
       Object.assign(next, { pricesSince: new Date().toISOString(), bestPrice: null, prevPrice: null, lowestPrice: null, bestTrip: null });
-      if (next.currency !== base.currency && !("alert_below" in p) && base.alertBelow != null && rates)
+      if (next.currency !== base.currency && base.alertBelow != null && rates && (!("alert_below" in p) || p.alert_below === base.alertBelow))
         next.alertBelow = Math.round(conv(rates, base.alertBelow, base.currency, next.currency));
     }
   }
@@ -583,6 +583,7 @@ export async function guestApi(path: string, method: string, body: unknown, serv
       if (!seg[2]) {
         if (method === "GET") return w;
         if (method === "PATCH") {
+          await getRates(serverFetch); // a currency change converts the target with them
           const next = watchFromInput(b, w);
           saveWatch(next);
           // a target that the current best already meets would never alert: alert now

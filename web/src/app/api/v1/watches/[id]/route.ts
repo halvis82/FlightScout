@@ -29,7 +29,8 @@ export const PATCH = route<Ctx>(async (req, { params }) => {
     // another search now: earlier prices no longer describe it
     Object.assign(cols, { pricesSince: new Date(), bestPrice: null, prevPrice: null, lowestPrice: null, bestTrip: null });
     // a target in the old currency, converted (unless a new one came with the edit)
-    if (next.currency !== cur.currency && cols.alertBelow === undefined && cur.alertBelow != null) {
+    // (the edit form always sends the target: unchanged means "the same target, in the new currency")
+    if (next.currency !== cur.currency && cur.alertBelow != null && (cols.alertBelow === undefined || cols.alertBelow === cur.alertBelow)) {
       cols.alertBelow = Math.round(convertWith(await getRates(), cur.alertBelow, cur.currency, next.currency));
     }
   }

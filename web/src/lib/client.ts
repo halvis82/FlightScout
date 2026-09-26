@@ -81,6 +81,7 @@ async function planHints(p: Record<string, unknown>): Promise<Record<string, unk
   const lo = typeof p.depart_start === "string" ? p.depart_start : null;
   if (!o || !d || !lo) return {};
   const hi = typeof p.depart_end === "string" && p.depart_end >= lo ? p.depart_end : lo;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(lo) || Number.isNaN(Date.parse(hi))) return {};
   const to = new Date(Date.parse(hi) + 4 * 86400_000).toISOString().slice(0, 10);
   try {
     return await rawFetch<Record<string, unknown>>(`/fares?origin=${o}&destination=${d}&from=${lo}&to=${to}`);

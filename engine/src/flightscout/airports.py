@@ -17,7 +17,7 @@ class Airport(BaseModel):
     country: str
     lat: float
     lon: float
-    size: str  # "L" large, "M" medium
+    size: str  # "L" large, "M" medium, "S" small with scheduled service
     alt: str | None = None  # local municipality name when it differs from the city
 
 
@@ -96,7 +96,12 @@ def all_airports() -> list[Airport]:
 def _fold(s: str) -> str:
     import unicodedata
 
-    return "".join(c for c in unicodedata.normalize("NFKD", s.lower()) if not unicodedata.combining(c))
+    # letters that aren't an accent on another letter (Førde, Ærø, Łódź, Straße) map by hand
+    s = s.lower().translate(_LETTERS)
+    return "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c))
+
+
+_LETTERS = str.maketrans({"ø": "o", "æ": "ae", "œ": "oe", "ß": "ss", "ł": "l", "đ": "d", "þ": "th", "ð": "d", "ı": "i"})
 
 
 def find(query: str, limit: int = 25) -> list[Airport]:
@@ -105,7 +110,7 @@ def find(query: str, limit: int = 25) -> list[Airport]:
     q = _fold(query.strip())
     hits = [a for a in _db().values()
             if q == a.iata.lower() or q in _fold(a.city) or q in _fold(a.name) or (a.alt and q in _fold(a.alt))]
-    hits.sort(key=lambda a: (a.iata.lower() != q, not _fold(a.city).startswith(q), a.size != "L"))
+    hits.sort(key=lambda a: (a.iata.lower() != q, not _fold(a.city).startswith(q), {"L": 0, "M": 1}.get(a.size, 2)))
     return hits[:limit]
 
 
@@ -139,7 +144,8 @@ def nearby(code: str, radius_km: float, include_medium: bool = True) -> list[str
         return []
     hits = []
     for a in _db().values():
-        if a.iata == base.iata or (a.size != "L" and not include_medium):
+        # small airports (a few flights a day) are real, but never crowd out the usual alternatives
+        if a.iata == base.iata or a.size == "S" or (a.size != "L" and not include_medium):
             continue
         d = haversine_km(base.iata, a.iata)
         if d <= radius_km:
