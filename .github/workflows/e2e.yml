@@ -44,4 +44,4 @@ jobs:
         if: failure()
         with:
           name: playwright-traces
-          path: web/test-results
+          path: /tmp/flightscout-e2e  # playwright.config.ts outputDir (os.tmpdir())
