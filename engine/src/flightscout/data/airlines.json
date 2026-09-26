@@ -1,5 +1,5 @@
 {
- "updated": "2026-09-22",
+ "updated": "2026-09-26",
  "airlines": [
   {
    "iata": "EI",
@@ -1038,6 +1038,36 @@
    "verify_note": "Bot protection page (403) in headless Chromium, format is the public flight-offers URL"
   },
   {
+   "iata": "LL",
+   "icao": "LVL",
+   "name": "LEVEL",
+   "country": "ES",
+   "regions": [
+    "global",
+    "europe",
+    "us_domestic",
+    "south_america"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "long haul low cost",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "BCN"
+   ],
+   "website": "https://www.flylevel.com",
+   "search_url": "https://www.flylevel.com/",
+   "deeplink": "https://www.flylevel.com/Flight/Select?o1={origin}&d1={destination}&dd1={depart}&dd2={return}&ADT={adults}&CHD=0&INL=0&r=true&mm=false&forcedCurrency=EUR&forcedCulture=en-US&newecom=true",
+   "date_format": "YYYY-MM-DD",
+   "oneway_deeplink": "https://www.flylevel.com/Flight/Select?o1={origin}&d1={destination}&dd1={depart}&ADT={adults}&CHD=0&INL=0&r=false&mm=false&forcedCurrency=EUR&forcedCulture=en-US&newecom=true",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/LL.png",
+   "notes": "IAG's long haul low cost airline from Barcelona to the US and South America, with fares that often undercut the legacy carriers.",
+   "verify_note": "Verified 2026-09-26 headless: BCN-JFK 5 to 12 Nov 2026 showed Barcelona to New York Thu, Nov 5 to Thu, Nov 12 with fares in the calendar, and the one way link for 2 adults showed Thu, Nov 5."
+  },
+  {
    "iata": "LO",
    "icao": "LOT",
    "name": "LOT Polish Airlines",
@@ -1893,6 +1923,34 @@
    "verify_note": "Verified 2026-09-22 STN-BCN 20-27 Nov shows fares. Client parses dates in local timezone, west of UTC it may display one day early."
   },
   {
+   "iata": "GQ",
+   "icao": "SEH",
+   "name": "SKY express",
+   "country": "GR",
+   "regions": [
+    "europe"
+   ],
+   "category": "hybrid",
+   "tags": [
+    "Greek islands",
+    "free carry-on"
+   ],
+   "alliance": null,
+   "hubs": [
+    "ATH",
+    "HER"
+   ],
+   "website": "https://www.skyexpress.gr",
+   "search_url": "https://www.skyexpress.gr/en",
+   "deeplink": "https://flights.skyexpress.gr/?routes[0][from]={origin}&routes[0][to]={destination}&routes[0][date]={depart}&routes[1][from]={destination}&routes[1][to]={origin}&routes[1][date]={return}&passengers[0][code]=ADT&passengers[0][count]={adults}&currency=EUR&execute=true",
+   "date_format": "YYYY-MM-DD",
+   "oneway_deeplink": "https://flights.skyexpress.gr/?routes[0][from]={origin}&routes[0][to]={destination}&routes[0][date]={depart}&passengers[0][code]=ADT&passengers[0][count]={adults}&currency=EUR&execute=true",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/GQ.png",
+   "notes": "Greek airline from Athens and Heraklion with the widest Greek island network, plus a growing list of European cities.",
+   "verify_note": "Verified 2026-09-26 headless: ATH-JTR 5 to 12 Nov 2026 landed on Select flights with Athens Thu 5 Nov 2026 and Santorini Thu 12 Nov 2026, and ATH-HER one way for 2 adults showed 5 Nov flights."
+  },
+  {
    "iata": "QS",
    "icao": "TVS",
    "name": "Smartwings",
@@ -2281,6 +2339,34 @@
    "notes": "Trinidad and Jamaica based carrier linking the Caribbean islands with New York, Miami, Fort Lauderdale, Orlando and Toronto."
   },
   {
+   "iata": "KX",
+   "icao": "CAY",
+   "name": "Cayman Airways",
+   "country": "KY",
+   "regions": [
+    "central_america_caribbean",
+    "north_america",
+    "us_domestic"
+   ],
+   "category": "full_service",
+   "tags": [
+    "islands"
+   ],
+   "alliance": null,
+   "hubs": [
+    "GCM"
+   ],
+   "website": "https://www.caymanairways.com",
+   "search_url": "https://www.caymanairways.com/",
+   "deeplink": "https://flights.caymanairways.com/dx/KXDX/#/flight-selection?journeyType=round-trip&locale=en-US&awardBooking=false&searchType=BRANDED&class=Economy&ADT={adults}&CHD=0&INF=0&origin={origin}&destination={destination}&date={depart}&origin1={destination}&destination1={origin}&date1={return}",
+   "date_format": "MM/DD/YYYY",
+   "oneway_deeplink": "https://flights.caymanairways.com/dx/KXDX/#/flight-selection?journeyType=one-way&locale=en-US&awardBooking=false&searchType=BRANDED&class=Economy&ADT={adults}&CHD=0&INF=0&origin={origin}&destination={destination}&date={depart}",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/KX.png",
+   "notes": "Flag carrier of the Cayman Islands linking Grand Cayman with the Sister Islands, Miami, Tampa, New York and the Caribbean.",
+   "verify_note": "Verified 2026-09-26 headless: GCM-MIA 5 to 12 Nov 2026 opened flight selection on Thu, Nov 05 with KX 102 and KX 106, and GCM-KIN one way for 2 passengers showed KX 600 on Nov 05. The source module uses MM-DD-YYYY, MM/DD/YYYY loads the same page."
+  },
+  {
    "iata": "CM",
    "icao": "CMP",
    "name": "Copa Airlines",
@@ -2409,6 +2495,37 @@
    "deeplink_verified": false,
    "logo": "https://images.kiwi.com/airlines/64/G3.png",
    "notes": "Major Brazilian domestic carrier in the Abra Group with Avianca, flying an all Boeing 737 fleet."
+  },
+  {
+   "iata": "HA",
+   "icao": "HAL",
+   "name": "Hawaiian Airlines",
+   "country": "US",
+   "regions": [
+    "us_domestic",
+    "north_america",
+    "oceania",
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free meals",
+    "free starlink wifi"
+   ],
+   "alliance": "oneworld",
+   "hubs": [
+    "HNL",
+    "OGG"
+   ],
+   "website": "https://www.hawaiianairlines.com",
+   "search_url": "https://www.hawaiianairlines.com/",
+   "deeplink": "https://www.alaskaair.com/search/results?A={adults}&O={origin}&D={destination}&OD={depart}&DD={return}&RT=true",
+   "date_format": "YYYY-MM-DD",
+   "oneway_deeplink": "https://www.alaskaair.com/search/results?A={adults}&O={origin}&D={destination}&OD={depart}&RT=false",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/HA.png",
+   "notes": "Hawaii's airline for interisland hops and flights to the mainland, Asia and the South Pacific, now booked through alaskaair.com.",
+   "verify_note": "Tested 2026-09-26 HNL-OGG: headless Chrome got alaskaair.com's image CAPTCHA, so the prefill was not confirmed. It is the same results URL as the Alaska entry and the one the shared Alaska/Hawaiian source module uses."
   },
   {
    "iata": "B6",
@@ -2929,6 +3046,34 @@
    "notes": "India's largest airline by far, now adding long haul routes to Europe."
   },
   {
+   "iata": "J9",
+   "icao": "JZR",
+   "name": "Jazeera Airways",
+   "country": "KW",
+   "regions": [
+    "middle_east",
+    "asia"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "KWI"
+   ],
+   "website": "https://www.jazeeraairways.com",
+   "search_url": "https://www.jazeeraairways.com/en-kw",
+   "deeplink": "https://www.jazeeraairways.com/en-kw/flights?tripType=roundtrip&origin={origin}&destination={destination}&departureDate={depart}&returnDate={return}&adults={adults}&children=0&infants=0",
+   "date_format": "YYYY-MM-DD",
+   "oneway_deeplink": "https://www.jazeeraairways.com/en-kw/flights?tripType=oneway&origin={origin}&destination={destination}&departureDate={depart}&adults={adults}&children=0&infants=0",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/J9.png",
+   "notes": "Kuwait's low cost carrier with a wide Gulf, Middle East, Central Asia and Indian subcontinent network from Kuwait City.",
+   "verify_note": "Verified 2026-09-26 headless: KWI-DXB 5 to 12 Nov 2026 listed J9 121 to J9 127 with 5-12 Nov in the header when the browser runs on Kuwait time. The site parses the dates in the browser's timezone, so west of UTC (tested on US Pacific time) it opens one day early. MM/DD/YYYY fixes the header but the search then fails."
+  },
+  {
    "iata": "WY",
    "icao": "OMA",
    "name": "Oman Air",
@@ -3212,6 +3357,63 @@
    "oneway_deeplink": "https://www.airasia.com/flights/search/?origin={origin}&destination={destination}&departDate={depart}&tripType=O&adult={adults}&child=0&infant=0&locale=en-gb&currency=MYR&cabinClass=economy"
   },
   {
+   "iata": "QP",
+   "icao": "AKJ",
+   "name": "Akasa Air",
+   "country": "IN",
+   "regions": [
+    "asia",
+    "middle_east"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "BOM",
+    "BLR"
+   ],
+   "website": "https://www.akasaair.com",
+   "search_url": "https://www.akasaair.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/QP.png",
+   "notes": "Young Indian low cost carrier flying 737 MAX jets on trunk domestic routes and to the Gulf.",
+   "verify_note": "No URL based search: the source module notes Akasa has no search deeplink, so the link opens the home page booking widget."
+  },
+  {
+   "iata": "9I",
+   "icao": "LLR",
+   "name": "Alliance Air",
+   "country": "IN",
+   "regions": [
+    "asia"
+   ],
+   "category": "regional",
+   "tags": [
+    "regional",
+    "small city routes"
+   ],
+   "alliance": null,
+   "hubs": [
+    "DEL",
+    "BLR",
+    "CCU"
+   ],
+   "website": "https://www.allianceair.in",
+   "search_url": "https://bookme.allianceair.in/",
+   "deeplink": "https://bookme.allianceair.in/search-schedule?org={origin}&des={destination}&dep_date={depart}&ret_date={return}&adult={adults}&child=0&infant=0",
+   "date_format": "DD/MM/YYYY",
+   "oneway_deeplink": "https://bookme.allianceair.in/search-schedule?org={origin}&des={destination}&dep_date={depart}&adult={adults}&child=0&infant=0",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/9I.png",
+   "notes": "India's state owned regional airline flying ATR turboprops to many small UDAN airports that most OTAs don't sell.",
+   "verify_note": "Verified 2026-09-26 headless: BLR-COK 5 to 12 Nov 2026 went straight to Choose Flights with 9I507 out and 9I508 back, and the one way link for 2 adults showed 5 Nov flights. The source module only sends org and des, dep_date and ret_date were read from the site's search form."
+  },
+  {
    "iata": "OZ",
    "icao": "AAR",
    "name": "Asiana Airlines",
@@ -3235,6 +3437,61 @@
    "deeplink_verified": false,
    "logo": "https://images.kiwi.com/airlines/64/OZ.png",
    "notes": "Being integrated into Korean Air and expected to leave Star Alliance."
+  },
+  {
+   "iata": "PG",
+   "icao": "BKP",
+   "name": "Bangkok Airways",
+   "country": "TH",
+   "regions": [
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free checked bags",
+    "free snacks"
+   ],
+   "alliance": null,
+   "hubs": [
+    "BKK",
+    "USM"
+   ],
+   "website": "https://www.bangkokair.com",
+   "search_url": "https://www.bangkokair.com/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/PG.png",
+   "notes": "Thai boutique airline known for Koh Samui, where it owns the airport, and lounge access for every passenger.",
+   "verify_note": "No URL based search: the booking app starts from a form POST (per the source module), so the link opens the home page search box."
+  },
+  {
+   "iata": "BG",
+   "icao": "BBC",
+   "name": "Biman Bangladesh Airlines",
+   "country": "BD",
+   "regions": [
+    "asia",
+    "middle_east"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free checked bags",
+    "free meals"
+   ],
+   "alliance": null,
+   "hubs": [
+    "DAC"
+   ],
+   "website": "https://www.biman-airlines.com",
+   "search_url": "https://www.biman-airlines.com/",
+   "deeplink": "https://booking.biman-airlines.com/dx/BGDX/#/flight-selection?journeyType=round-trip&locale=en-US&awardBooking=false&searchType=BRANDED&cabinClass=Economy&ADT={adults}&CHD=0&INF=0&origin={origin}&destination={destination}&date={depart}&origin1={destination}&destination1={origin}&date1={return}&direction=0&pointOfSale=BD",
+   "date_format": "MM/DD/YYYY",
+   "oneway_deeplink": "https://booking.biman-airlines.com/dx/BGDX/#/flight-selection?journeyType=one-way&locale=en-US&awardBooking=false&searchType=BRANDED&cabinClass=Economy&ADT={adults}&CHD=0&INF=0&origin={origin}&destination={destination}&date={depart}&direction=0&pointOfSale=BD",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/BG.png",
+   "notes": "Bangladesh's flag carrier linking Dhaka with the Gulf, Asia and London, with domestic hops to Chattogram and Cox's Bazar.",
+   "verify_note": "Verified 2026-09-26 headless: DAC-CGP 5 to 12 Nov 2026 opened flight selection on Thu, Nov 05 with 5 results, and DAC-CXB one way for 2 passengers showed Nov 05 flights. The source module uses MM-DD-YYYY, MM/DD/YYYY works the same while YYYY-MM-DD gives Invalid date."
   },
   {
    "iata": "5J",
@@ -3286,6 +3543,61 @@
    "deeplink_verified": false,
    "logo": "https://images.kiwi.com/airlines/64/CI.png",
    "notes": "Taiwan's flag carrier, often cheaper than EVA across the Pacific."
+  },
+  {
+   "iata": "IC",
+   "icao": "GOA",
+   "name": "FLY91",
+   "country": "IN",
+   "regions": [
+    "asia"
+   ],
+   "category": "regional",
+   "tags": [
+    "regional",
+    "small city routes"
+   ],
+   "alliance": null,
+   "hubs": [
+    "GOX"
+   ],
+   "website": "https://fly91.in",
+   "search_url": "https://fly91.in/",
+   "deeplink": null,
+   "date_format": "YYYY-MM-DD",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/IC.png",
+   "notes": "Goa based regional airline flying ATR 72s to smaller Indian cities and Lakshadweep that most OTAs don't sell.",
+   "verify_note": "Tested 2026-09-26: the results URL works (GOX-HYD 5 Nov 2026 listed IC 5202 and IC 5303) but it needs dates like 05-Nov-2026, which no supported date_format produces. DD/MM/YYYY, MM/DD/YYYY, DD.MM.YYYY and YYYY-MM-DD all bounce to the home page with an error, so there is no deeplink."
+  },
+  {
+   "iata": "FS",
+   "icao": "AYN",
+   "name": "FlyArystan",
+   "country": "KZ",
+   "regions": [
+    "asia"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "ALA",
+    "NQZ",
+    "CIT"
+   ],
+   "website": "https://flyarystan.com",
+   "search_url": "https://flyarystan.com/en",
+   "deeplink": "https://booking.flyarystan.com/ibe/availability?depPort={origin}&arrPort={destination}&departureDate={depart}&adult={adults}&child=0&infant=0&tripType=ROUND_TRIP&lang=en&returnDate={return}",
+   "date_format": "DD.MM.YYYY",
+   "oneway_deeplink": "https://booking.flyarystan.com/ibe/availability?depPort={origin}&arrPort={destination}&departureDate={depart}&adult={adults}&child=0&infant=0&tripType=ONE_WAY&lang=en",
+   "deeplink_verified": false,
+   "logo": "https://images.kiwi.com/airlines/64/FS.png",
+   "notes": "Kazakhstan's low cost carrier in the Air Astana group with a dense domestic network plus Central Asia, the Caucasus, Turkey and the Gulf.",
+   "verify_note": "Tested 2026-09-26: booking.flyarystan.com answered headless Chrome with an Imperva hCaptcha page, so the prefill could not be confirmed. The link is the Hitit Crane availability URL the source module builds, the same format that works for Star Air."
   },
   {
    "iata": "GA",
@@ -3424,6 +3736,33 @@
    "notes": "Kuala Lumpur oneworld carrier often good value to Southeast Asia and Australia."
   },
   {
+   "iata": "DD",
+   "icao": "NOK",
+   "name": "Nok Air",
+   "country": "TH",
+   "regions": [
+    "asia"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "DMK"
+   ],
+   "website": "https://www.nokair.com",
+   "search_url": "https://www.nokair.com/",
+   "deeplink": "https://booking.nokair.com/?routes[0][from]={origin}&routes[0][to]={destination}&routes[0][date]={depart}&routes[1][from]={destination}&routes[1][to]={origin}&routes[1][date]={return}&passengers[0][code]=ADT&passengers[0][count]={adults}&currency=THB&execute=true",
+   "date_format": "YYYY-MM-DD",
+   "oneway_deeplink": "https://booking.nokair.com/?routes[0][from]={origin}&routes[0][to]={destination}&routes[0][date]={depart}&passengers[0][code]=ADT&passengers[0][count]={adults}&currency=THB&execute=true",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/DD.png",
+   "notes": "Thai low cost carrier from Bangkok Don Mueang with a dense domestic network and a few regional routes.",
+   "verify_note": "Verified 2026-09-26 headless: DMK-CNX 5 to 12 Nov 2026 landed on Select flight with both dates and 1 adult shown, and DMK-HKT one way for 2 adults showed Thursday 5 November flights."
+  },
+  {
    "iata": "MM",
    "icao": "APJ",
    "name": "Peach Aviation",
@@ -3505,6 +3844,91 @@
    "verify_note": "Not verified. flyscoot.com rendered a blank page for headless Chrome and a guessed booking.flyscoot.com Flight/Select URL redirected to an empty search page."
   },
   {
+   "iata": "SG",
+   "icao": "SEJ",
+   "name": "SpiceJet",
+   "country": "IN",
+   "regions": [
+    "asia",
+    "middle_east"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap"
+   ],
+   "alliance": null,
+   "hubs": [
+    "DEL",
+    "BOM"
+   ],
+   "website": "https://www.spicejet.com",
+   "search_url": "https://www.spicejet.com/",
+   "deeplink": "https://www.spicejet.com/search?from={origin}&to={destination}&tripType=2&departure={depart}&return={return}&adult={adults}&child=0&infant=0&currency=INR&redirectTo=/",
+   "date_format": "YYYY-MM-DD",
+   "oneway_deeplink": "https://www.spicejet.com/search?from={origin}&to={destination}&tripType=1&departure={depart}&adult={adults}&child=0&infant=0&currency=INR&redirectTo=/",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/SG.png",
+   "notes": "Indian low cost carrier with a wide domestic network plus Gulf routes, often cheaper when booked on its own site.",
+   "verify_note": "Verified 2026-09-26 headless: DEL-BOM 5 to 12 Nov 2026 showed Delhi to Mumbai 05 Nov 2026 to 12 Nov 2026 with SG 603 listed, and the one way link for 2 adults showed Thu, 05 Nov flights. West of UTC the small trip summary line says one day early, but the search itself uses the right date."
+  },
+  {
+   "iata": "9C",
+   "icao": "CQH",
+   "name": "Spring Airlines",
+   "country": "CN",
+   "regions": [
+    "asia"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "PVG",
+    "SHA",
+    "SJW"
+   ],
+   "website": "https://en.ch.com",
+   "search_url": "https://en.ch.com/",
+   "deeplink": "https://en.ch.com/flights/{origin}-{destination}.html?FDate={depart}&RetDate={return}&ANum={adults}&CNum=0&INum=0&IfRet=true&MType=0",
+   "date_format": "YYYY-MM-DD",
+   "oneway_deeplink": "https://en.ch.com/flights/{origin}-{destination}.html?FDate={depart}&RetDate=&ANum={adults}&CNum=0&INum=0&IfRet=false&MType=0",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/9C.png",
+   "notes": "Shanghai based low cost carrier covering mainland China plus Japan, Korea and Southeast Asia, sold mostly on its own site.",
+   "verify_note": "Verified 2026-09-26 headless: PVG-KIX 5 to 12 Nov 2026 opened round trip flight selection with the route and both dates prefilled and 9C6575 listed, and SHA-SZX one way for 2 adults showed 5 Nov flights. Airport codes work as well as Spring's city codes."
+  },
+  {
+   "iata": "S5",
+   "icao": "SDG",
+   "name": "Star Air",
+   "country": "IN",
+   "regions": [
+    "asia"
+   ],
+   "category": "regional",
+   "tags": [
+    "regional",
+    "small city routes"
+   ],
+   "alliance": null,
+   "hubs": [
+    "BLR",
+    "IXG"
+   ],
+   "website": "https://www.starair.in",
+   "search_url": "https://www.starair.in/",
+   "deeplink": "https://book-sdg.crane.aero/ibe/availability?depPort={origin}&arrPort={destination}&departureDate={depart}&adult={adults}&child=0&infant=0&tripType=ROUND_TRIP&lang=en&returnDate={return}",
+   "date_format": "DD.MM.YYYY",
+   "oneway_deeplink": "https://book-sdg.crane.aero/ibe/availability?depPort={origin}&arrPort={destination}&departureDate={depart}&adult={adults}&child=0&infant=0&tripType=ONE_WAY&lang=en",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/S5.png",
+   "notes": "Indian regional airline flying Embraer jets on UDAN routes from Bengaluru, Mumbai, Hyderabad and Belagavi.",
+   "verify_note": "Verified 2026-09-26 headless: BLR-GBI 5 to 12 Nov 2026 showed Thu, Nov 05 to Thu, Nov 12 round trip with S5-117 listed, and the one way link for 2 adults showed Thu, Nov 05."
+  },
+  {
    "iata": "JX",
    "icao": "SJX",
    "name": "Starlux Airlines",
@@ -3582,6 +4006,33 @@
    "deeplink_verified": false,
    "logo": "https://images.kiwi.com/airlines/64/TG.png",
    "notes": "Bangkok Suvarnabhumi flag carrier with Europe and Asia network."
+  },
+  {
+   "iata": "IT",
+   "icao": "TTW",
+   "name": "Tigerair Taiwan",
+   "country": "TW",
+   "regions": [
+    "asia"
+   ],
+   "category": "low_cost",
+   "tags": [
+    "cheap",
+    "bags extra"
+   ],
+   "alliance": null,
+   "hubs": [
+    "TPE"
+   ],
+   "website": "https://www.tigerairtw.com",
+   "search_url": "https://booking.tigerairtw.com/",
+   "deeplink": "https://booking.tigerairtw.com/?outbound={origin}-{destination}&departureDate={depart}&returnDate={return}&adult={adults}&type=roundTrip&language=en-US&currencyCode=TWD",
+   "date_format": "YYYY-MM-DD",
+   "oneway_deeplink": "https://booking.tigerairtw.com/?outbound={origin}-{destination}&departureDate={depart}&adult={adults}&type=oneWay&language=en-US&currencyCode=TWD",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/IT.png",
+   "notes": "Taiwan's low cost carrier from Taoyuan with a big Japan and Korea network plus Southeast Asia.",
+   "verify_note": "Verified 2026-09-26 headless: TPE-NRT 5 to 12 Nov 2026 redirected to flight-result showing Taipei (Taoyuan) to Tokyo Narita 11/05 to 11/12 with IT 200 listed, and TPE-KIX one way for 2 adults showed 11/05 flights."
   },
   {
    "iata": "VJ",
@@ -3663,6 +4114,33 @@
    "notes": "JAL owned long haul low cost carrier flying 787s from Tokyo Narita to North America and Asia."
   },
   {
+   "iata": "PX",
+   "icao": "ANG",
+   "name": "Air Niugini",
+   "country": "PG",
+   "regions": [
+    "oceania",
+    "asia"
+   ],
+   "category": "full_service",
+   "tags": [
+    "free checked bags"
+   ],
+   "alliance": null,
+   "hubs": [
+    "POM"
+   ],
+   "website": "https://www.airniugini.com.pg",
+   "search_url": "https://www.airniugini.com.pg/",
+   "deeplink": "https://dx-flights.airniugini.com.pg/dx/PXDX/#/flight-selection?journeyType=round-trip&origin={origin}&destination={destination}&date={depart}&origin1={destination}&destination1={origin}&date1={return}&ADT={adults}&CHD=0&INF=0",
+   "date_format": "MM/DD/YYYY",
+   "oneway_deeplink": "https://dx-flights.airniugini.com.pg/dx/PXDX/#/flight-selection?journeyType=one-way&origin={origin}&destination={destination}&date={depart}&ADT={adults}&CHD=0&INF=0",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/PX.png",
+   "notes": "Papua New Guinea's flag carrier, covering the domestic network plus Brisbane, Sydney, Cairns, Manila and Singapore.",
+   "verify_note": "Verified 2026-09-26 headless: POM-BNE round trip 5 to 12 Nov 2026 and one way 5 Nov both opened flight selection on THU, NOV 05 with PX 5 at 950.20 PGK. MM/DD/YYYY works only without the activeMonth param the source module adds, which fails with a slash date."
+  },
+  {
    "iata": "FJ",
    "icao": "FJI",
    "name": "Fiji Airways",
@@ -3686,6 +4164,34 @@
    "deeplink_verified": false,
    "logo": "https://images.kiwi.com/airlines/64/FJ.png",
    "notes": "oneworld connect member linking Nadi with the US, Australia and the Pacific."
+  },
+  {
+   "iata": "FC",
+   "icao": "FCA",
+   "name": "Link Airways",
+   "country": "AU",
+   "regions": [
+    "oceania"
+   ],
+   "category": "regional",
+   "tags": [
+    "regional",
+    "free checked bags"
+   ],
+   "alliance": null,
+   "hubs": [
+    "BNE",
+    "CBR"
+   ],
+   "website": "https://www.linkairways.com",
+   "search_url": "https://www.linkairways.com/",
+   "deeplink": "https://search.linkairways.com/FC/Flight.aspx?aid=268&culture=en-GB&st=fa&sid=&Jtype=2&depCity={origin}&arrCity={destination}&depDate={depart}&arrDate={return}&adult1={adults}&child1=0&infant1=0&promotioncode=",
+   "date_format": "DD/MM/YYYY",
+   "oneway_deeplink": "https://search.linkairways.com/FC/Flight.aspx?aid=268&culture=en-GB&st=fa&sid=&Jtype=1&depCity={origin}&arrCity={destination}&depDate={depart}&arrDate={depart}&adult1={adults}&child1=0&infant1=0&promotioncode=",
+   "deeplink_verified": true,
+   "logo": "https://images.kiwi.com/airlines/64/FC.png",
+   "notes": "Australian regional airline out of Brisbane and Canberra serving country towns and Hobart, every fare includes a checked bag.",
+   "verify_note": "Verified 2026-09-26 headless: BNE-ARM 5 to 12 Nov 2026 showed Departure Thu, 05 Nov 2026 and Return Thu, 12 Nov 2026 with FC 883 listed, and CBR-HBA one way for 2 adults showed FC 263 on 5 Nov. The page needs a few seconds of JavaScript redirects before it renders."
   },
   {
    "iata": "VA",
