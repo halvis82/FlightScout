@@ -4,10 +4,12 @@ in the browser (History page)."""
 
 from __future__ import annotations
 
+import functools
 from datetime import date
 from typing import Literal
 
 from mcp.server.mcpserver import MCPServer
+from mcp.server.mcpserver.exceptions import ToolError
 
 from . import airports, config
 from .client import Client
@@ -35,6 +37,28 @@ def _save(kind: str, query: dict, payload: dict) -> None:
 
 def _cur(c: str | None) -> str:
     return (c or config.load().get("currency") or "USD").upper()
+
+
+def _explain(fn):
+    """Input the agent got wrong (a date in the past, 0 adults, an unknown
+    currency, a leg without "to") comes back as a readable message it can fix,
+    not a bare "Error executing tool"."""
+    from pydantic import ValidationError
+
+    from .client import NotLoggedIn
+
+    @functools.wraps(fn)
+    def run(*args, **kwargs):
+        try:
+            return fn(*args, **kwargs)
+        except ValidationError as e:
+            raise ToolError("; ".join(dict.fromkeys(err.get("msg", "").removeprefix("Value error, ")
+                                                    for err in e.errors()))) from e
+        except NotLoggedIn as e:
+            raise ToolError(str(e)) from e
+        except (ValueError, KeyError, TypeError) as e:
+            raise ToolError(f"{type(e).__name__}: {e}") from e
+    return run
 
 
 def _compact(trips: list[dict], limit: int) -> list[dict]:
@@ -65,14 +89,16 @@ def _compact(trips: list[dict], limit: int) -> list[dict]:
 
 
 @mcp.tool()
+@_explain
 def search_flights(origins: list[str], destinations: list[str], departure: date,
                    return_date: date | None = None, currency: str | None = None,
                    cabin: Literal["economy", "premium", "business", "first"] = "economy",
                    adults: int = 1, max_stops: int | None = None, flex_days: int = 0,
                    nearby_km: int = 0, limit: int = 15) -> dict:
-    """Search single ticket itineraries on Google Flights and Kiwi.com. Airports are IATA codes; metro codes
-    like NYC, LON, PAR, BAY (SFO/OAK/SJC) expand automatically. flex_days searches +/- days on Kiwi.
-    nearby_km adds airports within that radius (SAN also adds TIJ via the Cross Border Xpress)."""
+    """Search single ticket itineraries on every source: Google Flights, ITA Matrix, Kiwi.com, airlines directly
+    and booking sites (takes 45 to 90 s). Airports are IATA codes; metro codes like NYC, LON, PAR, BAY
+    (SFO/OAK/SJC) expand automatically. flex_days searches +/- days. nearby_km adds airports within that radius
+    (SAN also adds TIJ via the Cross Border Xpress). Prices are for all adults."""
     from .models import SearchQuery
     from .search import search
 
@@ -87,20 +113,25 @@ def search_flights(origins: list[str], destinations: list[str], departure: date,
 
 
 @mcp.tool()
+@_explain
 def plan_routes(origins: list[str], destinations: list[str], depart_start: date, depart_end: date | None = None,
                 return_start: date | None = None, return_end: date | None = None, currency: str | None = None,
                 hubs: list[str] | None = None, max_stopover_days: int = 3, min_connection_hours: float = 3.0,
                 max_trip_days: int | None = None, max_hubs: int = 8, nested_roundtrips: bool = True,
-                limit: int = 15) -> dict:
-    """Find cheaper routes than the normal search by combining separately booked tickets through hubs:
-    same day self transfers, stopovers of up to max_stopover_days at a hub, and for round trips nested
-    round trips (e.g. OSL-JFK return + JFK-SAN return). Slow: runs many searches (20 to 80)."""
+                cabin: Literal["economy", "premium", "business", "first"] = "economy", adults: int = 1,
+                nearby_km: int = 200, limit: int = 15) -> dict:
+    """Find cheaper routes than the normal search by combining separately booked tickets: same day self
+    transfers, stopovers of up to max_stopover_days, nested round trips (e.g. OSL-JFK return + JFK-SAN return)
+    and nearby airports within nearby_km. Layovers come from hubs on the way and from cities real fares show are
+    cheap from both ends; legs are priced on Google Flights and Kiwi, the best re-priced on airline sites.
+    Slow: runs many searches (about 30 to 90 s)."""
     from .planner import PlanRequest, plan
 
     req = PlanRequest(origins=origins, destinations=destinations, depart_start=depart_start, depart_end=depart_end,
                       return_start=return_start, return_end=return_end, currency=_cur(currency), hubs=hubs or [],
                       max_stopover_days=max_stopover_days, min_connection_hours=min_connection_hours,
-                      max_trip_days=max_trip_days, max_hubs=max_hubs, include_nested_roundtrips=nested_roundtrips)
+                      max_trip_days=max_trip_days, max_hubs=max_hubs, include_nested_roundtrips=nested_roundtrips,
+                      cabin=cabin, adults=adults, nearby_km=nearby_km)
     res = plan(req).model_dump(mode="json")
     _save("plan", req.model_dump(mode="json"), res)
     return {"trips": _compact(res["trips"], limit),
@@ -109,46 +140,68 @@ def plan_routes(origins: list[str], destinations: list[str], depart_start: date,
 
 
 @mcp.tool()
+@_explain
 def build_trip(start: str, stops: list[dict], earliest_departure: date, latest_departure: date | None = None,
                end: str | None = None, keep_order: bool = False, max_trip_days: int | None = None,
-               currency: str | None = None) -> dict:
+               currency: str | None = None, adults: int = 1) -> dict:
     """Build a multi city trip. stops: [{"place": "NYC", "min_nights": 2, "max_nights": 4}, ...].
     The order is optimized unless keep_order is true."""
     from .planner import TripRequest, TripStop, build_trip as run
 
     req = TripRequest(start=start, end=end, stops=[TripStop(**s) for s in stops], earliest_departure=earliest_departure,
                       latest_departure=latest_departure, keep_order=keep_order, max_trip_days=max_trip_days,
-                      currency=_cur(currency))
+                      currency=_cur(currency), adults=adults)
     res = run(req).model_dump(mode="json")
     _save("trip", req.model_dump(mode="json"), res)
     return {"trips": _compact(res["trips"], 8), "errors": res["errors"]}
 
 
 @mcp.tool()
+@_explain
 def explore_destinations(origin: str, earliest: date, latest: date, nights_min: int | None = None,
                          nights_max: int | None = None, regions: list[str] | None = None,
                          currency: str | None = None, limit: int = 40) -> dict:
-    """Cheapest destinations from an origin in a date window (Kiwi + Ryanair). regions can be continents or
-    countries like "Europe", "Mexico". Give nights_min/max for round trips."""
+    """Cheapest destinations from an origin in a date window (Google, Kiwi, KAYAK and Ryanair, worldwide in one
+    pass). regions (continents or countries like "Europe", "Mexico") adds a slower Kiwi pass for depth.
+    Give nights_min/max for round trips."""
     from .explore import explore
 
+    if latest < earliest:
+        raise ValueError("latest is before earliest")
     nights = (nights_min or 1, nights_max or nights_min or 7) if (nights_min or nights_max) else None
-    dests, errors = explore(origin, earliest, latest, _cur(currency), nights, regions=regions)
+    dests, errors = explore(origin.upper(), earliest, latest, _cur(currency), nights,
+                            sources=["google", "kiwiweb", "kayak", "ryanair"], regions=["anywhere"])
+    if regions:
+        more, e2 = explore(origin.upper(), earliest, latest, _cur(currency), nights, sources=["kiwi"], regions=regions)
+        seen = {d.destination for d in dests}
+        dests = sorted(dests + [d for d in more if d.destination not in seen], key=lambda d: d.price)
+        errors = {**errors, **e2}
     payload = {"destinations": [d.model_dump(mode="json") for d in dests], "errors": errors}
     _save("explore", {"origin": origin, "from": str(earliest), "to": str(latest)}, payload)
     return {"destinations": payload["destinations"][:limit], "errors": errors, "total_found": len(dests)}
 
 
 @mcp.tool()
+@_explain
 def price_calendar(origin: str, destination: str, earliest: date, latest: date, trip_days: int | None = None,
                    currency: str | None = None) -> list[dict]:
-    """Cheapest Google Flights price per departure date (one request per date, max 60 days)."""
+    """Cheapest price per departure date (max 60 days): Google Flights, plus the airlines' own low fare
+    calendars and Skyscanner for one way."""
+    from .search import cheapest_per_day, direct_dates
     from .sources import google
 
-    return [d.model_dump(mode="json") for d in google.dates(origin, destination, earliest, latest, _cur(currency), trip_days)]
+    if latest < earliest or (latest - earliest).days > 60:
+        raise ValueError("give a window of 0 to 60 days (latest on or after earliest)")
+    o, d = origin.upper(), destination.upper()
+    res = google.dates(o, d, earliest, latest, _cur(currency), trip_days)
+    if not trip_days:
+        extra, _ = direct_dates(o, d, earliest, latest, _cur(currency))
+        res = cheapest_per_day(res + extra)
+    return [x.model_dump(mode="json") for x in res]
 
 
 @mcp.tool()
+@_explain
 def find_airports(query: str) -> list[dict]:
     """Look up airport codes by city, name or code."""
     hits = airports.find(query)
@@ -156,6 +209,7 @@ def find_airports(query: str) -> list[dict]:
 
 
 @mcp.tool()
+@_explain
 def multicity_trip(start: str, legs: list[dict], currency: str | None = None, cabin: str = "economy",
                    adults: int = 1, watch: bool = False) -> dict:
     """Multi city trip in a fixed order. legs: [{"to": "JFK", "date": "2026-11-03", "flex_days": 2},
@@ -165,8 +219,10 @@ def multicity_trip(start: str, legs: list[dict], currency: str | None = None, ca
     from .multicity import Leg, MultiRequest, plan_multicity
 
     parsed, prev, prev_date = [], [start.upper()], None
-    for lg in legs:
-        d = date.fromisoformat(lg["date"])
+    for i, lg in enumerate(legs, 1):
+        if not isinstance(lg, dict) or not lg.get("to") or not lg.get("date"):
+            raise ValueError(f"leg {i} needs \"to\" (airport) and \"date\" (YYYY-MM-DD)")
+        d = date.fromisoformat(str(lg["date"]))
         by = bool(lg.get("arrive_by"))
         n = int(lg.get("flex_days") or 0)
         parsed.append(Leg(origins=prev, destinations=[lg["to"].upper()], date=d,
@@ -182,11 +238,13 @@ def multicity_trip(start: str, legs: list[dict], currency: str | None = None, ca
         out["watch"] = Client().add_watch(name=route, origins=[start.upper()], destinations=parsed[-1].destinations,
                                           trip_type="multicity", depart_start=parsed[0].date.isoformat(),
                                           depart_end=parsed[-1].date.isoformat(),
-                                          legs=[lg.model_dump(mode="json") for lg in parsed], currency=req.currency)
+                                          legs=[lg.model_dump(mode="json") for lg in parsed], currency=req.currency,
+                                          cabin=cabin, adults=adults)
     return out
 
 
 @mcp.tool()
+@_explain
 def airline_links(origin: str | None = None, destination: str | None = None, depart: date | None = None,
                   return_date: date | None = None, region: str | None = None, query: str = "") -> list[dict]:
     """Airline directory: airlines (by region, name or tag) with links into each airline's own search, pre-filled
@@ -203,6 +261,7 @@ def airline_links(origin: str | None = None, destination: str | None = None, dep
 
 
 @mcp.tool()
+@_explain
 def check_watch(watch_id: str) -> dict:
     """Price a watch right now (runs on the FlightScout server) and return the updated watch."""
     c = Client()
@@ -212,6 +271,7 @@ def check_watch(watch_id: str) -> dict:
 
 
 @mcp.tool()
+@_explain
 def list_watches() -> list[dict]:
     """The user's watchlist (tracked routes) with best price found so far."""
     drop = {"best_trip", "user_id", "sparkline"}
@@ -219,27 +279,32 @@ def list_watches() -> list[dict]:
 
 
 @mcp.tool()
+@_explain
 def add_watch(origins: list[str], destinations: list[str], depart_start: date, depart_end: date | None = None,
               nights_min: int | None = None, nights_max: int | None = None, name: str | None = None,
-              currency: str | None = None, alert_below: float | None = None, include_split: bool = True) -> dict:
-    """Track a route daily. Give nights_min/max for round trips, omit for one way."""
+              currency: str | None = None, alert_below: float | None = None, include_split: bool = True,
+              cabin: Literal["economy", "premium", "business", "first"] = "economy", adults: int = 1,
+              max_stops: int | None = None) -> dict:
+    """Track a route twice a day. Give nights_min/max for round trips, omit for one way."""
     rt = bool(nights_min or nights_max)
     return Client().add_watch(
         name=name or f"{','.join(origins)} to {','.join(destinations)}", origins=origins, destinations=destinations,
         trip_type="roundtrip" if rt else "oneway", depart_start=depart_start.isoformat(),
         depart_end=depart_end.isoformat() if depart_end else None, nights_min=nights_min,
         nights_max=nights_max or nights_min, currency=_cur(currency), include_split=include_split,
-        alert_below=alert_below, alert_drop_pct=10,
+        alert_below=alert_below, alert_drop_pct=10, cabin=cabin, adults=adults, max_stops=max_stops,
     )
 
 
 @mcp.tool()
+@_explain
 def watch_history(watch_id: str) -> list[dict]:
     """Price observations over time for a watch (for trends), newest last."""
     return [{k: v for k, v in o.items() if k != "trip"} for o in Client().history(watch_id)][-200:]
 
 
 @mcp.tool()
+@_explain
 def list_places() -> list[dict]:
     """The user's saved places: homes, frequent and interesting airports. Use these as defaults."""
     return Client().places()

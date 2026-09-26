@@ -163,8 +163,10 @@ class Itinerary(BaseModel):
     def flight_key(self) -> str:
         """Source independent identity, used to merge the same flights found
         on several sources."""
+        # without a flight number, the departure time tells flights apart
         return "|".join(
-            f"{s.carrier}{s.flight_number}@{s.departure:%Y%m%d}"
+            f"{s.carrier}{s.flight_number}@{s.departure:%Y%m%d}" if s.flight_number
+            else f"{s.carrier}{s.origin}{s.destination}@{s.departure:%Y%m%d%H%M}"
             for sl in self.slices
             for s in sl.segments
         )

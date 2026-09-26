@@ -96,6 +96,9 @@ SOURCES.update(OTAS)
 SOURCES.update(OTAS_BROWSER)
 OTA_WAIT = float(os.environ.get("FLIGHTSCOUT_OTA_WAIT", "45"))
 SLOW_WAIT = {"ita": 90.0}  # sources that need longer than OTA_WAIT
+# Everything else (Google, Kiwi, airline APIs) answers in seconds, but a stuck
+# one (Kiwi retrying 503s, a hanging airline API) must not hold the search.
+CORE_WAIT = float(os.environ.get("FLIGHTSCOUT_CORE_WAIT", "90"))
 # Direct airline sources over plain HTTP. Each gates itself on its network.
 AIRLINES = ["volaris", "wideroe", "skyairline", "norse", "volotea", "condor", "flair",
             "frontier", "breeze", "jetblue", "alaska", "arajet", "aeromexico", "aerolineas",
@@ -360,10 +363,11 @@ def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> Search
                 until = deadline + SLOW_WAIT.get(s, OTA_WAIT) - OTA_WAIT
                 found.extend(f.result(timeout=max(0.0, until - time.monotonic())))
             else:
-                found.extend(f.result())
+                found.extend(f.result(timeout=max(0.0, deadline - OTA_WAIT + CORE_WAIT - time.monotonic())))
             _note(s, None)
         except FutureTimeout:
-            errors[s] = f"still searching after {OTA_WAIT:.0f} s (cached for the next search)"
+            waited = SLOW_WAIT.get(s, OTA_WAIT) if (s in OTAS or s in OTAS_BROWSER or s in BROWSER_SOURCES) else CORE_WAIT
+            errors[s] = f"still searching after {waited:.0f} s (cached for the next search)"
         except Exception as e:  # one source failing must not sink the search
             log.warning("source %s failed: %s", s, e)
             errors[s] = str(e)[:300]

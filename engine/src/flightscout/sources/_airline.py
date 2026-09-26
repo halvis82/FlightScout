@@ -34,7 +34,8 @@ def make_slice(j: dict, names: dict[str, str] | None = None) -> Slice:
         segs.append(Segment(
             origin=s["origin"], destination=s["destination"],
             departure=dep.replace(tzinfo=None), arrival=arr.replace(tzinfo=None),
-            carrier=s["carrier"], carrier_name=names.get(s["carrier"]), flight_number=str(s["number"]),
+            carrier=s["carrier"], carrier_name=names.get(s["carrier"]),
+            flight_number=str(s["number"]) if s.get("number") not in (None, "", "None") else None,
             duration_min=dur, aircraft=s.get("aircraft"),
         ))
     first, last = _dt(j["segments"][0]["departure"]), _dt(j["segments"][-1]["arrival"])

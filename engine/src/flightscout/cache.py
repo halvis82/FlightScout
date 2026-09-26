@@ -7,6 +7,7 @@ import contextvars
 import hashlib
 import json
 import os
+import random
 import time
 from pathlib import Path
 from typing import Any
@@ -42,4 +43,32 @@ def put(key: str, value: Any) -> None:
         DIR.mkdir(parents=True, exist_ok=True)
         _path(key).write_text(json.dumps(value, default=str))
     except OSError:
-        pass  # read only filesystem (serverless), caching is best effort
+        return  # read only filesystem (serverless), caching is best effort
+    if random.random() < 1 / 300:
+        prune()
+
+
+MAX_AGE_S = 10 * 86400  # longer than any TTL in use (rates are refreshed twice a day)
+MAX_BYTES = 200 * 1024 * 1024
+
+
+def prune() -> None:
+    """Drop entries nobody can use any more, then the oldest ones while the
+    cache is over its size cap."""
+    try:
+        files = [(p.stat().st_mtime, p.stat().st_size, p) for p in DIR.glob("*.json")]
+    except OSError:
+        return
+    now = time.time()
+    keep = []
+    for mtime, size, p in files:
+        if now - mtime > MAX_AGE_S:
+            p.unlink(missing_ok=True)
+        else:
+            keep.append((mtime, size, p))
+    total = sum(size for _, size, _ in keep)
+    for mtime, size, p in sorted(keep):
+        if total <= MAX_BYTES:
+            break
+        p.unlink(missing_ok=True)
+        total -= size

@@ -105,7 +105,8 @@ Tools: `search_flights`, `plan_routes`, `multicity_trip`, `build_trip`, `explore
 
 ## Local runner
 
-`flightscout serve --install` starts the engine at login on `127.0.0.1:8787`. The website detects it and sends your
+`flightscout serve --install` sets up the engine on `127.0.0.1:8787`, on demand: it starts when the website searches and
+stops after a few quiet minutes, so nothing runs in between. The website detects it and sends your
 searches through your own home IP instead of Vercel's servers (more reliable, and it can run Google Explore live).
 
 ---

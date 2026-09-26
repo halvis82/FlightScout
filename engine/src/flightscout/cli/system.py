@@ -31,19 +31,36 @@ def register(app: typer.Typer) -> None:
 TRACK_PLIST = "com.flightscout.track"
 
 
+def _x(v) -> str:
+    """Text for a plist: a value with & or < must not break launchctl load."""
+    from xml.sax.saxutils import escape
+
+    return escape(str(v))
+
+
+def write_private(path: Path, text: str) -> None:
+    """Write a file only its owner can read, from the first byte (it may hold
+    keys from the environment)."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as f:
+        f.write(text)
+    path.chmod(0o600)
+
+
 def _install_tracking(exe: str, env: str, log: Path) -> None:
     """Check the logged in user's watches at 07:00 and 19:00 from this Mac."""
     plist = Path.home() / "Library" / "LaunchAgents" / f"{TRACK_PLIST}.plist"
     times = "".join(f"<dict><key>Hour</key><integer>{h}</integer><key>Minute</key><integer>5</integer></dict>" for h in (7, 19))
-    plist.write_text(f"""<?xml version="1.0" encoding="UTF-8"?>
+    write_private(plist, f"""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>Label</key><string>{TRACK_PLIST}</string>
-  <key>ProgramArguments</key><array><string>{exe}</string><string>watch</string><string>check</string></array>
+  <key>ProgramArguments</key><array><string>{_x(exe)}</string><string>watch</string><string>check</string></array>
   <key>EnvironmentVariables</key><dict>{env}</dict>
   <key>StartCalendarInterval</key><array>{times}</array>
-  <key>StandardOutPath</key><string>{log}</string>
-  <key>StandardErrorPath</key><string>{log}</string>
+  <key>StandardOutPath</key><string>{_x(log)}</string>
+  <key>StandardErrorPath</key><string>{_x(log)}</string>
 </dict></plist>
 """)
     subprocess.run(["launchctl", "unload", str(plist)], check=False, capture_output=True)
@@ -73,24 +90,22 @@ def _install_macos(exe: str, port: int, idle: int) -> Path:
     log = Path.home() / "Library" / "Logs" / "flightscout-runner.log"
     keep = [k for k in os.environ if k.startswith("FLIGHTSCOUT_") and k != "FLIGHTSCOUT_LAUNCHD"] + \
         [k for k in ("SERPAPI_KEY", "SEARCHAPI_KEY") if k in os.environ]
-    env = "".join(f"<key>{k}</key><string>{os.environ[k]}</string>" for k in keep)
-    plist.parent.mkdir(parents=True, exist_ok=True)
-    plist.write_text(f"""<?xml version="1.0" encoding="UTF-8"?>
+    env = "".join(f"<key>{_x(k)}</key><string>{_x(os.environ[k])}</string>" for k in keep)
+    write_private(plist, f"""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>Label</key><string>{PLIST}</string>
-  <key>ProgramArguments</key><array><string>{exe}</string><string>serve</string><string>--idle</string><string>{idle}</string></array>
+  <key>ProgramArguments</key><array><string>{_x(exe)}</string><string>serve</string><string>--idle</string><string>{idle}</string></array>
   <key>EnvironmentVariables</key><dict><key>FLIGHTSCOUT_LAUNCHD</key><string>1</string>{env}</dict>
   <key>Sockets</key><dict><key>Listeners</key><dict>
     <key>SockNodeName</key><string>127.0.0.1</string>
     <key>SockServiceName</key><string>{port}</string>
     <key>SockType</key><string>stream</string>
   </dict></dict>
-  <key>StandardOutPath</key><string>{log}</string>
-  <key>StandardErrorPath</key><string>{log}</string>
+  <key>StandardOutPath</key><string>{_x(log)}</string>
+  <key>StandardErrorPath</key><string>{_x(log)}</string>
 </dict></plist>
 """)
-    plist.chmod(0o600)  # may hold airline public keys from the environment
     subprocess.run(["launchctl", "unload", str(plist)], check=False, capture_output=True)
     subprocess.run(["launchctl", "load", str(plist)], check=True)
     return plist
@@ -215,7 +230,7 @@ def status():
     except ImportError:
         browser = "not installed (optional: flightscout setup-browser)"
     rows = [("account", who), ("local runner", runner),
-            ("starts at login", "yes" if (la / f"{PLIST}.plist").exists() else "no"),
+            ("starts on demand", "yes" if (la / f"{PLIST}.plist").exists() else "no"),
             ("watch checks from this Mac", "07:05 and 19:05" if (la / f"{TRACK_PLIST}.plist").exists() else "no"),
             ("browser support", browser)]
     for k, v in rows:

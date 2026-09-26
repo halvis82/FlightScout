@@ -75,3 +75,14 @@ def test_round_trip_from_prices_keep_their_return_date(monkeypatch, dt):
                     return_date=dt.date().replace(day=min(dt.day + 1, 28)), sources=["google"])
     res = s.search(q)
     assert res.trips[0].tickets[0].pending_return == q.return_date
+
+
+def test_flights_without_numbers_stay_apart_in_merge(dt):
+    from flightscout.search import merge
+
+    a = ticket(["MAN", "ALC"], dt, source="jet2")
+    b = ticket(["MAN", "ALC"], dt.replace(hour=15), source="jet2")
+    for it in (a, b):
+        for s in it.slices[0].segments:
+            s.flight_number = None
+    assert len(merge([a, b])) == 2

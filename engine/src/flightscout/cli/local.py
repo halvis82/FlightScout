@@ -179,19 +179,21 @@ def _install_socket(port: int) -> Path:
     if sys.platform == "darwin":
         plist = Path.home() / "Library" / "LaunchAgents" / f"{SITE_PLIST}.plist"
         log = Path.home() / "Library" / "Logs" / "flightscout-site.log"
-        plist.write_text(f"""<?xml version="1.0" encoding="UTF-8"?>
+        from .system import _x, write_private
+
+        write_private(plist, f"""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>Label</key><string>{SITE_PLIST}</string>
-  <key>ProgramArguments</key><array><string>{exe}</string><string>local</string><string>site</string></array>
+  <key>ProgramArguments</key><array><string>{_x(exe)}</string><string>local</string><string>site</string></array>
   <key>EnvironmentVariables</key><dict><key>FLIGHTSCOUT_LAUNCHD</key><string>1</string></dict>
   <key>Sockets</key><dict><key>Listeners</key><dict>
     <key>SockNodeName</key><string>127.0.0.1</string>
     <key>SockServiceName</key><string>{port}</string>
     <key>SockType</key><string>stream</string>
   </dict></dict>
-  <key>StandardOutPath</key><string>{log}</string>
-  <key>StandardErrorPath</key><string>{log}</string>
+  <key>StandardOutPath</key><string>{_x(log)}</string>
+  <key>StandardErrorPath</key><string>{_x(log)}</string>
 </dict></plist>
 """)
         plist.chmod(0o600)
