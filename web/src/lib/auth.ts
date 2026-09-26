@@ -49,8 +49,11 @@ export const auth = betterAuth({
       account: schema.account,
       verification: schema.verification,
       passkey: schema.passkey,
+      rateLimit: schema.authRateLimit,
     },
   }),
+  // limits on sign in and sign up attempts, shared by every server instance
+  rateLimit: { enabled: process.env.FLIGHTSCOUT_NO_RATE_LIMIT !== "1", storage: "database", window: 60, max: 30 },
   emailAndPassword: { enabled: true, minPasswordLength: 8 },
   socialProviders,
   session: { expiresIn: 60 * 60 * 24 * 60, updateAge: 60 * 60 * 24 },

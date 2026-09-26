@@ -11,6 +11,7 @@ import {
   uniqueIndex,
   serial,
   primaryKey,
+  bigint,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 
@@ -74,6 +75,15 @@ export const verification = pgTable("verification", {
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Better Auth's own rate limits (sign in, sign up, password attempts), kept
+// in the database so they hold across serverless instances.
+export const authRateLimit = pgTable("auth_rate_limit", {
+  id: text("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  count: integer("count").notNull(),
+  lastRequest: bigint("last_request", { mode: "number" }).notNull(),
 });
 
 export const passkey = pgTable(
