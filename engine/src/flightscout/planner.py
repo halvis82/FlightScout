@@ -34,7 +34,7 @@ from concurrent.futures import TimeoutError as FutureTimeout
 
 from . import airports, farememory, fx, sellers
 from .models import Itinerary, SearchQuery, Stopover, Trip
-from .search import endpoint_note, merge, to_currency
+from .search import endpoint_note, merge, place_name, to_currency
 from .sources import google, kiwi, kiwiweb
 
 log = logging.getLogger(__name__)
@@ -381,11 +381,10 @@ def discover_hubs(origin: str, dest: str, lo: date, hi: date, limit: int = 8,
 
 
 def _km_note(code: str, asked: str, lands: bool) -> str:
-    a, b = airports.get(code), airports.get(asked)
-    city = (a.city or a.name) if a else code
+    b = airports.get(asked)
     km = airports.haversine_km(code, asked)
     where = (b.city or b.name) if b else asked
-    return f"{'Lands at' if lands else 'Leaves from'} {code} ({city}), {km:.0f} km from {where}"
+    return f"{'Lands at' if lands else 'Leaves from'} {place_name(code)}, {km:.0f} km from {where}"
 
 
 def _nearby_trips(ctx: _Ctx, o: list[str], d: list[str], dep: date, ret: date | None) -> list[Trip]:

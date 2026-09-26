@@ -6,6 +6,7 @@ from __future__ import annotations
 import contextvars
 import logging
 import math
+import re
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -250,6 +251,17 @@ def _flag_outliers(items: list[Itinerary]) -> list[Itinerary]:
     return items
 
 
+def place_name(code: str) -> str:
+    """ "TRF (Sandefjord, Torp)": the airport's own name, since a city label
+    like "Oslo (Torp)" hides that it's 110 km from Oslo."""
+    ap = airports.get(code)
+    if not ap:
+        return code
+    name = re.sub(r"\b(International|Intl\.?|Regional|Municipal|Airport)\b", "", ap.name or "", flags=re.I)
+    name = re.sub(r"\s+,", ",", re.sub(r"\s{2,}", " ", name)).strip(" ,-") or (ap.city or code)
+    return f"{code} ({name})"
+
+
 def endpoint_note(it: Itinerary, origins: list[str], destinations: list[str]) -> str | None:
     """Some sites sell a city: "Oslo" can land at Sandefjord (TRF), 110 km
     away. Say so when a ticket starts or ends at another airport than asked."""
@@ -258,8 +270,7 @@ def endpoint_note(it: Itinerary, origins: list[str], destinations: list[str]) ->
         if asked and code not in asked:
             ref = min(asked, key=lambda a: airports.haversine_km(code, a))
             km = airports.haversine_km(code, ref)
-            ap = airports.get(code)
-            place = f"{code} ({(ap.city or ap.name) if ap else code})"
+            place = place_name(code)
             verb = "Lands at" if lands else "Leaves from"
             notes.append(f"{verb} {place}, {km:.0f} km from {ref}" if math.isfinite(km) else f"{verb} {place}")
     return "; ".join(notes) or None

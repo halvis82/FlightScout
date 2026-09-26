@@ -52,6 +52,7 @@ export function itineraryBadges(it: Itinerary, rules: SellerRule[] = []): Badge[
     if (/is basic/i.test(w)) out.push({ label: "Basic fare", tone: "warn", title: w });
     else if (/no free carry-on/i.test(w)) out.push({ label: "No carry-on", tone: "warn", title: w });
     else if (/only sold by travel agencies/i.test(w)) out.push({ label: "Agencies only", tone: "warn", title: w });
+    else if (/^(Lands at|Leaves from) /.test(w)) out.push({ label: w.split(",")[0].replace(/\s*\(.*$/, "").trim(), // "Lands at TRF" tone: "warn", title: w });
   }
   const rule = ruleFor(rules, it.seller);
   if (rule?.mode === "warn") out.push({ label: `Flagged: ${rule.seller}`, tone: "warn", title: rule.note });
