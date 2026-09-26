@@ -186,6 +186,10 @@ AIRLINE_CODES = {
     "vietnamairlines": ["VN"], "philippineairlines": ["PR"], "bangkokair": ["PG"], "avianca": ["AV"],
     "sas": ["SK"],
 }
+# Airline sources that only read the economy (or only) cabin: for premium,
+# business and first searches they're skipped, never shown as if they matched.
+ECONOMY_ONLY = {"volaris", "wideroe", "skyairline", "jet2", "vueling", "airnewzealand", "transavia", "norwegian",
+                "southwest", "vivaaerobus", "allegiant", "spicejet", "akasa", "vietjet", "tigerair", "jejuair"}
 # Sources that only run with a visible browser (FLIGHTSCOUT_HEADFUL=1): not listed as searched.
 HEADFUL_ONLY = {"vivaaerobus", "allegiant"}
 
@@ -356,6 +360,8 @@ def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> Search
     if not fx.known(q.currency):
         raise ValueError(f"unknown currency {q.currency}")
     srcs = expand_sources(list(q.sources))
+    if q.cabin != "economy":
+        srcs = [s for s in srcs if s not in ECONOMY_ONLY]
     errors: dict[str, str] = {}
     for s in [s for s in srcs if _cooling(s)]:
         errors[s] = f"paused for {_cooling(s) / 60:.0f} min after being blocked"

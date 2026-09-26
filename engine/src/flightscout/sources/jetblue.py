@@ -140,7 +140,7 @@ def _journeys(o: str, d: str, day: date, adults: int, cabin: str) -> list[dict]:
 
 def search(q: SearchQuery) -> list[Itinerary]:
     pairs = _pairs(q.origins, q.destinations)
-    if not pairs:
+    if not pairs or q.cabin == "premium":  # no premium economy cabin: never show economy as premium
         return []
     out: list[Itinerary] = []
     for o, d in pairs[:2]:

@@ -198,3 +198,17 @@ def test_every_direct_source_has_airline_codes_and_the_web_map_is_current():
     for name, codes in s.AIRLINE_CODES.items():
         if name not in s.HEADFUL_ONLY:
             assert all(c in web for c in codes), f"run scripts/gen_sources_doc.py ({name})"
+
+
+def test_economy_only_sources_list_is_current():
+    """Every airline source that never reads the cabin must be skipped for
+    premium, business and first searches (else economy fares look like matches)."""
+    import inspect
+    import re
+
+    from flightscout import search as s
+
+    for name in list(s.AIRLINES) + list(s.BROWSER_SOURCES):
+        src = inspect.getsource(inspect.getmodule(s.SOURCES[name]))
+        if not re.search(r"q\.cabin|cabin\s*[:=!]", src):
+            assert name in s.ECONOMY_ONLY, f"{name} ignores the cabin: add it to ECONOMY_ONLY or handle q.cabin"

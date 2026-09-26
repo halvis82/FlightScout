@@ -144,7 +144,7 @@ def _fetch(o: str, d: str, dep: date, ret: date | None, adults: int) -> dict:
 
 
 def search(q: SearchQuery) -> list[Itinerary]:
-    if not relevant(q.origins, q.destinations):
+    if not relevant(q.origins, q.destinations) or q.cabin == "premium":  # no premium economy cabin
         return []
     cabin = "BUSINESS" if q.cabin in ("business", "first") else "ECONOMY"
     out: list[Itinerary] = []

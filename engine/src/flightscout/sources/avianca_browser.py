@@ -103,7 +103,7 @@ def _bound(o: str, d: str, day: date, adults: int, cabin: str) -> tuple[list[dic
 
 
 def search(q: SearchQuery) -> list[Itinerary]:
-    if not relevant(q.origins, q.destinations):
+    if not relevant(q.origins, q.destinations) or q.cabin == "premium":  # no premium economy cabin
         return []
     out: list[Itinerary] = []
     for o in q.origins[:1]:
