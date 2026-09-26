@@ -247,8 +247,21 @@ def update():
     """Get the latest FlightScout and rebuild the local website."""
     c = _conf()
     subprocess.run(["git", "-C", c["repo"], "pull", "--ff-only"], check=True)
+    # the engine too: a website newer than its runner skips the runner
+    uv = shutil.which("uv")
+    if uv:
+        subprocess.run([uv, "tool", "install", "--force", "--reinstall", "--python", "3.12",
+                        f"flightscout[browser] @ {Path(c['repo']) / 'engine'}"], check=True, capture_output=True)
+    else:
+        out.print("[yellow]uv not found: the flightscout command itself was not updated.[/]")
     _build(c)
-    out.print("Updated.")
+    # running copies exit so the next visit starts the new version
+    for job, unit in ((SITE_PLIST, "flightscout-site.service"), ("com.flightscout.runner", "flightscout-runner.service")):
+        if sys.platform == "darwin":
+            subprocess.run(["launchctl", "stop", job], check=False, capture_output=True)
+        elif shutil.which("systemctl"):
+            subprocess.run(["systemctl", "--user", "stop", unit], check=False, capture_output=True)
+    out.print("Updated. Open or reload http://localhost:%d." % c["port"])
 
 
 @local_app.command()
