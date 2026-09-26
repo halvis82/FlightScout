@@ -14,7 +14,7 @@ import { api } from "@/lib/client";
 import { extensionVersion } from "@/lib/extension";
 import { localRunnerActive } from "@/lib/local-runner";
 import { PARTS, PART_LABELS, searchPart, type PartState } from "@/lib/live-search";
-import { airport, expandCodes, loadAirports, nearestAirport } from "@/lib/airports-client";
+import { METROS, airport, expandCodes, loadAirports, nearestAirport } from "@/lib/airports-client";
 import { RouteMap } from "@/components/route-map";
 import { addDays, dayDiff } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -69,6 +69,17 @@ function friendlyPlanError(msg: string) {
   if (/abort|time ?out|took too long|50[234]|failed to fetch|network/i.test(msg)) return "didn't finish in time. The flights above are complete. Search again to retry.";
   if (/^\s*[{<]|\d{3}:/.test(msg) || msg.length > 140) return "something went wrong. The flights above are complete.";
   return msg;
+}
+
+function formProblem(from: string[], to: string[]) {
+  const same = expandCodes(from).filter((c) => expandCodes(to).includes(c));
+  if (same.length) return `${same[0]} is both where you leave from and where you go. Pick a different airport.`;
+  // unknown codes (only once the airport list is loaded)
+  if (airport("LAX")) {
+    const bad = [...from, ...to].find((c) => !METROS[c] && !airport(c));
+    if (bad) return `${bad} isn't an airport FlightScout knows. Pick one from the list.`;
+  }
+  return null;
 }
 
 function startOrigin(defaults: string[], places: { kind: string; codes: string[] }[]): string[] {
@@ -151,6 +162,30 @@ function SearchPage() {
   const [parts, setParts] = useState<PartState[]>([]);
   const [finished, setFinished] = useState<{ secs: number; failed: number } | null>(null);
   const lastRun = useRef<string | null>(null);
+  // Each new search is a browser history entry, so Back and Forward move
+  // between searches: the address this page last wrote, to tell those apart.
+  const paramStr = params.toString();
+  const ownUrl = useRef(paramStr);
+  const searched = useRef(false);
+  const go = useCallback(
+    (qs: string) => {
+      // the first search of a page view replaces (a shared link gets tidied, not doubled)
+      const first = !searched.current;
+      searched.current = true;
+      if (qs === ownUrl.current) return;
+      const push = !first && Boolean(new URLSearchParams(ownUrl.current).get("from"));
+      ownUrl.current = qs;
+      (push ? router.push : router.replace)(qs ? `/?${qs}` : "/", { scroll: false });
+    },
+    [router],
+  );
+  useEffect(() => {
+    if (paramStr === ownUrl.current) return;
+    ownUrl.current = paramStr;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (params.get("from")) setForm(null); // Back or Forward to another search: the form follows the address and searches again
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paramStr]);
 
   const run = useCallback(
     async (f0: SearchForm) => {
@@ -173,7 +208,7 @@ function SearchPage() {
       setElapsed(0);
       const t0 = Date.now();
       const timer = setInterval(() => setElapsed(Math.round((Date.now() - t0) / 1000)), 1000);
-      router.replace(`/?${formToParams(f).toString()}`, { scroll: false });
+      go(formToParams(f).toString());
       if (f.tripType === "multicity") {
         // flights must be in date order; say which one isn't instead of searching
         const bad = f.legs.findIndex((l, i) => i > 0 && l.flex !== "by" && l.date < f.legs[i - 1].date);
@@ -224,6 +259,16 @@ function SearchPage() {
             setBusy(false);
           });
         clearInterval(timer);
+        return;
+      }
+      // say what's wrong instead of searching something that can't exist
+      const problem = formProblem(f.from, f.to);
+      if (problem) {
+        clearInterval(timer);
+        setBusy(false);
+        setStale(false);
+        setParts([]);
+        setErr(problem);
         return;
       }
       const q: SearchQuery = {
@@ -307,9 +352,10 @@ function SearchPage() {
             cabin: f.cabin,
             adults: f.adults,
             ...p,
-            // automatic on every search, so keep it light
-            max_hubs: Math.min(p.max_hubs ?? 6, 6),
-            max_stopover_days: Math.min(p.max_stopover_days ?? 2, 2),
+            // automatic on every search, so keep it light on the shared server
+            // (your own computer and watches use the full settings)
+            max_hubs: localRunnerActive() ? p.max_hubs : Math.min(p.max_hubs ?? 6, 6),
+            max_stopover_days: localRunnerActive() ? p.max_stopover_days : Math.min(p.max_stopover_days ?? 2, 2),
           },
         })
           // a newer search (or a switch to multi city) owns the results now
@@ -329,7 +375,7 @@ function SearchPage() {
       await Promise.all([searchP, planP]);
       clearInterval(timer);
     },
-    [router, settings, currency],
+    [go, settings, currency],
   );
   useEffect(() => {
     if (!fresh) return;
@@ -339,6 +385,7 @@ function SearchPage() {
     setPlan(null);
     setErr(null);
     lastRun.current = null;
+    ownUrl.current = "";
     router.replace("/", { scroll: false });
   }, [fresh, router]);
 
@@ -394,7 +441,7 @@ function SearchPage() {
             setResult(null);
             setPlan(null);
             lastRun.current = null;
-            router.replace(`/?${formToParams(form).toString()}`, { scroll: false });
+            go(formToParams(form).toString());
             return;
           }
           run(form);

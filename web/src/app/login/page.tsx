@@ -1,10 +1,23 @@
-import { enabledSocialProviders } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth, enabledSocialProviders } from "@/lib/auth";
 import { Suspense } from "react";
 import { LoginForm } from "./login-form";
 
-export const metadata = { title: "Sign in · FlightScout" };
+export const metadata = { title: "Sign in" };
 
-export default function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  // already signed in: nothing to do here
+  let signedIn = false;
+  try {
+    signedIn = Boolean(await auth.api.getSession({ headers: await headers() }));
+  } catch {
+    /* no database: show the form */
+  }
+  if (signedIn) {
+    const next = (await searchParams).next;
+    redirect(next?.startsWith("/") && !next.startsWith("//") ? next : "/");
+  }
   return (
     <Suspense>
       <LoginForm social={enabledSocialProviders} />

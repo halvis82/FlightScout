@@ -7,6 +7,7 @@ import { useApp } from "./app-context";
 import { useWatchDialog } from "./watch-dialog";
 import { Button, Empty, Segmented, Select, Switch } from "./ui";
 import { tripBlocked } from "@/lib/sellers";
+import { inCurrency } from "@/lib/airlines";
 import { parseLocal, dayDiff } from "@/lib/format";
 import type { PlanResult, SearchQuery, SearchResult, Trip } from "@/lib/types";
 
@@ -62,7 +63,14 @@ export function ResultsView({
   const { settings, convert } = useApp();
   const watch = useWatchDialog();
   const [sort, setSort] = useState<Sort>("price");
-  const [maxStops, setMaxStops] = useState<string>("any");
+  // starts at the search's own stops limit and follows it when it changes
+  const qStops = query?.max_stops == null ? "any" : String(query.max_stops);
+  const [maxStops, setMaxStops] = useState<string>(qStops);
+  const [stopsFor, setStopsFor] = useState(qStops);
+  if (stopsFor !== qStops) {
+    setStopsFor(qStops);
+    setMaxStops(qStops);
+  }
   const [showSplit, setShowSplit] = useState(true);
   const [hideSelfTransfer, setHideSelfTransfer] = useState(false);
   const [timeOfDay, setTimeOfDay] = useState("any");
@@ -258,9 +266,10 @@ export function ResultsView({
               .map(([k, v]) => `${k} ${v}`)
               .join(" · ")}
           </span>
+          {(query?.adults ?? 1) > 1 && <span>Prices are the total for all {query!.adults} travelers</span>}
           {direct && (
             <span>
-              Cheapest single ticket: <span className="font-medium text-fg">{direct.total_price.toFixed(0)} {direct.currency}</span>
+              Cheapest single ticket: <span className="font-medium text-fg">{money(direct.total_price, direct.currency)}</span>
             </span>
           )}
           {plan && plan.hubs_tried.length > 0 && (
@@ -269,7 +278,7 @@ export function ResultsView({
             </span>
           )}
           {googleUrl && (
-            <a href={googleUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-accent hover:underline">
+            <a href={inCurrency(googleUrl, settings?.currency ?? "USD")} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-accent hover:underline">
               Open this search on Google Flights <ExternalLink className="size-3" />
             </a>
           )}

@@ -56,6 +56,9 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
   const [checkErr, setCheckErr] = useState<string | null>(null);
 
   const w = data?.watch;
+  useEffect(() => {
+    if (w?.name) document.title = `${w.name} · FlightScout`;
+  }, [w?.name]);
   const tripType = w?.tripType;
   const obs = useMemo(() => data?.observations ?? [], [data]);
 
@@ -138,7 +141,14 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
   const legs = w?.tripType === "multicity" && Array.isArray(w.legs) ? (w.legs as MulticityLeg[]) : null;
   const live = useLiveSearch(liveQ, legs);
 
-  if (error) return <ErrorNote>{(error as Error).message}</ErrorNote>;
+  if (error)
+    return /not found|404/i.test((error as Error).message) ? (
+      <Empty title="This watch doesn't exist anymore" action={<Link href="/watches" className="text-sm font-medium text-accent hover:underline">Back to the watchlist</Link>}>
+        It may have been deleted, or it belongs to another account.
+      </Empty>
+    ) : (
+      <ErrorNote>{(error as Error).message}</ErrorNote>
+    );
   if (list && !id) return <Empty title="Watch not found">It may have been deleted. <Link className="text-accent" href="/watches">All watches</Link></Empty>;
   if (!w) return <Spinner />;
 
@@ -246,6 +256,8 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
             </Button>
             <Button
               variant="danger"
+              aria-label="Delete this watch"
+              title="Delete this watch"
               onClick={async () => {
                 if (!confirm(`Delete "${w.name}" and its price history?`)) return;
                 await api(`/watches/${id}`, { method: "DELETE" });
@@ -320,7 +332,9 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="font-semibold">
             Flights {legs ? "for this multi city trip" : shown ? `for ${formatDate(shown.depart, false)}${shown.nights != null && w.tripType === "roundtrip" ? `, ${shown.nights} nights` : ""}` : ""}
-            {!pick && !legs && <span className="ml-2 text-xs font-normal text-muted">(the cheapest date found)</span>}
+            {!pick && !legs && (
+              <span className="ml-2 text-xs font-normal text-muted">{cells.length ? "(the cheapest date found)" : "(the first day of the window, until prices come in)"}</span>
+            )}
           </h2>
           {live.pending > 0 ? (
             <span className="inline-flex items-center gap-1.5 text-xs text-muted">

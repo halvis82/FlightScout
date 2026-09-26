@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
-import { Check, ChevronDown, History, LogIn, LogOut, Monitor, Moon, Plane, Settings, Sun, User, X } from "lucide-react";
+import { Check, ChevronDown, History, LogIn, LogOut, Monitor, Moon, Plane, Settings, Sun, User, X, PlaneTakeoff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/client";
 import { signOut } from "@/lib/auth-client";
@@ -57,6 +57,15 @@ export function Shell({ children }: { children: ReactNode }) {
           </nav>
           <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
             <LocalRunnerPill />
+            {/* phones have no nav row: Airlines as an icon (Search is the logo) */}
+            <Link
+              href="/airlines"
+              className={cn("grid size-9 place-items-center rounded-lg text-muted hover:bg-surface-2 hover:text-fg sm:hidden", path.startsWith("/airlines") && "bg-surface-2 text-fg")}
+              aria-label="Airlines"
+              title="Airlines"
+            >
+              <PlaneTakeoff className="size-4" />
+            </Link>
             <CurrencyPicker />
             <WatchlistButton />
             <Link
@@ -159,7 +168,7 @@ function readTheme() {
     return "system";
   }
 }
-function setTheme(next: string) {
+export function setTheme(next: string) {
   try {
     if (next === "system") localStorage.removeItem("theme");
     else localStorage.setItem("theme", next);
@@ -169,13 +178,8 @@ function setTheme(next: string) {
   themeListeners.forEach((l) => l());
 }
 
-function AccountMenu() {
-  const { me } = useApp();
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const close = useCallback(() => setOpen(false), []);
-  useDismiss(ref, open, close);
-  const theme = useSyncExternalStore(
+export function useTheme() {
+  return useSyncExternalStore(
     (cb) => {
       themeListeners.add(cb);
       return () => themeListeners.delete(cb);
@@ -183,6 +187,15 @@ function AccountMenu() {
     readTheme,
     () => "system",
   );
+}
+
+function AccountMenu() {
+  const { me } = useApp();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const close = useCallback(() => setOpen(false), []);
+  useDismiss(ref, open, close);
+  const theme = useTheme();
   const initial = me?.user ? (me.user.name || me.user.email).slice(0, 1).toUpperCase() : null;
   return (
     <div ref={ref} className="relative">

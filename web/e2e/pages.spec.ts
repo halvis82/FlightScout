@@ -21,7 +21,7 @@ test("watchlist panel, settings and history open without errors", async ({ page 
   const errors = watchErrors(page);
   await page.goto("/");
   await page.getByRole("button", { name: /Watchlist/ }).first().click();
-  await expect(page.getByText("Checked twice a day")).toBeVisible();
+  await expect(page.getByText(/checks twice a day|checked twice a day/).first()).toBeVisible();
   await page.keyboard.press("Escape");
   await page.goto("/settings");
   await expect(page.getByText("Start searches from")).toBeVisible();
@@ -149,4 +149,20 @@ test("airlines tab marks airlines searched directly, everywhere or only locally"
   await page.getByText("Only airlines FlightScout searches directly").click();
   await expect(page.getByText("Included in FlightScout searches").first()).toBeVisible();
   await expect(page.getByText("Included in local FlightScout searches").first()).toBeVisible();
+});
+
+test("unknown pages get a real 404 and pages have their own titles", async ({ page }) => {
+  const res = await page.goto("/no-such-page");
+  expect(res?.status()).toBe(404);
+  await expect(page.getByText("This page doesn't exist")).toBeVisible();
+  await page.goto("/settings");
+  await expect(page).toHaveTitle("Settings · FlightScout");
+});
+
+test("the trip builder keeps its trip in the address", async ({ page }) => {
+  const d = new Date(Date.now() + 40 * 86400_000).toISOString().slice(0, 10);
+  await page.goto(`/trip?s=SAN&p=DEN:3-4&f=${d}&t=${d}&c=EUR`);
+  await expect(page.getByLabel("Min nights")).toHaveValue("3");
+  await expect(page.getByLabel("Max nights")).toHaveValue("4");
+  await expect(page.getByText("DEN").first()).toBeVisible();
 });

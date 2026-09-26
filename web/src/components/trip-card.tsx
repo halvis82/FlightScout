@@ -4,7 +4,7 @@ import { ArrowRight, ChevronDown, ExternalLink, Eye, Moon, TriangleAlert } from 
 import { Badge, Button } from "./ui";
 import { Code } from "./place";
 import { airport } from "@/lib/airports-client";
-import { airlineByCode, airlineLink, useAirlines, type Airline } from "@/lib/airlines";
+import { inCurrency, airlineByCode, airlineLink, useAirlines, type Airline } from "@/lib/airlines";
 import { useApp } from "./app-context";
 import { cn } from "@/lib/utils";
 import { dayDiff, formatDate, formatDuration, formatTime, parseLocal } from "@/lib/format";
@@ -43,7 +43,7 @@ export function TripCard({
   highlight?: boolean;
   onHover?: (t: Trip | null) => void;
 }) {
-  const { money, settings } = useApp();
+  const { money, settings, currency } = useApp();
   const [open, setOpen] = useState(false);
   const rules = settings?.sellerRules ?? [];
   const slices = trip.tickets.flatMap((t) => t.slices).sort((a, b) => a.departure.localeCompare(b.departure));
@@ -72,7 +72,7 @@ export function TripCard({
           {single?.return_pending && (
             <div className="grid grid-cols-[32px_minmax(0,1fr)] items-center gap-3">
               <span className="grid size-8 place-items-center rounded-lg border border-dashed border-border text-muted">↩</span>
-              <a href={single.booking_url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted hover:text-fg">
+              <a href={inCurrency(single.booking_url, currency)} target="_blank" rel="noopener noreferrer" className="text-xs text-muted hover:text-fg">
                 Return: pick any return flight on Google Flights. The price is the cheapest round trip with this outbound.
               </a>
             </div>
@@ -124,7 +124,7 @@ export function TripCard({
           <div className="flex items-center gap-1">
             {single ? (
               <a
-                href={single.booking_url}
+                href={inCurrency(single.booking_url, currency)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border-strong px-3.5 text-sm font-medium hover:bg-surface-2"
@@ -184,7 +184,7 @@ export function TripCard({
 
 // Same outbound, different return flights (collapsed from the list).
 function OtherReturns({ trip, alts }: { trip: Trip; alts: Trip[] }) {
-  const { money } = useApp();
+  const { money, currency } = useApp();
   const rows = [trip, ...alts].slice(0, 12);
   return (
     <div className="mb-3 rounded-lg border border-border">
@@ -195,7 +195,7 @@ function OtherReturns({ trip, alts }: { trip: Trip; alts: Trip[] }) {
           return (
             <a
               key={t.id}
-              href={t.tickets[0].booking_url}
+              href={inCurrency(t.tickets[0].booking_url, currency)}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 px-3 py-2 text-sm hover:bg-surface-2"
@@ -348,7 +348,7 @@ function SliceRow({ sl }: { sl: Slice }) {
 }
 
 function TicketBlock({ it, index }: { it: Itinerary; index?: number }) {
-  const { money, settings } = useApp();
+  const { money, settings, currency } = useApp();
   const badges = itineraryBadges(it, settings?.sellerRules ?? []);
   return (
     <div className="rounded-md border border-border">
@@ -367,7 +367,7 @@ function TicketBlock({ it, index }: { it: Itinerary; index?: number }) {
         <div className="flex items-center gap-2">
           <span className="font-semibold tabular-nums">{money(it.price, it.currency)}</span>
           <a
-            href={it.booking_url}
+            href={inCurrency(it.booking_url, currency)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex h-7 items-center gap-1 rounded-md bg-accent px-2.5 text-xs font-medium text-accent-fg hover:brightness-110"
@@ -466,14 +466,18 @@ function Layover({ prev, next }: { prev: Segment; next: Segment }) {
 }
 
 function OffersPanel({ it }: { it: Itinerary }) {
-  const { money, settings } = useApp();
+  const { money, settings, currency } = useApp();
   const [open, setOpen] = useState(false);
   const rules = settings?.sellerRules ?? [];
   if (!it.offers?.length) {
     if (it.source !== "google") return null;
     return (
       <div className="border-t border-border px-3 py-1.5 text-xs text-faint">
-        Seller breakdown available from the CLI (<code>flightscout search ... --sellers 5</code>) and in tracked watches.
+        Who sells this fare (the airline and agencies, each with its price) is listed on{" "}
+        <a href={inCurrency(it.booking_url, currency)} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+          Google Flights&apos; booking page
+        </a>
+        .
       </div>
     );
   }

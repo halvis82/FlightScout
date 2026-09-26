@@ -151,6 +151,14 @@ export function hasGuestData() {
   );
 }
 
+// Did the guest change any setting from the defaults (or from the account's
+// currency)? Only then is there anything to bring along.
+export function guestSettingsChanged(accountCurrency: string) {
+  const s = read<Partial<GuestSettings>>("settings", {});
+  const planner = s.planner && JSON.stringify({ ...DEFAULT_PLANNER, ...s.planner }) !== JSON.stringify(DEFAULT_PLANNER);
+  return Boolean(s.sellerRules?.length || s.defaultOrigins?.length || planner || (s.currency && s.currency !== accountCurrency));
+}
+
 export function guestSnapshot() {
   const watches = read<Watch[]>("watches", []);
   return {
@@ -301,21 +309,23 @@ async function recordObservations(w: Watch, obs: ObservationInput[], serverFetch
     lastCheckedAt: now,
   });
   const reasons = alertReasons(w, bestVal, prev);
-  if (reasons.length) {
-    const alerts = read<Alert[]>("alerts", []);
-    alerts.unshift({
-      id: nextId(),
-      watchId: w.id,
-      message: `${w.name} ${reasons.join(" and ")}`,
-      price: bestVal,
-      currency: w.currency,
-      bookingUrl: best.booking_url ?? null,
-      createdAt: now,
-      readAt: null,
-    });
-    write("alerts", alerts.slice(0, 50));
-  }
+  if (reasons.length) addAlert(w, reasons, bestVal, best.booking_url ?? null);
   return { inserted: rows.length, alerts: reasons.length ? 1 : 0 };
+}
+
+function addAlert(w: Watch, reasons: string[], price: number, bookingUrl: string | null) {
+  const alerts = read<Alert[]>("alerts", []);
+  alerts.unshift({
+    id: nextId(),
+    watchId: w.id,
+    message: `${w.name} ${reasons.join(" and ")}`,
+    price,
+    currency: w.currency,
+    bookingUrl,
+    createdAt: new Date().toISOString(),
+    readAt: null,
+  });
+  write("alerts", alerts.slice(0, 50));
 }
 
 async function checkWatch(w: Watch, serverFetch: ServerFetch) {
@@ -517,6 +527,9 @@ export async function guestApi(path: string, method: string, body: unknown, serv
         if (method === "PATCH") {
           const next = watchFromInput(b, w);
           saveWatch(next);
+          // a target that the current best already meets would never alert: alert now
+          if (next.alertBelow != null && next.alertBelow !== w.alertBelow && next.bestPrice != null && next.bestPrice <= next.alertBelow)
+            addAlert(next, alertReasons(next, next.bestPrice, null), next.bestPrice, (next.bestTrip as Trip | null)?.tickets?.[0]?.booking_url ?? null);
           return next;
         }
         if (method === "DELETE") {

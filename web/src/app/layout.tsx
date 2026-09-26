@@ -6,7 +6,7 @@ const inter = Inter({ variable: "--font-inter", subsets: ["latin"], display: "sw
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "FlightScout",
+  title: { default: "FlightScout", template: "%s · FlightScout" },
   description: "Find, combine and track flights across Google Flights, Kiwi.com and airlines.",
   manifest: "/manifest.webmanifest",
 };

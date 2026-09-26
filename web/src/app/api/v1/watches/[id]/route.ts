@@ -4,6 +4,7 @@ import { body, HttpError, intParam, json, requireUser, route } from "@/lib/api";
 import { watchSignature } from "@/lib/signature";
 import { toColumns, type WatchIn } from "@/lib/watch-validate";
 import { ownWatch } from "@/lib/watches";
+import { alertIfTargetMet } from "@/lib/observations";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -24,6 +25,7 @@ export const PATCH = route<Ctx>(async (req, { params }) => {
   const mine = await db.select().from(schema.watches).where(eq(schema.watches.userId, userId));
   if (mine.some((w) => w.id !== id && w.signature === signature)) throw new HttpError(409, "You already watch exactly this search.");
   const [row] = await db.update(schema.watches).set({ ...cols, signature }).where(eq(schema.watches.id, id)).returning();
+  await alertIfTargetMet(cur, row);
   return json(row);
 });
 

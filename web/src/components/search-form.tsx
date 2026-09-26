@@ -59,7 +59,6 @@ export function formToParams(f: SearchForm) {
     cabin: f.cabin,
     adults: String(f.adults),
     stops: f.stops,
-    cur: f.currency,
     src: f.sources.join(","),
     flex: String(f.flex),
     rflex: String(f.retFlex),
@@ -121,7 +120,8 @@ export function paramsToForm(p: URLSearchParams, base: SearchForm): SearchForm {
     cabin: pickOne(p.get("cabin") as SearchForm["cabin"] | undefined, ["economy", "premium", "business", "first"] as const, base.cabin),
     adults: Number.isInteger(num("adults")) && num("adults")! >= 1 && num("adults")! <= 9 ? num("adults")! : base.adults,
     stops: pickOne(p.get("stops") ?? undefined, ["any", "0", "1", "2"], base.stops),
-    currency: p.get("cur") ?? base.currency,
+    // links don't carry a currency: every viewer sees their own
+    currency: base.currency,
     sources: (p.get("src") ? (p.get("src")!.split(",").filter(Boolean) as Source[]) : undefined) ?? base.sources,
     flex: pickOne(num("flex"), [0, 1, 2, 3, 7], base.flex),
     retFlex: pickOne(num("rflex") ?? num("flex"), [0, 1, 2, 3, 7], base.retFlex),
@@ -229,7 +229,7 @@ export function SearchFormView({
         <button
           type="button"
           onClick={() => set({ from: f.to, to: f.from })}
-          className="mb-1 hidden size-9 place-items-center rounded-full border border-border text-muted hover:bg-surface-2 hover:text-fg lg:grid"
+          className="relative z-10 -my-4 mr-3 grid size-8 place-items-center justify-self-end rounded-full border border-border bg-surface text-muted hover:bg-surface-2 hover:text-fg lg:my-0 lg:mb-1 lg:mr-0 lg:size-9 lg:justify-self-auto"
           aria-label="Swap origin and destination"
           title="Swap"
         >

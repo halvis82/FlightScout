@@ -11,7 +11,21 @@ export class ApiError extends Error {
 
 type Init = { method?: string; body?: unknown; signal?: AbortSignal };
 
-async function serverFetch<T = unknown>(path: string, init?: Init): Promise<T> {
+// Exchange rates change daily: one request per page load serves everyone.
+let fxPromise: Promise<unknown> | null = null;
+
+function serverFetch<T = unknown>(path: string, init?: Init): Promise<T> {
+  if (path === "/fx" && !init?.body && (init?.method ?? "GET") === "GET") {
+    fxPromise ??= rawFetch("/fx").catch((e) => {
+      fxPromise = null;
+      throw e;
+    });
+    return fxPromise as Promise<T>;
+  }
+  return rawFetch<T>(path, init);
+}
+
+async function rawFetch<T = unknown>(path: string, init?: Init): Promise<T> {
   const res = await fetch(path.startsWith("/api") ? path : `/api/v1${path}`, {
     method: init?.method ?? (init?.body !== undefined ? "POST" : "GET"),
     headers: init?.body !== undefined ? { "content-type": "application/json" } : undefined,
@@ -84,6 +98,12 @@ export async function api<T = unknown>(path: string, init?: Init): Promise<T> {
   const method = init?.method ?? (init?.body !== undefined ? "POST" : "GET");
   const p = path.split("?")[0];
   if (p === "/settings" && method !== "GET") mePromise = null;
+  // who is signed in: fetched once, and this request primes the cache used by isGuest()
+  if (path === "/me" && method === "GET") {
+    const me = serverFetch<MeLite>("/me");
+    mePromise = me.catch(() => null);
+    return me as Promise<T>;
+  }
   const external = !path.startsWith("/api");
   const guest = external && (await isGuest());
 

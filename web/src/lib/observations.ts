@@ -60,6 +60,15 @@ export async function recordObservations(watch: Watch, obs: ObservationInput[]) 
   return { inserted: rows.length, alerts };
 }
 
+// A price target set (or lowered) while the current best already meets it
+// would never alert, because alerts fire when a price crosses the target.
+// Alert right away instead.
+export async function alertIfTargetMet(before: Watch, after: Watch) {
+  if (after.alertBelow == null || after.alertBelow === before.alertBelow || after.bestPrice == null || after.bestPrice > after.alertBelow) return 0;
+  const url = (after.bestTrip as Trip | null)?.tickets?.[0]?.booking_url ?? null;
+  return evaluateAlerts(after, after.bestPrice, null, { booking_url: url } as ObservationInput);
+}
+
 async function evaluateAlerts(watch: Watch, price: number, prev: number | null, best: ObservationInput) {
   const reasons = alertReasons(watch, price, prev);
   if (!reasons.length) return 0;

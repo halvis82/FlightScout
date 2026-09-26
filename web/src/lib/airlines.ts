@@ -113,3 +113,18 @@ export function airlineLink(a: Airline, q?: RouteQuery | null): [string, boolean
   };
   return [tpl.replace(/\{(\w+)\}/g, (_, k: string) => vals[k] ?? ""), true];
 }
+
+// Google Flights and Kiwi booking links carry the currency of the search;
+// show the site in the currency picked since then.
+export function inCurrency(url: string | null | undefined, currency: string): string | undefined {
+  if (!url) return undefined;
+  try {
+    const u = new URL(url);
+    if (/(^|\.)google\.[a-z.]+$/.test(u.hostname) && u.pathname.startsWith("/travel/flights")) u.searchParams.set("curr", currency);
+    else if (/(^|\.)kiwi\.com$/.test(u.hostname) && u.searchParams.has("currency")) u.searchParams.set("currency", currency.toLowerCase());
+    else return url;
+    return u.toString();
+  } catch {
+    return url;
+  }
+}

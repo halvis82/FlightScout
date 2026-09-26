@@ -16,7 +16,14 @@ export default function HistoryDetail({ params }: { params: Promise<{ id: string
   const { id } = use(params);
   const { data, error } = useSWR<Row>(`/searches/${id}`, fetcher);
   const { money } = useApp();
-  if (error) return <ErrorNote>{(error as Error).message}</ErrorNote>;
+  if (error)
+    return /not found|404/i.test((error as Error).message) ? (
+      <Empty title="This search isn't in your history" action={<Link href="/history" className="text-sm font-medium text-accent hover:underline">Back to history</Link>}>
+        It may have been deleted, or it belongs to another account.
+      </Empty>
+    ) : (
+      <ErrorNote>{(error as Error).message}</ErrorNote>
+    );
   if (!data) return <Spinner />;
   const q = data.query as Record<string, unknown>;
   const rerun = new URLSearchParams();

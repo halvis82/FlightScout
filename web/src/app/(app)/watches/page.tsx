@@ -64,7 +64,7 @@ export default function WatchesPage() {
         title="Watchlist"
         sub={`Routes you watch. ${checkNote(Boolean(me?.guest))} Prices build up into history you can chart and compare.`}
         actions={
-          <Button variant="primary" onClick={() => watch.open()}>
+          <Button variant="primary" onClick={() => watch.edit()}>
             <Plus className="size-4" /> New watch
           </Button>
         }
@@ -74,7 +74,7 @@ export default function WatchesPage() {
         <Empty
           title="Nothing on your watchlist yet"
           action={
-            <Button variant="primary" onClick={() => watch.open()}>
+            <Button variant="primary" onClick={() => watch.edit()}>
               <Plus className="size-4" /> Watch a route
             </Button>
           }

@@ -1,12 +1,12 @@
 "use client";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { useApp } from "./app-context";
 import { Dialog } from "./dialog";
 import { Button, ErrorNote } from "./ui";
 import { api } from "@/lib/client";
-import { clearGuestData, guestSnapshot, hasGuestData } from "@/lib/guest";
+import { clearGuestData, guestSettingsChanged, guestSnapshot, hasGuestData } from "@/lib/guest";
 
 const DISMISS_KEY = "fs.bannerDismissed";
 const listeners = new Set<() => void>();
@@ -57,17 +57,32 @@ export function ImportGuestData() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-  const open = Boolean(me?.user) && !skipped && !done && hasGuestData();
-  if (!open) return null;
-  const snap = guestSnapshot();
+  const signedIn = Boolean(me?.user) && !done && hasGuestData();
+  const snap = signedIn ? guestSnapshot() : null;
+  const settingsChanged = signedIn && guestSettingsChanged(me?.settings?.currency ?? "USD");
+  const worthAsking = Boolean(snap && (snap.places.length || snap.watches.length || settingsChanged));
+  // only recent searches: bring them along quietly instead of asking
+  useEffect(() => {
+    if (!snap || worthAsking) return;
+    (async () => {
+      for (const r of [...snap.searches].reverse()) {
+        if (r.payload) await api("/results", { body: { kind: r.kind, query: r.query, payload: r.payload, origin: "web" } }).catch(() => {});
+      }
+      clearGuestData();
+      setDone(true);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signedIn, worthAsking]);
+  if (!snap || !worthAsking || skipped) return null;
 
   async function run() {
+    if (!snap) return;
     setBusy(true);
     setErr(null);
     try {
       const s = snap.settings;
       const current = me!.settings!;
-      await api("/settings", {
+      if (settingsChanged) await api("/settings", {
         method: "PATCH",
         body: {
           currency: s.currency,
@@ -126,12 +141,14 @@ export function ImportGuestData() {
     <Dialog open onClose={() => setFlag("fs.importSkipped")} title="Bring your guest data along?">
       <p className="text-sm text-muted">This browser has data from when you used FlightScout without signing in:</p>
       <ul className="my-3 space-y-1 text-sm">
-        <li>{snap.places.length} saved places</li>
-        <li>
-          {snap.watches.length} watches with {snap.watches.reduce((n, w) => n + w.observations.length, 0)} recorded prices
-        </li>
-        <li>{snap.searches.filter((s) => s.payload).length} recent searches</li>
-        <li>Your currency, smart route limits and seller rules</li>
+        {snap.places.length > 0 && <li>{snap.places.length} saved places</li>}
+        {snap.watches.length > 0 && (
+          <li>
+            {snap.watches.length} watches with {snap.watches.reduce((n, w) => n + w.observations.length, 0)} recorded prices
+          </li>
+        )}
+        {snap.searches.some((s) => s.payload) && <li>{snap.searches.filter((s) => s.payload).length} recent searches</li>}
+        {settingsChanged && <li>Your settings (currency, starting airport, smart route limits, seller rules)</li>}
       </ul>
       <p className="text-sm text-muted">Importing adds them to your account so they sync and get tracked daily. The local copy is removed afterwards.</p>
       {err && <div className="mt-3"><ErrorNote>{err}</ErrorNote></div>}

@@ -10,15 +10,15 @@ Every way has every feature: search, smart routes, multi city, explore, the watc
 
 | | Just the website | **Website + local runner** (recommended) | Everything on your computer | Your own hosted copy |
 |---|---|---|---|---|
-| Setup | nothing | one command, once | clone + one command each time you use it | one script, once |
+| Setup | nothing | one command, once | one command, once | one script, once |
 | Website | flightscout-app.vercel.app | flightscout-app.vercel.app | http://localhost:3000 | your-name.vercel.app |
 | Searches run from | FlightScout's server | **your IP** | **your IP** | your server |
 | Sources | Google, ITA Matrix, Kiwi, 27 airlines, 14 booking sites | **all**: + 35 airlines and 8 booking sites that need a browser | all | like "just the website" |
 | Search limits | guests 60 an hour, accounts more | **none** (searches skip the server) | **none** | yours to set |
 | Account and data | online | online (same as the website) | on this computer, or `--shared` for the online one | your own database |
-| Runs in the background | nothing | nothing (starts when the website searches, stops after 10 idle minutes) | only while the command runs | your Vercel |
+| Runs in the background | nothing | nothing (starts when the website searches, stops after 10 idle minutes) | nothing (starts when you open localhost:3000, stops a couple of minutes after you close it) | your Vercel |
 
-**Recommendation:** use the website with the local runner. It's the same site and the same account, but faster, with all 62 airlines, no limits, and it keeps the shared server from getting blocked. Run everything locally when you want to be independent of Vercel entirely, or to develop.
+**Recommendation:** use the website with the local runner. It's the same site and the same account, but faster, with all 62 airlines, no limits, and it keeps the shared server from getting blocked. Run everything on your computer when you want to be independent of the online site entirely.
 
 ## Run it on your computer
 
@@ -37,20 +37,21 @@ Then open the website, go to Settings, "Where your searches run", click **Connec
 - Windows: `uv tool install 'flightscout[browser] @ git+https://github.com/halvis82/FlightScout#subdirectory=engine'`, then run `flightscout serve` while you search.
 - Optional, also check your watches from this computer twice a day: `flightscout login`, then `flightscout serve --install --track`.
 
-### Everything on your computer
+### Everything on your computer, macOS and Linux
 
 ```sh
-git clone https://github.com/halvis82/FlightScout && cd FlightScout
-./scripts/run-local.sh            # your own data, kept on this computer
-./scripts/run-local.sh --shared   # the same accounts and watchlist as the online site
+curl -fsSL https://raw.githubusercontent.com/halvis82/FlightScout/main/scripts/install-local.sh | sh
 ```
 
-Opens http://localhost:3000 until you press Ctrl+C. Needs Node 22+ and either the runner above or [uv](https://docs.astral.sh/uv/).
+Then open http://localhost:3000 (bookmark it). That's the whole setup.
 
-- **Own data** (default): an embedded database in `web/.pglite`, no server, no Docker, no accounts anywhere else. Anyone can make an account on this copy. Your watches are checked while it runs (10 minutes after start, then every 12 hours), and "Check now" works any time.
-- **`--shared`**: uses the online site's database, so you log in with your usual account and see the same watchlist; the online site keeps checking your watches. The database address comes from `~/.config/flightscout/local.env` (`DATABASE_URL=...`); if that file is missing and the Vercel CLI is logged in, it's fetched from the Vercel project (`FLIGHTSCOUT_VERCEL_PROJECT`, `FLIGHTSCOUT_VERCEL_SCOPE`).
-- Both: no rate limits, searches from your IP (with the browser sources when Chrome is installed), login works (email and password, passkeys).
-- It uses the on demand runner if it's installed, otherwise starts one for the session.
+- **Only runs while it's open.** Nothing stays running on your computer: the first visit to localhost:3000 starts the website and the engine (a few seconds), and a couple of minutes after you close the last FlightScout tab both stop. The operating system (launchd on macOS, systemd on Linux) just holds the port until you come back.
+- **Every feature:** accounts and login (email and password, passkeys), search with every source (plus the browser only airlines and booking sites when Google Chrome is installed, always headless), smart routes, multi city, explore, trip builder, the watchlist with price history and alerts in the page, and no rate limits. Searches use your own IP.
+- **Your data stays here:** an embedded database in the install folder, no Docker and no database server. Anyone can make an account on your copy. Your watches are checked when you open FlightScout if the last check is more than 12 hours old, and "Check now" works any time.
+- **Or share the online account:** add `--shared` (`... | sh -s -- --shared`) to log in with your usual account and see the same watchlist; the online site keeps checking your watches. It needs the online database's address in `~/.config/flightscout/local.env` as `DATABASE_URL=...`.
+- What it installs: the `flightscout` command (with uv, a small Python installer, if needed), Node.js 22 in `~/.config/flightscout/node` only if you don't have it, and the code in `~/.local/share/flightscout/FlightScout`. No admin rights.
+- Manage it: `flightscout local status`, `flightscout local update` (latest version), `flightscout local uninstall`. Windows, or without the on demand setup: `flightscout local start` runs it in a terminal and stops the same way.
+- Developing FlightScout itself: from a clone, `./scripts/run-local.sh` (or `--shared`) builds and runs your working copy until Ctrl+C.
 
 ### Browser extension (Google only)
 

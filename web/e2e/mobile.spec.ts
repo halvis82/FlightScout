@@ -11,3 +11,10 @@ for (const path of ["/?new=1", "/settings", "/airlines", "/history", "/trip", "/
     expect(width).toBeLessThanOrEqual(392);
   });
 }
+
+test("phones reach Airlines and can swap From and To", async ({ page }) => {
+  await page.goto("/?from=OSL&to=CPH&tt=oneway");
+  await expect(page.getByRole("button", { name: "Swap origin and destination" })).toBeVisible();
+  await page.getByRole("link", { name: "Airlines" }).click();
+  await expect(page).toHaveURL(/\/airlines/);
+});

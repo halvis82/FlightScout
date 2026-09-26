@@ -96,7 +96,7 @@ export function WatchlistPanel() {
             <p className="text-xs text-muted">{checkNote(Boolean(me?.guest))} Use Watch on any search or result to add one.</p>
           </div>
           <div className="flex items-center gap-1">
-            <Button size="sm" variant="soft" onClick={() => watch.open()}>
+            <Button size="sm" variant="soft" onClick={() => watch.edit()}>
               <Plus className="size-3.5" /> New
             </Button>
             <button onClick={() => openPanel(null)} className="rounded-lg p-2 text-muted hover:bg-surface-2 hover:text-fg" aria-label="Close watchlist">
@@ -151,7 +151,7 @@ export function WatchlistPanel() {
               </div>
               <div className="font-semibold">No watched routes yet</div>
               <p className="mx-auto mt-1 max-w-xs text-sm text-muted">
-                Tap the star on any flight result to track its price. FlightScout records every check so you can see when to book.
+                Use Watch this search above the results, or Watch this route on any flight, to track its price. FlightScout records every check so you can see when to book.
               </p>
             </div>
           )}

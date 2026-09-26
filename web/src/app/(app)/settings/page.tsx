@@ -4,6 +4,7 @@ import useSWR from "swr";
 import { Check, Copy, Fingerprint, KeyRound, Plus, Trash2 } from "lucide-react";
 import { AirportInput } from "@/components/airport-input";
 import { useApp } from "@/components/app-context";
+import { setTheme, useTheme } from "@/components/shell";
 import { cn } from "@/lib/utils";
 import { cityOf } from "@/lib/airports-client";
 import { useExtension } from "@/lib/extension";
@@ -28,6 +29,7 @@ function Section({ title, sub, children }: { title: string; sub?: string; childr
 
 export default function SettingsPage() {
   const { me, settings, refreshMe, places } = useApp();
+  const theme = useTheme();
   const [saved, setSaved] = useState(false);
 
   async function patch(body: Record<string, unknown>) {
@@ -54,6 +56,13 @@ export default function SettingsPage() {
                 {p.label} ({p.codes.join(", ")})
               </option>
             ))}
+          </Select>
+        </Field>
+        <Field label="Theme" className="mb-3 w-40">
+          <Select value={theme} onChange={(e) => setTheme(e.target.value)}>
+            <option value="system">Like my device</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
           </Select>
         </Field>
         <Field label="Currency" className="w-40">
@@ -335,7 +344,7 @@ function PlannerSection({ planner, onSave }: { planner: PlannerDefaults; onSave:
   return (
     <Section title="Smart routes" sub="Limits for split tickets, stopovers and nested round trips. These are what you're willing to accept.">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Field label="Max stopover (days)">
+        <Field label="Max stopover (days)" hint="Searches on the server use up to 2">
           <Input type="number" min={0} max={30} value={p.max_stopover_days} onChange={num("max_stopover_days")} />
         </Field>
         <Field label="Min self transfer (hours)" hint="Buffer between separate tickets">
@@ -344,7 +353,7 @@ function PlannerSection({ planner, onSave }: { planner: PlannerDefaults; onSave:
         <Field label="Max total trip (days)" hint="Blank means no limit">
           <Input type="number" min={1} value={p.max_trip_days ?? ""} onChange={num("max_trip_days")} />
         </Field>
-        <Field label="Hubs to try" hint="More finds more, but is slower">
+        <Field label="Hubs to try" hint="More finds more, but is slower. Searches on the server use up to 6">
           <Input type="number" min={1} max={30} value={p.max_hubs} onChange={num("max_hubs")} />
         </Field>
       </div>
@@ -364,7 +373,8 @@ function PlannerSection({ planner, onSave }: { planner: PlannerDefaults; onSave:
 function SellerSection({ rules, onSave }: { rules: SellerRule[]; onSave: (r: SellerRule[]) => void }) {
   const [name, setName] = useState("");
   const [mode, setMode] = useState<"warn" | "block">("warn");
-  const has = (r: SellerRule) => rules.some((x) => x.seller.toLowerCase() === r.seller.toLowerCase() && x.mode === r.mode);
+  // any rule for that seller already covers its preset (Hidden is stronger than Warn)
+  const has = (r: SellerRule) => rules.some((x) => x.seller.toLowerCase() === r.seller.toLowerCase());
   const add = (r: SellerRule) => onSave([...rules.filter((x) => x.seller.toLowerCase() !== r.seller.toLowerCase()), r]);
   return (
     <Section
@@ -377,7 +387,7 @@ function SellerSection({ rules, onSave }: { rules: SellerRule[]; onSave: (r: Sel
             <span className="font-medium">{r.seller}</span>
             <Badge tone={r.mode === "block" ? "bad" : "warn"}>{r.mode === "block" ? "Hidden" : "Warning"}</Badge>
             {r.note && <span className="truncate text-xs text-muted">{r.note}</span>}
-            <button className="ml-auto rounded p-1 text-muted hover:text-bad" onClick={() => onSave(rules.filter((x) => x !== r))} aria-label="Remove">
+            <button className="ml-auto rounded p-1 text-muted hover:text-bad" onClick={() => onSave(rules.filter((x) => x !== r))} aria-label={`Remove the rule for ${r.seller}`}>
               <Trash2 className="size-3.5" />
             </button>
           </div>
