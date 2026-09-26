@@ -18,8 +18,8 @@ export type MapPoint = {
   dot?: boolean; // render a small colored dot instead of a label (declutter)
 };
 
-// MapLibre is ~1 MB of JS: load it on its own after the page is interactive
-// (idle time, or when a map mounts) instead of in the first bundle.
+// MapLibre is ~1 MB of JS: loaded on its own when a map mounts, never in the
+// first bundle.
 type MapLib = typeof import("maplibre-gl");
 let libP: Promise<MapLib> | null = null;
 function loadLib(): Promise<MapLib> {
@@ -31,10 +31,9 @@ function loadLib(): Promise<MapLib> {
   });
   return libP;
 }
-if (typeof window !== "undefined") {
-  const idle = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 1500));
-  idle(() => void loadLib());
-}
+// No preload at import: Next prefetches this module for links on every page,
+// and pages without a map shouldn't download ~280 KB. A map starts loading it
+// when it mounts.
 
 const LIGHT = "https://tiles.openfreemap.org/styles/positron";
 const DARK = "https://tiles.openfreemap.org/styles/dark";
