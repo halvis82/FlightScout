@@ -88,7 +88,8 @@ def _fetch(o: str, d: str, day: date, adults: int, currency: str) -> tuple[dict,
         got = _browser.capture(
             page, lambda: page.evaluate(_SUBMIT_JS, [dep, arr, f"{day:%d/%m/%Y}", adults, currency.upper()]),
             lambda u: "/search-experience/results/v2" in u and "direction=outbound" in u, timeout=60,
-            body=lambda t: '"isLiveSearchDone":true' in t)
+            # a finished search: "isLiveSearchDone":true before Sept 2026, "status":"complete" now
+            body=lambda t: '"isLiveSearchDone":true' in t or '"status":"complete"' in t)
         if not got:
             return "", page.url
         return got[-1][1], re.sub(r"/(train|bus|ferry)(?=\?|$)", "/flight", page.url)

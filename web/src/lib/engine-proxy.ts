@@ -28,6 +28,8 @@ function normalize(kind: EngineKind, raw: unknown): Record<string, unknown> {
   return r;
 }
 
+const UNVERIFIED = "*unverified";
+
 function rulesToEngine(rules: SellerRule[]) {
   return Object.fromEntries(rules.map((r) => [r.seller, r.mode]));
 }
@@ -66,8 +68,9 @@ export async function proxyEngine(req: Request, kind: EngineKind) {
       : userId
         ? (await getSettings(userId)).sellerRules
         : [];
-    const blocked = rules.filter((r) => r.mode === "block");
-    if (blocked.length) payload.seller_rules = rulesToEngine(blocked);
+    // hidden sellers, plus the choice to see agencies FlightScout couldn't verify
+    const sent = rules.filter((r) => r.mode === "block" || r.seller === UNVERIFIED);
+    if (sent.length) payload.seller_rules = rulesToEngine(sent);
   }
   delete payload.sellerRules;
   // Shared cache: the same search (by anyone) within a few minutes is served

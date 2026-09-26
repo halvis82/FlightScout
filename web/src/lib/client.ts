@@ -67,7 +67,8 @@ export function isGuest(): Promise<boolean> {
 const ENGINE_KINDS = new Set(["/search", "/plan", "/explore", "/dates", "/trip", "/multicity"]);
 
 function rulesToEngine(rules: SellerRule[]) {
-  const blocked = rules.filter((r) => r.mode === "block");
+  // hidden sellers, plus the choice to see agencies FlightScout couldn't verify
+  const blocked = rules.filter((r) => r.mode === "block" || r.seller === "*unverified");
   return blocked.length ? Object.fromEntries(blocked.map((r) => [r.seller, r.mode])) : undefined;
 }
 

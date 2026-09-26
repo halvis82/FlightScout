@@ -86,3 +86,21 @@ def test_flights_without_numbers_stay_apart_in_merge(dt):
         for s in it.slices[0].segments:
             s.flight_number = None
     assert len(merge([a, b])) == 2
+
+
+def test_unverified_agencies_are_hidden_unless_asked(dt):
+    from flightscout import sellers
+    from flightscout.models import Offer, Fare, Trip
+
+    good = ticket(["LAX", "DPS"], dt, source="wego").model_copy(update={"seller": "Expedia", "seller_kind": "ota"})
+    bad = ticket(["LAX", "DPS"], dt, source="wego").model_copy(update={"seller": "HolidayBreakz", "seller_kind": "ota"})
+    airline = ticket(["LAX", "DPS"], dt, source="google").model_copy(update={
+        "seller": "Garuda", "seller_kind": "airline",
+        "offers": [Offer(seller="Garuda", is_airline=True, fares=[Fare(price=500)]),
+                   Offer(seller="Magicfares", is_airline=False, fares=[Fare(price=400)])]})
+    trips = [Trip(tickets=[x], total_price=x.price, currency="USD") for x in (good, bad, airline)]
+    kept = sellers.apply_rules([t.model_copy(deep=True) for t in trips], None)
+    assert [t.tickets[0].seller for t in kept] == ["Expedia", "Garuda"]
+    assert [o.seller for o in kept[1].tickets[0].offers] == ["Garuda"]  # unverified offers dropped too
+    shown = sellers.apply_rules([t.model_copy(deep=True) for t in trips], {"*unverified": "warn"})
+    assert len(shown) == 3 and any("couldn't verify" in w for w in shown[1].tickets[0].warnings)

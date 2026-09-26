@@ -370,19 +370,34 @@ function PlannerSection({ planner, onSave }: { planner: PlannerDefaults; onSave:
   );
 }
 
+const UNVERIFIED = "*unverified"; // a seller rule the engine reads as "show unverified agencies, flagged"
+
 function SellerSection({ rules, onSave }: { rules: SellerRule[]; onSave: (r: SellerRule[]) => void }) {
   const [name, setName] = useState("");
   const [mode, setMode] = useState<"warn" | "block">("warn");
   // any rule for that seller already covers its preset (Hidden is stronger than Warn)
   const has = (r: SellerRule) => rules.some((x) => x.seller.toLowerCase() === r.seller.toLowerCase());
   const add = (r: SellerRule) => onSave([...rules.filter((x) => x.seller.toLowerCase() !== r.seller.toLowerCase()), r]);
+  const showUnverified = rules.some((x) => x.seller === UNVERIFIED);
   return (
     <Section
       title="Sellers and travel agencies"
       sub="Block sellers to hide their results, or flag them with a warning. Self transfers, separate tickets and agency sold tickets are always labeled."
     >
+      <div className="mb-3 rounded-lg border border-border p-3">
+        <Switch
+          checked={showUnverified}
+          onChange={(on) => onSave(on ? [...rules.filter((x) => x.seller !== UNVERIFIED), { seller: UNVERIFIED, mode: "warn" }] : rules.filter((x) => x.seller !== UNVERIFIED))}
+          label={<span className="text-sm font-medium">Show agencies FlightScout couldn&apos;t verify</span>}
+        />
+        <p className="mt-1 text-xs text-muted">
+          Booking sites like Wego and KAYAK also list small agencies we can&apos;t vouch for (some ask for more money after you pay).
+          They&apos;re hidden unless you turn this on, and then marked &quot;Unverified agency&quot;. Airlines and established booking sites
+          always show.
+        </p>
+      </div>
       <div className="space-y-1.5">
-        {rules.map((r) => (
+        {rules.filter((r) => r.seller !== UNVERIFIED).map((r) => (
           <div key={r.seller + r.mode} className="flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm">
             <span className="font-medium">{r.seller}</span>
             <Badge tone={r.mode === "block" ? "bad" : "warn"}>{r.mode === "block" ? "Hidden" : "Warning"}</Badge>
