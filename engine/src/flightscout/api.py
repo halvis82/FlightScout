@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, model_validator
 
 from . import explore as explore_mod
-from .models import DatePrice, Destination, SearchQuery, SearchResult
+from .models import BadInput, DatePrice, Destination, SearchQuery, SearchResult
 from .multicity import MultiRequest, plan_multicity
 from .planner import PlanRequest, PlanResult, TripRequest, build_trip, plan
 from .search import search as run_search
@@ -43,8 +43,8 @@ if LOCAL:
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost", "[::1]", "testserver"])
 
 
-@app.exception_handler(ValueError)
-async def _bad_input(request: Request, exc: ValueError):
+@app.exception_handler(BadInput)
+async def _bad_input(request: Request, exc: BadInput):
     # e.g. an unknown currency or dates that make no sense: the caller's mistake, not a crash
     return JSONResponse(status_code=422, content={"detail": str(exc)[:300]})
 

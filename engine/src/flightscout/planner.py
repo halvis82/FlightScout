@@ -112,9 +112,9 @@ class _Ctx:
 
     def gsearch(self, o: list[str], d: list[str], dep: date, ret: date | None = None) -> list[Itinerary]:
         self.requests += 1
-        q = SearchQuery(origins=o, destinations=d, departure=dep, return_date=ret,
-                        currency=self.req.currency, cabin=self.req.cabin, adults=self.req.adults)
         try:
+            q = SearchQuery(origins=o[:12], destinations=d[:12], departure=dep, return_date=ret,
+                            currency=self.req.currency, cabin=self.req.cabin, adults=self.req.adults)
             res = google.search(q, top_n=2 if ret else 3, wide=False)
         except Exception as e:
             self.errors[f"google {','.join(o)}-{','.join(d)} {dep}"] = str(e)[:200]
@@ -141,9 +141,9 @@ class _Ctx:
         if not self.req.include_kiwi:
             return []
         self.requests += 1
-        q = SearchQuery(origins=o, destinations=d, departure=dep, return_date=ret,
-                        currency=self.req.currency, cabin=self.req.cabin, adults=self.req.adults)
         try:
+            q = SearchQuery(origins=o[:12], destinations=d[:12], departure=dep, return_date=ret,
+                            currency=self.req.currency, cabin=self.req.cabin, adults=self.req.adults)
             res = kiwi.search(q)
         except Exception as e:
             self.errors[f"kiwi {','.join(o)}-{','.join(d)} {dep}"] = str(e)[:200]
@@ -226,12 +226,25 @@ def _chain(legs: list[Itinerary], req: PlanRequest, kind: str | None = None) -> 
                 kind=k, stopovers=stopovers, risks=list(dict.fromkeys(risks)))
 
 
+def _directions(tickets: list[Itinerary], dest: set[str]) -> tuple[list[Itinerary], list[Itinerary]]:
+    """Separate tickets of a round trip: those up to the destination, then the way home."""
+    for k, tk in enumerate(tickets):
+        if tk.slices[-1].destination in dest:
+            return tickets[: k + 1], tickets[k + 1:]
+    return tickets, []
+
+
 def _travel_ok(t: Trip, req: PlanRequest) -> bool:
     if req.max_travel_hours is None:
         return True
-    # compare per direction: sum outbound slices before the destination
-    out = sum(tk.slices[0].duration_min for tk in t.tickets if tk.slices) / 60
-    return out <= req.max_travel_hours * (2 if t.kind == "nested" else 1) + 1e-6
+    if t.kind == "nested":  # two round trip tickets: their outbound slices
+        out = sum(tk.slices[0].duration_min for tk in t.tickets if tk.slices) / 60
+        return out <= req.max_travel_hours * 2 + 1e-6
+    # the flying time of each direction on its own (the stay in between isn't travel)
+    dest = set(airports.expand(req.destinations))
+    outbound, back = _directions(t.tickets, dest)
+    hours = [sum(sl.duration_min for tk in part for sl in tk.slices) / 60 for part in (outbound, back) if part]
+    return all(h <= req.max_travel_hours + 1e-6 for h in hours)
 
 
 def _cheapest(items: list[Itinerary], n: int) -> list[Itinerary]:
@@ -415,7 +428,7 @@ def _nearby_trips(ctx: _Ctx, o: list[str], d: list[str], dep: date, ret: date | 
     return out
 
 
-def _reprice(ctx: _Ctx, trips: list[Trip], limit: int = 6, wait: float = 35.0) -> list[Trip]:
+def _reprice(ctx: _Ctx, trips: list[Trip], limit: int = 6, wait: float = 50.0) -> list[Trip]:
     """Re-price the legs of the best split and stopover trips on the airlines'
     own sites (and the other direct sources), and swap in a cheaper leg
     wherever the connection still works."""
@@ -445,10 +458,11 @@ def _reprice(ctx: _Ctx, trips: list[Trip], limit: int = 6, wait: float = 35.0) -
             ctx.errors[f"airlines {leg[0]}-{leg[1]} {leg[2]}"] = "airline sites were still searching"
         except Exception as e:
             ctx.errors[f"airlines {leg[0]}-{leg[1]} {leg[2]}"] = str(e)[:200]
-    out = []
-    for t in best:
-        tickets = list(t.tickets)
-        changed = False
+    dest = set(airports.expand(req.destinations))
+
+    def swap(tickets: list[Itinerary]) -> tuple[list[Itinerary], bool]:
+        """Cheaper legs within one direction, only where the connections still work."""
+        tickets, changed = list(tickets), False
         for i, tk in enumerate(tickets):
             key = (tk.slices[0].origin, tk.slices[-1].destination, tk.slices[0].departure.date())
             for alt in sorted(alts.get(key, []), key=lambda x: x.price):
@@ -458,16 +472,32 @@ def _reprice(ctx: _Ctx, trips: list[Trip], limit: int = 6, wait: float = 35.0) -
                 if _chain(trial, req):
                     tickets, changed = trial, True
                     break
-        if changed:
-            new = _chain(tickets, req)
-            if new:
-                out.append(new)
+        return tickets, changed
+
+    out = []
+    for t in best:
+        # a round trip is two journeys: the stay at the destination is not a connection
+        outbound, back = _directions(list(t.tickets), dest)
+        new_out, c1 = swap(outbound)
+        new_back, c2 = swap(back) if back else (back, False)
+        if not (c1 or c2):
+            continue
+        parts = [_chain(p, req) for p in (new_out, new_back) if p]
+        if any(p is None for p in parts):
+            continue
+        if new_back and new_back[0].slices[0].departure <= new_out[-1].slices[-1].arrival:
+            continue
+        stops = [s for p in parts for s in p.stopovers]
+        tickets = new_out + new_back
+        out.append(Trip(tickets=tickets, total_price=round(sum(x.price for x in tickets), 2), currency=req.currency,
+                        kind="stopover" if stops else "split", stopovers=stops,
+                        risks=list(dict.fromkeys(r for p in parts for r in p.risks))))
     return out
 
 
 def plan(req: PlanRequest) -> PlanResult:
-    o = airports.expand(req.origins)
-    d = airports.expand(req.destinations)
+    o = airports.expand(req.origins)[:12]
+    d = airports.expand(req.destinations)[:12]
     ctx = _Ctx(req)
     main_o, main_d = o[0], d[0]
     trips: list[Trip] = []

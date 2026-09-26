@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeout
 
 from . import airports, farememory, fx, sellers
-from .models import Itinerary, SearchQuery, SearchResult, Trip
+from .models import BadInput, Itinerary, SearchQuery, SearchResult, Trip
 from .models import DatePrice
 from .sources import (_browser, condor, flair, google, kiwi, kiwiweb, norse, serpapi, skyairline, skyscanner,
                       vivaaerobus, volaris, volotea, wideroe, wizzair)
@@ -358,7 +358,7 @@ def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> Search
         "destinations": airports.expand_nearby(q.destinations, q.nearby_km),
     })
     if not fx.known(q.currency):
-        raise ValueError(f"unknown currency {q.currency}")
+        raise BadInput(f"unknown currency {q.currency}")
     srcs = expand_sources(list(q.sources))
     if q.cabin != "economy":
         srcs = [s for s in srcs if s not in ECONOMY_ONLY]

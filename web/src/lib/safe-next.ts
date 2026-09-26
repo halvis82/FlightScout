@@ -6,7 +6,9 @@ export function safeNext(next: string | null | undefined, origin = "http://local
     const base = new URL(origin);
     const u = new URL(next, base);
     if (u.origin !== base.origin || !["http:", "https:"].includes(u.protocol)) return "/";
-    return u.pathname + u.search + u.hash || "/";
+    // "/.//evil.com" parses to the path "//evil.com", which a browser reads as another host
+    const path = u.pathname.replace(/^[/\\]+/, "/");
+    return path + u.search + u.hash || "/";
   } catch {
     return "/";
   }

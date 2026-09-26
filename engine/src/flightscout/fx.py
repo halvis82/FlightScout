@@ -80,8 +80,12 @@ def convert(amount: float, frm: str, to: str) -> float:
 
 
 def known(code: str) -> bool:
+    """A currency we can convert to. When the rate services can't be reached,
+    any three letter code passes (a USD search must not fail over it)."""
     try:
         convert(1.0, "EUR", code)
         return True
     except ValueError:
         return False
+    except Exception:
+        return len(code) == 3 and code.isalpha()

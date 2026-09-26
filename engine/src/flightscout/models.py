@@ -261,6 +261,11 @@ class Destination(BaseModel):
     lon: float | None = None
 
 
+class BadInput(ValueError):
+    """The caller asked for something that can't work (an unknown currency,
+    dates in the wrong order): answered as 422 by the API, not a crash."""
+
+
 class SearchQuery(BaseModel):
     origins: list[str]
     destinations: list[str]

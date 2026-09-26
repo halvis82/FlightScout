@@ -159,3 +159,28 @@ def test_multicity_uses_every_source_and_keeps_the_order(world, monkeypatch):
     assert best.total_price == 170 and best.tickets[0].source == "ryanair"
     for t in res.trips:
         assert t.tickets[1].slices[0].departure > t.tickets[0].slices[-1].arrival
+
+
+def test_reprice_keeps_round_trips_as_two_journeys(world, monkeypatch):
+    at = datetime(world.year, world.month, world.day, 7)
+    out1 = ticket(["SAN", "FCO"], at, hours=12, price=200)
+    out2 = ticket(["FCO", "OSL"], at + timedelta(days=1), hours=3, price=80)
+    back = ticket(["OSL", "SAN"], at + timedelta(days=8), hours=13, price=300)
+    trip = Trip(tickets=[out1, out2, back], total_price=580, currency="USD", kind="split")
+    cheaper = ticket(["FCO", "OSL"], at + timedelta(days=1), hours=3, price=45, source="level")
+
+    def fake_full(q, seller_rules=None):
+        if q.origins == ["FCO"]:
+            return SearchResult(query=q, trips=[Trip(tickets=[cheaper], total_price=45, currency="USD")])
+        return SearchResult(query=q, trips=[])
+
+    monkeypatch.setattr(search_mod, "search", fake_full)
+    req = planner.PlanRequest(origins=["SAN"], destinations=["OSL"], depart_start=world,
+                              return_start=world + timedelta(days=8), max_stopover_days=2)
+    ctx = planner._Ctx(req)
+    got = planner._reprice(ctx, [trip])
+    assert len(got) == 1 and got[0].total_price == 545
+    # the week in Oslo is the trip itself, not a stopover
+    assert all(s.airport != "OSL" for s in got[0].stopovers)
+    req2 = req.model_copy(update={"max_travel_hours": 20})
+    assert planner._travel_ok(got[0], req2)  # 16 h out and 13 h back, each under 20 h

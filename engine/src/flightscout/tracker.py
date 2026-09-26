@@ -70,8 +70,8 @@ def check(watch: dict[str, Any], budget: int = 12) -> list[dict]:
     if watch.get("trip_type") == "multicity":
         return check_multicity(watch)
     cur = watch.get("currency") or "USD"
-    o = airports.expand(watch["origins"])
-    d = airports.expand(watch["destinations"])
+    o = airports.expand(watch["origins"])[:12]
+    d = airports.expand(watch["destinations"])[:12]
     start = date.fromisoformat(watch["depart_start"])
     end = date.fromisoformat(watch.get("depart_end") or watch["depart_start"])
     today = date.today()
@@ -100,10 +100,10 @@ def check(watch: dict[str, Any], budget: int = 12) -> list[dict]:
             return []
 
     def google_obs(dep: date, n: int | None) -> list[dict]:
-        q = SearchQuery(origins=o, destinations=d, departure=dep,
-                        return_date=dep + timedelta(days=n) if n else None, currency=cur,
-                        cabin=cabin, adults=watch.get("adults") or 1, max_stops=watch.get("max_stops"))
         try:
+            q = SearchQuery(origins=o, destinations=d, departure=dep,
+                            return_date=dep + timedelta(days=n) if n else None, currency=cur,
+                            cabin=cabin, adults=watch.get("adults") or 1, max_stops=watch.get("max_stops"))
             res = google.search(q, top_n=2, wide=False)
         except Exception as e:
             log.warning("google failed %s %s: %s", watch.get("id"), dep, e)

@@ -46,7 +46,7 @@ def _db() -> sqlite3.Connection | None:
 def record(items: list[Itinerary]) -> None:
     """Remember one way, single slice tickets (the only prices that belong to
     exactly one route and day)."""
-    rows = []
+    best: dict[tuple, tuple] = {}
     now = time.time()
     for i in items:
         if len(i.slices) != 1 or i.return_pending or i.price <= 0:
@@ -56,7 +56,10 @@ def record(items: list[Itinerary]) -> None:
             usd = fx.convert(i.price, i.currency, "USD")
         except Exception:
             continue
-        rows.append((sl.origin, sl.destination, sl.departure.date().isoformat(), round(usd, 2), i.source, now))
+        k = (sl.origin, sl.destination, sl.departure.date().isoformat(), i.source)
+        if k not in best or usd < best[k][3]:
+            best[k] = (*k[:3], round(usd, 2), i.source, now)
+    rows = list(best.values())  # the cheapest per route, day and source in this batch
     if not rows:
         return
     with _lock:
@@ -64,7 +67,7 @@ def record(items: list[Itinerary]) -> None:
         if not c:
             return
         try:
-            # keep the cheaper of the old and new price per source and day
+            # a newer price replaces an older one (fares move)
             c.executemany("""INSERT INTO fares VALUES (?,?,?,?,?,?)
                 ON CONFLICT(origin, dest, day, source) DO UPDATE SET usd = excluded.usd, seen = excluded.seen""", rows)
             c.commit()

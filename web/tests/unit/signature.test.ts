@@ -61,5 +61,9 @@ describe("safeNext", () => {
     expect(safeNext("//example.org/x")).toBe("/");
     expect(safeNext("/\\example.org/x")).toBe("/");
     expect(safeNext(null)).toBe("/");
+    for (const bad of ["/.//evil.com", "/..//evil.com", "/a/..//evil.com", "/./\\evil.com"]) {
+      const out = safeNext(bad);
+      expect(out.startsWith("//") || out.startsWith("/\\")).toBe(false);
+    }
   });
 });
