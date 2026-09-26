@@ -76,6 +76,7 @@ async function viaLocalRunner<T>(p: string, body: Record<string, unknown>, guest
   const query = { ...body };
   delete query.quiet;
   delete query.sellerRules;
+  delete query.part; // stored like the server stores it
   const payload: Record<string, unknown> = { ...query };
   if ((kind === "search" || kind === "plan") && !payload.seller_rules) {
     const rules = guest ? guestSettings().sellerRules : ((await loadMe())?.settings?.sellerRules ?? []);
@@ -146,7 +147,9 @@ export async function api<T = unknown>(path: string, init?: Init): Promise<T> {
     const b = (init?.body ?? {}) as Record<string, unknown>;
     if (ENGINE_KINDS.has(p) && b.quiet !== true && !(typeof b.part === "number" && b.part > 0)) {
       try {
-        const id = await afterGuestEngineCall(p.slice(1), b, res as Record<string, unknown>, serverFetch);
+        const q = { ...b };
+        delete q.part; // stored like the server stores it
+        const id = await afterGuestEngineCall(p.slice(1), q, res as Record<string, unknown>, serverFetch);
         if (id != null) (res as Record<string, unknown>).search_id = id;
       } catch {}
     }
