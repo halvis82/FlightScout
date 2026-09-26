@@ -48,7 +48,7 @@ def put(key: str, value: Any) -> None:
         prune()
 
 
-MAX_AGE_S = 10 * 86400  # longer than any TTL in use (rates are refreshed twice a day)
+MAX_AGE_S = 31 * 86400  # longer than any TTL or fallback in use (rates are kept 30 days as a fallback)
 MAX_BYTES = 200 * 1024 * 1024
 
 

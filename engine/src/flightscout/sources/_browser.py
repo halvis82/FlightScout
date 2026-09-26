@@ -209,6 +209,7 @@ class _Conn:
                 "userAgent": self.ua, "acceptLanguage": "en-US,en", "userAgentMetadata": meta})
         elif self.headful:
             self._minimize(pg)
+        self.pages.pop(key, None)  # a recreated tab is the most recently used
         self.pages[key] = pg
         return pg
 

@@ -206,7 +206,7 @@ def _install_socket(port: int) -> Path:
         f"[Unit]\nDescription=FlightScout website (on demand)\n\n[Socket]\nListenStream=127.0.0.1:{port}\n\n"
         "[Install]\nWantedBy=sockets.target\n")
     (d / "flightscout-site.service").write_text(
-        f"[Unit]\nDescription=FlightScout website\n\n[Service]\nExecStart={exe} local site\n")
+        f"[Unit]\nDescription=FlightScout website\n\n[Service]\nExecStart=\"{exe}\" local site\n")
     subprocess.run(["systemctl", "--user", "daemon-reload"], check=False)
     subprocess.run(["systemctl", "--user", "enable", "--now", "flightscout-site.socket"], check=True)
     return d / "flightscout-site.socket"
@@ -252,8 +252,10 @@ def update():
     # the engine too: a website newer than its runner skips the runner
     uv = shutil.which("uv")
     if uv:
-        subprocess.run([uv, "tool", "install", "--force", "--reinstall", "--python", "3.12",
-                        f"flightscout[browser] @ {Path(c['repo']) / 'engine'}"], check=True, capture_output=True)
+        r = subprocess.run([uv, "tool", "install", "--force", "--reinstall", "--python", "3.12",
+                            f"flightscout[browser] @ {Path(c['repo']) / 'engine'}"], capture_output=True, text=True)
+        if r.returncode:
+            raise RuntimeError("updating the flightscout command failed: " + (r.stderr or r.stdout).strip()[-500:])
     else:
         out.print("[yellow]uv not found: the flightscout command itself was not updated.[/]")
     _build(c)

@@ -15,6 +15,7 @@ SUPPORTED = ["NOK", "EUR", "USD", "GBP", "MXN"]
 # (off entirely in browser mode) would mean a file read, or an HTTP call, each.
 _TTL = 12 * 3600
 _mem: dict[str, tuple[float, dict[str, float]]] = {}
+_failed: dict[str, float] = {}  # key -> when fetching last failed (not retried for a minute)
 _lock = threading.Lock()
 
 
@@ -28,14 +29,21 @@ def _cached(key: str, fetch) -> dict[str, float]:
             return hit[1]
         data = cache.get(key, ttl=_TTL)
         if not data:
-            try:
-                data = fetch()
-                cache.put(key, data)
-            except Exception:
-                # the rate service is down: yesterday's rates beat failing the search
+            if time.time() - _failed.get(key, 0) < 60:
                 data = cache.get(key, ttl=30 * 86400)
                 if not data:
-                    raise
+                    raise RuntimeError("exchange rates unavailable (retrying in a minute)")
+            else:
+                try:
+                    data = fetch()
+                    cache.put(key, data)
+                    _failed.pop(key, None)
+                except Exception:
+                    _failed[key] = time.time()
+                    # the rate service is down: yesterday's rates beat failing the search
+                    data = cache.get(key, ttl=30 * 86400)
+                    if not data:
+                        raise
         _mem[key] = (time.time(), data)
         return data
 

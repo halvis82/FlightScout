@@ -2,7 +2,7 @@
 import { placeSignature, watchSignature } from "./signature";
 import { HttpError } from "./http-error";
 import { placeInput } from "./place-validate";
-import { addDays } from "./format";
+import { addDays, isoDate } from "./format";
 import { cleanCurrency, cleanOrigins, cleanPlanner, cleanSellerRules } from "./settings-validate";
 import { checkWatch as checkWatchFields, isDate, toColumns, type WatchIn } from "./watch-validate";
 // Guest mode: the same /api/v1 routes the server offers for signed in users,
@@ -292,7 +292,7 @@ function saveWatch(w: Watch) {
 async function recordObservations(w: Watch, obs: ObservationInput[], serverFetch: ServerFetch) {
   const r = await getRates(serverFetch);
   const now = new Date().toISOString();
-  const today = now.slice(0, 10);
+  const today = isoDate(new Date()); // the visitor's own date
   // only real, future prices in a currency we can compare (like the server)
   const good = obs.filter(
     (o) => o && typeof o.price === "number" && Number.isFinite(o.price) && o.price > 0 && isDate(o.depart_date) && o.depart_date >= today && Boolean(r[String(o.currency).toUpperCase()]),

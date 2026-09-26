@@ -168,11 +168,10 @@ def _calendar_month(origin: str, dest: str, year: int, month: int) -> list[dict]
     # LEVEL's bot wall challenges some browser fingerprints (Chrome's since 2026-09) and lets others through
     for fp in ("safari", "chrome"):
         r = cr.get(f"{SITE}/nwe/flights/api/calendar/", params=params, impersonate=fp, timeout=30)
-        r.raise_for_status()
-        if "json" in (r.headers.get("content-type") or ""):
+        if r.ok and "json" in (r.headers.get("content-type") or ""):
             break
     else:
-        raise RuntimeError("level: calendar blocked by a bot check")
+        raise RuntimeError(f"level: calendar blocked by a bot check (HTTP {r.status_code})")
     out = [d for d in (r.json().get("data") or {}).get("dayPrices") or [] if d.get("price")]
     cache.put(key, out)
     return out

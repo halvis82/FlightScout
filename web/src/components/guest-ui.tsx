@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { useApp } from "./app-context";
@@ -63,8 +63,10 @@ export function ImportGuestData() {
   const settingsChanged = signedIn && guestSettingsChanged(me?.settings?.currency ?? "USD");
   const worthAsking = Boolean(snap && (snap.places.length || snap.watches.length || settingsChanged));
   // only recent searches: bring them along quietly instead of asking
+  const quietStarted = useRef(false); // once, even when React runs effects twice in development
   useEffect(() => {
-    if (!snap || worthAsking) return;
+    if (!snap || worthAsking || quietStarted.current) return;
+    quietStarted.current = true;
     (async () => {
       for (const r of [...snap.searches].reverse()) {
         if (r.payload) await api("/results", { body: { kind: r.kind, query: r.query, payload: r.payload, origin: "web" } }).catch(() => {});

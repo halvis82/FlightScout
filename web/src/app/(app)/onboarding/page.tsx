@@ -12,8 +12,9 @@ type Row = { label: string; codes: string[]; kind: "home" | "frequent" | "intere
 
 export default function Onboarding() {
   const router = useRouter();
-  const { refreshMe, refreshPlaces, places } = useApp();
-  const [currency, setCurrency] = useState("USD");
+  const { refreshMe, refreshPlaces, places, settings } = useApp();
+  // starts from what the account already has (a returning user keeps it)
+  const [currency, setCurrency] = useState(settings?.currency ?? "USD");
   const [rows, setRows] = useState<Row[]>([{ label: "", codes: [], kind: "home" }]);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -34,7 +35,7 @@ export default function Onboarding() {
       await api("/settings", {
         method: "PATCH",
         // skipping keeps whatever the account already has
-        body: skip ? { onboarded: true } : { currency, onboarded: true, defaultOrigins: home ? home.codes : [] },
+        body: skip ? { onboarded: true } : { currency, onboarded: true, ...(home ? { defaultOrigins: home.codes } : {}) },
       });
       await Promise.all([refreshMe(), refreshPlaces()]);
       router.replace("/");

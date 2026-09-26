@@ -125,8 +125,10 @@ def search(q: SearchQuery) -> list[Itinerary]:
                     if "invalid" not in json.dumps(data).lower():
                         # anything else is a hiccup, not an answer: don't remember it
                         raise RuntimeError(f"transavia: unexpected answer {json.dumps(data)[:120]}")
-                    data = {"data": {}}  # "Invalid ... request": Transavia doesn't fly it
-                cache.put(key, data)
+                    data = {"data": {}}  # "Invalid ... request": usually not flown, but also a
+                    # missing cookie, so it's not remembered
+                else:
+                    cache.put(key, data)
             outs, backs = parse(data, q.adults)
             if q.return_date and backs is None:
                 continue

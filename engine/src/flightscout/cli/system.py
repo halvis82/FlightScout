@@ -119,7 +119,7 @@ def _install_linux(exe: str, port: int, idle: int) -> Path:
         f"[Unit]\nDescription=FlightScout local runner (on demand)\n\n[Socket]\nListenStream=127.0.0.1:{port}\n\n"
         "[Install]\nWantedBy=sockets.target\n")
     (d / "flightscout-runner.service").write_text(
-        f"[Unit]\nDescription=FlightScout local runner\n\n[Service]\nExecStart={exe} serve --idle {idle}\n")
+        f"[Unit]\nDescription=FlightScout local runner\n\n[Service]\nExecStart=\"{exe}\" serve --idle {idle}\n")
     subprocess.run(["systemctl", "--user", "daemon-reload"], check=False)
     subprocess.run(["systemctl", "--user", "enable", "--now", "flightscout-runner.socket"], check=True)
     return d / "flightscout-runner.socket"

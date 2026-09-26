@@ -58,7 +58,11 @@ export async function recordObservations(watch: Watch, obs: ObservationInput[]) 
     .where(and(eq(schema.observations.watchId, watch.id), gte(schema.observations.observedAt, since), gte(schema.observations.departDate, today)))
     .orderBy(asc(schema.observations.priceUsd))
     .limit(1);
-  if (!top || top.priceUsd == null) return { inserted: rows.length, alerts: 0 };
+  // no usable best (or no rate for the watch's own currency, e.g. rates offline): record, don't judge
+  if (!top || top.priceUsd == null || !hasRate(rates, watch.currency)) {
+    await db.update(schema.watches).set({ lastCheckedAt: now }).where(eq(schema.watches.id, watch.id));
+    return { inserted: rows.length, alerts: 0 };
+  }
   const bestVal = Math.round(convertWith(rates, top.priceUsd, "USD", watch.currency) * 100) / 100;
   const prev = watch.bestPrice;
   const lowest = watch.lowestPrice == null ? bestVal : Math.min(watch.lowestPrice, bestVal);

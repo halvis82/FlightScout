@@ -466,7 +466,8 @@ function SearchPage() {
           const today = isoDate(new Date());
           const len = r.ret ? Math.max(1, dayDiff(r.depart, r.ret)) : 7;
           const depart = r.depart < today ? today : r.depart;
-          const ret = r.ret && r.ret > depart ? r.ret : addDays(depart, len);
+          // moved forward: keep the trip length, not the old return date
+          const ret = r.ret && depart === r.depart ? r.ret : addDays(depart, len);
           const next: SearchForm = { ...form, from: r.from, to: r.to, tripType: r.tripType, depart, ret };
           setForm(next);
         }}

@@ -120,8 +120,13 @@ class _Ctx:
             self.errors[f"google {','.join(o)}-{','.join(d)} {dep}"] = str(e)[:200]
             return []
         out = [sellers.annotate(to_currency(i, self.req.currency)) for i in res]
-        farememory.record(out)
+        self.remember(out)
         return out
+
+    def remember(self, items: list[Itinerary]) -> None:
+        # the fare memory compares one adult economy fares only
+        if self.req.adults == 1 and self.req.cabin == "economy":
+            farememory.record(items)
 
     def kwindow(self, o: list[str], d: list[str], lo: date, hi: date) -> list[Itinerary]:
         """Kiwi one way tickets for up to 6 x 6 airports over a date window."""
@@ -134,7 +139,7 @@ class _Ctx:
             self.errors[f"kiwi {','.join(o)}-{','.join(d)} {lo}"] = str(e)[:200]
             return []
         out = [sellers.annotate(to_currency(i, self.req.currency)) for i in res]
-        farememory.record(out)
+        self.remember(out)
         return out
 
     def ksearch(self, o: list[str], d: list[str], dep: date, ret: date | None = None) -> list[Itinerary]:
@@ -362,17 +367,19 @@ def discover_hubs(origin: str, dest: str, lo: date, hi: date, limit: int = 8,
     direct = airports.haversine_km(origin, dest)
     if not math.isfinite(direct) or direct < 300:
         return []
-    with ThreadPoolExecutor(max_workers=2) as ex:
-        fa = ex.submit(kiwiweb.explore, origin, lo, hi, "USD")
-        fb = ex.submit(kiwiweb.explore, dest, lo, hi, "USD")
-        a: dict[str, float] = {}
-        b: dict[str, float] = {}
-        for f, into in ((fa, a), (fb, b)):
-            try:
-                for x in f.result(timeout=40):
-                    into[x.destination] = min(x.price, into.get(x.destination, x.price))
-            except Exception as e:
-                log.info("hub discovery: %s", e)
+    ex = ThreadPoolExecutor(max_workers=2)
+    fa = ex.submit(kiwiweb.explore, origin, lo, hi, "USD")
+    fb = ex.submit(kiwiweb.explore, dest, lo, hi, "USD")
+    a: dict[str, float] = {}
+    b: dict[str, float] = {}
+    end = time.monotonic() + 30
+    for f, into in ((fa, a), (fb, b)):
+        try:
+            for x in f.result(timeout=max(0.1, end - time.monotonic())):
+                into[x.destination] = min(x.price, into.get(x.destination, x.price))
+        except Exception as e:
+            log.info("hub discovery: %s", e)
+    ex.shutdown(wait=False)  # a slow answer is left behind (it still fills the cache)
     # the fare memory knows exact legs: origin to X and X to dest
     for h, p in farememory.from_origin(origin, lo, hi).items():
         a[h] = min(p, a.get(h, p))
@@ -515,7 +522,8 @@ def plan(req: PlanRequest) -> PlanResult:
     static = [h for h in static if h not in o and h not in d]
     found = [h for h in found if h not in o and h not in d and h not in near]
     rest = [x for pair in itertools.zip_longest(found, static) for x in pair if x]
-    cap = max(req.max_hubs, len(near) + 2) + min(2, len(found))
+    # max_hubs=0: only the gateways near either end
+    cap = len(near) if req.max_hubs == 0 else max(req.max_hubs, len(near) + 2) + min(2, len(found))
     hubs = list(dict.fromkeys(near + rest))[:cap]
 
     # 1. Direct (single ticket) options.
@@ -575,8 +583,10 @@ def plan(req: PlanRequest) -> PlanResult:
                 best_hubs = list(dict.fromkeys(near + (sorted(hub_rank, key=hub_rank.get)[:4] or hubs[:4])))[:6]
                 trips += _nested(ctx, o, d, dep_dates[0], ret_dates[0], best_hubs)
 
-    # 4. Nearby airports at either end.
-    trips += _nearby_trips(ctx, o, d, dep_dates[0], ret_dates[0] if ret_dates else None)
+    # 4. Nearby airports at either end (a round trip within the trip length limit).
+    ret0 = ret_dates[0] if ret_dates else None
+    if not (ret0 and req.max_trip_days and (ret0 - dep_dates[0]).days > req.max_trip_days):
+        trips += _nearby_trips(ctx, o, d, dep_dates[0], ret0)
 
     trips = [t for t in trips if _travel_ok(t, req)]
     trips = sellers.apply_rules(trips, req.seller_rules)

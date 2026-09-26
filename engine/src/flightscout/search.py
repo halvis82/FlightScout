@@ -400,7 +400,8 @@ def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> Search
         except ValueError as e:  # a source answering in a currency we can't convert
             errors[i.source] = str(e)
     items = merge(_flag_outliers(converted))
-    farememory.record(items)
+    if q.adults == 1 and q.cabin == "economy":  # the fare memory compares one adult economy fares
+        farememory.record(items)
     for i in items:
         if (n := endpoint_note(i, q.origins, q.destinations)) and n not in i.warnings:
             i.warnings.append(n)

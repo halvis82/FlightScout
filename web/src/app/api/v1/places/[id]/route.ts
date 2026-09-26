@@ -20,6 +20,7 @@ export const PATCH = route<Ctx>(async (req, { params }) => {
   const [prev] = await db.select().from(schema.places).where(and(eq(schema.places.id, id), eq(schema.places.userId, userId)));
   if (!prev) throw new HttpError(404, "not found");
   const p = placeInput(await body<unknown>(req), true);
+  if (!Object.keys(p).length) return json(prev); // nothing to change
   if (p.signature && p.signature !== prev.signature) {
     const [clash] = await db
       .select({ id: schema.places.id })
