@@ -71,31 +71,63 @@ export function formToParams(f: SearchForm) {
   return p;
 }
 
+// A shared or hand edited link must never break the page: anything invalid
+// falls back to the default instead of reaching the search (or crashing).
+const ISO = /^\d{4}-\d{2}-\d{2}$/;
+const validDate = (d: string | null | undefined): d is string => !!d && ISO.test(d) && !Number.isNaN(Date.parse(d));
+const pickOne = <T extends string | number>(v: T | undefined, ok: readonly T[], fallback: T): T => (v !== undefined && ok.includes(v) ? v : fallback);
+
 export function paramsToForm(p: URLSearchParams, base: SearchForm): SearchForm {
-  const list = (k: string) => (p.get(k) ? p.get(k)!.split(",").filter(Boolean) : undefined);
+  const codes = (k: string) => {
+    const v = p.get(k);
+    if (!v) return undefined;
+    return v
+      .split(",")
+      .map((c) => c.trim().toUpperCase())
+      .filter((c) => /^[A-Z]{3}$/.test(c));
+  };
+  const today = new Date().toISOString().slice(0, 10);
+  const num = (k: string) => (p.get(k) != null && p.get(k) !== "" ? Number(p.get(k)) : undefined);
+  const d = p.get("d");
+  const depart = validDate(d) && d >= today ? d : base.depart;
+  const r = p.get("r");
+  // keep the trip length when a past link is moved forward; a return before departure gets a week
+  const nights = validDate(d) && validDate(r) && r > d ? Math.round((Date.parse(r) - Date.parse(d)) / 86400_000) : 7;
+  const ret = validDate(r) && r > depart ? r : addDays(depart, nights);
+  const tt = p.get("tt") as SearchForm["tripType"] | null;
+  const legs = (() => {
+    try {
+      const raw = p.get("ml") ? (JSON.parse(p.get("ml")!) as MultiLeg[]) : null;
+      if (!Array.isArray(raw)) return base.legs;
+      const ok = raw
+        .filter((l) => l && Array.isArray(l.to))
+        .map((l) => ({
+          to: l.to.map((c) => String(c).toUpperCase()).filter((c) => /^[A-Z]{3}$/.test(c)),
+          date: validDate(l.date) && l.date >= today ? l.date : depart,
+          flex: l.flex === "by" ? ("by" as const) : pickOne(Number(l.flex), [0, 1, 2, 3, 7], 0),
+        }));
+      return ok.length ? ok : base.legs;
+    } catch {
+      return base.legs;
+    }
+  })();
   return {
     ...base,
-    from: list("from") ?? base.from,
-    to: list("to") ?? base.to,
-    depart: p.get("d") ?? base.depart,
-    ret: p.get("r") ?? base.ret,
-    tripType: (p.get("tt") as SearchForm["tripType"]) ?? (p.get("r") ? "roundtrip" : p.get("d") ? "oneway" : base.tripType),
-    cabin: (p.get("cabin") as SearchForm["cabin"]) ?? base.cabin,
-    adults: Number(p.get("adults") ?? base.adults),
-    stops: p.get("stops") ?? base.stops,
+    from: codes("from") ?? base.from,
+    to: codes("to") ?? base.to,
+    depart,
+    ret,
+    tripType: tt === "oneway" || tt === "roundtrip" || tt === "multicity" ? tt : p.get("r") ? "roundtrip" : p.get("d") ? "oneway" : base.tripType,
+    cabin: pickOne(p.get("cabin") as SearchForm["cabin"] | undefined, ["economy", "premium", "business", "first"] as const, base.cabin),
+    adults: Number.isInteger(num("adults")) && num("adults")! >= 1 && num("adults")! <= 9 ? num("adults")! : base.adults,
+    stops: pickOne(p.get("stops") ?? undefined, ["any", "0", "1", "2"], base.stops),
     currency: p.get("cur") ?? base.currency,
-    sources: (list("src") as Source[]) ?? base.sources,
-    flex: Number(p.get("flex") ?? base.flex),
-    retFlex: Number(p.get("rflex") ?? p.get("flex") ?? base.retFlex),
+    sources: (p.get("src") ? (p.get("src")!.split(",").filter(Boolean) as Source[]) : undefined) ?? base.sources,
+    flex: pickOne(num("flex"), [0, 1, 2, 3, 7], base.flex),
+    retFlex: pickOne(num("rflex") ?? num("flex"), [0, 1, 2, 3, 7], base.retFlex),
     smart: p.has("smart") ? p.get("smart") === "1" : base.smart,
-    legs: (() => {
-      try {
-        return p.get("ml") ? (JSON.parse(p.get("ml")!) as MultiLeg[]) : base.legs;
-      } catch {
-        return base.legs;
-      }
-    })(),
-    nearby: Number(p.get("near") ?? base.nearby),
+    legs,
+    nearby: pickOne(num("near"), [0, 50, 100, 150, 250], base.nearby),
   };
 }
 

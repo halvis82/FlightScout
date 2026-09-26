@@ -57,12 +57,15 @@ export function AirportInput({
         out.push({ key: `p${p.id}`, title: p.label, sub: p.codes.map((c) => `${c}${cityOf(c) && cityOf(c) !== p.label ? ` (${cityOf(c)})` : ""}`).join(", "), codes: p.codes, kind: "place" });
       return out.slice(0, 10);
     }
+    // an exact airport code comes first ("SAN" is San Diego, not a city group that contains "san")
+    const exact = rows?.find((r) => r.iata.toLowerCase() === s);
+    if (exact) out.push({ key: exact.iata, title: airportWithCity(exact.iata), sub: `${exact.iata} · ${countryName(exact.country)}`, codes: [exact.iata], kind: "airport", star: exact.iata });
     for (const p of places) if (fold(p.label).includes(s)) out.push({ key: `p${p.id}`, title: p.label, sub: `Saved · ${p.codes.join(", ")}`, codes: p.codes, kind: "place" });
     for (const [code, m] of Object.entries(METROS))
       if (code.toLowerCase().startsWith(s) || fold(m.label).includes(s)) out.push({ key: code, title: m.label, sub: `${code} · ${m.codes.join(", ")}`, codes: [code], kind: "metro" });
     if (rows)
       for (const r of searchAirports(rows, s, 8))
-        out.push({ key: r.iata, title: airportWithCity(r.iata), sub: `${r.iata} · ${countryName(r.country)}`, codes: [r.iata], kind: "airport", star: r.iata });
+        if (r.iata !== exact?.iata) out.push({ key: r.iata, title: airportWithCity(r.iata), sub: `${r.iata} · ${countryName(r.country)}`, codes: [r.iata], kind: "airport", star: r.iata });
     return out.slice(0, 10);
   }, [q, rows, places]);
 

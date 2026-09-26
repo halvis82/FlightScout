@@ -167,6 +167,15 @@ function SearchPage() {
       const timer = setInterval(() => setElapsed(Math.round((Date.now() - t0) / 1000)), 1000);
       router.replace(`/?${formToParams(f).toString()}`, { scroll: false });
       if (f.tripType === "multicity") {
+        // flights must be in date order; say which one isn't instead of searching
+        const bad = f.legs.findIndex((l, i) => i > 0 && l.flex !== "by" && l.date < f.legs[i - 1].date);
+        if (bad > 0) {
+          clearInterval(timer);
+          setBusy(false);
+          setStale(false);
+          setErr(`Flight ${bad + 1} leaves before flight ${bad}. Check the dates.`);
+          return;
+        }
         const legs = f.legs.map((l, i) => {
           const prevDate = i > 0 ? f.legs[i - 1].date : null;
           const by = l.flex === "by";
@@ -444,7 +453,9 @@ function SearchPage() {
       {/* Watch works before searching too: as soon as the form is complete */}
       {(hasResults ||
         (form.from.length > 0 &&
-          (form.tripType === "multicity" ? form.legs.length > 0 && form.legs.every((l) => l.to.length) : form.to.length > 0))) && (
+          (form.tripType === "multicity"
+            ? form.legs.length > 0 && form.legs.every((l, i) => l.to.length && (i === 0 || l.date >= form.legs[i - 1].date))
+            : form.to.length > 0))) && (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="text-sm text-muted">
             {form.tripType === "multicity"

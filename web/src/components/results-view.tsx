@@ -68,7 +68,9 @@ export function ResultsView({
   const [timeOfDay, setTimeOfDay] = useState("any");
   const [sources, setSources] = useState<string[]>([]);
   const [hover, setHover] = useState<Trip | null>(null);
-  const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  // kept in USD so switching currency keeps the same limit
+  const [maxUsd, setMaxUsd] = useState<number | null>(null);
+  const maxPrice = maxUsd == null ? null : convert(maxUsd, "USD");
   const [limit, setLimit] = useState(60);
   const { money } = useApp();
   const priceRange = useMemo(() => {
@@ -217,7 +219,7 @@ export function ResultsView({
                 max={priceRange[1]}
                 step={Math.max(1, Math.round((priceRange[1] - priceRange[0]) / 100))}
                 value={maxPrice ?? priceRange[1]}
-                onChange={(e) => setMaxPrice(Number(e.target.value) >= priceRange[1] ? null : Number(e.target.value))}
+                onChange={(e) => setMaxUsd(Number(e.target.value) >= priceRange[1] ? null : convert(Number(e.target.value), settings?.currency ?? "USD", "USD"))}
                 className="w-28 accent-[var(--accent)]"
                 aria-label="Maximum price"
               />

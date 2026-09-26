@@ -40,7 +40,9 @@ export function ExplorePanel({
   const [failed, setFailed] = useState<string[]>([]);
   const [sort, setSort] = useState<Sort>("price");
   const [hover, setHover] = useState<string | null>(null);
-  const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  // kept in USD so switching currency keeps the same limit
+  const [maxUsd, setMaxUsd] = useState<number | null>(null);
+  const maxPrice = maxUsd == null ? null : convert(maxUsd, "USD");
   const [when, setWhen] = useState<"any" | "mine">("any");
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -186,7 +188,7 @@ export function ExplorePanel({
                 max={range[1]}
                 step={Math.max(1, Math.round((range[1] - range[0]) / 100))}
                 value={maxPrice ?? range[1]}
-                onChange={(e) => setMaxPrice(Number(e.target.value) >= range[1] ? null : Number(e.target.value))}
+                onChange={(e) => setMaxUsd(Number(e.target.value) >= range[1] ? null : convert(Number(e.target.value), currency, "USD"))}
                 className="w-28 accent-[var(--accent)]"
                 aria-label="Maximum price"
               />
