@@ -45,6 +45,7 @@ function fromParams(q: URLSearchParams) {
     maxDays: max && /^\d{1,3}$/.test(max) ? max : "",
     keepOrder: q.get("o") === "1",
     cur: cur && (CURRENCIES as readonly string[]).includes(cur) ? cur : null,
+    adults: /^[1-9]$/.test(q.get("a") ?? "") ? Number(q.get("a")) : 1,
     ready: stops.length > 0 && Boolean(code(q.get("s"))),
   };
 }
@@ -70,6 +71,7 @@ function TripBuilder() {
   const [maxDays, setMaxDays] = useState<string>(init.maxDays);
   const [keepOrder, setKeepOrder] = useState(init.keepOrder);
   const [cur, setCur] = useState<string | null>(init.cur);
+  const [adults, setAdults] = useState(init.adults);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [res, setRes] = useState<PlanResult | null>(null);
@@ -101,6 +103,7 @@ function TripBuilder() {
     if (maxDays) q.set("m", maxDays);
     if (keepOrder) q.set("o", "1");
     if (cur) q.set("c", cur);
+    if (adults > 1) q.set("a", String(adults));
     router.replace(`/trip?${q.toString()}`, { scroll: false });
     setBusy(true);
     setErr(null);
@@ -116,6 +119,7 @@ function TripBuilder() {
           max_trip_days: maxDays ? Number(maxDays) : null,
           keep_order: keepOrder,
           currency: currencyUsed,
+          adults,
         },
       });
       setRes(r);
@@ -186,7 +190,7 @@ function TripBuilder() {
               <Plus className="size-3.5" /> Add a place
             </Button>
           </div>
-          <div className="grid grid-cols-2 gap-2 border-t border-border pt-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 border-t border-border pt-3 sm:grid-cols-5">
             <Field label="Leave between">
               <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
             </Field>
@@ -195,6 +199,15 @@ function TripBuilder() {
             </Field>
             <Field label="Max trip days">
               <Input type="number" min={1} value={maxDays} placeholder="No limit" onChange={(e) => setMaxDays(e.target.value)} />
+            </Field>
+            <Field label="Travelers">
+              <Select value={adults} onChange={(e) => setAdults(Number(e.target.value))}>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                  <option key={n} value={n}>
+                    {n} {n > 1 ? "adults" : "adult"}
+                  </option>
+                ))}
+              </Select>
             </Field>
             <Field label="Currency">
               <Select value={currencyUsed} onChange={(e) => setCur(e.target.value)}>
@@ -219,7 +232,7 @@ function TripBuilder() {
         </div>
       )}
       {err && <ErrorNote>{err}</ErrorNote>}
-      {res && (res.trips.length ? <ResultsView trips={res.trips} errors={res.errors} plan={res} /> : <Empty title="No complete trip found">Try a wider date window, more flexible nights, or letting FlightScout reorder the stops.</Empty>)}
+      {res && (res.trips.length ? <ResultsView trips={res.trips} errors={res.errors} plan={res} query={{ adults }} /> : <Empty title="No complete trip found">Try a wider date window, more flexible nights, or letting FlightScout reorder the stops.</Empty>)}
     </div>
   );
 }
