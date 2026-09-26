@@ -186,6 +186,18 @@ def search(q: SearchQuery) -> list[Itinerary]:
     return out
 
 
+def search_window(origins: list[str], destinations: list[str], lo: date, hi: date, currency: str,
+                  adults: int = 1, cabin: str = "economy", limit: int = 100) -> list[Itinerary]:
+    """One way tickets from any of ``origins`` to any of ``destinations``
+    (up to 6 each) leaving lo..hi, in one request. The planner prices a whole
+    row of layovers at once with it."""
+    itin = {"source": _ids(origins[:6]), "destination": _ids(destinations[:6]),
+            "outboundDepartureDate": _range(max(lo, date.today()), hi)}
+    v = {"s": {"itinerary": itin, **_passengers(adults, cabin)}, "f": _filter(limit), "o": _options(currency)}
+    res = _gql(Q_ONEWAY, v, "SearchOneWayItinerariesQuery")
+    return [i for it in res.get("itineraries") or [] if (i := _itinerary(it, currency))]
+
+
 def deeplink(origin: str, dest: str, dep: date, ret: date | None = None) -> str:
     """kiwi.com results page. Kiwi resolves airport codes in the path."""
     tail = f"/{dep.isoformat()}" + (f"/{ret.isoformat()}" if ret else "/no-return")

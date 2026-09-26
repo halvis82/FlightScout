@@ -18,6 +18,7 @@ const KIND_LABEL: Record<string, string> = {
   stopover: "Stopover",
   nested: "Nested round trips",
   multicity: "Multi city",
+  nearby: "Nearby airport",
 };
 
 function minutesBetween(a: string, b: string) {
@@ -81,9 +82,11 @@ export function TripCard({
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-11 text-xs text-muted">
               {trip.kind !== "single" && (
                 <span className="font-medium text-info">
-                  {KIND_LABEL[trip.kind]} · {trip.tickets.length} tickets
+                  {KIND_LABEL[trip.kind]}
+                  {trip.tickets.length > 1 && ` · ${trip.tickets.length} tickets`}
                 </span>
               )}
+              {trip.note && <span className="text-warn">{trip.note}</span>}
               {trip.stopovers.map((s) => (
                 <span key={s.airport + s.hours}>
                   {stayLabel(s, slices)} in <Code code={s.airport} compact />

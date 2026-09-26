@@ -82,7 +82,7 @@ Sites limit how often one address can search, and the server's address is shared
 ## Features
 
 - **Search**: one way, round trip and multi city, flexible dates per side, nearby airports, presets (weekend, a week, two weeks), prices in the date picker. Results stream in by source group with a clear searching and complete state, and mirror Google Flights' "Best" (its top departing flights, in its order) and "Cheapest" views.
-- **Smart routes**: cheaper combinations of separate tickets, stopovers, nested round trips and nearby gateways, with self transfer risks spelled out.
+- **Smart routes**: cheaper combinations of separate tickets, stopovers, nested round trips and nearby airports, with self transfer risks spelled out. Layovers come from hubs on the way, from cities that real fares show are cheap from both ends (other countries on the way, low cost bases), and from a memory of the prices every search has seen. Each leg is priced on Google Flights and Kiwi, and the best combinations are re-priced on the airlines' own sites. Tickets that start or end at another airport than asked (a city search landing 110 km away) are labeled with the distance.
 - **Explore**: the cheapest places to go from your airports, on a map, when you leave the destination empty.
 - **Watchlist**: watch any search (before or after searching), price history, prices by date, the live flight list, alerts in the page, by push and by email.
 - **Sellers**: every result says who sells it (airline, agency, metasearch); block or warn about sellers; bait prices far below the market are flagged; hidden city fares are marked.

@@ -5,12 +5,13 @@ from __future__ import annotations
 
 import contextvars
 import logging
+import math
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeout
 
-from . import airports, fx, sellers
+from . import airports, farememory, fx, sellers
 from .models import Itinerary, SearchQuery, SearchResult, Trip
 from .models import DatePrice
 from .sources import (_browser, condor, flair, google, kiwi, kiwiweb, norse, serpapi, skyairline, skyscanner,
@@ -245,6 +246,21 @@ def _flag_outliers(items: list[Itinerary]) -> list[Itinerary]:
     return items
 
 
+def endpoint_note(it: Itinerary, origins: list[str], destinations: list[str]) -> str | None:
+    """Some sites sell a city: "Oslo" can land at Sandefjord (TRF), 110 km
+    away. Say so when a ticket starts or ends at another airport than asked."""
+    notes = []
+    for code, asked, lands in ((it.slices[0].origin, origins, False), (it.slices[0].destination, destinations, True)):
+        if asked and code not in asked:
+            ref = min(asked, key=lambda a: airports.haversine_km(code, a))
+            km = airports.haversine_km(code, ref)
+            ap = airports.get(code)
+            place = f"{code} ({(ap.city or ap.name) if ap else code})"
+            verb = "Lands at" if lands else "Leaves from"
+            notes.append(f"{verb} {place}, {km:.0f} km from {ref}" if math.isfinite(km) else f"{verb} {place}")
+    return "; ".join(notes) or None
+
+
 def merge(items: list[Itinerary]) -> list[Itinerary]:
     """Same flights from the same kind of seller collapse into the cheapest.
     The same flights sold by an OTA and via Google both stay, since they are
@@ -354,6 +370,10 @@ def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> Search
         if i.return_pending and i.pending_return is None:
             i.pending_return = q.return_date
     items = merge(_flag_outliers([sellers.annotate(to_currency(i, q.currency)) for i in found]))
+    farememory.record(items)
+    for i in items:
+        if (n := endpoint_note(i, q.origins, q.destinations)) and n not in i.warnings:
+            i.warnings.append(n)
     trips = [Trip(tickets=[i], total_price=i.price, currency=i.currency, kind="single",
                   risks=list(i.warnings)) for i in items]
     trips = sellers.apply_rules(trips, seller_rules)

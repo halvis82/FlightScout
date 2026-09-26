@@ -113,7 +113,7 @@ def search(
     if f != Fmt.table:
         return
     singles = [t for t in trips if t.kind == "single"]
-    combos = [t for t in trips if t.kind != "single"]
+    combos = [t for t in trips if t.kind not in ("single", "nearby")]
     if singles and combos and min(c.total_price for c in combos) < min(s.total_price for s in singles):
         best = min(combos, key=lambda t: t.total_price)
         out.print(f"[green]Cheaper combination: {best.total_price:,.0f} {best.currency} via {'-'.join(best.route)} "

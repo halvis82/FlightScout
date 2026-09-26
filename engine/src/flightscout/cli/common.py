@@ -172,7 +172,8 @@ def trip_rows(trips) -> list[dict]:
             "sources": ",".join(sorted({tk.source for tk in t.tickets})),
             "self_transfer": any(tk.self_transfer for tk in t.tickets),
             "return_pending": any(tk.return_pending for tk in t.tickets),
-            "savings_vs_direct": t.savings_vs_direct, "booking_urls": " ".join(tk.booking_url for tk in t.tickets),
+            "savings_vs_direct": t.savings_vs_direct, "note": t.note or "",
+            "booking_urls": " ".join(tk.booking_url for tk in t.tickets),
         })
     return rows
 
@@ -191,6 +192,8 @@ def trips_table(trips, limit: int, title: str) -> Table:
             kind += " [yellow]self transfer[/yellow]"
         if any(tk.return_pending for tk in tr.tickets):
             kind = "round trip [dim](pick return on Google)[/dim]"
+        if tr.note:
+            kind += f"\n[yellow]{tr.note}[/yellow]"
         links = "\n".join(f"[link={tk.booking_url}]{tk.seller or tk.source}[/link]" for tk in tr.tickets)
         price = f"{tr.total_price:,.0f} {tr.currency}"
         if tr.savings_vs_direct and tr.savings_vs_direct > 0:

@@ -60,7 +60,7 @@ export interface Itinerary {
   trip_type: "oneway" | "roundtrip" | "multi";
 }
 
-export type TripKind = "single" | "split" | "stopover" | "nested" | "multicity";
+export type TripKind = "single" | "split" | "stopover" | "nested" | "multicity" | "nearby";
 
 export interface Trip {
   id: string;
@@ -70,6 +70,7 @@ export interface Trip {
   kind: TripKind;
   stopovers: { airport: string; hours: number }[];
   risks: string[];
+  note?: string | null; // "nearby": "Lands at TRF (Sandefjord), 110 km from OSL"
   savings_vs_direct?: number | null;
   score?: number | null;
   route: string[];

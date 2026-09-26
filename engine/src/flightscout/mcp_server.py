@@ -47,6 +47,7 @@ def _compact(trips: list[dict], limit: int) -> list[dict]:
             "route": "-".join(t["route"]), "departure": t["departure"], "arrival": t["arrival"],
             "travel_hours": round(t["travel_min"] / 60, 1),
             "savings_vs_direct": t.get("savings_vs_direct"),
+            "note": t.get("note"),
             "stopovers": t.get("stopovers"),
             "risks": t.get("risks", [])[:4],
             "tickets": [{

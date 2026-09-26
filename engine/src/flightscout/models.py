@@ -183,8 +183,11 @@ class Trip(BaseModel):
     tickets: list[Itinerary]
     total_price: float
     currency: str
-    kind: Literal["single", "split", "stopover", "nested", "multicity"] = "single"
+    kind: Literal["single", "split", "stopover", "nested", "multicity", "nearby"] = "single"
     stopovers: list[Stopover] = Field(default_factory=list)
+    # "nearby": leaves from or lands at another airport than asked, e.g.
+    # "Lands at TRF (Sandefjord), 110 km from OSL"
+    note: str | None = None
     risks: list[str] = Field(default_factory=list)
     savings_vs_direct: float | None = None
     score: float | None = None

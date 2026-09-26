@@ -290,7 +290,7 @@ export function ResultsView({
         )}
         {(() => {
           const singles = list.filter((t) => t.kind === "single");
-          const combos = list.filter((t) => t.kind !== "single");
+          const combos = list.filter((t) => t.kind !== "single" && t.kind !== "nearby");
           if (!singles.length || !combos.length) return null;
           const bestSingle = Math.min(...singles.map((t) => convert(t.total_price, t.currency)));
           const best = combos.reduce((a, b) => (convert(a.total_price, a.currency) <= convert(b.total_price, b.currency) ? a : b));
