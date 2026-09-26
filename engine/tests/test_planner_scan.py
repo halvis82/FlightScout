@@ -81,3 +81,10 @@ def test_endpoint_note_flags_other_airports():
     note = search_mod.endpoint_note(ticket(["SAN", "TRF"], at), ["SAN"], ["OSL"])
     assert note and note.startswith("Lands at TRF") and "km from OSL" in note
     assert search_mod.endpoint_note(ticket(["SAN", "OSL"], at), ["SAN"], ["OSL"]) is None
+
+
+def test_legs_with_absurd_detours_are_dropped():
+    at = datetime(2030, 1, 1, 8)
+    assert not planner._sane(ticket(["SAN", "DEN", "LAX"], at))  # 180 km flown via Denver
+    assert planner._sane(ticket(["SAN", "LAX"], at))
+    assert planner._sane(ticket(["SAN", "DEN", "KEF", "OSL"], at))  # long haul with normal connections

@@ -213,6 +213,17 @@ def _cheapest(items: list[Itinerary], n: int) -> list[Itinerary]:
     return sorted(items, key=lambda i: i.price)[:n]
 
 
+def _sane(it: Itinerary, max_ratio: float = 2.0) -> bool:
+    """A leg that flies more than twice its own distance (San Diego to Los
+    Angeles via Denver) is never what someone building a route wants."""
+    for sl in it.slices:
+        direct = airports.haversine_km(sl.origin, sl.destination)
+        flown = sum(airports.haversine_km(g.origin, g.destination) for g in sl.segments)
+        if math.isfinite(direct) and math.isfinite(flown) and direct > 0 and flown > max(direct * max_ratio, direct + 800):
+            return False
+    return True
+
+
 def _oneway_via_hubs(ctx: _Ctx, o: list[str], d: list[str], dep: date, hubs: list[str]
                      ) -> tuple[list[Trip], dict[str, float]]:
     """o to hub on ``dep`` and hub to d on dep..dep+max_stopover_days."""
@@ -248,7 +259,8 @@ def _oneway_via_hubs(ctx: _Ctx, o: list[str], d: list[str], dep: date, hubs: lis
                 by_hub[h].append(it)
     trips, hub_cost = [], {}
     for h in hubs:
-        leg1s, leg2s = merge(first_by[h]), merge(by_hub[h])
+        leg1s = [i for i in merge(first_by[h]) if _sane(i)]
+        leg2s = [i for i in merge(by_hub[h]) if _sane(i)]
         if leg1s and leg2s:
             hub_cost[h] = min(i.price for i in leg1s) + min(i.price for i in leg2s)
         for a in _cheapest(leg1s, 5):
@@ -594,7 +606,7 @@ def build_trip(req: TripRequest) -> PlanResult:
                 except Exception as e:
                     errors[f"{prev}-{dest}"] = str(e)[:200]
                     opts = []
-                for it in _cheapest([sellers.annotate(to_currency(x, req.currency)) for x in opts], req.beam):
+                for it in _cheapest([sellers.annotate(to_currency(x, req.currency)) for x in opts if _sane(x)], req.beam):
                     if arr and it.slices[0].departure <= arr:
                         continue
                     nxt.append((tickets + [it], it.slices[-1].arrival, cost + it.price))
