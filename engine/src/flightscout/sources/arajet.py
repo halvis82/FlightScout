@@ -125,7 +125,7 @@ def search(q: SearchQuery) -> list[Itinerary]:
         return []
     out: list[Itinerary] = []
     for o, d in pairs[:4]:
-        key = f"arajet:{o}:{d}:{q.departure}:{q.return_date}"
+        key = f"arajet:{o}:{d}:{q.departure}:{q.return_date}:{q.adults}"
         if (data := cache.get(key)) is None:
             shops = [{"dateTimeDepart": {"date": str(q.departure)}, "locationDepart": {"code": o},
                       "locationArrive": {"code": d}}]

@@ -123,7 +123,8 @@ def parse(res: dict, adults: int = 1, cabin: str = "economy") -> list[dict]:
         best = None
         for f in fams:
             s = sols.get(f)
-            if s and s.get("grandTotal") and (s.get("seatsRemaining") or 1) > 0:
+            # no seat count means "not limited"; 0 means sold out
+            if s and s.get("grandTotal") and (s.get("seatsRemaining") is None or s["seatsRemaining"] > 0):
                 if best is None or s["grandTotal"] < best[0]:
                     best = (float(s["grandTotal"]), f, s.get("seatsRemaining"))
         segs = r.get("segments") or []

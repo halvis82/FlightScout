@@ -112,7 +112,7 @@ def parse(data: dict, adults: int = 1, cabin: str = "ECONOMY") -> tuple[list[dic
         js = []
         for f in ((d.get("journey") or {}).get(way) or {}).get("flights") or []:
             fares = [x for x in (f.get("priceInfo") or {}).get("fares") or []
-                     if x.get("price") is not None and (x.get("cabin") or "ECONOMY") == cabin and (x.get("seats") or 1) > 0]
+                     if x.get("price") is not None and (x.get("cabin") or "ECONOMY") == cabin and (x.get("seats") is None or x["seats"] > 0)]
             if not fares or not f.get("trips"):
                 continue
             best = min(fares, key=lambda x: float(x["price"]))

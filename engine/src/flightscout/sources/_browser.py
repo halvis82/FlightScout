@@ -19,6 +19,7 @@ from __future__ import annotations
 import atexit
 import logging
 import os
+from collections import OrderedDict
 import platform
 import queue
 import shutil
@@ -155,14 +156,18 @@ class _Conn:
         else:
             self.pw.stop()
             raise RuntimeError(f"could not attach to Chrome: {err}")
-        self.pages: dict[str, Any] = {}
-        ctx = self.browser.contexts[0]
-        first = ctx.pages[0] if ctx.pages else None
-        self.ua = None
-        if first:
-            self.ua = first.evaluate("navigator.userAgent").replace("HeadlessChrome", "Chrome")
-            if self.headful:
-                self._minimize(first)
+        self.pages: OrderedDict[str, Any] = OrderedDict()
+        try:
+            ctx = self.browser.contexts[0]
+            first = ctx.pages[0] if ctx.pages else None
+            self.ua = None
+            if first:
+                self.ua = first.evaluate("navigator.userAgent").replace("HeadlessChrome", "Chrome")
+                if self.headful:
+                    self._minimize(first)
+        except Exception:
+            self.pw.stop()  # don't leave the Playwright driver running
+            raise
 
     def _minimize(self, page) -> None:
         try:
@@ -175,7 +180,15 @@ class _Conn:
     def page(self, key: str):
         pg = self.pages.get(key)
         if pg is not None and not pg.is_closed():
+            self.pages.move_to_end(key)
             return pg
+        # a tab per site, but not forever: close the least recently used ones
+        while len(self.pages) >= MAX_PAGES:
+            _, old = self.pages.popitem(last=False)
+            try:
+                old.close()
+            except Exception:
+                pass
         # The profile's default context, not a fresh incognito-like one:
         # Cloudflare Turnstile turns interactive for new contexts (Allegiant).
         # Cookies are per site anyway, so the airlines don't collide.
@@ -209,6 +222,9 @@ class _Conn:
 # same time as tabs of the one Chrome process: one worker thread each, since
 # Playwright's sync API is bound to its thread. FLIGHTSCOUT_BROWSER_TABS caps it.
 TABS = max(1, int(os.environ.get("FLIGHTSCOUT_BROWSER_TABS", 4)))
+# Open site tabs kept per worker for reuse (cookies live in the profile, so a
+# closed tab costs only a page load next time).
+MAX_PAGES = max(2, int(os.environ.get("FLIGHTSCOUT_BROWSER_PAGES", 8)))
 
 
 class _Pool:

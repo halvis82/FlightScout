@@ -121,8 +121,11 @@ def search(q: SearchQuery) -> list[Itinerary]:
             data = cache.get(key)
             if data is None:
                 data = _fetch(url)
-                if "data" not in data:  # "Invalid ... request": Transavia doesn't fly it
-                    data = {"data": {}}
+                if "data" not in data:
+                    if "invalid" not in json.dumps(data).lower():
+                        # anything else is a hiccup, not an answer: don't remember it
+                        raise RuntimeError(f"transavia: unexpected answer {json.dumps(data)[:120]}")
+                    data = {"data": {}}  # "Invalid ... request": Transavia doesn't fly it
                 cache.put(key, data)
             outs, backs = parse(data, q.adults)
             if q.return_date and backs is None:

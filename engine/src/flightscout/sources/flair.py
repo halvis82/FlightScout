@@ -77,7 +77,8 @@ def _flights(origin: str, dest: str, day: date, adults: int) -> list[dict]:
             "origin": origin, "destination": dest, "number": f["flightNumber"],
             "departure": f["scheduledDeparture"], "arrival": f["scheduledArrival"],
             "dep_utc": f["scheduledDepartureUtc"], "arr_utc": f["scheduledArrivalUtc"],
-            "total": float(f["totalFare"]), "currency": f.get("currencyCode") or "CAD",
+            # totalFare is for one adult (it doesn't change with adultCount): the whole party pays it each
+            "total": round(float(f["totalFare"]) * adults, 2), "currency": f.get("currencyCode") or "CAD",
             "fare_class": f.get("fareClass"),
         })
     cache.put(key, out)

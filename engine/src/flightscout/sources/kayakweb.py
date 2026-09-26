@@ -117,7 +117,8 @@ def _fetch(brand: str, host: str, o: str, d: str, dep: date, ret: date | None, a
         time.sleep(2.5)
     if data.get("status") != "complete" and not data.get("results"):
         raise RuntimeError(f"{brand}: search did not complete")
-    cache.put(key, data)
+    if data.get("status") == "complete":  # a partial answer is shown, not remembered
+        cache.put(key, data)
     return data
 
 
@@ -178,7 +179,7 @@ def parse(data: dict, q: SearchQuery, brand: str, host: str, o: str, d: str) -> 
         if split:
             warn.append(HACKER)
         out.append(Itinerary(
-            source=brand, price=price, currency=cur or "USD", slices=slices,
+            source=brand, price=price, currency=cur or domain(brand, q.currency)[1], slices=slices,
             booking_url=search_url(brand, host, o, d, q.departure, q.return_date, q.adults, q.cabin, r.get("resultId")),
             seller=label(code), seller_kind="airline" if airline(code) else "ota",
             self_transfer=split, offers=offers, warnings=warn,

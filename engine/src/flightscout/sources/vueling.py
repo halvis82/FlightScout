@@ -158,7 +158,10 @@ def parse(data: dict, adults: int = 1) -> tuple[list[dict], str]:
                     for f in j.get("fares") or []:
                         p = fares.get(f["fareAvailabilityKey"])
                         if p and (best is None or p[0] < best[0]):
-                            seats = min((x.get("availableCount") or 99 for x in f.get("details") or []), default=None)
+                            counts = [x["availableCount"] for x in f.get("details") or [] if x.get("availableCount") is not None]
+                            seats = min(counts, default=None)
+                            if seats == 0:  # sold out at this fare
+                                continue
                             best = (p[0], p[1], seats)
                     if not best:
                         continue

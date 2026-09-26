@@ -89,7 +89,7 @@ def parse(data: dict) -> tuple[list[dict], str | None]:
     return out, currency
 
 
-def _fetch(url: str) -> dict:
+def _fetch(url: str, origin: str = "") -> dict:
     """air-bounds JSON, or {} when Norwegian has no flights that day (it then
     redirects to its low fare calendar page instead of the booking app)."""
     def job(page) -> tuple[str, str]:
@@ -98,7 +98,15 @@ def _fetch(url: str) -> dict:
                                    lambda u: "/search/air-bounds" in u, timeout=40,
                                    stop=lambda: "/low-fare-calendar" in page.url)
             if got:
-                return got[-1][1], ""
+                # the requested bound: the app may also fetch another (an upsell) after it
+                for _, txt in got:
+                    try:
+                        g = (json.loads(txt).get("data") or {}).get("airBoundGroups") or []
+                    except ValueError:
+                        continue
+                    if not origin or not g or (g[0].get("boundDetails") or {}).get("originLocationCode") == origin:
+                        return txt, ""
+                return got[0][1], ""
             if "/low-fare-calendar" in page.url:  # "No flights available on selected dates"
                 return "", "none"
         return "", page.url
@@ -117,7 +125,7 @@ def _fetch(url: str) -> dict:
 def _bound(o: str, d: str, day: date, adults: int, cur: str) -> tuple[list[dict], str | None]:
     key = f"norwegian:{o}:{d}:{day}:{adults}:{cur}"
     if (hit := cache.get(key)) is None:
-        hit = _fetch(deeplink(o, d, day, adults=adults, currency=cur))
+        hit = _fetch(deeplink(o, d, day, adults=adults, currency=cur), o)
         cache.put(key, hit)
     return parse(hit)
 
