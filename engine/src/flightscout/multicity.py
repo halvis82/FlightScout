@@ -57,7 +57,7 @@ def _leg_options(leg: Leg, req: MultiRequest, errors: dict[str, str]) -> list[It
     found: list[Itinerary] = []
 
     def kiwi_range():
-        return kiwi.search_range(o[0], d[0], lo, hi, req.currency, None, req.cabin)
+        return kiwi.search_range(o[0], d[0], lo, hi, req.currency, None, req.cabin, req.adults)
 
     def google_best():
         days = [lo + timedelta(days=i) for i in range((hi - lo).days + 1)]

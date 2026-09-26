@@ -160,13 +160,14 @@ def search(q: SearchQuery) -> list[Itinerary]:
 
 
 def search_range(origin: str, destination: str, start: date, end: date, currency: str,
-                 nights: tuple[int, int] | None = None, cabin: str = "economy") -> list[Itinerary]:
+                 nights: tuple[int, int] | None = None, cabin: str = "economy", adults: int = 1) -> list[Itinerary]:
     """Cheapest itineraries anywhere in a departure window. With ``nights`` it
-    searches round trips of that length. One request, up to 15 results."""
+    searches round trips of that length. One request, up to 15 results, priced
+    for all ``adults``."""
     args = {
         "flyFrom": origin, "flyTo": destination, "departureDate": _d(start),
         "departureDateTo": _d(end), "currency": currency, "locale": "en",
-        "cabinClass": _CABIN[cabin],
+        "cabinClass": _CABIN[cabin], "adults": adults,
     }
     if nights:
         args["nights_in_dst_from"], args["nights_in_dst_to"] = nights

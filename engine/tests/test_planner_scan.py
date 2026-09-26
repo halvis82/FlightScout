@@ -95,3 +95,37 @@ def test_known_fares_from_the_website_find_layovers(world, monkeypatch):
     found = planner.discover_hubs("SAN", "OSL", world, world, known_from={"FCO": 200, "LAX": 90},
                                   known_to={"FCO": 60, "fra": 150})
     assert found == ["FCO"]  # LAX has no known leg on to Oslo, FRA none from San Diego
+
+
+def test_nested_ignores_one_slice_round_trip_rows(world, monkeypatch):
+    # Google's "choose the return later" rows (return_pending) have one slice
+    at = datetime(world.year, world.month, world.day, 7)
+    pending = ticket(["SAN", "LAX"], at).model_copy(update={"return_pending": True})
+    monkeypatch.setattr(google, "search", lambda q, top_n=3, wide=True: [pending])
+    ctx = planner._Ctx(planner.PlanRequest(origins=["SAN"], destinations=["OSL"], depart_start=world))
+    assert planner._nested(ctx, ["SAN"], ["OSL"], world, world + timedelta(days=7), ["LAX"]) == []
+
+
+def test_bad_plan_requests_are_refused():
+    with pytest.raises(ValueError):
+        planner.PlanRequest(origins=["SAN"], destinations=["OSL"], depart_start=date.today() + timedelta(days=9),
+                            depart_end=date.today() + timedelta(days=3))
+    with pytest.raises(ValueError):
+        planner.PlanRequest(origins=["SAN"], destinations=["OSL"], depart_start=date.today() + timedelta(days=9),
+                            currency="dollars")
+
+
+def test_trip_builder_only_swaps_in_flights_that_still_connect(world, monkeypatch):
+    at = datetime(world.year, world.month, world.day, 8)
+    leg1 = ticket(["OSL", "CPH"], at, hours=1, price=100, source="kiwi")
+    leg2 = ticket(["CPH", "OSL"], at + timedelta(days=3), hours=1, price=100, source="kiwi")
+    monkeypatch.setattr(kiwi, "search_range", lambda o, d, lo, hi, cur, nights=None, cabin="economy", adults=1:
+                        [leg1] if o == "OSL" else [leg2])
+    # Google has a cheaper Copenhagen flight, but it leaves before the first flight lands
+    early = ticket(["CPH", "OSL"], at - timedelta(hours=2), hours=1, price=60)
+    monkeypatch.setattr(google, "search", lambda q, top_n=3, wide=True: [early] if q.origins == ["CPH"] else [])
+    res = planner.build_trip(planner.TripRequest(start="OSL", stops=[planner.TripStop(place="CPH", min_nights=2, max_nights=4)],
+                                                 earliest_departure=world))
+    for t in res.trips:
+        legs = [tk.slices[0] for tk in t.tickets]
+        assert all(b.departure > a.arrival for a, b in zip(legs, legs[1:]))

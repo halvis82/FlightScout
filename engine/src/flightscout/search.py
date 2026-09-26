@@ -339,6 +339,8 @@ def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> Search
         "origins": airports.expand_nearby(q.origins, q.nearby_km),
         "destinations": airports.expand_nearby(q.destinations, q.nearby_km),
     })
+    if not fx.known(q.currency):
+        raise ValueError(f"unknown currency {q.currency}")
     srcs = expand_sources(list(q.sources))
     errors: dict[str, str] = {}
     for s in [s for s in srcs if _cooling(s)]:
@@ -370,7 +372,13 @@ def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> Search
     for i in found:  # round trip "from" prices: remember which return they were for
         if i.return_pending and i.pending_return is None:
             i.pending_return = q.return_date
-    items = merge(_flag_outliers([sellers.annotate(to_currency(i, q.currency)) for i in found]))
+    converted = []
+    for i in found:
+        try:
+            converted.append(sellers.annotate(to_currency(i, q.currency)))
+        except ValueError as e:  # a source answering in a currency we can't convert
+            errors[i.source] = str(e)
+    items = merge(_flag_outliers(converted))
     farememory.record(items)
     for i in items:
         if (n := endpoint_note(i, q.origins, q.destinations)) and n not in i.warnings:

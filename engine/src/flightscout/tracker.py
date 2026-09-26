@@ -92,7 +92,8 @@ def check(watch: dict[str, Any], budget: int = 12) -> list[dict]:
 
     def kiwi_obs() -> list[dict]:
         try:
-            k = kiwi.search_range(o[0], d[0], start, end, cur, (nmin, nmax) if rt else None, cabin)
+            k = kiwi.search_range(o[0], d[0], start, end, cur, (nmin, nmax) if rt else None, cabin,
+                                  watch.get("adults") or 1)
             return [_obs(to_currency(it, cur)) for it in sorted(k, key=lambda i: i.price)[:5]]
         except Exception as e:
             log.warning("kiwi failed for %s: %s", watch.get("id"), e)
@@ -124,9 +125,14 @@ def check(watch: dict[str, Any], budget: int = 12) -> list[dict]:
         dep = date.fromisoformat(best["depart_date"])
         ret = date.fromisoformat(best["return_date"]) if best.get("return_date") else None
         try:
+            pl = watch.get("planner") or {}
             res = plan(PlanRequest(origins=o, destinations=d, depart_start=dep, return_start=ret,
-                                   currency=cur, cabin=cabin, max_hubs=4, max_stopover_days=1,
-                                   include_nested_roundtrips=rt, max_results=10))
+                                   currency=cur, cabin=cabin, adults=watch.get("adults") or 1, max_hubs=4,
+                                   max_stopover_days=1, include_nested_roundtrips=rt, max_results=10,
+                                   min_connection_hours=pl.get("min_connection_hours") or 3.0,
+                                   seller_rules=watch.get("seller_rules") or None,
+                                   # light: this runs for every watch, twice a day
+                                   reprice_with_airlines=False, nearby_km=0))
             for t in res.trips:
                 if t.kind != "single":
                     out.append(_obs(t))

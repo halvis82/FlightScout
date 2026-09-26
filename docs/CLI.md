@@ -116,15 +116,15 @@ flightscout search LAX DPS +60 -r +71 --depart-flex 3 --smart --sort best
 | `--flex` | int | ± days on both dates. |
 | `--depart-flex` | int | ± days on the departure only. |
 | `--return-flex` | int | ± days on the return only. |
-| `--cabin` | str (default `economy`) | economy, premium, business or first. |
-| `--adults` | int (default `1`) | Passengers (adults). |
+| `--cabin` | choice (default `economy`) | economy, premium, business or first. |
+| `--adults` | int range (default `1`) | Passengers (adults), 1 to 9. Prices are for all of them. |
 | `--max-stops` | int | 0 for nonstop only. |
 | `--nearby` | int | Also search airports within this many km (SAN adds TIJ). |
 | `--smart` | flag | Also look for cheaper separate ticket combinations (slower). |
 | `--sources` | str (default `default`) | default (google, kiwi, kiwiweb, airlines, otas), or a list. Groups: airlines = every direct airline that flies the route, otas = booking sites (Booking.com, Expedia, KAYAK, Priceline, Trip.com...). Or single sources like google,kiwiweb,jetblue,booking. Browser ones need Chrome (headless); FLIGHTSCOUT_BROWSER=0 turns them off. |
 | `--max-price` | float | Hide results above this price. |
 | `--sort` | choice (default `price`) | price, duration, departure or best (price + time). |
-| `--time` | str | morning, afternoon or evening departure. |
+| `--time` | choice | morning, afternoon or evening departure. |
 | `--airline` | str | Only results with this airline (IATA, e.g. SK). |
 | `--no-self-transfer` | flag | Hide self transfer itineraries. |
 | `--sellers` | int | Seller and fare breakdown for the top N Google results (browser). |
@@ -163,7 +163,8 @@ flightscout plan OSL SAN +40 --hubs JFK,KEF --max-stopover-days 2
 | `--max-travel-hours` | float | Longest travel time per direction. |
 | `--nested`, `--no-nested` | flag (default `True`) | Try nested round trips (A-hub return + hub-B return). |
 | `--value-of-time` | float (default `15.0`) | Money per hour of travel, for ranking. |
-| `--cabin` | str (default `economy`) |  |
+| `--cabin` | choice (default `economy`) | economy, premium, business or first. |
+| `--adults` | int range (default `1`) | Passengers (adults), 1 to 9. Prices are for all of them. |
 | `--max-price` | float |  |
 | `--sort` | choice (default `best`) | best (default), price, duration or departure. |
 | `--limit` | int (default `20`) |  |
@@ -185,8 +186,8 @@ flightscout multicity SAN JFK@2026-11-03±2 OSL@2026-11-07±3 CDG@by2026-11-15 S
 | `START` | argument, required | Where the trip starts (airport or metro). |
 | `LEGS` | argument, required | Stops in order: PLACE@DATE, optionally ±N days (JFK@2026-11-03±2) or 'by' for arrive by (CDG@by2026-11-15). Use ~N instead of ±N if your shell prefers. |
 | `--currency`, `-c` | str | NOK, EUR, USD, GBP, MXN... Default: your configured currency. |
-| `--cabin` | str (default `economy`) |  |
-| `--adults` | int (default `1`) |  |
+| `--cabin` | choice (default `economy`) | economy, premium, business or first. |
+| `--adults` | int range (default `1`) | Passengers (adults), 1 to 9. Prices are for all of them. |
 | `--min-gap` | float (default `4.0`) | Hours needed between landing and the next flight. |
 | `--watch` | flag | Also add this multi city trip to your watchlist. |
 | `--limit` | int (default `10`) |  |
@@ -211,6 +212,7 @@ flightscout trip OSL -s NYC:2-4 -s SAN:5-10 -s MEX:3-5 --from 2026-11-10 --to 20
 | `--end` | str | Where the trip ends (default: start). |
 | `--keep-order` | flag | Visit stops in the given order. |
 | `--max-trip-days` | int |  |
+| `--adults` | int range (default `1`) | Passengers (adults), 1 to 9. Prices are for all of them. |
 | `--currency`, `-c` | str | NOK, EUR, USD, GBP, MXN... Default: your configured currency. |
 | `--format`, `-f` | choice (default `table`) | table (default), json (for agents and scripts) or csv. |
 | `--json` | flag | Shortcut for --format json. |

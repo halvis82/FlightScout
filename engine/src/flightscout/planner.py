@@ -28,7 +28,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from concurrent.futures import TimeoutError as FutureTimeout
 
@@ -69,6 +69,27 @@ class PlanRequest(BaseModel):
     # to destination, e.g. from the website's shared fare memory
     known_from_origin: dict[str, float] = Field(default_factory=dict)
     known_to_dest: dict[str, float] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _sane(self) -> "PlanRequest":
+        if not self.origins or not self.destinations:
+            raise ValueError("pick where you fly from and to")
+        if self.depart_start < date.today() - timedelta(days=1):
+            raise ValueError(f"the departure date {self.depart_start} is in the past")
+        if self.depart_end and self.depart_end < self.depart_start:
+            raise ValueError("the latest departure is before the earliest")
+        if self.return_end and self.return_start and self.return_end < self.return_start:
+            raise ValueError("the latest return is before the earliest")
+        if self.return_start and self.return_start < self.depart_start:
+            raise ValueError("the return is before the departure")
+        if not 1 <= self.adults <= 9:
+            raise ValueError("1 to 9 adults")
+        if not (len(self.currency) == 3 and self.currency.isalpha()):
+            raise ValueError(f"{self.currency!r} is not a currency code")
+        self.currency = self.currency.upper()
+        self.max_hubs = max(0, min(self.max_hubs, 30))
+        self.max_stopover_days = max(0, min(self.max_stopover_days, 30))
+        return self
     value_of_time_per_hour: float = 15.0  # in `currency`, used for scoring only
     max_results: int = 40
     seller_rules: dict[str, str] | None = None
@@ -293,7 +314,9 @@ def _nested(ctx: _Ctx, o: list[str], d: list[str], dep: date, ret: date, hubs: l
     res = ctx.many(calls)
     trips = []
     for i, h in enumerate(meta):
-        outer, inner = res[2 * i], res[2 * i + 1]
+        # only real round trips (Google's "pick the return later" rows have one slice)
+        outer = [x for x in res[2 * i] if len(x.slices) == 2]
+        inner = [x for x in res[2 * i + 1] if len(x.slices) == 2]
         for a in _cheapest(outer, 3):
             for b in _cheapest(inner, 3):
                 # a: o->h, h->o ; b: h->d, d->h. Check both hub connections.
@@ -566,8 +589,26 @@ class TripRequest(BaseModel):
     max_trip_days: int | None = None
     keep_order: bool = False
     currency: str = "USD"
+    adults: int = 1
     beam: int = 4
     value_of_time_per_hour: float = 15.0
+
+    @model_validator(mode="after")
+    def _sane(self) -> "TripRequest":
+        if not self.stops:
+            raise ValueError("add at least one place to visit")
+        if self.latest_departure and self.latest_departure < self.earliest_departure:
+            raise ValueError("the latest departure is before the earliest")
+        if self.earliest_departure < date.today() - timedelta(days=1):
+            raise ValueError(f"the departure date {self.earliest_departure} is in the past")
+        if not 1 <= self.adults <= 9:
+            raise ValueError("1 to 9 adults")
+        for st in self.stops:
+            if st.min_nights < 0 or st.max_nights < st.min_nights:
+                raise ValueError(f"nights for {st.place}: the maximum must be at least the minimum")
+        self.currency = self.currency.upper()
+        self.beam = max(1, min(self.beam, 8))
+        return self
 
 
 def _order(req: TripRequest) -> list[list[TripStop]]:
@@ -612,7 +653,7 @@ def build_trip(req: TripRequest) -> PlanResult:
                     hi = arr.date() + timedelta(days=st.max_nights)
                 try:
                     requests += 1
-                    opts = kiwi.search_range(prev, dest, lo, hi, req.currency)
+                    opts = kiwi.search_range(prev, dest, lo, hi, req.currency, adults=req.adults)
                 except Exception as e:
                     errors[f"{prev}-{dest}"] = str(e)[:200]
                     opts = []
@@ -644,22 +685,32 @@ def build_trip(req: TripRequest) -> PlanResult:
     # links are nicer than an OTA when the price is comparable).
     results.sort(key=lambda t: t.score or 0)
     for t in results[:2]:
-        new_tickets = []
-        for tk in t.tickets:
+        new_tickets: list[Itinerary] = []
+        for i, tk in enumerate(t.tickets):
             sl = tk.slices[0]
             try:
                 requests += 1
                 g = google.search(SearchQuery(origins=[sl.origin], destinations=[sl.destination],
-                                              departure=sl.departure.date(), currency=req.currency), wide=False)
+                                              departure=sl.departure.date(), currency=req.currency,
+                                              adults=req.adults), wide=False)
                 g = [to_currency(x, req.currency) for x in g]
-                alt = min(g, key=lambda x: x.price, default=None)
             except Exception as e:
                 errors[f"google {sl.origin}-{sl.destination}"] = str(e)[:200]
-                alt = None
-            new_tickets.append(sellers.annotate(alt) if alt and alt.price <= tk.price * 1.05 else tk)
+                g = []
+            # a replacement must still connect: after the (possibly new) flight
+            # before it lands, and landing before the next one leaves
+            after = new_tickets[-1].slices[-1].arrival + timedelta(hours=3) if new_tickets else None
+            nxt = t.tickets[i + 1].slices[0].departure - timedelta(hours=3) if i + 1 < len(t.tickets) else None
+            fits = [x for x in g if len(x.slices) == 1 and x.slices[0].destination == sl.destination
+                    and (after is None or x.slices[0].departure >= after)
+                    and (nxt is None or x.slices[-1].arrival <= nxt) and x.price <= tk.price * 1.05]
+            alt = min(fits, key=lambda x: x.price, default=None)
+            new_tickets.append(sellers.annotate(alt) if alt else tk)
         if any(a is not b for a, b in zip(new_tickets, t.tickets)):
             total = round(sum(x.price for x in new_tickets), 2)
-            results.append(t.model_copy(update={"tickets": new_tickets, "total_price": total,
+            stops = [Stopover(airport=a.slices[-1].destination, hours=round(_hours(a.slices[-1].arrival, b.slices[0].departure), 1))
+                     for a, b in zip(new_tickets, new_tickets[1:])]
+            results.append(t.model_copy(update={"tickets": new_tickets, "total_price": total, "stopovers": stops,
                                                 "score": (t.score or 0) - t.total_price + total}))
     results = list({t.id: t for t in results}.values())
     results.sort(key=lambda t: t.score or 0)

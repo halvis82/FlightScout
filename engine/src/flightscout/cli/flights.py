@@ -9,7 +9,7 @@ from typing import Optional
 import typer
 from rich.table import Table
 
-from .common import (CurOpt, Fmt, FmtOpt, JsonOpt, SaveOpt, Sort, codes, con, cur, emit_csv, emit_json, filter_sort,
+from .common import (AdultsOpt, Cabin, CabinOpt, CurOpt, Fmt, FmtOpt, JsonOpt, SaveOpt, Sort, TimeOfDay, codes, con, cur, emit_csv, emit_json, filter_sort,
                      fmt_of, open_url, out, parse_date, save, show_trips)
 
 
@@ -36,8 +36,8 @@ def search(
     flex: int = typer.Option(0, "--flex", help="± days on both dates."),
     depart_flex: Optional[int] = typer.Option(None, "--depart-flex", help="± days on the departure only."),
     return_flex: Optional[int] = typer.Option(None, "--return-flex", help="± days on the return only."),
-    cabin: str = typer.Option("economy", help="economy, premium, business or first."),
-    adults: int = typer.Option(1, help="Passengers (adults)."),
+    cabin: Cabin = CabinOpt,
+    adults: int = AdultsOpt,
     max_stops: Optional[int] = typer.Option(None, "--max-stops", help="0 for nonstop only."),
     nearby: int = typer.Option(0, "--nearby", help="Also search airports within this many km (SAN adds TIJ)."),
     smart: bool = typer.Option(False, "--smart", help="Also look for cheaper separate ticket combinations (slower)."),
@@ -48,7 +48,7 @@ def search(
                                 "FLIGHTSCOUT_BROWSER=0 turns them off."),
     max_price: Optional[float] = typer.Option(None, "--max-price", help="Hide results above this price."),
     sort: Sort = typer.Option(Sort.price, help="price, duration, departure or best (price + time)."),
-    time_of_day: Optional[str] = typer.Option(None, "--time", help="morning, afternoon or evening departure."),
+    time_of_day: Optional[TimeOfDay] = typer.Option(None, "--time", help="morning, afternoon or evening departure."),
     airline: Optional[str] = typer.Option(None, "--airline", help="Only results with this airline (IATA, e.g. SK)."),
     no_self_transfer: bool = typer.Option(False, "--no-self-transfer", help="Hide self transfer itineraries."),
     sellers: int = typer.Option(0, "--sellers", help="Seller and fare breakdown for the top N Google results (browser)."),
@@ -84,7 +84,7 @@ def search(
     rf = return_flex if return_flex is not None else rf
     src = {} if sources.strip().lower() == "default" else {
         "sources": [s.strip().lower() for s in sources.split(",") if s.strip()]}
-    q = SearchQuery(origins=codes(origin), destinations=codes(destination), departure=d, return_date=r, cabin=cabin,
+    q = SearchQuery(origins=codes(origin), destinations=codes(destination), departure=d, return_date=r, cabin=cabin.value,
                     adults=adults, max_stops=max_stops, currency=cur(currency), departure_flex_days=df,
                     return_flex_days=rf if r else 0, nearby_km=nearby, **src)
     with con.status("searching Google Flights, Kiwi.com and airlines..."):
@@ -96,7 +96,7 @@ def search(
         with con.status("looking for cheaper combinations (about a minute)..."):
             pr = run_plan(PlanRequest(origins=q.origins, destinations=q.destinations, depart_start=d - timedelta(days=df),
                                       depart_end=d + timedelta(days=df), return_start=r - timedelta(days=rf) if r else None,
-                                      return_end=r + timedelta(days=rf) if r else None, currency=q.currency, cabin=cabin,
+                                      return_end=r + timedelta(days=rf) if r else None, currency=q.currency, cabin=cabin.value,
                                       adults=adults, max_hubs=6, max_stopover_days=2))
         seen = {t.id for t in trips}
         trips += [t for t in pr.trips if t.id not in seen and t.kind != "single"]
@@ -106,7 +106,7 @@ def search(
         with con.status("reading seller prices..."):
             enrich(trips, sellers)
     save("search", q.model_dump(mode="json"), res, keep)
-    trips = filter_sort(trips, sort, max_price, max_stops, time_of_day, no_self_transfer, airline)
+    trips = filter_sort(trips, sort, max_price, max_stops, time_of_day.value if time_of_day else None, no_self_transfer, airline)
     f = fmt_of(fmt, as_json)
     show_trips(trips, f, limit, f"{','.join(q.origins)} to {','.join(q.destinations)}",
                payload={**res.model_dump(mode="json"), "trips": [t.model_dump(mode="json") for t in trips]})
@@ -138,7 +138,7 @@ def search(
                trip_type="roundtrip" if r else "oneway", depart_start=(d - timedelta(days=df)).isoformat(),
                depart_end=(d + timedelta(days=df)).isoformat(),
                nights_min=max(0, (r - d).days - df - rf) if r else None, nights_max=(r - d).days + df + rf if r else None,
-               currency=q.currency, cabin=cabin, adults=adults, include_split=smart)
+               currency=q.currency, cabin=cabin.value, adults=adults, include_split=smart)
     if open_n:
         if 1 <= open_n <= len(trips):
             for tk in trips[open_n - 1].tickets:
@@ -189,7 +189,8 @@ def plan(
     max_travel_hours: Optional[float] = typer.Option(None, "--max-travel-hours", help="Longest travel time per direction."),
     nested: bool = typer.Option(True, "--nested/--no-nested", help="Try nested round trips (A-hub return + hub-B return)."),
     value_of_time: float = typer.Option(15.0, "--value-of-time", help="Money per hour of travel, for ranking."),
-    cabin: str = typer.Option("economy"),
+    cabin: Cabin = CabinOpt,
+    adults: int = AdultsOpt,
     max_price: Optional[float] = typer.Option(None, "--max-price"),
     sort: Sort = typer.Option(Sort.best, help="best (default), price, duration or departure."),
     limit: int = typer.Option(20),
@@ -210,7 +211,7 @@ def plan(
     req = PlanRequest(origins=codes(origin), destinations=codes(destination), depart_start=parse_date(depart),
                       depart_end=parse_date(depart_end) if depart_end else None,
                       return_start=parse_date(ret) if ret else None, return_end=parse_date(ret_end) if ret_end else None,
-                      currency=cur(currency), cabin=cabin, hubs=codes(hubs), max_hubs=max_hubs,
+                      currency=cur(currency), cabin=cabin.value, adults=adults, hubs=codes(hubs), max_hubs=max_hubs,
                       max_stopover_days=max_stopover_days, min_connection_hours=min_connection,
                       max_trip_days=max_trip_days, max_travel_hours=max_travel_hours,
                       include_nested_roundtrips=nested, value_of_time_per_hour=value_of_time)
@@ -231,8 +232,8 @@ def multicity(
     legs: list[str] = typer.Argument(..., help="Stops in order: PLACE@DATE, optionally ±N days (JFK@2026-11-03±2) or "
                                      "'by' for arrive by (CDG@by2026-11-15). Use ~N instead of ±N if your shell prefers."),
     currency: Optional[str] = CurOpt,
-    cabin: str = typer.Option("economy"),
-    adults: int = typer.Option(1),
+    cabin: Cabin = CabinOpt,
+    adults: int = AdultsOpt,
     min_gap: float = typer.Option(4.0, "--min-gap", help="Hours needed between landing and the next flight."),
     watch: bool = typer.Option(False, "--watch", help="Also add this multi city trip to your watchlist."),
     limit: int = typer.Option(10),
@@ -264,7 +265,7 @@ def multicity(
         parsed.append(Leg(origins=prev, destinations=codes(place), date=d, before=max(0, before),
                           after=0 if by else n, arrive_by=d if by else None))
         prev, prev_date = codes(place), d
-    req = MultiRequest(legs=parsed, currency=cur(currency), cabin=cabin, adults=adults, min_gap_hours=min_gap)
+    req = MultiRequest(legs=parsed, currency=cur(currency), cabin=cabin.value, adults=adults, min_gap_hours=min_gap)
     with con.status("pricing every flight in its window..."):
         res = plan_multicity(req)
     save("multicity", req.model_dump(mode="json"), res, keep)
@@ -275,7 +276,7 @@ def multicity(
     if watch:
         _watch(name=route, origins=codes(start), destinations=parsed[-1].destinations, trip_type="multicity",
                depart_start=parsed[0].date.isoformat(), depart_end=parsed[-1].date.isoformat(),
-               legs=[{**lg.model_dump(mode="json")} for lg in parsed], currency=req.currency, cabin=cabin, adults=adults)
+               legs=[{**lg.model_dump(mode="json")} for lg in parsed], currency=req.currency, cabin=cabin.value, adults=adults)
 
 
 def trip(
@@ -286,6 +287,7 @@ def trip(
     end: Optional[str] = typer.Option(None, "--end", help="Where the trip ends (default: start)."),
     keep_order: bool = typer.Option(False, "--keep-order", help="Visit stops in the given order."),
     max_trip_days: Optional[int] = typer.Option(None, "--max-trip-days"),
+    adults: int = AdultsOpt,
     currency: Optional[str] = CurOpt,
     fmt: Fmt = FmtOpt,
     as_json: bool = JsonOpt,
@@ -302,10 +304,12 @@ def trip(
     for s in stops:
         place, _, rng = s.partition(":")
         lo, _, hi = rng.partition("-")
-        parsed.append(TripStop(place=place.upper(), min_nights=int(lo or 2), max_nights=int(hi or lo or 5)))
+        if not place.strip() or not (lo or "0").isdigit() or not (hi or "0").isdigit():
+            raise typer.BadParameter(f"{s!r}: use PLACE or PLACE:MIN-MAX nights, e.g. NYC:2-4", param_hint="--stop")
+        parsed.append(TripStop(place=place.strip().upper(), min_nights=int(lo or 2), max_nights=int(hi or lo or 5)))
     req = TripRequest(start=start.upper(), end=end.upper() if end else None, stops=parsed,
                       earliest_departure=parse_date(earliest), latest_departure=parse_date(latest) if latest else None,
-                      keep_order=keep_order, max_trip_days=max_trip_days, currency=cur(currency))
+                      keep_order=keep_order, max_trip_days=max_trip_days, currency=cur(currency), adults=adults)
     with con.status("building trip..."):
         res = build_trip(req)
     save("trip", req.model_dump(mode="json"), res, keep)
@@ -332,6 +336,11 @@ def dates(
     from ..sources import google
 
     o, d = origin.upper(), destination.upper()
+    lo_d, hi_d = parse_date(earliest), parse_date(latest)
+    if hi_d < lo_d:
+        raise typer.BadParameter("--to is before --from", param_hint="--to")
+    if (hi_d - lo_d).days > 60:
+        raise typer.BadParameter("at most 60 days at once", param_hint="--to")
     with con.status("pricing dates..."):
         res = google.dates(o, d, parse_date(earliest), parse_date(latest), cur(currency), trip_days)
         if not trip_days:  # airline calendars are one way only

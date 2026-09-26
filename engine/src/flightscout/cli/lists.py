@@ -7,17 +7,26 @@ from typing import Optional
 import typer
 from rich.table import Table
 
-from .common import CurOpt, Fmt, FmtOpt, JsonOpt, client, codes, con, cur, emit_csv, emit_json, fmt_of, open_url, out, parse_date
+from .common import AdultsOpt, Cabin, CabinOpt, CurOpt, Fmt, FmtOpt, JsonOpt, client, codes, con, cur, emit_csv, emit_json, fmt_of, open_url, out, parse_date
 
 watch_app = typer.Typer(no_args_is_help=True, help="Watchlist: routes tracked twice a day, with price history and alerts.")
 places_app = typer.Typer(no_args_is_help=True, help="Saved places: homes, favorites and places you want to go.")
 
 
-def _resolve(c, prefix: str) -> int:
-    for w in c.watches():
-        if str(w["id"]) == str(prefix) or str(w["id"]).startswith(str(prefix)):
+def _resolve(c, ref: str) -> int:
+    """A watch by its exact id, or by a name that only one watch matches."""
+    ws = c.watches()
+    ref = str(ref).strip()
+    for w in ws:
+        if str(w["id"]) == ref:
             return w["id"]
-    raise typer.BadParameter(f"no watch with id {prefix} (see `flightscout watch list`)")
+    named = [w for w in ws if ref and ref.lower() in str(w.get("name") or "").lower()]
+    if len(named) == 1:
+        return named[0]["id"]
+    if len(named) > 1:
+        raise typer.BadParameter(f"{ref!r} matches {len(named)} watches: "
+                                 + ", ".join(f"{w['id']} ({w.get('name')})" for w in named[:6]))
+    raise typer.BadParameter(f"no watch with id {ref} (see `flightscout watch list`)")
 
 
 @watch_app.command("list")
@@ -58,8 +67,8 @@ def watch_add(
     alert_below: Optional[float] = typer.Option(None, "--alert-below", help="Alert when a price drops below this."),
     alert_drop_pct: Optional[float] = typer.Option(10.0, "--alert-drop-pct", help="Alert on a drop of this % vs the best so far."),
     split: bool = typer.Option(True, "--split/--no-split", help="Also track split ticket deals."),
-    cabin: str = typer.Option("economy"),
-    adults: int = typer.Option(1),
+    cabin: Cabin = CabinOpt,
+    adults: int = AdultsOpt,
     currency: Optional[str] = CurOpt,
     fmt: Fmt = FmtOpt,
     as_json: bool = JsonOpt,
@@ -78,7 +87,7 @@ def watch_add(
         name=name or f"{origin.upper()} to {destination.upper()}", origins=codes(origin), destinations=codes(destination),
         trip_type="roundtrip" if nights else "oneway", depart_start=parse_date(earliest).isoformat(),
         depart_end=parse_date(latest or earliest).isoformat(), nights_min=lo, nights_max=hi, currency=cur(currency),
-        cabin=cabin, adults=adults, include_split=split, alert_below=alert_below, alert_drop_pct=alert_drop_pct,
+        cabin=cabin.value, adults=adults, include_split=split, alert_below=alert_below, alert_drop_pct=alert_drop_pct,
     )
     if fmt_of(fmt, as_json) == Fmt.json:
         return emit_json(w)

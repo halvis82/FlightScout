@@ -28,6 +28,23 @@ class Fmt(str, Enum):
     csv = "csv"
 
 
+class Cabin(str, Enum):
+    economy = "economy"
+    premium = "premium"
+    business = "business"
+    first = "first"
+
+
+class TimeOfDay(str, Enum):
+    morning = "morning"
+    afternoon = "afternoon"
+    evening = "evening"
+
+
+CabinOpt = typer.Option(Cabin.economy, help="economy, premium, business or first.")
+AdultsOpt = typer.Option(1, min=1, max=9, help="Passengers (adults), 1 to 9. Prices are for all of them.")
+
+
 class Sort(str, Enum):
     price = "price"
     duration = "duration"

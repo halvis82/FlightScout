@@ -108,3 +108,21 @@ def test_airlines_route_links():
 def test_airports_nearby():
     r = runner.invoke(app, ["airports", "SAN", "--nearby", "150", "--json"])
     assert "TIJ" in [a["iata"] for a in json.loads(r.output)]
+
+
+def test_watch_ids_match_exactly_never_by_prefix():
+    import pytest as _pt
+    import typer as _typer
+
+    from flightscout.cli.lists import _resolve
+
+    class C:
+        def watches(self):
+            return [{"id": 12, "name": "SAN to OSL"}, {"id": 1, "name": "LAX to DPS"}, {"id": 3, "name": "SAN to LIS"}]
+
+    assert _resolve(C(), "1") == 1  # not watch 12
+    assert _resolve(C(), "dps") == 1
+    with _pt.raises(_typer.BadParameter):
+        _resolve(C(), "SAN")  # two watches
+    with _pt.raises(_typer.BadParameter):
+        _resolve(C(), "99")

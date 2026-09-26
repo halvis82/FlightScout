@@ -3,13 +3,15 @@ called server side by the web app. Protected by a shared ENGINE_KEY."""
 
 from __future__ import annotations
 
+import hmac
 import os
 import time
 from datetime import date
 from typing import Any
 
-from fastapi import Depends, FastAPI, Header, HTTPException
-from pydantic import BaseModel
+from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, model_validator
 
 from . import explore as explore_mod
 from .models import DatePrice, Destination, SearchQuery, SearchResult
@@ -34,6 +36,17 @@ if LOCAL:
     app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST", "OPTIONS"],
                        allow_headers=["*"], max_age=600,
                        allow_private_network=True)
+    # Only requests addressed to this computer: a web page that points its own
+    # domain at 127.0.0.1 (DNS rebinding) must not reach the runner.
+    from starlette.middleware.trustedhost import TrustedHostMiddleware
+
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost", "[::1]", "testserver"])
+
+
+@app.exception_handler(ValueError)
+async def _bad_input(request: Request, exc: ValueError):
+    # e.g. an unknown currency or dates that make no sense: the caller's mistake, not a crash
+    return JSONResponse(status_code=422, content={"detail": str(exc)[:300]})
 
 
 # Last time anything but a health check came in: an on demand local runner
@@ -61,7 +74,10 @@ def auth(x_engine_key: str | None = Header(default=None)) -> None:
     if LOCAL:
         return  # bound to 127.0.0.1 and CORS restricted
     key = os.environ.get("ENGINE_KEY")
-    if key and x_engine_key != key:
+    if not key:
+        # never open to the internet by accident
+        raise HTTPException(status_code=503, detail="ENGINE_KEY is not set on this engine")
+    if not x_engine_key or not hmac.compare_digest(x_engine_key.encode(), key.encode()):
         raise HTTPException(status_code=401, detail="bad engine key")
 
 
@@ -78,6 +94,14 @@ class DatesBody(BaseModel):
     trip_days: int | None = None
     skip_google: bool = False  # the visitor's browser prices the Google part (extension)
 
+    @model_validator(mode="after")
+    def _sane(self) -> "DatesBody":
+        if self.end < self.start:
+            raise ValueError("the end date is before the start date")
+        if (self.end - self.start).days > 370:
+            raise ValueError("at most a year of dates at once")
+        return self
+
 
 class ExploreBody(BaseModel):
     origin: str
@@ -88,7 +112,15 @@ class ExploreBody(BaseModel):
     nights_max: int | None = None
     sources: list[str] | None = None
     regions: list[str] | None = None
-    batch: int | None = None  # 0 to len(BATCHES)-1: request explore.BATCHES[batch] only
+    batch: int | None = None  # 0 to len(BATCHES): 0 is the fast worldwide pass, then explore.BATCHES[batch - 1]
+
+    @model_validator(mode="after")
+    def _sane(self) -> "ExploreBody":
+        if self.end < self.start:
+            raise ValueError("the end date is before the start date")
+        if self.batch is not None and not 0 <= self.batch <= len(explore_mod.BATCHES):
+            raise ValueError(f"batch must be 0 to {len(explore_mod.BATCHES)}")
+        return self
 
 
 class ExploreResult(BaseModel):

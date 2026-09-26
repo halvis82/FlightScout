@@ -28,8 +28,14 @@ def _cached(key: str, fetch) -> dict[str, float]:
             return hit[1]
         data = cache.get(key, ttl=_TTL)
         if not data:
-            data = fetch()
-            cache.put(key, data)
+            try:
+                data = fetch()
+                cache.put(key, data)
+            except Exception:
+                # the rate service is down: yesterday's rates beat failing the search
+                data = cache.get(key, ttl=30 * 86400)
+                if not data:
+                    raise
         _mem[key] = (time.time(), data)
         return data
 
@@ -67,4 +73,15 @@ def convert(amount: float, frm: str, to: str) -> float:
     rt = rates("EUR")
     if frm not in rt or to not in rt:
         rt = {**_wide_rates(), **rt}
+    for c in (frm, to):
+        if c not in rt:
+            raise ValueError(f"unknown currency {c}")
     return amount / rt[frm] * rt[to]
+
+
+def known(code: str) -> bool:
+    try:
+        convert(1.0, "EUR", code)
+        return True
+    except ValueError:
+        return False

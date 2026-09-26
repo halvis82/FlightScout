@@ -288,6 +288,11 @@ class SearchQuery(BaseModel):
             raise ValueError("the return date is before the departure date")
         if not 1 <= self.adults <= 9:
             raise ValueError("1 to 9 adults")
+        if not (len(self.currency) == 3 and self.currency.isalpha()):
+            raise ValueError(f"{self.currency!r} is not a currency code")
+        self.currency = self.currency.upper()
+        self.origins = [c.strip().upper() for c in self.origins]
+        self.destinations = [c.strip().upper() for c in self.destinations]
         return self
 
 

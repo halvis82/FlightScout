@@ -8,7 +8,7 @@ import { DEFAULT_PLANNER } from "@/lib/settings";
 export const GET = route(async (req) => {
   requireTracker(req);
   const rows = await db
-    .select({ w: schema.watches, planner: schema.settings.planner })
+    .select({ w: schema.watches, planner: schema.settings.planner, rules: schema.settings.sellerRules })
     .from(schema.watches)
     .leftJoin(schema.settings, eq(schema.settings.userId, schema.watches.userId))
     .where(eq(schema.watches.active, true));
@@ -16,7 +16,7 @@ export const GET = route(async (req) => {
   return json(
     rows
       .filter((r) => r.w.departEnd >= today)
-      .map(({ w, planner }) => ({
+      .map(({ w, planner, rules }) => ({
         id: w.id,
         name: w.name,
         origins: w.origins,
@@ -34,6 +34,8 @@ export const GET = route(async (req) => {
         include_split: w.includeSplit,
         last_checked_at: w.lastCheckedAt,
         planner: { ...DEFAULT_PLANNER, ...(planner ?? {}) },
+        // the owner's hidden sellers stay hidden in tracked prices too
+        seller_rules: Object.fromEntries((rules ?? []).filter((r) => r.mode === "block").map((r) => [r.seller, r.mode])),
       })),
   );
 });
