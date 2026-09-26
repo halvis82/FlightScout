@@ -188,6 +188,8 @@ def plan(
     max_trip_days: Optional[int] = typer.Option(None, "--max-trip-days", help="Longest whole trip."),
     max_travel_hours: Optional[float] = typer.Option(None, "--max-travel-hours", help="Longest travel time per direction."),
     nested: bool = typer.Option(True, "--nested/--no-nested", help="Try nested round trips (A-hub return + hub-B return)."),
+    nearby_km: int = typer.Option(200, "--nearby-km", min=0, max=300, help="Also try airports this close to either end (0: off)."),
+    discover: bool = typer.Option(True, "--discover/--no-discover", help="Add layovers that real fares show are cheap from both ends."),
     value_of_time: float = typer.Option(15.0, "--value-of-time", help="Money per hour of travel, for ranking."),
     cabin: Cabin = CabinOpt,
     adults: int = AdultsOpt,
@@ -199,8 +201,10 @@ def plan(
     as_json: bool = JsonOpt,
     keep: bool = SaveOpt,
 ):
-    """Cheaper routes from separate tickets: split tickets, stopovers, nested round trips and positioning
-    flights through hubs and gateways near you (e.g. San Diego via LAX).
+    """Cheaper routes from separate tickets: split tickets, stopovers, nested round trips, positioning flights
+    through gateways near you (e.g. San Diego via LAX) and nearby airports at either end. Layovers come from hubs
+    on the way and from cities real fares show are cheap from both ends; each leg is priced on Google Flights and
+    Kiwi, and the best routes are re-priced on the airlines' own sites.
 
     Examples:
       flightscout plan SAN DPS 2027-02-11 -r 2027-02-22
@@ -214,7 +218,8 @@ def plan(
                       currency=cur(currency), cabin=cabin.value, adults=adults, hubs=codes(hubs), max_hubs=max_hubs,
                       max_stopover_days=max_stopover_days, min_connection_hours=min_connection,
                       max_trip_days=max_trip_days, max_travel_hours=max_travel_hours,
-                      include_nested_roundtrips=nested, value_of_time_per_hour=value_of_time)
+                      include_nested_roundtrips=nested, value_of_time_per_hour=value_of_time,
+                      nearby_km=nearby_km, discover_hubs=discover)
     with con.status("planning (this runs many searches, about a minute)..."):
         res = run(req)
     save("plan", req.model_dump(mode="json"), res, keep)

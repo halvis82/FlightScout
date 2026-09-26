@@ -140,8 +140,10 @@ flightscout search LAX DPS +60 -r +71 --depart-flex 3 --smart --sort best
 
 ## `flightscout plan`
 
-Cheaper routes from separate tickets: split tickets, stopovers, nested round trips and positioning
-flights through hubs and gateways near you (e.g. San Diego via LAX).
+Cheaper routes from separate tickets: split tickets, stopovers, nested round trips, positioning flights
+through gateways near you (e.g. San Diego via LAX) and nearby airports at either end. Layovers come from hubs
+on the way and from cities real fares show are cheap from both ends; each leg is priced on Google Flights and
+Kiwi, and the best routes are re-priced on the airlines' own sites.
 
 ```sh
 flightscout plan SAN DPS 2027-02-11 -r 2027-02-22
@@ -163,6 +165,8 @@ flightscout plan OSL SAN +40 --hubs JFK,KEF --max-stopover-days 2
 | `--max-trip-days` | int | Longest whole trip. |
 | `--max-travel-hours` | float | Longest travel time per direction. |
 | `--nested`, `--no-nested` | flag (default `True`) | Try nested round trips (A-hub return + hub-B return). |
+| `--nearby-km` | int range (default `200`) | Also try airports this close to either end (0: off). |
+| `--discover`, `--no-discover` | flag (default `True`) | Add layovers that real fares show are cheap from both ends. |
 | `--value-of-time` | float (default `15.0`) | Money per hour of travel, for ranking. |
 | `--cabin` | choice (default `economy`) | economy, premium, business or first. |
 | `--adults` | int range (default `1`) | Passengers (adults), 1 to 9. Prices are for all of them. |
