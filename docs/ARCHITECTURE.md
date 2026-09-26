@@ -115,6 +115,6 @@ CORS allows the configured website origins.
 
 ## Seller rules
 
-Every itinerary carries `seller` + `seller_kind`. Users can mark sellers `block` (hidden) or `warn`. Built in warnings:
+Every itinerary carries `seller` + `seller_kind`. Only verified sellers show by default (`sellers.VERIFIED`: airlines and established booking sites, each checked; unverified agencies are hidden unless the rules include `"*unverified": "warn"`, which Settings sets). Users can mark sellers `block` (hidden) or `warn`. Built in warnings:
 OTA sold tickets, self transfers (connections not protected), separate tickets in planner trips, airport changes
 during a connection, short self transfer buffers, overnight connections.
