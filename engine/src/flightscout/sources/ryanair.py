@@ -60,16 +60,31 @@ def explore(origin: str, start: date, end: date, currency: str) -> list[Destinat
     return out
 
 
-def _airports() -> dict[str, str]:
-    """Ryanair airports: IATA code to the currency charged there."""
-    key = "ryanair:airports"
+def _airports() -> dict[str, dict]:
+    """Ryanair airports: IATA code to {currency charged there, time zone}."""
+    key = "ryanair:airports:v2"
     if (hit := cache.get(key, ttl=7 * 86400)) is not None:
         return hit
     r = httpx.get("https://www.ryanair.com/api/views/locate/5/airports/en/active", headers=_UA, timeout=30)
     r.raise_for_status()
-    out = {a["code"]: (a.get("country") or {}).get("currency") or "EUR" for a in r.json() if a.get("code")}
+    out = {a["code"]: {"currency": (a.get("country") or {}).get("currency") or "EUR", "tz": a.get("timeZone")}
+           for a in r.json() if a.get("code")}
     cache.put(key, out)
     return out
+
+
+def _with_offset(local: str, tz: str | None) -> str:
+    """Local wall clock plus its UTC offset, so the flight's duration is exact
+    across time zones (London to Milan is 1 h 55, not 2 h 55)."""
+    if not tz:
+        return local
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    try:
+        return datetime.fromisoformat(local).replace(tzinfo=ZoneInfo(tz)).isoformat()
+    except Exception:
+        return local
 
 
 def relevant(origins: list[str], destinations: list[str]) -> bool:
@@ -80,8 +95,8 @@ def relevant(origins: list[str], destinations: list[str]) -> bool:
     return any(o in known for o in origins) and any(d in known for d in destinations)
 
 
-def _cheapest(origin: str, dest: str, day: date, adults: int, currency: str) -> dict | None:
-    key = f"ryanair:day:{origin}:{dest}:{day}:{adults}:{currency}"
+def _cheapest(origin: str, dest: str, day: date, adults: int, currency: str, tzs: tuple = (None, None)) -> dict | None:
+    key = f"ryanair:day2:{origin}:{dest}:{day}:{adults}:{currency}"
     if (hit := cache.get(key)) is not None:
         return hit or None
     r = httpx.get(f"{BASE}/oneWayFares", headers=_UA, timeout=30, params={
@@ -95,8 +110,8 @@ def _cheapest(origin: str, dest: str, day: date, adults: int, currency: str) -> 
     if fares:
         o = fares[0]["outbound"]
         num = o.get("flightNumber") or "FR"
-        j = {"segments": [{"origin": origin, "destination": dest, "departure": o["departureDate"],
-                           "arrival": o["arrivalDate"], "carrier": num[:2], "number": num[2:]}],
+        j = {"segments": [{"origin": origin, "destination": dest, "departure": _with_offset(o["departureDate"], tzs[0]),
+                           "arrival": _with_offset(o["arrivalDate"], tzs[1]), "carrier": num[:2], "number": num[2:]}],
              "total": float(o["price"]["value"]), "seats": None, "currency": o["price"]["currencyCode"]}
     cache.put(key, j or {})
     return j
@@ -110,16 +125,16 @@ def search(q: SearchQuery) -> list[Itinerary]:
     out: list[Itinerary] = []
     days = [q.departure + timedelta(days=k) for k in range(-min(q.departure_flex_days, 2), min(q.departure_flex_days, 2) + 1)]
     for o, d in pairs:
-        cur = known[o]
+        cur, tz_o, tz_d = known[o]["currency"], known[o].get("tz"), known[d].get("tz")
         for day in days:
             if day < date.today():
                 continue
-            a = _cheapest(o, d, day, q.adults, cur)
+            a = _cheapest(o, d, day, q.adults, cur, (tz_o, tz_d))
             if not a:
                 continue
             b = None
             if q.return_date:
-                b = _cheapest(d, o, q.return_date, q.adults, known[d])
+                b = _cheapest(d, o, q.return_date, q.adults, known[d]["currency"], (tz_d, tz_o))
                 if not b:
                     continue
                 if b["currency"] != a["currency"]:  # each way is charged in its own country's money
