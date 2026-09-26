@@ -1,5 +1,5 @@
 // Watch logic shared by the server (signed in users) and the browser (guests).
-import { addDays, dayDiff, formatPrice } from "./format";
+import { addDays, dayDiff, formatPrice, isoDate } from "./format";
 import { expandCodes } from "./metros";
 import type { Cabin, SearchQuery, Trip } from "./types";
 
@@ -38,7 +38,7 @@ export type ObservationInput = {
 // One engine query covering a watch's date window. Google gets the middle
 // date, Kiwi covers the rest of the window through flex days.
 export function watchToQuery(w: WatchLike): SearchQuery {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = isoDate(new Date());
   const start = w.departStart < today ? today : w.departStart;
   const span = Math.max(0, dayDiff(start, w.departEnd));
   const half = Math.floor(span / 2);

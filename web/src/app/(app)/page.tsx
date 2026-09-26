@@ -16,7 +16,7 @@ import { localRunnerActive } from "@/lib/local-runner";
 import { PARTS, PART_LABELS, searchPart, type PartState } from "@/lib/live-search";
 import { METROS, airport, expandCodes, loadAirports, nearestAirport } from "@/lib/airports-client";
 import { RouteMap } from "@/components/route-map";
-import { addDays, dayDiff } from "@/lib/format";
+import { addDays, dayDiff, isoDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { PlanResult, SearchQuery, SearchResult } from "@/lib/types";
 
@@ -182,8 +182,16 @@ function SearchPage() {
   useEffect(() => {
     if (paramStr === ownUrl.current) return;
     ownUrl.current = paramStr;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (params.get("from")) setForm(null); // Back or Forward to another search: the form follows the address and searches again
+    if (!params.get("from")) return;
+    // Back or Forward to another search: the form follows the address and searches again;
+    // results of the other kind (one way vs multi city) don't belong under it
+    if ((params.get("tt") === "multicity") !== (edited?.tripType === "multicity")) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setResult(null);
+      setPlan(null);
+      lastRun.current = null;
+    }
+    setForm(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paramStr]);
 
@@ -454,7 +462,12 @@ function SearchPage() {
       />
       <RecentRow
         onPick={(r) => {
-          const next: SearchForm = { ...form, from: r.from, to: r.to, tripType: r.tripType, depart: r.depart, ret: r.ret };
+          // a past search again: same trip length, from today
+          const today = isoDate(new Date());
+          const len = r.ret ? Math.max(1, dayDiff(r.depart, r.ret)) : 7;
+          const depart = r.depart < today ? today : r.depart;
+          const ret = r.ret && r.ret > depart ? r.ret : addDays(depart, len);
+          const next: SearchForm = { ...form, from: r.from, to: r.to, tripType: r.tripType, depart, ret };
           setForm(next);
         }}
       />

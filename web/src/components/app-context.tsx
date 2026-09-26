@@ -61,7 +61,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
   const money = useCallback(
     (amount: number | null | undefined, from: string, opts?: { compact?: boolean }) =>
-      amount == null ? "–" : fx || from === currency ? formatPrice(convert(amount, from), currency, opts) : formatPrice(amount, from, opts),
+      amount == null
+        ? "–"
+        : from === currency || (fx?.rates[from?.toUpperCase()] && fx.rates[currency])
+          ? formatPrice(convert(amount, from?.toUpperCase()), currency, opts)
+          : formatPrice(amount, from, opts), // no rate for it: shown in its own currency, never mislabeled
     [convert, currency, fx],
   );
 

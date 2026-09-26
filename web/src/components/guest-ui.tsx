@@ -6,6 +6,7 @@ import { useApp } from "./app-context";
 import { Dialog } from "./dialog";
 import { Button, ErrorNote } from "./ui";
 import { api } from "@/lib/client";
+import { DEFAULT_PLANNER } from "@/lib/defaults";
 import { clearGuestData, guestSettingsChanged, guestSnapshot, hasGuestData } from "@/lib/guest";
 
 const DISMISS_KEY = "fs.bannerDismissed";
@@ -82,49 +83,68 @@ export function ImportGuestData() {
     try {
       const s = snap.settings;
       const current = me!.settings!;
-      if (settingsChanged) await api("/settings", {
-        method: "PATCH",
-        body: {
-          currency: s.currency,
-          planner: s.planner,
-          sellerRules: [...current.sellerRules, ...s.sellerRules.filter((r) => !current.sellerRules.some((c) => c.seller === r.seller))],
-          defaultOrigins: [...new Set([...current.defaultOrigins, ...s.defaultOrigins])],
-        },
-      });
+      const failed: string[] = [];
+      const attempt = async (what: string, fn: () => Promise<unknown>) => {
+        try {
+          await fn();
+        } catch (e) {
+          failed.push(`${what}: ${(e as Error).message}`);
+        }
+      };
+      if (settingsChanged) {
+        // only what the guest actually changed; the account keeps the rest
+        const body: Record<string, unknown> = {};
+        if (s.currency !== current.currency) body.currency = s.currency;
+        if (JSON.stringify(s.planner) !== JSON.stringify(DEFAULT_PLANNER)) body.planner = s.planner;
+        const newRules = s.sellerRules.filter((r) => !current.sellerRules.some((c) => c.seller === r.seller));
+        if (newRules.length) body.sellerRules = [...current.sellerRules, ...newRules];
+        if (s.defaultOrigins.length) body.defaultOrigins = [...new Set([...current.defaultOrigins, ...s.defaultOrigins])];
+        if (Object.keys(body).length) await attempt("settings", () => api("/settings", { method: "PATCH", body }));
+      }
       const existing = await api<{ codes: string[]; label: string }[]>("/places");
       for (const p of snap.places) {
-        if (existing.some((e) => e.label === p.label && e.codes.join() === p.codes.join())) continue;
-        await api("/places", { body: { label: p.label, codes: p.codes, kind: p.kind } });
+        if (existing.some((e) => [...e.codes].sort().join() === [...p.codes].sort().join())) continue;
+        await attempt(p.label, () => api("/places", { body: { label: p.label, codes: p.codes, kind: p.kind } }));
       }
       for (const { watch: w, observations } of snap.watches) {
-        const row = await api<{ id: number }>("/watches", {
-          body: {
-            name: w.name,
-            origins: w.origins,
-            destinations: w.destinations,
-            trip_type: w.tripType,
-            depart_start: w.departStart,
-            depart_end: w.departEnd,
-            nights_min: w.nightsMin,
-            nights_max: w.nightsMax,
-            cabin: w.cabin,
-            adults: w.adults,
-            max_stops: w.maxStops,
-            currency: w.currency,
-            include_split: w.includeSplit,
-            alert_below: w.alertBelow,
-            alert_drop_pct: w.alertDropPct,
-            active: w.active,
-            notes: w.notes,
-          },
+        await attempt(w.name, async () => {
+          const row = await api<{ id: number; existing?: boolean }>("/watches", {
+            body: {
+              name: w.name,
+              origins: w.origins,
+              destinations: w.destinations,
+              trip_type: w.tripType,
+              legs: w.legs ?? null,
+              depart_start: w.departStart,
+              depart_end: w.departEnd,
+              nights_min: w.nightsMin,
+              nights_max: w.nightsMax,
+              cabin: w.cabin,
+              adults: w.adults,
+              max_stops: w.maxStops,
+              currency: w.currency,
+              include_split: w.includeSplit,
+              alert_below: w.alertBelow,
+              alert_drop_pct: w.alertDropPct,
+              active: w.active,
+              notes: w.notes,
+            },
+          });
+          if (row.existing) return; // already on the account (an earlier try): don't double its prices
+          for (let i = 0; i < observations.length; i += 500) {
+            await api(`/watches/${row.id}/observations`, { body: observations.slice(i, i + 500) });
+          }
         });
-        for (let i = 0; i < observations.length; i += 500) {
-          await api(`/watches/${row.id}/observations`, { body: observations.slice(i, i + 500) });
-        }
       }
       for (const r of [...snap.searches].reverse()) {
         if (!r.payload) continue;
-        await api("/results", { body: { kind: r.kind, query: r.query, payload: r.payload, origin: "web" } });
+        await attempt(r.summary ?? "a search", () => api("/results", { body: { kind: r.kind, query: r.query, payload: r.payload, origin: "web" } }));
+      }
+      if (failed.length) {
+        // keep the guest copy so nothing is lost; trying again skips what's already in
+        setErr(`Some items couldn't be imported (the rest are in your account): ${failed.slice(0, 3).join("; ")}${failed.length > 3 ? "..." : ""}`);
+        await Promise.all([refreshMe(), refreshPlaces()]);
+        return;
       }
       clearGuestData();
       setDone(true);

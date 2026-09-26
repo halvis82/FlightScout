@@ -6,6 +6,7 @@ import { DateRangeField } from "./date-picker";
 import { Button, Field, Segmented, Select, Switch } from "./ui";
 import { addDays, dayDiff, isoDate } from "@/lib/format";
 import type { Source } from "@/lib/types";
+import { METROS } from "@/lib/metros";
 import { preset } from "@/lib/presets";
 
 export type LegFlex = number | "by"; // ±days, or "arrive by this date"
@@ -77,15 +78,15 @@ const validDate = (d: string | null | undefined): d is string => !!d && ISO.test
 const pickOne = <T extends string | number>(v: T | undefined, ok: readonly T[], fallback: T): T => (v !== undefined && ok.includes(v) ? v : fallback);
 
 export function paramsToForm(p: URLSearchParams, base: SearchForm): SearchForm {
+  // airport codes, and area codes like NYC or OSLX; nothing valid = the default
+  const valid = (c: string) => /^[A-Z]{3}$/.test(c) || (/^[A-Z]{4}$/.test(c) && c in METROS);
   const codes = (k: string) => {
     const v = p.get(k);
     if (!v) return undefined;
-    return v
-      .split(",")
-      .map((c) => c.trim().toUpperCase())
-      .filter((c) => /^[A-Z]{3}$/.test(c));
+    const out = [...new Set(v.split(",").map((c) => c.trim().toUpperCase()).filter(valid))].slice(0, 8);
+    return out.length ? out : undefined;
   };
-  const today = new Date().toISOString().slice(0, 10);
+  const today = isoDate(new Date()); // the visitor's own date, not UTC
   const num = (k: string) => (p.get(k) != null && p.get(k) !== "" ? Number(p.get(k)) : undefined);
   const d = p.get("d");
   const depart = validDate(d) && d >= today ? d : base.depart;
@@ -101,7 +102,7 @@ export function paramsToForm(p: URLSearchParams, base: SearchForm): SearchForm {
       const ok = raw
         .filter((l) => l && Array.isArray(l.to))
         .map((l) => ({
-          to: l.to.map((c) => String(c).toUpperCase()).filter((c) => /^[A-Z]{3}$/.test(c)),
+          to: l.to.map((c) => String(c).toUpperCase()).filter(valid).slice(0, 8),
           date: validDate(l.date) && l.date >= today ? l.date : depart,
           flex: l.flex === "by" ? ("by" as const) : pickOne(Number(l.flex), [0, 1, 2, 3, 7], 0),
         }));

@@ -25,23 +25,34 @@ export default function HistoryDetail({ params }: { params: Promise<{ id: string
       <ErrorNote>{(error as Error).message}</ErrorNote>
     );
   if (!data) return <Spinner />;
-  const q = data.query as Record<string, unknown>;
+  const q = (data.query ?? {}) as Record<string, unknown>;
+  // saved queries come from the website, the CLI and agents: origin or origins, list or text
+  const list = (...vs: unknown[]) => {
+    for (const v of vs) {
+      if (Array.isArray(v) && v.length) return v.map(String);
+      if (typeof v === "string" && v) return v.split(",");
+    }
+    return [] as string[];
+  };
+  const str = (v: unknown) => (typeof v === "string" ? v : "");
+  const from = list(q.origins, q.origin, q.start);
+  const to = list(q.destinations, q.destination);
   const rerun = new URLSearchParams();
-  if (data.kind === "search") {
-    const s = q as unknown as SearchQuery;
-    rerun.set("from", s.origins.join(","));
-    rerun.set("to", s.destinations.join(","));
-    rerun.set("d", s.departure);
-    if (s.return_date) rerun.set("r", s.return_date);
-    rerun.set("tt", s.return_date ? "roundtrip" : "oneway");
-    if (s.currency) rerun.set("cur", s.currency);
-  } else if (data.kind === "plan") {
-    rerun.set("from", (q.origins as string[]).join(","));
-    rerun.set("to", (q.destinations as string[]).join(","));
-    rerun.set("d", q.depart_start as string);
-    if (q.return_start) rerun.set("r", q.return_start as string);
-    rerun.set("smart", "1");
+  if ((data.kind === "search" || data.kind === "plan") && from.length && to.length) {
+    const dep = str(q.departure) || str(q.depart_start);
+    const ret = str(q.return_date) || str(q.return_start);
+    rerun.set("from", from.join(","));
+    rerun.set("to", to.join(","));
+    if (dep) rerun.set("d", dep);
+    if (ret) rerun.set("r", ret);
+    rerun.set("tt", ret ? "roundtrip" : "oneway");
+    if (typeof q.adults === "number") rerun.set("adults", String(q.adults));
+    if (typeof q.cabin === "string") rerun.set("cabin", q.cabin);
+    if (data.kind === "plan") rerun.set("smart", "1");
   }
+  const payload = (data.payload ?? null) as Record<string, unknown> | null;
+  const trips = Array.isArray(payload?.trips) ? (payload!.trips as SearchResult["trips"]) : null;
+  const items = (Array.isArray(payload?.items) ? payload!.items : Array.isArray(payload?.destinations) ? payload!.destinations : []) as (Destination & DatePrice)[];
 
   return (
     <div>
@@ -61,19 +72,22 @@ export default function HistoryDetail({ params }: { params: Promise<{ id: string
         }
       />
       <p className="mb-3 text-xs text-muted">Prices below are as they were when this search ran. Fares change, so check the live link before booking.</p>
-      {!data.payload ? (
+      {!payload ? (
         <Empty title="Result payload was trimmed">Old results keep only the query. Search again for live prices.</Empty>
-      ) : data.kind === "search" || data.kind === "plan" ? (
+      ) : trips ? (
+        // searches, smart routes, the trip builder and multi city trips all keep trips
         <ResultsView
-          trips={(data.payload as SearchResult | PlanResult).trips ?? []}
-          query={data.kind === "search" ? (q as unknown as SearchQuery) : { origins: q.origins as string[], destinations: q.destinations as string[] }}
-          errors={(data.payload as SearchResult).errors}
-          googleUrl={(data.payload as SearchResult).google_url}
-          plan={data.kind === "plan" ? (data.payload as PlanResult) : null}
+          trips={trips}
+          query={data.kind === "search" ? (q as unknown as SearchQuery) : { origins: from, destinations: to }}
+          errors={(payload.errors as Record<string, string>) ?? {}}
+          googleUrl={typeof payload.google_url === "string" ? payload.google_url : null}
+          plan={data.kind !== "search" ? (payload as unknown as PlanResult) : null}
         />
+      ) : !items.length ? (
+        <Empty title="Nothing was found in this search" />
       ) : (
         <Card className="divide-y divide-border">
-          {(((data.payload as { items?: (Destination | DatePrice)[] }).items ?? []) as (Destination & DatePrice)[]).map((d, i) => (
+          {items.map((d, i) => (
             <div key={i} className="flex items-center gap-3 px-3 py-2 text-sm">
               <span className="font-mono">{d.origin} → {d.destination}</span>
               {"city" in d && d.city && <span className="text-muted">{d.city}</span>}

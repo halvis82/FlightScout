@@ -93,3 +93,19 @@ describe("watch validation", () => {
     expect(c).toMatchObject({ origins: ["LAX"], destinations: ["DPS"], departStart: "2027-03-15", departEnd: "2027-03-15", adults: 2, maxStops: 1, alertBelow: 450 });
   });
 });
+
+import { resolveWatchParam, watchHref } from "@/lib/watch-slug";
+
+describe("watch links", () => {
+  const a = { id: 18, origins: ["SAN"], destinations: ["OSL"], tripType: "oneway", departStart: "2027-01-02" };
+  const b = { id: 5, origins: ["LAX"], destinations: ["DPS"], tripType: "roundtrip", departStart: "2027-03-18", nightsMin: 7 };
+  const c = { ...b, id: 6 };
+  it("a date's day is never read as a watch id", () => {
+    expect(resolveWatchParam("lax-dps-2027-03-18", [a, b])).toBeNull();
+  });
+  it("duplicate slugs get the id and resolve to the right watch", () => {
+    expect(watchHref(c, [b, c])).toBe("/watches/lax-dps-2027-03-18-7n-6");
+    expect(resolveWatchParam("lax-dps-2027-03-18-7n-6", [b, c])).toBe("6");
+    expect(watchHref(b)).toBe("/watches/lax-dps-2027-03-18-7n-5");
+  });
+});

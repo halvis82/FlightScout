@@ -17,8 +17,9 @@ export function watchSlug(w: W) {
 
 export function watchHref(w: W, all?: W[] | null) {
   const s = watchSlug(w);
-  const clash = (all ?? []).some((x) => String(x.id) !== String(w.id) && watchSlug(x) === s);
-  return `/watches/${clash ? `${s}-${w.id}` : s}`;
+  // without the list we can't know the slug is unique: add the id to be sure
+  const clash = !all || all.some((x) => String(x.id) !== String(w.id) && watchSlug(x) === s);
+  return `/watches/${clash && w.id != null ? `${s}-${w.id}` : s}`;
 }
 
 // The id a /watches/<param> URL points at, given the user's watches.
@@ -27,7 +28,9 @@ export function resolveWatchParam(param: string, all: (W & { id: number | string
   if (!all) return null;
   const direct = all.find((w) => watchSlug(w) === param);
   if (direct) return String(direct.id);
-  const m = /-(\d+)$/.exec(param);
-  const byId = m ? all.find((w) => String(w.id) === m[1]) : undefined;
+  // "<slug>-<id>": the id counts only when the rest is that watch's slug
+  // (lax-dps-2027-03-18 must not open watch 18)
+  const m = /^(.*)-(\d+)$/.exec(param);
+  const byId = m ? all.find((w) => String(w.id) === m[2] && watchSlug(w) === m[1]) : undefined;
   return byId ? String(byId.id) : null;
 }
