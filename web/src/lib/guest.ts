@@ -1,5 +1,7 @@
 "use client";
 import { placeSignature, watchSignature } from "./signature";
+import { HttpError } from "./http-error";
+import { placeInput } from "./place-validate";
 // Guest mode: the same /api/v1 routes the server offers for signed in users,
 // answered from localStorage. The client `api()` helper routes here when the
 // visitor has no session, so pages don't need to know which mode they're in.
@@ -14,6 +16,16 @@ const P = "fs.guest.";
 const MAX_OBS_PER_WATCH = 3000;
 const MAX_SEARCHES = 40;
 const SEARCHES_WITH_PAYLOAD = 8;
+
+// Shared validation throws HttpError: the guest router answers with the same status.
+function checked<T>(fn: () => T): T {
+  try {
+    return fn();
+  } catch (e) {
+    if (e instanceof HttpError) throw new GuestError(e.status, e.message);
+    throw e;
+  }
+}
 
 export class GuestError extends Error {
   constructor(public status: number, message: string) {
@@ -468,11 +480,11 @@ export async function guestApi(path: string, method: string, body: unknown, serv
       const list = read<Place[]>("places", []);
       if (!seg[1]) {
         if (method === "GET") return [...list].sort((a, b) => a.kind.localeCompare(b.kind) || a.label.localeCompare(b.label));
-        const c = codes(b.codes);
-        if (!String(b.label ?? "").trim() || !c.length) throw new GuestError(400, "label and at least one airport code are required");
+        const v = checked(() => placeInput(b, false));
+        const c = v.codes!;
         const dupPlace = list.find((x) => placeSignature(x.codes) === placeSignature(c));
         if (dupPlace) return { ...dupPlace, existing: true };
-        const row: Place = { id: nextId(), label: String(b.label).trim(), codes: c, kind: (b.kind as Place["kind"]) ?? "frequent", color: null, notes: null, createdAt: new Date().toISOString() };
+        const row: Place = { id: nextId(), label: v.label!, codes: c, kind: v.kind!, color: v.color ?? null, notes: v.notes ?? null, createdAt: new Date().toISOString() };
         write("places", [...list, row]);
         return row;
       }
@@ -489,7 +501,11 @@ export async function guestApi(path: string, method: string, body: unknown, serv
         return { ok: true };
       }
       if (method === "PATCH") {
-        const next = list.map((x) => (x.id === id ? { ...x, ...b, codes: b.codes ? codes(b.codes) : x.codes } : x));
+        const v = checked(() => placeInput(b, true));
+        delete v.signature;
+        if (v.codes && list.some((x) => x.id !== id && placeSignature(x.codes) === placeSignature(v.codes!)))
+          throw new GuestError(409, "You already saved a place with exactly these airports.");
+        const next = list.map((x) => (x.id === id ? { ...x, ...v } : x));
         write("places", next);
         const row = next.find((x) => x.id === id);
         if (prev && row && b.codes) syncDefault(prev.codes, row.codes);

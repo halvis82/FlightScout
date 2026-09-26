@@ -1,6 +1,6 @@
 import { and, asc, eq, gte } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
-import { intParam, json, requireUser, route } from "@/lib/api";
+import { numParam, intParam, json, requireUser, route } from "@/lib/api";
 import { convertWith, getRates } from "@/lib/fx";
 import { ownWatch } from "@/lib/watches";
 
@@ -11,7 +11,7 @@ type Ctx = { params: Promise<{ id: string }> };
 export const GET = route<Ctx>(async (req, { params }) => {
   const userId = await requireUser(req);
   const w = await ownWatch(userId, intParam((await params).id));
-  const days = Number(new URL(req.url).searchParams.get("days") ?? 365);
+  const days = numParam(new URL(req.url).searchParams, "days", 365, 1, 3650);
   const since = new Date(Date.now() - days * 86400_000);
   const rows = await db
     .select({

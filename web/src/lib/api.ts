@@ -6,11 +6,8 @@ import { eq } from "drizzle-orm";
 import { auth } from "./auth";
 import { db, schema } from "./db";
 
-export class HttpError extends Error {
-  constructor(public status: number, message: string) {
-    super(message);
-  }
-}
+import { HttpError } from "./http-error";
+export { HttpError };
 
 export function json(data: unknown, init?: number | ResponseInit) {
   return NextResponse.json(data, typeof init === "number" ? { status: init } : init);
@@ -78,8 +75,9 @@ export function route<C = unknown>(fn: Handler<C>): Handler<C> {
       return await fn(req, ctx);
     } catch (e) {
       if (e instanceof HttpError) return json({ error: e.message }, e.status);
+      // details (SQL, ids) stay in the server log, never in the response
       console.error(e);
-      return json({ error: e instanceof Error ? e.message : "internal error" }, 500);
+      return json({ error: "Something went wrong on our side. Please try again." }, 500);
     }
   };
 }
@@ -94,6 +92,15 @@ export async function body<T>(req: Request): Promise<T> {
 
 export function intParam(v: string) {
   const n = Number(v);
-  if (!Number.isInteger(n)) throw new HttpError(400, "bad id");
+  if (!Number.isInteger(n) || n < 1 || n > 2_147_483_647) throw new HttpError(400, "bad id");
+  return n;
+}
+
+// An integer query parameter within [min, max], `fallback` when absent.
+export function numParam(sp: URLSearchParams, name: string, fallback: number, min: number, max: number) {
+  const raw = sp.get(name);
+  if (raw === null || raw === "") return fallback;
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n < min || n > max) throw new HttpError(400, `${name} must be a whole number from ${min} to ${max}`);
   return n;
 }

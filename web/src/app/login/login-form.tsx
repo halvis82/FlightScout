@@ -5,10 +5,11 @@ import Link from "next/link";
 import { Fingerprint, Plane } from "lucide-react";
 import { authClient, signIn, signUp } from "@/lib/auth-client";
 import { Button, ErrorNote, Field, Input, Segmented } from "@/components/ui";
+import { safeNext } from "@/lib/safe-next";
 
 export function LoginForm({ social }: { social: string[] }) {
   const params = useSearchParams();
-  const next = params.get("next") || "/";
+  const next = safeNext(params.get("next"), typeof window !== "undefined" ? window.location.origin : undefined);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth, enabledSocialProviders } from "@/lib/auth";
 import { Suspense } from "react";
 import { LoginForm } from "./login-form";
+import { safeNext } from "@/lib/safe-next";
 
 export const metadata = { title: "Sign in" };
 
@@ -15,8 +16,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     /* no database: show the form */
   }
   if (signedIn) {
-    const next = (await searchParams).next;
-    redirect(next?.startsWith("/") && !next.startsWith("//") ? next : "/");
+    redirect(safeNext((await searchParams).next));
   }
   return (
     <Suspense>

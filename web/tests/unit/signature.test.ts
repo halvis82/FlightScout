@@ -50,3 +50,16 @@ describe("queryMatchesWatch", () => {
     expect(queryMatchesWatch({ ...q, return_date: "2026-11-30" } as never, w as never)).toBe(false);
   });
 });
+
+import { safeNext } from "../../src/lib/safe-next";
+
+describe("safeNext", () => {
+  it("keeps paths on this site and refuses everything else", () => {
+    expect(safeNext("/watches?x=1#a")).toBe("/watches?x=1#a");
+    expect(safeNext("javascript:alert(1)")).toBe("/");
+    expect(safeNext("https://example.org/x")).toBe("/");
+    expect(safeNext("//example.org/x")).toBe("/");
+    expect(safeNext("/\\example.org/x")).toBe("/");
+    expect(safeNext(null)).toBe("/");
+  });
+});

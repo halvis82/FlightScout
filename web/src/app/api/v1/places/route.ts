@@ -1,7 +1,7 @@
-import { placeSignature } from "@/lib/signature";
+import { placeInput } from "@/lib/place-validate";
 import { and, asc, eq } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
-import { body, json, requireUser, route, HttpError } from "@/lib/api";
+import { body, json, requireUser, route } from "@/lib/api";
 
 export const GET = route(async (req) => {
   const userId = await requireUser(req);
@@ -13,19 +13,13 @@ export const GET = route(async (req) => {
   return json(rows);
 });
 
-type In = { label: string; codes: string[] | string; kind?: "home" | "frequent" | "interested"; color?: string; notes?: string };
-
 export const POST = route(async (req) => {
   const userId = await requireUser(req);
-  const p = await body<In>(req);
-  const codes = (Array.isArray(p.codes) ? p.codes : p.codes.split(","))
-    .map((c) => c.trim().toUpperCase())
-    .filter((c) => /^[A-Z]{3,4}$/.test(c));
-  if (!p.label?.trim() || !codes.length) throw new HttpError(400, "label and at least one airport code are required");
-  const signature = placeSignature(codes);
+  const p = placeInput(await body<unknown>(req), false);
+  const signature = p.signature!;
   const [row] = await db
     .insert(schema.places)
-    .values({ userId, label: p.label.trim(), codes, kind: p.kind ?? "frequent", color: p.color, notes: p.notes, signature })
+    .values({ userId, label: p.label!, codes: p.codes!, kind: p.kind!, color: p.color, notes: p.notes, signature })
     .onConflictDoNothing({ target: [schema.places.userId, schema.places.signature] })
     .returning();
   if (row) return json(row, 201);

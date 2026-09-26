@@ -1,6 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
-import { body, intParam, json, requireUser, route } from "@/lib/api";
+import { body, HttpError, intParam, json, requireUser, route } from "@/lib/api";
+import { placeInput } from "@/lib/place-validate";
 import { placeSignature } from "@/lib/signature";
 
 // "Start searches from" holds a copy of a favorite's codes: keep it in step
@@ -17,10 +18,18 @@ export const PATCH = route<Ctx>(async (req, { params }) => {
   const userId = await requireUser(req);
   const id = intParam((await params).id);
   const [prev] = await db.select().from(schema.places).where(and(eq(schema.places.id, id), eq(schema.places.userId, userId)));
-  const p = await body<Partial<{ label: string; codes: string[]; kind: "home" | "frequent" | "interested"; color: string; notes: string }>>(req);
+  if (!prev) throw new HttpError(404, "not found");
+  const p = placeInput(await body<unknown>(req), true);
+  if (p.signature && p.signature !== prev.signature) {
+    const [clash] = await db
+      .select({ id: schema.places.id })
+      .from(schema.places)
+      .where(and(eq(schema.places.userId, userId), eq(schema.places.signature, p.signature)));
+    if (clash) throw new HttpError(409, "You already saved a place with exactly these airports.");
+  }
   const [row] = await db
     .update(schema.places)
-    .set({ ...p, codes: p.codes?.map((c) => c.toUpperCase()) })
+    .set(p)
     .where(and(eq(schema.places.id, id), eq(schema.places.userId, userId)))
     .returning();
   if (prev && row && p.codes) await syncDefault(userId, prev.codes, row.codes);
