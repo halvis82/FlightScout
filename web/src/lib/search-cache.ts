@@ -46,7 +46,7 @@ export async function cachePut(kind: string, key: string, payload: unknown) {
       .values({ key, kind, payload, createdAt: new Date() })
       .onConflictDoUpdate({ target: schema.searchCache.key, set: { payload, createdAt: new Date() } });
     // opportunistic cleanup of anything older than a day
-    if (Math.random() < 0.05) await db.delete(schema.searchCache).where(lt(schema.searchCache.createdAt, new Date(Date.now() - 86_400_000)));
+    if (Math.random() < 0.01) await db.delete(schema.searchCache).where(lt(schema.searchCache.createdAt, new Date(Date.now() - 86_400_000)));
   } catch {
     /* ignore */
   }

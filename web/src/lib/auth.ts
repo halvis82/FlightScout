@@ -28,7 +28,9 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
 // Only these emails may create accounts. Everyone else can still use the site
 // as a guest. "*" lets anyone sign up (your own copy on your computer).
-export const allowedSignupEmails = (process.env.ALLOWED_SIGNUP_EMAILS ?? "hhafnor@gmail.com")
+// Who may make an account ("*" = anyone). Unset means nobody: a copy that
+// forgot to set it must not let strangers claim an address.
+export const allowedSignupEmails = (process.env.ALLOWED_SIGNUP_EMAILS ?? "")
   .split(",")
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean);

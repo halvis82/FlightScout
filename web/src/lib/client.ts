@@ -51,13 +51,17 @@ let mePromise: Promise<MeLite | null> | null = null;
 let meUnread = false; // mePromise hasn't been handed to a GET /me caller yet
 function loadMe() {
   if (!mePromise) {
-    mePromise = serverFetch<MeLite>("/me").catch(() => null);
+    mePromise = serverFetch<MeLite>("/me").catch(() => {
+      mePromise = null; // a failed check is asked again next time, not remembered
+      return null;
+    });
     meUnread = true;
   }
   return mePromise;
 }
 export function isGuest(): Promise<boolean> {
-  return loadMe().then((m) => (m ? !m.user : false));
+  // unknown (the check failed): a guest, since signed in calls would only fail anyway
+  return loadMe().then((m) => (m ? !m.user : true));
 }
 
 const ENGINE_KINDS = new Set(["/search", "/plan", "/explore", "/dates", "/trip", "/multicity"]);

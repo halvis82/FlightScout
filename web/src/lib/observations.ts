@@ -1,4 +1,5 @@
 import "server-only";
+import { after } from "next/server";
 import { and, asc, desc, eq, gte } from "drizzle-orm";
 import { db, schema } from "./db";
 import { convertWith, getRates, hasRate } from "./fx";
@@ -85,6 +86,8 @@ export async function alertIfTargetMet(before: Watch, after: Watch) {
   return evaluateAlerts(after, after.bestPrice, null, { booking_url: url } as ObservationInput);
 }
 
+const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+
 async function evaluateAlerts(watch: Watch, price: number, prev: number | null, best: ObservationInput) {
   const reasons = alertReasons(watch, price, prev);
   if (!reasons.length) return 0;
@@ -108,20 +111,30 @@ async function evaluateAlerts(watch: Watch, price: number, prev: number | null, 
     currency: watch.currency,
     bookingUrl: best.booking_url ?? null,
   });
-  const s = await getSettings(watch.userId);
-  const base = process.env.BETTER_AUTH_URL ?? "";
-  if (s.pushAlerts) {
-    await sendPush(watch.userId, { title: "FlightScout price alert", body: message, url: `/watches/${watch.id}` });
-  }
-  if (s.emailAlerts) {
-    const [u] = await db.select().from(schema.user).where(eq(schema.user.id, watch.userId));
-    if (u) {
-      await sendEmail(
-        u.email,
-        `Price alert: ${watch.name} ${formatPrice(price, watch.currency)}`,
-        `<p>${message}.</p><p><a href="${best.booking_url ?? base + "/watches/" + watch.id}">Open the fare</a> · <a href="${base}/watches/${watch.id}">View price history</a></p>`,
-      );
+  // push and email go out after the response, so a search never waits on them
+  const deliver = async () => {
+    const s = await getSettings(watch.userId);
+    const base = process.env.BETTER_AUTH_URL ?? "";
+    if (s.pushAlerts) {
+      await sendPush(watch.userId, { title: "FlightScout price alert", body: message, url: `/watches/${watch.id}` }).catch(() => 0);
     }
+    if (s.emailAlerts) {
+      const [u] = await db.select().from(schema.user).where(eq(schema.user.id, watch.userId));
+      if (u) {
+        const history = `${base}/watches/${watch.id}`;
+        const fare = /^https?:\/\//.test(best.booking_url ?? "") ? best.booking_url! : history;
+        await sendEmail(
+          u.email,
+          `Price alert: ${watch.name} ${formatPrice(price, watch.currency)}`,
+          `<p>${esc(message)}.</p><p><a href="${esc(fare)}">Open the fare</a> · <a href="${esc(history)}">View price history</a></p>`,
+        ).catch(() => false);
+      }
+    }
+  };
+  try {
+    after(deliver);
+  } catch {
+    await deliver(); // not inside a request (scripts): send now
   }
   return 1;
 }

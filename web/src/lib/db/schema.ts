@@ -235,7 +235,7 @@ export const searches = pgTable(
     payload: jsonb("payload"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("searches_user_time_idx").on(t.userId, t.createdAt)],
+  (t) => [index("searches_user_time_idx").on(t.userId, t.createdAt), index("searches_kind_time_idx").on(t.kind, t.createdAt)],
 );
 
 export const apiTokens = pgTable(
@@ -313,12 +313,16 @@ export const exploreCache = pgTable("explore_cache", {
 
 // Shared engine results: the same search by anyone within a few minutes is
 // answered from here instead of asking Google (and friends) again.
-export const searchCache = pgTable("search_cache", {
-  key: text("key").primaryKey(),
-  kind: text("kind").notNull(),
-  payload: jsonb("payload").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const searchCache = pgTable(
+  "search_cache",
+  {
+    key: text("key").primaryKey(),
+    kind: text("kind").notNull(),
+    payload: jsonb("payload").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("search_cache_time_idx").on(t.createdAt)],
+);
 
 // The cheapest one way price seen per route and day (USD), from every saved
 // result, CLI push and tracker check. Smart routes use it to pick layovers

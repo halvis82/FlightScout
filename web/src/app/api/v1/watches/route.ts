@@ -25,10 +25,12 @@ export const GET = route(async (req) => {
     .orderBy(day);
   const rates = await getRates();
   return json(
-    ws.map((w) => ({
+    // the full best trip stays on the watch's own page (it's large and the list doesn't show it)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ws.map(({ bestTrip, ...w }) => ({
       ...w,
       sparkline: pts
-        .filter((p) => p.watchId === w.id)
+        .filter((p) => p.watchId === w.id && (!w.pricesSince || p.day >= new Date(w.pricesSince).toISOString().slice(0, 10)))
         .map((p) => ({ day: p.day, price: Math.round(convertWith(rates, Number(p.min), "USD", w.currency)) })),
     })),
   );

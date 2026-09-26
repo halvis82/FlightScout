@@ -64,6 +64,13 @@
       "when": 1790440257288,
       "tag": "0008_token_parent",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790440513870,
+      "tag": "0009_perf_indexes",
+      "breakpoints": true
     }
   ]
 }

@@ -36,7 +36,7 @@ Run the engine next to it (see `../engine`) on `http://127.0.0.1:8787` with `ENG
 | `DATABASE_URL` | yes | Postgres (Neon on Vercel). `pglite:<dir>` for a local embedded DB |
 | `BETTER_AUTH_SECRET` | yes | Long random string (`openssl rand -hex 32`) |
 | `BETTER_AUTH_URL` | yes in prod | `https://flightscout-app.vercel.app` |
-| `ALLOWED_SIGNUP_EMAILS` | no | Comma separated. Default `hhafnor@gmail.com` |
+| `ALLOWED_SIGNUP_EMAILS` | yes, for accounts | Comma separated emails that may sign up, or `*` for anyone. Unset: nobody can sign up (guests still work) |
 | `ENGINE_URL`, `ENGINE_KEY` | yes | Engine base URL (`https://flightscout-engine.vercel.app`) and its shared key |
 | `TRACKER_KEY` | for tracking | Shared secret the GitHub Actions tracker sends as `x-tracker-key` |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | for push | `npx web-push generate-vapid-keys` |

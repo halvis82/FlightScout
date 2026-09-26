@@ -14,6 +14,15 @@ export const POST = route(async (req) => {
   }
   const s = p.subscription;
   if (!s?.endpoint || !s.keys?.p256dh || !s.keys?.auth) throw new HttpError(400, "bad subscription");
+  // only the browsers' own push services (never an address of our choosing)
+  let host = "";
+  try {
+    const u = new URL(s.endpoint);
+    host = u.protocol === "https:" ? u.hostname : "";
+  } catch {}
+  const PUSH_HOSTS = [/^fcm\.googleapis\.com$/, /^updates\.push\.services\.mozilla\.com$/, /\.notify\.windows\.com$/, /\.push\.apple\.com$/, /^web\.push\.apple\.com$/];
+  if (!PUSH_HOSTS.some((r) => r.test(host)) || s.endpoint.length > 1000 || s.keys.p256dh.length > 200 || s.keys.auth.length > 100)
+    throw new HttpError(400, "not a browser push subscription");
   await db
     .insert(schema.pushSubscriptions)
     .values({ userId, endpoint: s.endpoint, p256dh: s.keys.p256dh, auth: s.keys.auth })
