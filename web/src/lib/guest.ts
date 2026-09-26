@@ -386,9 +386,8 @@ function summarize(kind: SearchRow["kind"], q: Record<string, unknown>) {
 export function saveSearch(kind: SearchRow["kind"], query: Record<string, unknown>, payload: unknown, summary?: string) {
   let list = read<SearchRow[]>("searches", []);
   // the same search again soon (a reload, back and forth) replaces its row
-  const last = list[0];
-  if (last && last.kind === kind && Date.now() - Date.parse(last.createdAt) < 30 * 60_000 && JSON.stringify(last.query) === JSON.stringify(query))
-    list = list.slice(1);
+  const same = JSON.stringify(query);
+  list = list.filter((r) => !(r.kind === kind && Date.now() - Date.parse(r.createdAt) < 30 * 60_000 && JSON.stringify(r.query) === same));
   const row: SearchRow = {
     id: nextId(),
     kind,

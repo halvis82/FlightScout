@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte } from "drizzle-orm";
 import { db, schema } from "./db";
 import { feedMatchingWatches } from "./observations";
 import type { SearchQuery, Trip } from "./types";
@@ -34,14 +34,16 @@ export async function saveSearch(
   query: Record<string, unknown>,
   payload: unknown,
 ) {
-  const [last] = await db
-    .select({ id: schema.searches.id, kind: schema.searches.kind, query: schema.searches.query, createdAt: schema.searches.createdAt })
+  // a search also saves its smart routes, so look through the recent rows, not just the last one
+  const recent = await db
+    .select({ id: schema.searches.id, query: schema.searches.query })
     .from(schema.searches)
-    .where(eq(schema.searches.userId, userId))
+    .where(and(eq(schema.searches.userId, userId), eq(schema.searches.kind, kind), gte(schema.searches.createdAt, new Date(Date.now() - SAME_SEARCH_MS))))
     .orderBy(desc(schema.searches.id))
-    .limit(1);
+    .limit(20);
+  const last = recent.find((r) => stable(r.query) === stable(query));
   let id: number;
-  if (last && last.kind === kind && Date.now() - last.createdAt.getTime() < SAME_SEARCH_MS && stable(last.query) === stable(query)) {
+  if (last) {
     id = last.id;
     await db.update(schema.searches).set({ payload: payload as object, createdAt: new Date() }).where(eq(schema.searches.id, id));
   } else {
