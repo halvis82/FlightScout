@@ -143,3 +143,14 @@ Runs on: server or local runner (browser ones local only).
 | `flydubai` | flydubai (FZ) direct from flydubai.com through the shared headless Chrome (see _browser.py). Its booking app (flights2.flydubai.com) sits behind Akamai Bot Manager: plain HTTP clients get "Access Denied" on the flight AP... |
 | `kiwiweb` | Kiwi.com through the GraphQL backend its own website uses (api.skypicker.com/umbrella/v2/graphql, keyless, Chrome TLS impersonation). |
 | `skyscanner` | Skyscanner month view price calendar (the grid behind "Whole month" on skyscanner.net), keyless with Chrome TLS impersonation. |
+
+## Checked and not added
+
+Sites that were tried and can't be searched reliably today, so nobody tries them blindly again.
+
+| Site | What we found |
+|---|---|
+| easyJet | 2026-09-26: every API path answers an Akamai challenge (HTTP 429 `cpr_chlge`) or "Access Denied" with Chrome and Safari TLS fingerprints, and its search page shows "Access Denied" to headless Chrome. Google Flights and Kiwi both sell easyJet fares. |
+| Wizz Air search | Its availability search sits behind Kasada and answers 429 even to a headless browser. Its low fare calendar is used (`wizzair` calendar), and Google Flights and Kiwi sell Wizz fares. |
+| Omio | `omio_browser` works, but its results JSON prices were about 16% above what its own page showed on every comparison (2026-09), so it stays off until that's explained (FLIGHTSCOUT_OMIO_UNVERIFIED=1 turns it on). |
+| Ryanair availability API | Its booking API answers "Availability declined" to non browser clients; the fare finder (the cheapest flight of each day, verified against the site) is used instead. |
