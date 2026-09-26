@@ -1,10 +1,12 @@
-import { json, route, HttpError } from "@/lib/api";
+import { json, requireUser, route, HttpError } from "@/lib/api";
 import { knownFares } from "@/lib/fares";
 
 // Fares this site has seen (USD, cheapest per airport) from an origin and to a
 // destination: layover hints for smart routes run on the visitor's own
-// computer (the website adds them itself for server side plans).
+// computer (the website adds them itself for server side plans). Signed in
+// only: it shows which routes people search.
 export const GET = route(async (req) => {
+  await requireUser(req);
   const p = new URL(req.url).searchParams;
   const code = (k: string) => {
     const v = (p.get(k) ?? "").toUpperCase();
@@ -20,6 +22,6 @@ export const GET = route(async (req) => {
   const hi = day("to");
   if (hi < lo || Date.parse(hi) - Date.parse(lo) > 40 * 86400_000) throw new HttpError(400, "bad date range");
   return json(await knownFares(code("origin"), code("destination"), lo, hi), {
-    headers: { "Cache-Control": "public, s-maxage=600" },
+    headers: { "Cache-Control": "private, max-age=600" },
   });
 });
