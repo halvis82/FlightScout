@@ -46,7 +46,13 @@ export async function checkWatch(w: Watch, userId: string) {
         currency: w.currency,
         cabin: w.cabin,
         adults: w.adults,
-        ...s.planner,
+        // the owner's limits, clamped like the website's own automatic searches
+        max_stopover_days: Math.min(s.planner.max_stopover_days, 3),
+        min_connection_hours: s.planner.min_connection_hours,
+        max_trip_days: s.planner.max_trip_days,
+        max_hubs: Math.min(s.planner.max_hubs, 6),
+        allow_self_transfer: s.planner.allow_self_transfer,
+        include_nested_roundtrips: s.planner.include_nested_roundtrips,
       });
       trips = [...trips, ...plan.trips.filter((t) => t.tickets.length > 1)];
       Object.assign(errors, plan.errors);

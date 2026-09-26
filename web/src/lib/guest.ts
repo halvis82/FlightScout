@@ -2,6 +2,7 @@
 import { placeSignature, watchSignature } from "./signature";
 import { HttpError } from "./http-error";
 import { placeInput } from "./place-validate";
+import { cleanCurrency, cleanOrigins, cleanPlanner, cleanSellerRules } from "./settings-validate";
 import { checkWatch as checkWatchFields, isDate, toColumns, type WatchIn } from "./watch-validate";
 // Guest mode: the same /api/v1 routes the server offers for signed in users,
 // answered from localStorage. The client `api()` helper routes here when the
@@ -145,10 +146,16 @@ export function guestSettings(): GuestSettings {
   const s = read<Partial<GuestSettings>>("settings", {});
   return {
     userId: "guest",
-    currency: s.currency ?? "USD",
-    defaultOrigins: s.defaultOrigins ?? [],
-    planner: { ...DEFAULT_PLANNER, ...(s.planner ?? {}) },
-    sellerRules: s.sellerRules ?? [],
+    currency: typeof s.currency === "string" ? s.currency : "USD",
+    defaultOrigins: Array.isArray(s.defaultOrigins) ? s.defaultOrigins : [],
+    planner: (() => {
+      try {
+        return cleanPlanner(s.planner ?? {});
+      } catch {
+        return DEFAULT_PLANNER;
+      }
+    })(),
+    sellerRules: cleanSellerRules(s.sellerRules ?? [], false),
     emailAlerts: false,
     pushAlerts: false,
     onboarded: s.onboarded ?? false,
@@ -217,11 +224,6 @@ function conv(r: Record<string, number>, amount: number, from: string, to: strin
 // ---------------------------------------------------------------------------
 // watches
 // ---------------------------------------------------------------------------
-
-const codes = (v: unknown) =>
-  (Array.isArray(v) ? v : String(v ?? "").split(","))
-    .map((c) => String(c).trim().toUpperCase())
-    .filter((c) => /^[A-Z]{3,4}$/.test(c));
 
 function watchFromInput(p: Record<string, unknown>, base?: Watch): Watch {
   const c = checked(() => toColumns(p as WatchIn, Boolean(base))) as Partial<Watch>;
@@ -498,13 +500,13 @@ export async function guestApi(path: string, method: string, body: unknown, serv
     case "settings": {
       if (method !== "PATCH") break;
       const cur = guestSettings();
-      const next = {
-        currency: (b.currency as string) ?? cur.currency,
-        defaultOrigins: b.defaultOrigins ? codes(b.defaultOrigins) : cur.defaultOrigins,
-        planner: b.planner ? { ...cur.planner, ...(b.planner as object) } : cur.planner,
-        sellerRules: (b.sellerRules as SellerRule[]) ?? cur.sellerRules,
-        onboarded: (b.onboarded as boolean) ?? cur.onboarded,
-      };
+      const next = checked(() => ({
+        currency: b.currency !== undefined ? cleanCurrency(b.currency) : cur.currency,
+        defaultOrigins: b.defaultOrigins !== undefined ? cleanOrigins(b.defaultOrigins) : cur.defaultOrigins,
+        planner: b.planner !== undefined ? cleanPlanner(b.planner, cur.planner) : cur.planner,
+        sellerRules: b.sellerRules !== undefined ? cleanSellerRules(b.sellerRules) : cur.sellerRules,
+        onboarded: b.onboarded !== undefined ? Boolean(b.onboarded) : cur.onboarded,
+      }));
       write("settings", next);
       return guestSettings();
     }
