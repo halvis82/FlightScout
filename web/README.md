@@ -40,7 +40,7 @@ Run the engine next to it (see `../engine`) on `http://127.0.0.1:8787` with `ENG
 | `ENGINE_URL`, `ENGINE_KEY` | yes | Engine base URL (`https://flightscout-engine.vercel.app`) and its shared key |
 | `TRACKER_KEY` | for tracking | Shared secret the GitHub Actions tracker sends as `x-tracker-key` |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | for push | `npx web-push generate-vapid-keys` |
-| `RESEND_API_KEY`, `ALERT_FROM_EMAIL` | for email | Resend API key and a verified sender |
+| `RESEND_API_KEY`, `ALERT_FROM_EMAIL` | for email | Resend API key and a verified sender. Turns on email alerts and confirmation of new accounts' addresses (existing accounts confirm on their next sign in) |
 | `GITHUB_CLIENT_ID/SECRET`, `GOOGLE_CLIENT_ID/SECRET` | no | OAuth buttons appear only when set |
 | `CRON_SECRET` | for cleanup | Protects `/api/cron/cleanup` (Vercel sends it automatically) |
 

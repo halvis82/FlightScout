@@ -126,7 +126,7 @@ vercel login && gh auth login
 
 It creates both Vercel projects, a Neon database, all secrets (kept in `~/.config/flightscout/deploy-secrets.env`, Vercel and GitHub only), the tracker's GitHub secrets, and deploys. Only `you@example.com` can sign up; add more emails to `ALLOWED_SIGNUP_EMAILS` on Vercel (`*` allows anyone).
 
-Optional keys: `RESEND_API_KEY` + `ALERT_FROM_EMAIL` for email alerts, GitHub or Google OAuth IDs for social login, `SEARCHAPI_KEY`/`SERPAPI_KEY` for the paid Google fallback.
+Optional keys: `RESEND_API_KEY` + `ALERT_FROM_EMAIL` for email alerts and email confirmation of new accounts (with them set, an address must be confirmed before password sign in), GitHub or Google OAuth IDs for social login, `SEARCHAPI_KEY`/`SERPAPI_KEY` for the paid Google fallback.
 
 ## How it's built
 
