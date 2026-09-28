@@ -89,17 +89,23 @@ def deeplink(origin: str, dest: str, dep: date, ret: date | None = None, adults:
 def _slug(o: str, d: str, dep: date) -> str | None:
     """The destination's URL segment (e.g. "alicante"), from the site's own
     destination search. None when Jet2 does not fly o -> d."""
-    key = f"jet2:slug:{o}:{d}"
+    key = f"jet2:slug2:{o}:{d}"  # slug2: older entries could hold a week long miss
     if (hit := cache.get(key, ttl=7 * 86400)) is not None:
-        return hit or None
+        return hit
+    # The answer only lists destinations with a flight on that day, so a miss
+    # is kept for that date alone (Jet2 skips weekdays on many routes).
+    miss = f"jet2:noslug:{o}:{d}:{dep}"
+    if cache.get(miss) is not None:
+        return None
     r = _get(f"{SITE}/api/search-results/low-fare-search/?{_query(o, d, dep, None, 1)}",
              headers={"Accept": "application/json, text/plain, */*", "Referer": f"{SITE}/"})
     data = r.json()
     data = data.get("data", data)
     slug = next((x.get("urlSegment") for x in data.get("destinations") or [] if x.get("airportCode") == d), None)
-    if slug is None and not (data.get("airportAvailabilities") or {}):
-        return None  # unknown answer: don't cache a negative
-    cache.put(key, slug or "")
+    if slug:
+        cache.put(key, slug)
+    elif data.get("airportAvailabilities"):  # a real "no flight that day", not an unknown answer
+        cache.put(miss, True)
     return slug
 
 

@@ -124,6 +124,31 @@ def test_jet2_page_data():
     assert jet2.page_data(html) == {"isError": True, "trips": {}}
 
 
+def test_jet2_slug_miss_is_kept_for_that_day_only(monkeypatch):
+    answers = {"2026-11-11": {"destinations": [], "airportAvailabilities": {"man": {"available": False}}},
+               "2026-11-12": {"destinations": [{"airportCode": "ALC", "urlSegment": "alicante"}],
+                              "airportAvailabilities": {"man": {"available": True}}}}
+    calls = []
+
+    class R:
+        def __init__(self, d):
+            self.d = d
+
+        def json(self):
+            return {"data": self.d}
+
+    def fake_get(url, **kw):
+        day = url.split("from=")[1][:10]
+        calls.append(day)
+        return R(answers[day])
+
+    monkeypatch.setattr(jet2, "_get", fake_get)
+    assert jet2._slug("MAN", "ALC", date(2026, 11, 11)) is None  # no flight on a Wednesday
+    assert jet2._slug("MAN", "ALC", date(2026, 11, 11)) is None and calls == ["2026-11-11"]
+    assert jet2._slug("MAN", "ALC", date(2026, 11, 12)) == "alicante"  # the next day still asks
+    assert jet2._slug("MAN", "ALC", date(2026, 11, 11)) == "alicante" and len(calls) == 2
+
+
 # --- Aer Lingus ---------------------------------------------------------------
 
 def test_aerlingus_parse_round_trip():
@@ -185,7 +210,11 @@ def _soon_b(days=45):
 
 @pytest.mark.live
 def test_jet2_live():
-    its = jet2.search(_q_b("MAN", "ALC", _soon_b(), _soon_b(52)))
+    # Jet2 skips some weekdays on MAN-ALC in winter, so try a few days in a row
+    its = []
+    for n in range(45, 52):
+        if its := jet2.search(_q_b("MAN", "ALC", _soon_b(n), _soon_b(n + 7))):
+            break
     assert its and all(i.source == "jet2" and i.currency == "GBP" and i.price > 0 for i in its)
     assert its[0].booking_url.startswith("https://www.jet2.com/en/search-results/")
 
