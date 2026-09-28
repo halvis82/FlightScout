@@ -123,9 +123,23 @@ def _fetch(url: str) -> dict:
         got = _browser.capture(page, lambda: page.goto(url, wait_until="commit", timeout=60000),
                                lambda u: u.startswith(f"{SITE}/Flight/Select?"), timeout=50,
                                body=lambda t: "window.__remixContext = " in t)
-        return got[-1][1] if got else ""
+        if got:
+            return got[-1][1]
+        # since 2026-09 the page after the bot check often isn't a response we
+        # can read (the challenge reloads it): take the rendered page instead
+        try:
+            page.wait_for_function("() => window.__remixContext && window.__remixContext.state", timeout=15000)
+        except Exception:
+            return ""
+        return page.content() if page.url.startswith(f"{SITE}/Flight/Select?") else ""
 
-    html = _browser.run(job, "level", timeout=120)
+    try:
+        html = _browser.run(job, "level", timeout=120)
+    except Exception as e:  # the challenge now and then closes the tab: once more on a fresh one
+        log.info("level: retrying after %s", e)
+        html = ""
+    if not html:
+        html = _browser.run(job, "level", timeout=120)
     if not html:
         raise RuntimeError("level: no flight page (Akamai challenge not passed?)")
     data = loader(html)

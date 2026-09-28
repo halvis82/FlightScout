@@ -13,7 +13,9 @@ D = date.today() + timedelta(days=45)
 
 
 def test_google_and_kiwi_return_priced_results():
-    r = search(SearchQuery(origins=["OSL"], destinations=["CPH"], departure=D, sources=["google", "kiwiweb"]))
+    q = SearchQuery(origins=["OSL"], destinations=["CPH"], departure=D, sources=["google", "kiwiweb"])
+    assert "kiwiweb" not in {t.tickets[0].source for t in search(q).trips}  # Kiwi.com hidden by default
+    r = search(q, {"*unreliable": "warn"})
     srcs = {t.tickets[0].source for t in r.trips}
     assert {"google", "kiwiweb"} <= srcs, r.errors
     assert all(t.total_price > 0 and t.tickets[0].booking_url.startswith("http") for t in r.trips)
