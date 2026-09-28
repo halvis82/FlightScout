@@ -148,6 +148,6 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/PERFORMANCE.md](doc
 | Suite | Command | Runs |
 |---|---|---|
 | Engine unit tests (offline) | `cd engine && uv run pytest` | every push (GitHub Actions) |
-| Engine live source tests | `cd engine && FLIGHTSCOUT_LIVE=1 uv run --extra browser pytest -m live` | nightly (sites that wall off GitHub's servers are skipped there; run from home after changing a source) |
+| Engine live source tests | `cd engine && FLIGHTSCOUT_LIVE=1 uv run --extra browser pytest -m live` | nightly (sites that wall off GitHub's servers are skipped there, a failed test gets one retry, and a test that fails in one run is a warning that turns red only if it fails again the next run; run from home after changing a source) |
 | Web unit tests, types, lint | `cd web && npm test && npx tsc --noEmit && npm run lint` | every push |
 | Browser tests (every flow, phone width, no console errors) | `cd web && E2E_BASE_URL=https://flightscout-app.vercel.app npx playwright test` | nightly against the live site |

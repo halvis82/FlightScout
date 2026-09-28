@@ -37,6 +37,7 @@ flights = { git = "https://github.com/punitarani/fli", rev = "main" }
 dev = [
     "httpx>=0.28.1",
     "pytest>=9.1.1",
+    "pytest-rerunfailures>=16.7",
 ]
 
 [tool.pytest.ini_options]

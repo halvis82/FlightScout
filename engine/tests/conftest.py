@@ -1,6 +1,7 @@
 """Offline by default. Live tests (real sources on the internet) run with
 FLIGHTSCOUT_LIVE=1 or `pytest -m live`."""
 
+import json
 import os
 import sys
 from datetime import date, datetime, timedelta
@@ -98,3 +99,47 @@ def d():
 def dt():
     base = date.today() + timedelta(days=30)
     return datetime(base.year, base.month, base.day, 8, 0)
+
+
+# Two strikes on CI. The nightly asks about 70 real sites from GitHub's
+# datacenter IPs; each fails now and then for reasons of its own (a bot wall
+# that day, a slow answer), so one run almost always had some red test while
+# every source worked. The workflow retries a failed live test once
+# (pytest-rerunfailures), and FLIGHTSCOUT_LIVE_STATE keeps the tests that still
+# failed. A live test that fails in one run is a warning; failing again in the
+# next run (a source that really broke) turns the run red.
+_final_failures: set[str] = set()
+
+
+def pytest_runtest_logreport(report):
+    if report.failed and "live" in report.keywords:  # retried attempts report as "rerun", not failed
+        _final_failures.add(report.nodeid)
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_sessionfinish(session, exitstatus):
+    state = os.environ.get("FLIGHTSCOUT_LIVE_STATE")
+    if not (state and os.environ.get("GITHUB_ACTIONS")):
+        return
+    path = Path(state)
+    try:
+        before = set(json.loads(path.read_text()))
+    except (OSError, ValueError):
+        before = set()
+    path.write_text(json.dumps(sorted(_final_failures)))
+    again = _final_failures & before
+    once = _final_failures - before
+    lines = []
+    for n in sorted(again):
+        print(f"::error title=Live source failed twice in a row::{n}")
+        lines.append(f"- ❌ `{n}` failed in this run and the one before: probably broken")
+    for n in sorted(once):
+        print(f"::warning title=Live source failed once (retried)::{n}")
+        lines.append(f"- ⚠️ `{n}` failed once (after a retry): red if it fails again next run")
+    if lines and os.environ.get("GITHUB_STEP_SUMMARY"):
+        with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+            f.write("### Live source failures\n" + "\n".join(lines) + "\n")
+    # only live test failures can be forgiven, and only first ones
+    others = session.testsfailed > len(_final_failures)
+    if exitstatus == pytest.ExitCode.TESTS_FAILED and not again and not others:
+        session.exitstatus = pytest.ExitCode.OK

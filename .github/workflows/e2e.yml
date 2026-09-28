@@ -1,7 +1,9 @@
 name: Live checks
 
 # Nightly against the live site and real flight sources, plus on demand.
-# Catches sources breaking (a scraper stops working) and UI regressions.
+# Catches sources breaking (a scraper stops working) and UI regressions. A
+# live source that fails once (after a retry) is a warning in the run summary;
+# failing two runs in a row turns the run red.
 on:
   schedule:
     - cron: "40 7 * * *"
@@ -16,11 +18,26 @@ jobs:
       - name: Browser for the Google Cheapest tab check
         working-directory: engine
         run: uv run --extra browser playwright install --with-deps chromium chrome
+      # Which live tests failed last run (see tests/conftest.py): a test fails
+      # the run only when it failed the run before too. Each run saves its own.
+      - name: Last run's live failures
+        uses: actions/cache/restore@v6
+        with:
+          path: engine/.live-failures.json
+          key: live-failures-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: live-failures-
       - name: Live source tests (incl. coverage of Google's Cheapest tab)
         working-directory: engine
         env:
           FLIGHTSCOUT_LIVE: "1"
-        run: uv run --extra browser pytest -q -m live
+          FLIGHTSCOUT_LIVE_STATE: .live-failures.json
+        run: uv run --extra browser pytest -q -m live --reruns 1 --reruns-delay 30
+      - name: Save this run's live failures
+        if: always()
+        uses: actions/cache/save@v6
+        with:
+          path: engine/.live-failures.json
+          key: live-failures-${{ github.run_id }}-${{ github.run_attempt }}
 
   site:
     runs-on: ubuntu-24.04
