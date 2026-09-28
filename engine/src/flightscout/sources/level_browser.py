@@ -171,6 +171,34 @@ def search(q: SearchQuery) -> list[Itinerary]:
     return out
 
 
+def _calendar_in_browser(params: dict) -> dict | None:
+    if not _browser.available():
+        return None
+    from urllib.parse import urlencode
+
+    url = f"{SITE}/nwe/flights/api/calendar/?{urlencode(params)}"
+
+    def job(page):
+        if not page.url.startswith(SITE):
+            page.goto(f"{SITE}/", wait_until="domcontentloaded", timeout=60000)
+        for _ in range(3):  # the bot check can take a moment to clear
+            got = page.evaluate("""async (u) => {
+                const r = await fetch(u, {headers: {Accept: "application/json"}});
+                const t = await r.text();
+                try { return JSON.parse(t); } catch { return null; }
+            }""", url)
+            if got is not None:
+                return got
+            page.wait_for_timeout(3000)
+        return None
+
+    try:
+        return _browser.run(job, "level", timeout=120)
+    except Exception as e:
+        log.info("level: calendar in the browser failed: %s", e)
+        return None
+
+
 def _calendar_month(origin: str, dest: str, year: int, month: int) -> list[dict]:
     from curl_cffi import requests as cr
 
@@ -180,13 +208,17 @@ def _calendar_month(origin: str, dest: str, year: int, month: int) -> list[dict]
     params = {"triptype": "OW", "origin": origin, "destination": dest, "month": f"{month:02d}", "year": year,
               "currencyCode": "EUR", "originType": "flights"}
     # LEVEL's bot wall challenges some browser fingerprints (Chrome's since 2026-09) and lets others through
+    data = None
     for fp in ("safari", "chrome"):
         r = cr.get(f"{SITE}/nwe/flights/api/calendar/", params=params, impersonate=fp, timeout=30)
         if r.ok and "json" in (r.headers.get("content-type") or ""):
+            data = r.json()
             break
-    else:
+    if data is None:  # walled for plain HTTP: ask from inside the site in the real Chrome, which passes the check
+        data = _calendar_in_browser(params)
+    if data is None:
         raise RuntimeError(f"level: calendar blocked by a bot check (HTTP {r.status_code})")
-    out = [d for d in (r.json().get("data") or {}).get("dayPrices") or [] if d.get("price")]
+    out = [d for d in (data.get("data") or {}).get("dayPrices") or [] if d.get("price")]
     cache.put(key, out)
     return out
 
