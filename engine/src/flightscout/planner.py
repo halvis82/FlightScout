@@ -466,14 +466,18 @@ def _reprice(ctx: _Ctx, trips: list[Trip], limit: int = 6, wait: float = 50.0) -
         except Exception as e:
             ctx.errors[f"airlines {leg[0]}-{leg[1]} {leg[2]}"] = str(e)[:200]
     dest = set(airports.expand(req.destinations))
+    allow = sellers.show_unreliable(req.seller_rules)
 
     def swap(tickets: list[Itinerary]) -> tuple[list[Itinerary], bool]:
-        """Cheaper legs within one direction, only where the connections still work."""
+        """Cheaper legs within one direction, only where the connections still
+        work. A leg from a hidden (unreliable) seller is swapped even when the
+        airline's own fare costs more."""
         tickets, changed = list(tickets), False
         for i, tk in enumerate(tickets):
             key = (tk.slices[0].origin, tk.slices[-1].destination, tk.slices[0].departure.date())
+            must = not allow and not sellers.reliable(tk.seller, tk.seller_kind)
             for alt in sorted(alts.get(key, []), key=lambda x: x.price):
-                if alt.price >= tk.price - 0.5:
+                if alt.price >= tk.price - 0.5 and not must:
                     break
                 trial = tickets[:i] + [alt] + tickets[i + 1:]
                 if _chain(trial, req):
@@ -589,13 +593,14 @@ def plan(req: PlanRequest) -> PlanResult:
         trips += _nearby_trips(ctx, o, d, dep_dates[0], ret0)
 
     trips = [t for t in trips if _travel_ok(t, req)]
+    found = trips  # before the seller rules: hidden sellers' legs can still be re-priced on the airlines
     trips = sellers.apply_rules(trips, req.seller_rules)
     direct = min((t for t in trips if t.kind == "single"), key=lambda t: t.total_price, default=None)
     for t in trips:
         t.score = _score(t, req)
     # 5. The best combinations, re-priced on the airlines' own sites.
     if req.reprice_with_airlines and req.allow_self_transfer:
-        better = [t for t in sellers.apply_rules(_reprice(ctx, trips), req.seller_rules) if _travel_ok(t, req)]
+        better = [t for t in sellers.apply_rules(_reprice(ctx, found), req.seller_rules) if _travel_ok(t, req)]
         for t in better:
             t.score = _score(t, req)
         trips += better
@@ -632,6 +637,7 @@ class TripRequest(BaseModel):
     adults: int = 1
     beam: int = 4
     value_of_time_per_hour: float = 15.0
+    seller_rules: dict[str, str] | None = None
 
     @model_validator(mode="after")
     def _sane(self) -> "TripRequest":
@@ -730,9 +736,12 @@ def build_trip(req: TripRequest) -> PlanResult:
             results.append(t)
 
     # Re-price winners on Google for the exact same dates (airline direct
-    # links are nicer than an OTA when the price is comparable).
+    # links are nicer than an OTA when the price is comparable). When
+    # unreliable sellers are hidden, Kiwi only finds the legs: each one has
+    # to be swapped for a Google fare whatever it costs, or the plan is dropped.
+    allow = sellers.show_unreliable(req.seller_rules)
     results.sort(key=lambda t: t.score or 0)
-    for t in results[:2]:
+    for t in results[:2 if allow else 5]:
         new_tickets: list[Itinerary] = []
         for i, tk in enumerate(t.tickets):
             sl = tk.slices[0]
@@ -751,7 +760,8 @@ def build_trip(req: TripRequest) -> PlanResult:
             nxt = t.tickets[i + 1].slices[0].departure - timedelta(hours=3) if i + 1 < len(t.tickets) else None
             fits = [x for x in g if len(x.slices) == 1 and x.slices[0].destination == sl.destination
                     and (after is None or x.slices[0].departure >= after)
-                    and (nxt is None or x.slices[-1].arrival <= nxt) and x.price <= tk.price * 1.05]
+                    and (nxt is None or x.slices[-1].arrival <= nxt)
+                    and (x.price <= tk.price * 1.05 or not (allow or sellers.reliable(tk.seller, tk.seller_kind)))]
             alt = min(fits, key=lambda x: x.price, default=None)
             new_tickets.append(sellers.annotate(alt) if alt else tk)
         if any(a is not b for a, b in zip(new_tickets, t.tickets)):
@@ -760,6 +770,6 @@ def build_trip(req: TripRequest) -> PlanResult:
                      for a, b in zip(new_tickets, new_tickets[1:])]
             results.append(t.model_copy(update={"tickets": new_tickets, "total_price": total, "stopovers": stops,
                                                 "score": (t.score or 0) - t.total_price + total}))
-    results = list({t.id: t for t in results}.values())
+    results = sellers.apply_rules(list({t.id: t for t in results}.values()), req.seller_rules)
     results.sort(key=lambda t: t.score or 0)
     return PlanResult(trips=results[:20], requests=requests, errors=errors)

@@ -6,6 +6,7 @@ import { saveSearch } from "./searches";
 import { cacheGet, cacheKey, cachePut } from "./search-cache";
 import { getSettings } from "./settings";
 import type { SellerRule } from "./db/schema";
+import { engineSellerRules, SELLER_KINDS } from "./sellers";
 import { knownFares, recordFares } from "./fares";
 import type { Trip } from "./types";
 
@@ -28,11 +29,6 @@ function normalize(kind: EngineKind, raw: unknown): Record<string, unknown> {
   return r;
 }
 
-const UNVERIFIED = "*unverified";
-
-function rulesToEngine(rules: SellerRule[]) {
-  return Object.fromEntries(rules.map((r) => [r.seller, r.mode]));
-}
 
 // Shared handler for /api/v1/{search,plan,explore,dates,trip}. Works for
 // guests (rate limited per IP) and signed in users (saved to history, feeds
@@ -61,16 +57,15 @@ export async function proxyEngine(req: Request, kind: EngineKind) {
     payload.pages = pages;
   }
   delete payload.pages_id;
-  if ((kind === "search" || kind === "plan" || kind === "browser") && !payload.seller_rules) {
+  if (SELLER_KINDS.has(kind) && !payload.seller_rules) {
     // guests send their rules inline; signed in users use saved settings
     const rules = Array.isArray(q.sellerRules)
       ? (q.sellerRules as SellerRule[])
       : userId
         ? (await getSettings(userId)).sellerRules
         : [];
-    // hidden sellers, plus the choice to see agencies FlightScout couldn't verify
-    const sent = rules.filter((r) => r.mode === "block" || r.seller === UNVERIFIED);
-    if (sent.length) payload.seller_rules = rulesToEngine(sent);
+    const sent = engineSellerRules(rules);
+    if (sent) payload.seller_rules = sent;
   }
   delete payload.sellerRules;
   // Shared cache: the same search (by anyone) within a few minutes is served

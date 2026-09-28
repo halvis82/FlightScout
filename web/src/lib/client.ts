@@ -2,6 +2,7 @@
 import { afterGuestEngineCall, guestApi, GuestError, guestSettings, isGuestRoute } from "./guest";
 import { localEngine, localRunnerActive, runnerKnown } from "./local-runner";
 import type { SellerRule } from "./db/schema";
+import { engineSellerRules, SELLER_KINDS } from "./sellers";
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -66,12 +67,6 @@ export function isGuest(): Promise<boolean> {
 
 const ENGINE_KINDS = new Set(["/search", "/plan", "/explore", "/dates", "/trip", "/multicity"]);
 
-function rulesToEngine(rules: SellerRule[]) {
-  // hidden sellers, plus the choice to see agencies FlightScout couldn't verify
-  const blocked = rules.filter((r) => r.mode === "block" || r.seller === "*unverified");
-  return blocked.length ? Object.fromEntries(blocked.map((r) => [r.seller, r.mode])) : undefined;
-}
-
 // Engine call through the user's local runner. Mirrors the server proxy:
 // seller rules become `seller_rules`, results are saved to history (and feed
 // watches) through /results for signed in users, or locally for guests.
@@ -100,7 +95,7 @@ const engineOrServer: typeof serverFetch = async <T,>(path: string, init?: Init)
       const body = { ...(init.body as Record<string, unknown>) };
       delete body.sellerRules;
       const rules = (init.body as { sellerRules?: SellerRule[] }).sellerRules;
-      const sr = rules ? rulesToEngine(rules) : undefined;
+      const sr = rules ? engineSellerRules(rules) : undefined;
       if (sr) body.seller_rules = sr;
       return (await localEngine(p.slice(1), body)) as T;
     } catch {
@@ -118,9 +113,9 @@ async function viaLocalRunner<T>(p: string, body: Record<string, unknown>, guest
   delete query.sellerRules;
   delete query.part; // stored like the server stores it
   const payload: Record<string, unknown> = { ...query };
-  if ((kind === "search" || kind === "plan") && !payload.seller_rules) {
+  if (SELLER_KINDS.has(kind) && !payload.seller_rules) {
     const rules = guest ? guestSettings().sellerRules : ((await loadMe())?.settings?.sellerRules ?? []);
-    const sr = rulesToEngine(rules);
+    const sr = engineSellerRules(rules);
     if (sr) payload.seller_rules = sr;
   }
   if (kind === "plan") Object.assign(payload, await planHints(payload));
@@ -187,7 +182,7 @@ export async function api<T = unknown>(path: string, init?: Init): Promise<T> {
     }
     // guests send their seller rules along, signed in users have them saved
     const body =
-      (p === "/search" || p === "/plan") && init?.body && typeof init.body === "object"
+      SELLER_KINDS.has(p.slice(1)) && init?.body && typeof init.body === "object"
         ? { sellerRules: guestSettings().sellerRules, ...(init.body as object) }
         : init?.body;
     const res = await serverFetch<T>(path, { ...init, body });

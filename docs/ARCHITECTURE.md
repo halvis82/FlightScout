@@ -115,6 +115,6 @@ CORS allows the configured website origins.
 
 ## Seller rules
 
-Every itinerary carries `seller` + `seller_kind`. Only verified sellers show by default (`sellers.VERIFIED`: airlines and established booking sites, each checked; unverified agencies are hidden unless the rules include `"*unverified": "warn"`, which Settings sets). Users can mark sellers `block` (hidden) or `warn`. Built in warnings:
+Every itinerary carries `seller` + `seller_kind`. Only reliable sellers show by default (`sellers.RELIABLE`: airlines, Google Flights and ITA Matrix, and the major booking sites of Expedia Group and Booking Holdings). Every other seller (Kiwi.com, Mytrip, Gotogate, eDreams, Opodo, Trip.com, EaseMyTrip, Skiplagged, CheapOair, small agencies passed through by metasearch sites...) is hidden unless the rules include `"*unreliable": "warn"`, which the Settings checkbox "Include less reliable booking sites" (off by default) sets; they then carry a "Less reliable seller" warning. While hidden, sources that only sell through such sellers (`sellers.UNRELIABLE_SOURCES`) aren't asked at all, the smart route planner still uses Kiwi to find legs but swaps them for the airline's own fare, and the tracker skips Kiwi prices. Users can mark sellers `block` (hidden) or `warn`. Built in warnings:
 OTA sold tickets, self transfers (connections not protected), separate tickets in planner trips, airport changes
 during a connection, short self transfer buffers, overnight connections.

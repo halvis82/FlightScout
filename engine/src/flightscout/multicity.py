@@ -113,9 +113,12 @@ def _leg_options(leg: Leg, req: MultiRequest, errors: dict[str, str]) -> list[It
                         cabin=req.cabin, adults=req.adults, sources=["airlines_http"])
         return [t.tickets[0] for t in full_search(q).trips]
 
+    # Kiwi.com sells every Kiwi answer: not asked while unreliable sellers are hidden
+    allow = sellers.show_unreliable(req.seller_rules)
     ex = ThreadPoolExecutor(max_workers=4)
-    jobs = {"kiwi": ex.submit(kiwi_range), "kiwiweb": ex.submit(kiwi_window), "google": ex.submit(google_best),
-            "airlines": ex.submit(airlines_direct)}
+    jobs = {"google": ex.submit(google_best), "airlines": ex.submit(airlines_direct)}
+    if allow:
+        jobs = {"kiwi": ex.submit(kiwi_range), "kiwiweb": ex.submit(kiwi_window), **jobs}
     end = time.monotonic() + 40
     for name, f in jobs.items():
         try:
@@ -125,7 +128,8 @@ def _leg_options(leg: Leg, req: MultiRequest, errors: dict[str, str]) -> list[It
         except Exception as e:
             errors[f"{name} {o[0]}-{d[0]}"] = str(e)[:200]
     ex.shutdown(wait=False)
-    items = merge([sellers.annotate(to_currency(i, req.currency)) for i in found if _sane(i)])
+    items = merge([sellers.annotate(to_currency(i, req.currency)) for i in found
+                   if _sane(i) and (allow or sellers.reliable(i.seller, i.seller_kind))])
     # a "city" answer that leaves from or lands at another airport says so
     for i in items:
         if (n := endpoint_note(i, o, d)) and n not in i.warnings:

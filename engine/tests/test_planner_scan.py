@@ -153,7 +153,8 @@ def test_multicity_uses_every_source_and_keeps_the_order(world, monkeypatch):
 
     monkeypatch.setattr(multicity, "full_search", fake_full)
     req = multicity.MultiRequest(legs=[multicity.Leg(origins=["OSL"], destinations=["LON"], date=world),
-                                       multicity.Leg(origins=["LON"], destinations=["OSL"], date=later)])
+                                       multicity.Leg(origins=["LON"], destinations=["OSL"], date=later)],
+                                 seller_rules={"*unreliable": "warn"})
     res = multicity.plan_multicity(req)
     best = min(res.trips, key=lambda t: t.total_price)
     assert best.total_price == 170 and best.tickets[0].source == "ryanair"
@@ -184,3 +185,25 @@ def test_reprice_keeps_round_trips_as_two_journeys(world, monkeypatch):
     assert all(s.airport != "OSL" for s in got[0].stopovers)
     req2 = req.model_copy(update={"max_travel_hours": 20})
     assert planner._travel_ok(got[0], req2)  # 16 h out and 13 h back, each under 20 h
+
+
+def test_reprice_swaps_an_unreliable_leg_even_when_the_airline_costs_more(world, monkeypatch):
+    at = datetime(world.year, world.month, world.day, 7)
+    leg1 = ticket(["SAN", "FCO"], at, hours=12, price=200)
+    kiwi_leg = ticket(["FCO", "OSL"], at + timedelta(days=1), hours=3, price=40, source="kiwiweb").model_copy(
+        update={"seller": "Kiwi.com", "seller_kind": "ota"})
+    trip = Trip(tickets=[leg1, kiwi_leg], total_price=240, currency="USD", kind="split")
+    airline = ticket(["FCO", "OSL"], at + timedelta(days=1), hours=3, price=70, source="level")
+
+    def fake_full(q, seller_rules=None):
+        if q.origins == ["FCO"]:
+            return SearchResult(query=q, trips=[Trip(tickets=[airline], total_price=70, currency="USD")])
+        return SearchResult(query=q, trips=[])
+
+    monkeypatch.setattr(search_mod, "search", fake_full)
+    req = planner.PlanRequest(origins=["SAN"], destinations=["OSL"], depart_start=world, max_stopover_days=2)
+    got = planner._reprice(planner._Ctx(req), [trip.model_copy(deep=True)])
+    assert len(got) == 1 and got[0].total_price == 270 and got[0].tickets[1].source == "level"
+    # with unreliable sellers shown, only a cheaper fare is worth a swap
+    shown = req.model_copy(update={"seller_rules": {"*unreliable": "warn"}})
+    assert planner._reprice(planner._Ctx(shown), [trip.model_copy(deep=True)]) == []

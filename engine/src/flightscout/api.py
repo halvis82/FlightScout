@@ -177,6 +177,7 @@ def multicity(body: MultiRequest) -> PlanResult:
 
 class BrowserSearchBody(SearchQuery):
     pages: dict[str, Any] = {}  # url -> ds:1 data fetched by the visitor's browser
+    seller_rules: dict[str, str] | None = None
     mode: str = "search"  # or "dates": price calendar (then use start/end/trip_days)
     start: date | None = None
     end: date | None = None
@@ -191,7 +192,7 @@ def google_browser(body: BrowserSearchBody) -> dict:
     from . import browser_fetch
     from .search import search as run_search
 
-    q = SearchQuery(**body.model_dump(exclude={"pages", "mode", "start", "end", "trip_days"}))
+    q = SearchQuery(**body.model_dump(exclude={"pages", "mode", "start", "end", "trip_days", "seller_rules"}))
     q = q.model_copy(update={"sources": ["google"]})
     try:
         with browser_fetch.browser_pages(body.pages):
@@ -199,7 +200,7 @@ def google_browser(body: BrowserSearchBody) -> dict:
                 days = google.dates(q.origins[0], q.destinations[0], body.start or q.departure, body.end or q.departure,
                                     q.currency, body.trip_days)
             else:
-                res = run_search(q)
+                res = run_search(q, body.seller_rules)
     except browser_fetch.NeedPages as e:
         return {"need": e.urls}
     if body.mode == "dates":

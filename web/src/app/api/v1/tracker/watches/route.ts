@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
 import { json, requireTracker, route } from "@/lib/api";
 import { DEFAULT_PLANNER } from "@/lib/settings";
+import { engineSellerRules } from "@/lib/sellers";
 import { cleanSellerRules } from "@/lib/settings-validate";
 
 // Every active watch across all users, with the owner's planner defaults, for
@@ -35,8 +36,8 @@ export const GET = route(async (req) => {
         include_split: w.includeSplit,
         last_checked_at: w.lastCheckedAt,
         planner: { ...DEFAULT_PLANNER, ...(planner ?? {}) },
-        // the owner's hidden sellers stay hidden in tracked prices too
-        seller_rules: Object.fromEntries(cleanSellerRules(rules, false).filter((r) => r.mode === "block").map((r) => [r.seller, r.mode])),
+        // the owner's hidden sellers (and less reliable ones, unless shown) stay hidden in tracked prices too
+        seller_rules: engineSellerRules(cleanSellerRules(rules, false)) ?? {},
       })),
   );
 });

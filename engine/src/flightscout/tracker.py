@@ -10,7 +10,7 @@ import logging
 from datetime import date, timedelta
 from typing import Any
 
-from . import airports
+from . import airports, sellers
 from .models import Itinerary, SearchQuery, Trip
 from .planner import PlanRequest, plan
 from .search import to_currency
@@ -61,7 +61,7 @@ def check_multicity(watch: dict[str, Any]) -> list[dict]:
         return []
     res = plan_multicity(MultiRequest(legs=legs, currency=watch.get("currency") or "USD",
                                       cabin=watch.get("cabin") or "economy", adults=watch.get("adults") or 1,
-                                      max_results=5))
+                                      max_results=5, seller_rules=watch.get("seller_rules") or None))
     return [_obs(t) for t in res.trips[:5]]
 
 
@@ -91,6 +91,8 @@ def check(watch: dict[str, Any], budget: int = 12) -> list[dict]:
     dates = _sample(start, end, max(1, budget // len(nights)))
 
     def kiwi_obs() -> list[dict]:
+        if not sellers.show_unreliable(watch.get("seller_rules")):
+            return []  # Kiwi.com sells every one of these: hidden unless the owner shows unreliable sellers
         try:
             k = kiwi.search_range(o[0], d[0], start, end, cur, (nmin, nmax) if rt else None, cabin,
                                   watch.get("adults") or 1)
@@ -142,7 +144,7 @@ def check(watch: dict[str, Any], budget: int = 12) -> list[dict]:
     return out
 
 
-def _enrich_best(obs: list[dict]) -> None:
+def _enrich_best(obs: list[dict], rules: dict[str, str] | None = None) -> None:
     """Add Google's seller breakdown to the cheapest Google observation when a
     browser is available (GitHub Actions installs one)."""
     try:
@@ -155,7 +157,7 @@ def _enrich_best(obs: list[dict]) -> None:
     best = min(g, key=lambda o: o["price"])
     trip = Trip(**best["trip"])
     try:
-        enrich([trip], 1)
+        enrich([trip], 1, rules)
     except Exception as e:
         log.warning("seller breakdown failed: %s", e)
         return
@@ -173,7 +175,7 @@ def run_all(client, only: str | None = None, budget: int = 12) -> dict[str, int]
             continue
         obs = check(w, budget=budget)
         if obs:
-            _enrich_best(obs)
+            _enrich_best(obs, w.get("seller_rules") or None)
             if client.tracker_key and not client.token:
                 client.tracker_push(w["id"], obs)
             else:

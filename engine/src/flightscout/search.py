@@ -291,7 +291,8 @@ def merge(items: list[Itinerary]) -> list[Itinerary]:
         # a hidden city ticket lists only the flights you fly, so it would look
         # like (and replace) the normal ticket for them: keep both
         hidden = any(w.lower().startswith("hidden city") for w in it.warnings)
-        k = (it.flight_key, it.seller_kind, hidden)
+        # nor may a cheaper unreliable seller (hidden by default) replace a reliable one
+        k = (it.flight_key, it.seller_kind, hidden, sellers.reliable(it.seller, it.seller_kind))
         if k not in best or it.price < best[k].price:
             best[k] = it
     return sorted(best.values(), key=lambda i: i.price)
@@ -362,6 +363,8 @@ def search(q: SearchQuery, seller_rules: dict[str, str] | None = None) -> Search
     if not fx.known(q.currency):
         raise BadInput(f"unknown currency {q.currency}")
     srcs = expand_sources(list(q.sources))
+    if not sellers.show_unreliable(seller_rules):  # every result of these would be hidden
+        srcs = [s for s in srcs if s not in sellers.UNRELIABLE_SOURCES]
     if q.cabin != "economy":
         srcs = [s for s in srcs if s not in ECONOMY_ONLY]
     errors: dict[str, str] = {}

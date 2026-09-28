@@ -51,6 +51,8 @@ def search(
     time_of_day: Optional[TimeOfDay] = typer.Option(None, "--time", help="morning, afternoon or evening departure."),
     airline: Optional[str] = typer.Option(None, "--airline", help="Only results with this airline (IATA, e.g. SK)."),
     no_self_transfer: bool = typer.Option(False, "--no-self-transfer", help="Hide self transfer itineraries."),
+    unreliable: bool = typer.Option(False, "--unreliable", help="Also show sellers other than airlines and major "
+                                    "booking sites (Kiwi.com, Mytrip, EaseMyTrip, Skiplagged...), flagged."),
     sellers: int = typer.Option(0, "--sellers", help="Seller and fare breakdown for the top N Google results (browser)."),
     open_n: Optional[int] = typer.Option(None, "--open", help="Open the booking page of result N in your browser."),
     airline_links: bool = typer.Option(False, "--airline-links", help="Also print links to each airline's own site, pre-filled."),
@@ -87,8 +89,10 @@ def search(
     q = SearchQuery(origins=codes(origin), destinations=codes(destination), departure=d, return_date=r, cabin=cabin.value,
                     adults=adults, max_stops=max_stops, currency=cur(currency), departure_flex_days=df,
                     return_flex_days=rf if r else 0, nearby_km=nearby, **src)
-    with con.status("searching Google Flights, Kiwi.com and airlines..."):
-        res = run(q)
+    rules = {"*unreliable": "warn"} if unreliable else None
+    with con.status("searching Google Flights, Kiwi.com and airlines..." if unreliable
+                    else "searching Google Flights, airlines and major booking sites..."):
+        res = run(q, rules)
     trips = list(res.trips)
     if smart:
         from ..planner import PlanRequest, plan as run_plan
@@ -97,14 +101,14 @@ def search(
             pr = run_plan(PlanRequest(origins=q.origins, destinations=q.destinations, depart_start=d - timedelta(days=df),
                                       depart_end=d + timedelta(days=df), return_start=r - timedelta(days=rf) if r else None,
                                       return_end=r + timedelta(days=rf) if r else None, currency=q.currency, cabin=cabin.value,
-                                      adults=adults, max_hubs=6, max_stopover_days=2))
+                                      adults=adults, max_hubs=6, max_stopover_days=2, seller_rules=rules))
         seen = {t.id for t in trips}
         trips += [t for t in pr.trips if t.id not in seen and t.kind != "single"]
     if sellers:
         from ..sellers_live import enrich
 
         with con.status("reading seller prices..."):
-            enrich(trips, sellers)
+            enrich(trips, sellers, rules)
     save("search", q.model_dump(mode="json"), res, keep)
     trips = filter_sort(trips, sort, max_price, max_stops, time_of_day.value if time_of_day else None, no_self_transfer, airline)
     f = fmt_of(fmt, as_json)

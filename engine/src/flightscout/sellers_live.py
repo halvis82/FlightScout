@@ -104,13 +104,15 @@ def booking_options(url: str, page=None) -> tuple[list[Offer], str | None]:
 
 def enrich(trips: list[Trip], top: int = 5, rules: dict[str, str] | None = None) -> None:
     """Attach seller breakdowns to the Google tickets of the first ``top``
-    trips. Sellers on the block list are removed, warned ones get flagged, and
+    trips. Sellers on the block list (and unreliable ones unless the rules
+    show them) are removed, warned ones get flagged, and
     the ticket price becomes the cheapest allowed seller."""
     from playwright.sync_api import sync_playwright
 
-    from .sellers import DEFAULT_RULES
+    from .sellers import reliable, show_unreliable
 
-    lower = {k.lower(): v for k, v in {**DEFAULT_RULES, **(rules or {})}.items()}
+    lower = {k.lower(): v for k, v in (rules or {}).items()}
+    allow = show_unreliable(rules)
     picked = [t for t in trips if any(tk.source == "google" for tk in t.tickets)][:top]
     tickets = [tk for t in picked for tk in t.tickets if tk.source == "google"]
     if not tickets:
@@ -127,7 +129,8 @@ def enrich(trips: list[Trip], top: int = 5, rules: dict[str, str] | None = None)
             except Exception as e:
                 log.warning("booking options failed: %s", e)
                 continue
-            offers = [o for o in offers if lower.get(o.seller.lower()) != "block"]
+            offers = [o for o in offers if lower.get(o.seller.lower()) != "block"
+                      and (allow or o.is_airline or reliable(o.seller))]
             tk.offers = offers
             tk.price_insight = insight
             if offers:

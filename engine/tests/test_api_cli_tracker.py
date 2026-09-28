@@ -29,9 +29,11 @@ def test_search_merges_sources_and_converts_currency(monkeypatch, dt):
     monkeypatch.setattr(search_mod.fx, "convert", lambda amt, frm, to: amt * 2 if frm != to else amt)
     q = search_mod.SearchQuery(origins=["SAN"], destinations=["LAX"], departure=dt.date(), currency="USD",
                                sources=["google", "kiwi", "booking"])
-    r = search_mod.search(q)
+    r = search_mod.search(q, {"*unreliable": "warn"})
     assert [t.total_price for t in r.trips] == [50, 80]  # EUR converted, sorted
     assert "booking" in r.errors  # one failing source doesn't sink the search
+    # by default a source that only sells through an unreliable seller isn't asked at all
+    assert [t.total_price for t in search_mod.search(q).trips] == [50]
 
 
 def test_tracker_sampling_never_divides_by_zero():

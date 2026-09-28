@@ -128,6 +128,7 @@ flightscout search LAX DPS +60 -r +71 --depart-flex 3 --smart --sort best
 | `--time` | choice | morning, afternoon or evening departure. |
 | `--airline` | str | Only results with this airline (IATA, e.g. SK). |
 | `--no-self-transfer` | flag | Hide self transfer itineraries. |
+| `--unreliable` | flag | Also show sellers other than airlines and major booking sites (Kiwi.com, Mytrip, EaseMyTrip, Skiplagged...), flagged. |
 | `--sellers` | int | Seller and fare breakdown for the top N Google results (browser). |
 | `--open` | int | Open the booking page of result N in your browser. |
 | `--airline-links` | flag | Also print links to each airline's own site, pre-filled. |

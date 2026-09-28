@@ -5,6 +5,8 @@ import { airlineLink, type Airline } from "@/lib/airlines";
 import { addDays, dayDiff, formatPrice } from "@/lib/format";
 import { preset } from "@/lib/presets";
 import { searchAirports, expandCodes, type AirportRow } from "@/lib/airports-client";
+import { engineSellerRules, itineraryBadges, ruleFor, SHOW_UNRELIABLE, showsUnreliable } from "@/lib/sellers";
+import type { Itinerary } from "@/lib/types";
 
 const rows = JSON.parse(readFileSync("public/airports.json", "utf8")) as AirportRow[];
 const airlines = (JSON.parse(readFileSync("public/airlines.json", "utf8")) as { airlines: Airline[] }).airlines;
@@ -70,5 +72,28 @@ describe("airline deep links", () => {
   });
   it("falls back to the search page without a route", () => {
     for (const a of airlines) expect(airlineLink(a, null)[1]).toBe(false);
+  });
+});
+
+describe("seller rules for the engine", () => {
+  it("sends hidden sellers and the less reliable sites checkbox, nothing else", () => {
+    expect(engineSellerRules([])).toBeUndefined();
+    expect(engineSellerRules([{ seller: "Expedia", mode: "warn" }])).toBeUndefined();
+    expect(engineSellerRules([{ seller: "Expedia", mode: "block" }, { seller: SHOW_UNRELIABLE, mode: "warn" }])).toEqual({
+      Expedia: "block",
+      "*unreliable": "warn",
+    });
+    // the older, narrower switch no longer shows anything
+    expect(engineSellerRules([{ seller: "*unverified", mode: "warn" }])).toBeUndefined();
+    expect(showsUnreliable([{ seller: "*unverified", mode: "warn" }])).toBe(false);
+  });
+
+  it("marks less reliable sellers and never treats the checkbox as a seller rule", () => {
+    const it = { self_transfer: false, seller_kind: "ota", seller: "Mytrip", slices: [], warnings: [
+      "Sold by Mytrip, not the airline or a major booking site. Its price can change at checkout and support can be hard to reach. Check before paying.",
+    ] } as unknown as Itinerary;
+    const rules = [{ seller: SHOW_UNRELIABLE, mode: "warn" as const }];
+    expect(itineraryBadges(it, rules).map((b) => b.label)).toEqual(["Travel agency", "Less reliable seller"]);
+    expect(ruleFor(rules, "*unreliable seller")).toBeUndefined();
   });
 });

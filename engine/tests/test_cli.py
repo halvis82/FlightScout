@@ -44,7 +44,7 @@ def fake_sources(monkeypatch, dt):
     cheap = ticket(["SAN", "LAX"], dt.replace(hour=7), price=80, carrier="AS")
     pricey = ticket(["SAN", "LAX"], dt.replace(hour=19), price=300, carrier="DL")
     selft = ticket(["SAN", "SFO", "LAX"], dt.replace(hour=13), price=60, carrier="UA", self_transfer=True,
-                   source="kiwi").model_copy(update={"seller_kind": "ota"})
+                   source="kiwi").model_copy(update={"seller_kind": "ota", "seller": "Kiwi.com"})
     monkeypatch.setattr(search_mod, "SOURCES", {"google": lambda q: [cheap, pricey], "kiwi": lambda q: [selft]})
     monkeypatch.setattr(search_mod.google, "search_url", lambda q: "https://www.google.com/travel/flights")
     return dt
@@ -53,16 +53,20 @@ def fake_sources(monkeypatch, dt):
 def test_search_json_filters_and_sorting(fake_sources):
     d = fake_sources.date().isoformat()
     r = runner.invoke(app, ["search", "SAN", "LAX", d, "--sources", "google,kiwi", "--json", "--no-save"])
+    assert [t["total_price"] for t in json.loads(r.output)["trips"]] == [80, 300]  # Kiwi.com hidden by default
+    r = runner.invoke(app, ["search", "SAN", "LAX", d, "--sources", "google,kiwi", "--json", "--no-save", "--unreliable"])
     trips = json.loads(r.output)["trips"]
     assert [t["total_price"] for t in trips] == [60, 80, 300]  # cheapest first
-    r = runner.invoke(app, ["search", "SAN", "LAX", d, "--sources", "google,kiwi", "--json", "--no-save",
+    assert any("major booking site" in w for w in trips[0]["tickets"][0]["warnings"])
+    r = runner.invoke(app, ["search", "SAN", "LAX", d, "--sources", "google,kiwi", "--json", "--no-save", "--unreliable",
                             "--max-price", "200", "--no-self-transfer", "--time", "morning"])
     assert [t["total_price"] for t in json.loads(r.output)["trips"]] == [80]
 
 
 def test_search_csv_has_booking_links(fake_sources):
     d = fake_sources.date().isoformat()
-    r = runner.invoke(app, ["search", "SAN", "LAX", d, "--sources", "google,kiwi", "-f", "csv", "--no-save"])
+    r = runner.invoke(app, ["search", "SAN", "LAX", d, "--sources", "google,kiwi", "-f", "csv", "--no-save",
+                            "--unreliable"])
     rows = list(csv.DictReader(io.StringIO(r.output)))
     assert len(rows) == 3 and all(row["booking_urls"].startswith("https://") for row in rows)
 

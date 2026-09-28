@@ -6,13 +6,17 @@ import { watchToQuery } from "./watch-logic";
 import { recordObservations } from "./observations";
 import { tripsForWatch, tripsToObservations } from "./watch-logic";
 import { getSettings } from "./settings";
+import { engineSellerRules } from "./sellers";
 import type { PlanResult, SearchResult, Trip } from "./types";
 
 type Watch = typeof schema.watches.$inferSelect;
 
 export async function checkWatch(w: Watch, userId: string) {
+  const s = await getSettings(userId);
+  const sellerRules = engineSellerRules(s.sellerRules);
+  const rules = sellerRules ? { seller_rules: sellerRules } : {};
   if (w.tripType === "multicity" && w.legs?.length) {
-    const res = await engine<PlanResult>("/multicity", { legs: w.legs, currency: w.currency, cabin: w.cabin, adults: w.adults });
+    const res = await engine<PlanResult>("/multicity", { legs: w.legs, currency: w.currency, cabin: w.cabin, adults: w.adults, ...rules });
     const dest = [w.legs.at(-1)!.destinations[0]];
     const result = await recordObservations(w, tripsToObservations(res.trips.slice(0, 5), dest));
     await db.insert(schema.searches).values({
@@ -26,12 +30,7 @@ export async function checkWatch(w: Watch, userId: string) {
     return { ...result, trips: res.trips.length, errors: res.errors };
   }
   const q = watchToQuery(w);
-  const s = await getSettings(userId);
-  const blocked = s.sellerRules.filter((r) => r.mode === "block");
-  const res = await engine<SearchResult>("/search", {
-    ...q,
-    ...(blocked.length ? { seller_rules: Object.fromEntries(blocked.map((r) => [r.seller, r.mode])) } : {}),
-  });
+  const res = await engine<SearchResult>("/search", { ...q, ...rules });
   let trips: Trip[] = res.trips;
   const errors = { ...res.errors };
   if (w.includeSplit) {
@@ -53,6 +52,7 @@ export async function checkWatch(w: Watch, userId: string) {
         max_hubs: Math.min(s.planner.max_hubs, 6),
         allow_self_transfer: s.planner.allow_self_transfer,
         include_nested_roundtrips: s.planner.include_nested_roundtrips,
+        ...rules,
       });
       trips = [...trips, ...plan.trips.filter((t) => t.tickets.length > 1)];
       Object.assign(errors, plan.errors);

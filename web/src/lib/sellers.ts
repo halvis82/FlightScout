@@ -1,7 +1,27 @@
 import type { SellerRule } from "./db/schema";
 import type { Itinerary, Trip } from "./types";
 
-// Presets users can add with one click. Nothing is blocked by default.
+// A seller rule the engine reads as "also show sellers other than airlines and
+// major booking sites, flagged" (the Settings checkbox, off by default).
+// "*unverified" was an older, narrower switch the engine no longer reads.
+export const SHOW_UNRELIABLE = "*unreliable";
+const SWITCHES = new Set([SHOW_UNRELIABLE, "*unverified"]);
+
+// Engine calls that return trips, and so take seller rules.
+export const SELLER_KINDS = new Set(["search", "plan", "browser", "trip", "multicity"]);
+
+export const showsUnreliable = (rules: SellerRule[]) => rules.some((r) => r.seller === SHOW_UNRELIABLE);
+export const isSwitch = (r: SellerRule) => SWITCHES.has(r.seller);
+
+// The rules the engine needs: hidden sellers, plus the checkbox. Warn rules
+// are applied here in the browser instead.
+export function engineSellerRules(rules: SellerRule[]): Record<string, string> | undefined {
+  const sent = rules.filter((r) => (r.mode === "block" && !isSwitch(r)) || r.seller === SHOW_UNRELIABLE);
+  return sent.length ? Object.fromEntries(sent.map((r) => [r.seller, r.mode])) : undefined;
+}
+
+// Presets users can add with one click. These sellers are hidden unless the
+// Settings checkbox includes less reliable booking sites.
 export const SELLER_PRESETS: SellerRule[] = [
   { seller: "Kiwi.com", mode: "warn", note: "OTA. Self transfers are covered by the Kiwi Guarantee, not the airlines." },
   { seller: "Gotogate", mode: "warn", note: "OTA with frequent service complaints." },
@@ -16,7 +36,7 @@ export const SELLER_PRESETS: SellerRule[] = [
 export function ruleFor(rules: SellerRule[], seller?: string | null) {
   if (!seller) return undefined;
   const s = seller.toLowerCase();
-  return rules.find((r) => s.includes(r.seller.toLowerCase()));
+  return rules.find((r) => !isSwitch(r) && s.includes(r.seller.toLowerCase()));
 }
 
 export function isBlocked(rules: SellerRule[], it: Itinerary) {
@@ -52,6 +72,7 @@ export function itineraryBadges(it: Itinerary, rules: SellerRule[] = []): Badge[
     if (/is basic/i.test(w)) out.push({ label: "Basic fare", tone: "warn", title: w });
     else if (/no free carry-on/i.test(w)) out.push({ label: "No carry-on", tone: "warn", title: w });
     else if (/only sold by travel agencies/i.test(w)) out.push({ label: "Agencies only", tone: "warn", title: w });
+    else if (/not the airline or a major booking site/.test(w)) out.push({ label: "Less reliable seller", tone: "danger", title: w });
     else if (/couldn't verify as an established company/.test(w)) out.push({ label: "Unverified agency", tone: "danger", title: w });
     // "Lands at TRF (Sandefjord, Torp), 122 km from OSL" shows as "Lands at TRF"
     else if (/^(Lands at|Leaves from) /.test(w)) out.push({ label: w.split(",")[0].replace(/\s*\(.*$/, "").trim(), tone: "warn", title: w });
