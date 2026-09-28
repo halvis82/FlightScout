@@ -12,6 +12,14 @@ import type { PlanResult, SearchQuery, SearchResult } from "./types";
 // ITA Matrix and the polling metasearch sites
 export const PARTS: string[][] = [["google"], ["kiwiweb"], ["airlines"], ["kiwi"], ["otas_fast"], ["otas_slow"]];
 export const PART_LABELS = ["Google Flights", "Kiwi.com", "Airlines direct", "Kiwi.com deals", "Booking sites", "More booking sites, ITA Matrix"];
+// Kiwi.com sells everything these two parts find: skipped unless Settings
+// includes less reliable booking sites (the engine would hide them anyway).
+const KIWI_PARTS = new Set(["kiwiweb", "kiwi"]);
+export function partsFor(showUnreliable: boolean) {
+  return PARTS.map((sources, i) => ({ sources, label: PART_LABELS[i] })).filter(
+    (p) => showUnreliable || !KIWI_PARTS.has(p.sources[0]),
+  );
+}
 export type PartState = { state: "searching" | "done" | "failed"; n: number };
 
 // Google via the visitor's own browser when the FlightScout Helper extension is
@@ -41,17 +49,17 @@ export type MulticityLeg = {
 };
 
 // A search that fills in part by part. `q` null = nothing to search.
-export function useLiveSearch(q: SearchQuery | null, legs?: MulticityLeg[] | null) {
+export function useLiveSearch(q: SearchQuery | null, legs?: MulticityLeg[] | null, showUnreliable = false) {
   const [result, setResult] = useState<SearchResult | null>(null);
   const [plan, setPlan] = useState<PlanResult | null>(null);
   const [pending, setPending] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const seq = useRef(0);
-  const key = JSON.stringify([q, legs]);
+  const key = JSON.stringify([q, legs, showUnreliable]);
   /* eslint-disable react-hooks/set-state-in-effect -- a new search resets the previous one */
   useEffect(() => {
+    const run = ++seq.current; // also drops a search that's still running
     if (!q && !legs?.length) return;
-    const run = ++seq.current;
     setError(null);
     if (legs?.length) {
       setPending(1);
@@ -62,10 +70,11 @@ export function useLiveSearch(q: SearchQuery | null, legs?: MulticityLeg[] | nul
       return;
     }
     let acc: SearchResult | null = null;
-    let left = PARTS.length;
+    const parts = partsFor(showUnreliable);
+    let left = parts.length;
     setPending(left);
     setPlan(null);
-    PARTS.forEach((sources, part) =>
+    parts.forEach(({ sources }, part) =>
       searchPart(q!, sources, part + 1) // part > 0: not saved to history again
         .then((r) => {
           if (run !== seq.current) return;

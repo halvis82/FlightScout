@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Check, Sparkles, X } from "lucide-react";
 import { useApp } from "@/components/app-context";
@@ -13,7 +13,8 @@ import { Empty, ErrorNote, Spinner } from "@/components/ui";
 import { api } from "@/lib/client";
 import { extensionVersion } from "@/lib/extension";
 import { localRunnerActive } from "@/lib/local-runner";
-import { PARTS, PART_LABELS, searchPart, type PartState } from "@/lib/live-search";
+import { partsFor, searchPart, type PartState } from "@/lib/live-search";
+import { showsUnreliable } from "@/lib/sellers";
 import { airport, expandCodes, loadAirports, nearestAirport } from "@/lib/airports-client";
 import { RouteMap } from "@/components/route-map";
 import { addDays, dayDiff, isoDate } from "@/lib/format";
@@ -133,6 +134,8 @@ function useNearestAirport(needed: boolean, onFound: () => void) {
 
 function SearchPage() {
   const { settings, currency, places } = useApp();
+  const unreliable = showsUnreliable(settings?.sellerRules ?? []);
+  const searchParts = useMemo(() => partsFor(unreliable), [unreliable]);
   const router = useRouter();
   const params = useSearchParams();
   const fresh = params.get("new") === "1";
@@ -159,6 +162,15 @@ function SearchPage() {
   const [finished, setFinished] = useState<{ secs: number; failed: number } | null>(null);
   const lastRun = useRef<string | null>(null);
   const clock = useRef<ReturnType<typeof setInterval> | null>(null);
+  // the running search's late parts must not land under a form they don't belong to
+  const abandon = () => {
+    runSeq.current++;
+    if (clock.current) clearInterval(clock.current);
+    setBusy(false);
+    setPending(0);
+    setPlanBusy(false);
+    setParts([]);
+  };
   // Each new search is a browser history entry, so Back and Forward move
   // between searches: the address this page last wrote, to tell those apart.
   const paramStr = params.toString();
@@ -206,7 +218,7 @@ function SearchPage() {
       lastRun.current = JSON.stringify([f0.from, f0.to, f0.depart, f0.ret, f0.tripType, f0.flex, f0.retFlex, f0.cabin, f0.adults, f0.stops, f0.nearby, f0.smart]);
       setErr(null);
       setStale(true); // keep showing the previous results, dimmed
-      setPending(PARTS.length);
+      setPending(searchParts.length);
       setPlan(null);
       setBusy(true);
       setFinished(null);
@@ -299,12 +311,12 @@ function SearchPage() {
       const runId = ++runSeq.current;
       let acc: SearchResult | null = null;
       let searchId: number | null = null; // history row, saved with the first part
-      let pending = PARTS.length;
-      const states: PartState[] = PARTS.map(() => ({ state: "searching", n: 0 }));
+      let pending = searchParts.length;
+      const states: PartState[] = searchParts.map(() => ({ state: "searching", n: 0 }));
       setParts([...states]);
       setFinished(null);
       const searchP = Promise.all(
-        PARTS.map((sources, part) =>
+        searchParts.map(({ sources }, part) =>
           searchPart(q, sources, part)
             .then((r) => {
               if (runSeq.current !== runId) return;
@@ -387,7 +399,7 @@ function SearchPage() {
       await Promise.all([searchP, planP]);
       clearInterval(timer);
     },
-    [go, settings, currency],
+    [go, settings, currency, searchParts],
   );
   useEffect(() => {
     if (!fresh) return;
@@ -435,6 +447,7 @@ function SearchPage() {
         onChange={(next) => {
           // switching to or from multi city: old results don't belong to the new form
           if (next.tripType !== form.tripType && (next.tripType === "multicity" || form.tripType === "multicity")) {
+            abandon();
             setResult(null);
             setPlan(null);
             setErr(null);
@@ -442,6 +455,7 @@ function SearchPage() {
           }
           // clearing the destination goes back to exploring
           if (!next.to.length && form.to.length && next.tripType !== "multicity") {
+            abandon();
             setResult(null);
             setPlan(null);
             lastRun.current = null;
@@ -507,7 +521,7 @@ function SearchPage() {
                 title={p.state === "failed" ? "Didn't answer this time" : undefined}
               >
                 {p.state === "searching" ? <Spinner className="size-3" /> : p.state === "done" ? <Check className="size-3" /> : <X className="size-3" />}
-                {PART_LABELS[i]}
+                {searchParts[i]?.label}
                 {p.state === "done" && <span className="tabular-nums opacity-70">{p.n}</span>}
               </span>
             ))}

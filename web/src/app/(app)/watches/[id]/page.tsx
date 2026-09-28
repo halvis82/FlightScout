@@ -13,6 +13,7 @@ import { Badge, Button, Card, Empty, ErrorNote, PageHeader, Segmented, Spinner }
 import { api, fetcher } from "@/lib/client";
 import { addDays, dayDiff, formatDate, formatDuration, relativeTime } from "@/lib/format";
 import { useLiveSearch, type MulticityLeg } from "@/lib/live-search";
+import { showsUnreliable } from "@/lib/sellers";
 import type { SearchQuery } from "@/lib/types";
 import type { WatchRow } from "@/lib/watch-types";
 import { resolveWatchParam, watchHref } from "@/lib/watch-slug";
@@ -39,7 +40,7 @@ const SOURCE = (s: string) => (s === "google" ? "Google Flights" : s === "kiwi" 
 export default function WatchDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id: param } = use(params);
   const router = useRouter();
-  const { money, convert, currency, me } = useApp();
+  const { money, convert, currency, me, settings } = useApp();
   // /watches/lax-dps-2027-03-18-11n (readable) or /watches/6 (old links)
   const { data: list } = useSWR<WatchRow[]>("/watches", fetcher, { revalidateOnFocus: false });
   const id = resolveWatchParam(param, list);
@@ -139,7 +140,7 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
     };
   }, [w, shown]);
   const legs = w?.tripType === "multicity" && Array.isArray(w.legs) ? (w.legs as MulticityLeg[]) : null;
-  const live = useLiveSearch(liveQ, legs);
+  const live = useLiveSearch(liveQ, legs, showsUnreliable(settings?.sellerRules ?? []));
 
   if (error)
     return /not found|404/i.test((error as Error).message) ? (
