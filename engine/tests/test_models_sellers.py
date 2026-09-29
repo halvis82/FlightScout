@@ -73,7 +73,7 @@ def test_round_trip_from_prices_keep_their_return_date(monkeypatch, dt):
     it = ticket(["LAX", "DPS"], dt, price=927.0).model_copy(update={"return_pending": True})
     monkeypatch.setitem(s.SOURCES, "google", lambda q: [it.model_copy()])
     q = SearchQuery(origins=["LAX"], destinations=["DPS"], departure=dt.date(),
-                    return_date=dt.date().replace(day=min(dt.day + 1, 28)), sources=["google"])
+                    return_date=dt.date() + timedelta(days=1), sources=["google"])
     res = s.search(q)
     assert res.trips[0].tickets[0].pending_return == q.return_date
 
