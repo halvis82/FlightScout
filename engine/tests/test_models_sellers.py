@@ -152,3 +152,13 @@ def test_a_metasearch_result_switches_to_its_cheapest_reliable_seller(dt):
     # shown as is when less reliable sellers are included
     shown = sellers.apply_rules([t.model_copy(deep=True)], {"*unreliable": "warn"})
     assert shown[0].tickets[0].seller == "TrustFares" and shown[0].total_price == 500.0
+
+
+def test_unnamed_agency_is_hidden_by_default(dt):
+    it = ticket(["SAN", "SEA"], dt, source="wego").model_copy(
+        update={"seller": None, "seller_kind": "ota"})
+    trip = Trip(tickets=[it], total_price=it.price, currency="USD")
+    assert sellers.apply_rules([trip.model_copy(deep=True)], None) == []
+    shown = sellers.apply_rules([trip], {"*unreliable": "warn"})
+    assert len(shown) == 1
+    assert any("unknown seller" in w for w in shown[0].tickets[0].warnings)

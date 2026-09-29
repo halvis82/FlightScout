@@ -4,7 +4,7 @@ import { and, asc, desc, eq, gte } from "drizzle-orm";
 import { db, schema } from "./db";
 import { convertWith, getRates, hasRate } from "./fx";
 import { isDate } from "./watch-validate";
-import { sendEmail, sendPush } from "./notify";
+import { sendEmail } from "./notify";
 import { getSettings } from "./settings";
 import { formatPrice } from "./format";
 import type { Trip, SearchQuery } from "./types";
@@ -115,13 +115,10 @@ async function evaluateAlerts(watch: Watch, price: number, prev: number | null, 
     currency: watch.currency,
     bookingUrl: best.booking_url ?? null,
   });
-  // push and email go out after the response, so a search never waits on them
+  // Email goes out after the response, so a search never waits on delivery.
   const deliver = async () => {
     const s = await getSettings(watch.userId);
     const base = process.env.BETTER_AUTH_URL ?? "";
-    if (s.pushAlerts) {
-      await sendPush(watch.userId, { title: "FlightScout price alert", body: message, url: `/watches/${watch.id}` }).catch(() => 0);
-    }
     if (s.emailAlerts) {
       const [u] = await db.select().from(schema.user).where(eq(schema.user.id, watch.userId));
       if (u) {

@@ -10,7 +10,7 @@ const SWITCHES = new Set([SHOW_UNRELIABLE, "*unverified"]);
 // Engine calls that return trips, and so take seller rules.
 export const SELLER_KINDS = new Set(["search", "plan", "browser", "trip", "multicity"]);
 
-export const showsUnreliable = (rules: SellerRule[]) => rules.some((r) => r.seller === SHOW_UNRELIABLE);
+export const showsUnreliable = (rules: SellerRule[]) => rules.some((r) => r.seller === SHOW_UNRELIABLE && r.mode === "warn");
 export const isSwitch = (r: SellerRule) => SWITCHES.has(r.seller);
 
 // The rules the engine needs: hidden sellers, plus the checkbox. Warn rules
@@ -23,6 +23,7 @@ export function engineSellerRules(rules: SellerRule[]): Record<string, string> |
 // Presets users can add with one click. These sellers are hidden unless the
 // Settings checkbox includes less reliable booking sites.
 export const SELLER_PRESETS: SellerRule[] = [
+  { seller: "Skiplagged", mode: "warn", note: "All Skiplagged fares are included only when less reliable booking sites are enabled." },
   { seller: "Kiwi.com", mode: "warn", note: "OTA. Self transfers are covered by the Kiwi Guarantee, not the airlines." },
   { seller: "Gotogate", mode: "warn", note: "OTA with frequent service complaints." },
   { seller: "Mytrip", mode: "warn", note: "OTA (Etraveli group)." },

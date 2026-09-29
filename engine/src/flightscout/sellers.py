@@ -44,8 +44,8 @@ def reliable(seller: str | None, seller_kind: str | None = None) -> bool:
     if seller_kind == "airline":
         return True
     n = _norm(seller)
-    if not n:  # no third party named: the source itself sells it
-        return True
+    if not n:  # unnamed agencies must not bypass the default seller filter
+        return seller_kind != "ota"
     return n in RELIABLE or n.split(" (")[0] in RELIABLE
 
 

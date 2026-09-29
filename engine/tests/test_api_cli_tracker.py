@@ -49,3 +49,22 @@ def test_cli_airports_and_date_parsing():
     from flightscout.cli import _date
     assert _date("+3") == date.today() + timedelta(days=3)
     assert _date("2026-11-20") == date(2026, 11, 20)
+
+
+def test_skiplagged_source_is_only_called_when_unreliable_sites_are_enabled(monkeypatch, dt):
+    calls = []
+    it = ticket(["SAN", "SEA"], dt, source="skiplagged").model_copy(
+        update={"seller": "Skiplagged", "seller_kind": "metasearch"})
+
+    def source(q):
+        calls.append(q)
+        return [it.model_copy(deep=True)]
+
+    monkeypatch.setattr(search_mod, "SOURCES", {"skiplagged": source})
+    q = search_mod.SearchQuery(origins=["SAN"], destinations=["SEA"], departure=dt.date(),
+                               sources=["skiplagged"])
+    assert search_mod.search(q).trips == []
+    assert calls == []
+    shown = search_mod.search(q, {"*unreliable": "warn"})
+    assert len(calls) == 1 and len(shown.trips) == 1
+    assert any("major booking site" in w for w in shown.trips[0].tickets[0].warnings)

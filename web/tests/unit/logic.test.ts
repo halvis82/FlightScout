@@ -86,6 +86,8 @@ describe("seller rules for the engine", () => {
     // the older, narrower switch no longer shows anything
     expect(engineSellerRules([{ seller: "*unverified", mode: "warn" }])).toBeUndefined();
     expect(showsUnreliable([{ seller: "*unverified", mode: "warn" }])).toBe(false);
+    expect(showsUnreliable([{ seller: SHOW_UNRELIABLE, mode: "block" }])).toBe(false);
+    expect(showsUnreliable([{ seller: SHOW_UNRELIABLE, mode: "warn" }])).toBe(true);
   });
 
   it("marks less reliable sellers and never treats the checkbox as a seller rule", () => {

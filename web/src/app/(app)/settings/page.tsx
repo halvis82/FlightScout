@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
+import Link from "next/link";
 import { Check, Copy, Fingerprint, KeyRound, Plus, Trash2 } from "lucide-react";
 import { AirportInput } from "@/components/airport-input";
 import { useApp } from "@/components/app-context";
@@ -87,7 +88,7 @@ export default function SettingsPage() {
         <Section title="Account features" sub="Sign in to unlock these. Your guest data can be imported when you do.">
           <ul className="list-inside list-disc space-y-1 text-sm text-muted">
             <li>Daily background price tracking for every watch</li>
-            <li>Email and push alerts when prices drop</li>
+            <li>Email alerts when prices drop</li>
             <li>Sync across devices</li>
             <li>API tokens for the flightscout CLI, the MCP server and AI agents</li>
             <li>Passkey sign in</li>
@@ -395,7 +396,7 @@ function SellerSection({ rules, onSave }: { rules: SellerRule[]; onSave: (r: Sel
           <span className="mt-1 block text-xs text-muted">
             Off: you only see fares from airlines, Google Flights and major booking sites (Expedia, Orbitz, Travelocity, Priceline,
             Booking.com). On: fares from other agencies show too, marked &quot;Less reliable seller&quot;. That covers Kiwi.com, Mytrip,
-            Gotogate, eDreams, Opodo, Trip.com, EaseMyTrip, CheapOair, Skiplagged&apos;s hidden city fares and small agencies listed
+            Gotogate, eDreams, Opodo, Trip.com, EaseMyTrip, CheapOair, Skiplagged (all fares, including hidden city tickets) and small agencies listed
             by sites like Wego and KAYAK (HolidayBreakz, Magicfares...). Their prices are often not what you pay at checkout, and
             support can be hard to reach.
           </span>
@@ -444,79 +445,37 @@ function SellerSection({ rules, onSave }: { rules: SellerRule[]; onSave: (r: Sel
   );
 }
 
-function urlB64ToUint8Array(base64: string) {
-  const padding = "=".repeat((4 - (base64.length % 4)) % 4);
-  const b = (base64 + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const raw = atob(b);
-  return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
-}
-
 function AlertsSection() {
   const { me, settings, refreshMe } = useApp();
   const [err, setErr] = useState<string | null>(null);
-  const [msg, setMsg] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   if (!me?.user || !settings) return null;
-  const email = me.user.email;
-
-  async function enablePush(on: boolean) {
-    setErr(null);
-    try {
-      if (on) {
-        if (!("serviceWorker" in navigator) || !("PushManager" in window)) throw new Error("This browser doesn't support web push.");
-        const perm = await Notification.requestPermission();
-        if (perm !== "granted") throw new Error("Notification permission was not granted.");
-        const reg = await navigator.serviceWorker.register("/sw.js");
-        await navigator.serviceWorker.ready;
-        const sub =
-          (await reg.pushManager.getSubscription()) ??
-          (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!) }));
-        await api("/push", { body: { subscription: sub.toJSON() } });
-      } else {
-        const reg = await navigator.serviceWorker.getRegistration();
-        const sub = await reg?.pushManager.getSubscription();
-        if (sub) {
-          await api("/push", { method: "DELETE", body: { endpoint: sub.endpoint } });
-          await sub.unsubscribe();
-        }
-      }
-      await api("/settings", { method: "PATCH", body: { pushAlerts: on } });
-      refreshMe();
-    } catch (e) {
-      setErr((e as Error).message);
-    }
-  }
 
   return (
-    <Section title="Alerts" sub="Alerts fire when a watch drops below its target price or falls by its drop percentage. They always appear under the bell.">
+    <Section title="Alerts" sub="Alerts fire when a watch reaches its target price or falls by its drop percentage. They always appear under the bell.">
       <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <Switch
-            checked={settings.emailAlerts}
-            disabled={!me.features.email}
-            onChange={async (v) => {
-              await api("/settings", { method: "PATCH", body: { emailAlerts: v } });
-              refreshMe();
-            }}
-            label={`Email to ${email}`}
-          />
-          {!me.features.email && <span className="text-xs text-faint">Needs RESEND_API_KEY and ALERT_FROM_EMAIL on the server.</span>}
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <Switch checked={settings.pushAlerts} disabled={!me.features.push} onChange={enablePush} label="Push notifications on this device" />
-          {!me.features.push && <span className="text-xs text-faint">Needs VAPID keys on the server.</span>}
-          {settings.pushAlerts && (
-            <Button
-              size="sm"
-              onClick={async () => {
-                const r = await api<{ sent: number }>("/push", { body: { test: true } });
-                setMsg(r.sent ? `Sent to ${r.sent} device${r.sent > 1 ? "s" : ""}.` : "No subscribed devices.");
-              }}
-            >
-              Send test
-            </Button>
-          )}
-          {msg && <span className="text-xs text-muted">{msg}</span>}
-        </div>
+        <Switch
+          checked={settings.emailAlerts}
+          disabled={busy || (!me.features.email && !settings.emailAlerts)}
+          onChange={async (emailAlerts) => {
+            setErr(null);
+            setBusy(true);
+            try {
+              await api("/settings", { method: "PATCH", body: { emailAlerts } });
+              await refreshMe();
+            } catch (e) {
+              setErr((e as Error).message);
+            } finally {
+              setBusy(false);
+            }
+          }}
+          label={`Email to ${me.user.email}`}
+        />
+        {!me.features.email && <p className="text-xs text-muted">Email alerts are unavailable because email delivery has not been set up for FlightScout. Price alerts still appear under the bell.</p>}
+        <p className="text-xs text-muted">
+          Email alerts are off by default. Set a target price or drop percentage by editing a watch in <Link href="/watches" className="text-accent">Watchlist</Link>.
+          You will only receive an email when an alert condition is met, rather than after every price check.
+        </p>
         {err && <ErrorNote>{err}</ErrorNote>}
       </div>
     </Section>
