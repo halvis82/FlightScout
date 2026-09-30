@@ -14,7 +14,6 @@ import { GuestBanner, ImportGuestData } from "./guest-ui";
 import { openPanel, toastStore } from "./stores";
 import { PlainButton, Tip, useDismiss } from "./ui";
 import { WatchlistButton, WatchlistPanel } from "./watchlist-panel";
-import { KeepAlive } from "./keep-alive";
 
 const NAV = [
   { href: "/", label: "Search" },
@@ -82,7 +81,6 @@ export function Shell({ children }: { children: ReactNode }) {
       </header>
       <GuestBanner />
       <ImportGuestData />
-      <KeepAlive />
       <main className="mx-auto w-full max-w-7xl flex-1 px-3 pt-5 pb-10 sm:px-4">{children}</main>
       <footer className="mx-auto flex w-full max-w-7xl flex-wrap gap-x-4 gap-y-1 px-3 pb-8 text-xs text-faint sm:px-4">
         <a href="https://github.com/halvis82/FlightScout" target="_blank" rel="noopener noreferrer" className="hover:text-fg">
@@ -101,12 +99,13 @@ export function Shell({ children }: { children: ReactNode }) {
 function LocalRunnerPill() {
   const lr = useLocalRunner();
   const ext = useExtension();
-  if (!lr.active && !ext) return null;
-  const how = lr.active ? `the local runner (flightscout serve${lr.version ? ` ${lr.version}` : ""})` : `the FlightScout Helper extension ${ext}`;
+  const label = lr.disabled ? "Local disabled" : lr.probing ? "Connecting…" : lr.standby ? "Local idle" : lr.outdated ? "Update runner" : lr.active ? "Your IP" : ext ? "Extension" : "Local server";
+  const description = lr.active ? "Searches run on this computer. Open local server settings." : "View local server status, start it, or install it.";
   return (
-    <Tip side="bottom" label={`Google Flights searches run from your own IP through ${how}, so they're never blocked or rate limited.`}>
-      <Link href="/settings#own-ip" className="hidden items-center gap-1.5 rounded-full border border-good/30 bg-good-soft px-2.5 py-1 text-xs font-medium text-good md:inline-flex">
-        <span className="size-1.5 rounded-full bg-good" /> Your IP
+    <Tip side="bottom" label={description}>
+      <Link href="/settings#own-ip" aria-label={description} className={cn("inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium", lr.active ? "border-good/30 bg-good-soft text-good" : "border-border text-muted")}>
+        <span className={cn("size-1.5 rounded-full", lr.active ? "bg-good" : "bg-current")} />
+        <span className="hidden md:inline">{label}</span>
       </Link>
     </Tip>
   );

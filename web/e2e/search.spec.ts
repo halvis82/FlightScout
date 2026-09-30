@@ -45,7 +45,7 @@ test.describe("search", () => {
   test("logo resets and tabs keep the search", async ({ page }) => {
     await page.goto("/?from=OSL&to=CPH&tt=oneway&d=2026-11-19");
     await expect(page.getByText(/\d+ flights/).first()).toBeVisible();
-    await page.getByRole("link", { name: "Airlines" }).click();
+    await page.getByRole("link", { name: "Airlines", exact: true }).click();
     await page.getByRole("link", { name: "Search", exact: true }).first().click();
     await expect(page.locator("form")).toContainText("CPH");
     await page.getByRole("link", { name: "FlightScout" }).first().click();

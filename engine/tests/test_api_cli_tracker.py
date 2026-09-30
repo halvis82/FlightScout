@@ -68,3 +68,29 @@ def test_skiplagged_source_is_only_called_when_unreliable_sites_are_enabled(monk
     shown = search_mod.search(q, {"*unreliable": "warn"})
     assert len(calls) == 1 and len(shown.trips) == 1
     assert any("major booking site" in w for w in shown.trips[0].tickets[0].warnings)
+
+
+def test_idle_status_probes_do_not_extend_deadline(monkeypatch):
+    from flightscout import api
+    monkeypatch.setattr(api, 'LOCAL', True)
+    monkeypatch.setattr(api, '_idle_minutes', 120)
+    monkeypatch.setattr(api, '_last', [1000.0])
+    monkeypatch.setattr(api, '_active', 0)
+    monkeypatch.setattr(api.time, 'time', lambda: 8201.0)
+    c = TestClient(app)
+    for path in ('/health', '/api/health', '/alive'):
+        c.get(path)
+    c.options('/search')
+    assert api.last_activity() == 1000.0
+    assert api.idle_expired()
+    assert c.get('/health').json()['lifecycle']['idle_expires_at'] == 8200.0
+    monkeypatch.setattr(api, '_active', 1)
+    assert not api.idle_expired()
+    assert c.get('/health').json()['lifecycle']['idle_expires_at'] is None
+    monkeypatch.setattr(api, '_active', 0)
+    c.get('/not-a-route')
+    assert api.last_activity() == 8201.0
+    assert not api.idle_expired()
+    monkeypatch.setattr(api, '_idle_minutes', 0)
+    assert not api.idle_expired()
+    assert c.get('/health').json()['lifecycle']['idle_expires_at'] is None

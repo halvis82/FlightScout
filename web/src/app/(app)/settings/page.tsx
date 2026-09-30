@@ -1,4 +1,5 @@
 "use client";
+import { toast } from "@/components/stores";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import Link from "next/link";
@@ -9,7 +10,7 @@ import { setTheme, useTheme } from "@/components/shell";
 import { cn } from "@/lib/utils";
 import { cityOf } from "@/lib/airports-client";
 import { useExtension } from "@/lib/extension";
-import { connectLocalRunner, localAccess, useLocalRunner, type LocalAccess } from "@/lib/local-runner";
+import { connectLocalRunner, localAccess, setLocalRunnerDisabled, useLocalRunner, type LocalAccess } from "@/lib/local-runner";
 import { PlainButton, Badge, Button, Card, ErrorNote, Field, Input, PageHeader, Select, Switch } from "@/components/ui";
 import { api, fetcher } from "@/lib/client";
 import { authClient } from "@/lib/auth-client";
@@ -167,10 +168,13 @@ function OwnIpSection() {
               )}
             </div>
             <p className="mt-1 text-xs text-muted">
-              Mac or Linux. Starts only when the website searches and stops after 10 quiet minutes, so nothing runs in the
-              background. Also powers the CLI and AI agents.
+              Mac or Linux. Starts on demand and stops after two hours without searches. An open tab does not keep it running. Also powers the CLI and AI agents.
             </p>
             <pre className="mt-2 overflow-x-auto rounded-lg bg-surface-2 p-2 text-[11px] leading-relaxed">{INSTALL}</pre>
+            <Button size="sm" variant="soft" onClick={async () => {
+              try { await navigator.clipboard.writeText(INSTALL); toast({ text: "Install command copied" }); }
+              catch { toast({ text: "Select and copy the command above" }); }
+            }}>Copy install / update command</Button>
             <p className="mt-1.5 text-xs text-faint">
               Remove with <code>flightscout serve --uninstall</code>. Windows: run <code>flightscout serve</code> while you
               search.
@@ -216,7 +220,7 @@ function OwnIpSection() {
         </div>
         <p className="mt-3 text-xs text-muted">
           Want it all on your computer, website included? One command installs it at http://localhost:3000, with accounts,
-          watchlist and every source, and it runs only while that page is open:
+          watchlist and every source. It stops after two hours without traffic:
         </p>
         <pre className="mt-1.5 overflow-x-auto rounded-lg bg-surface-2 p-2 text-[11px] leading-relaxed">{INSTALL_LOCAL}</pre>
         <p className="mt-1.5 text-xs text-muted">
@@ -241,7 +245,16 @@ function RunnerConnect({ active }: { active: boolean }) {
   useEffect(() => {
     localAccess().then(setAccess);
   }, [active]);
-  if (active) return <p className="mt-2 text-xs text-good">Connected: searches run on this computer.</p>;
+  const lr = useLocalRunner();
+  if (active) return <div className="mt-2 space-y-2 text-xs">
+    <p className="text-good">Running: searches run on this computer.</p>
+    <p className="text-muted">{!lr.lifecycle ? "Run the update command above to enable automatic shutdown and detailed status."
+      : lr.lifecycle.active_requests ? "Searching. The idle timer starts after the search finishes."
+      : lr.lifecycle.idle_expires_at ? `Stops when idle at ${new Date(lr.lifecycle.idle_expires_at * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}. A new search restarts the timer.`
+      : "Automatic shutdown is turned off."}</p>
+    <Button size="sm" variant="soft" onClick={() => setLocalRunnerDisabled(true)}>Use shared server</Button>
+    <p className="text-faint">Switching leaves the local process to stop on its idle timer.</p>
+  </div>;
   if (access === "denied")
     return (
       <p className="mt-2 text-xs text-warn">
@@ -254,17 +267,18 @@ function RunnerConnect({ active }: { active: boolean }) {
       <Button
         size="sm"
         variant="soft"
+        disabled={lr.probing}
         onClick={async () => {
           await connectLocalRunner();
           setTried(true);
           setAccess(await localAccess());
         }}
       >
-        Connect to my computer
+        {lr.probing ? "Connecting…" : "Start / connect local server"}
       </Button>
       <span className="text-muted">
-        {tried
-          ? "Not found yet: run the command above, then try again."
+        {lr.disabled ? "Disabled for this browser. Connect to enable it again." : lr.standby ? "Idle timer elapsed. Connect or search to start it again." : tried
+          ? "Disconnected: run the install / update command above, then try again."
           : access === "prompt"
             ? "Your browser will ask once to allow local network access."
             : "After installing, click to connect."}

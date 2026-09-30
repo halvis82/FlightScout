@@ -1,7 +1,7 @@
 #!/bin/sh
 # FlightScout local runner: searches run from your computer (your own IP)
 # instead of the shared server, with the same website. It starts only when
-# the website searches and stops after 10 quiet minutes (nothing runs in the
+# the website searches and stops after two quiet hours (nothing runs in the
 # background otherwise). macOS and Linux (systemd).
 #
 #   curl -fsSL https://raw.githubusercontent.com/halvis82/FlightScout/main/scripts/install-runner.sh | sh

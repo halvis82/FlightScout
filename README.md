@@ -16,7 +16,7 @@ Every way has every feature: search, smart routes, multi city, explore, the watc
 | Sources | Google, ITA Matrix, Kiwi, 28 airlines, 14 booking sites | **all**: + 33 airlines and 8 booking sites that need a browser | all | like "just the website" |
 | Search limits | guests 60 an hour, accounts more | **none** (searches skip the server) | **none** | yours to set |
 | Account and data | online | online (same as the website) | on this computer, or `--shared` for the online one | your own database |
-| Runs in the background | nothing | nothing (starts when the website searches, stops after 10 idle minutes) | nothing (starts when you open localhost:3000, stops a couple of minutes after you close it) | your Vercel |
+| Runs in the background | nothing | nothing (starts when the website searches, stops after two idle hours) | nothing (starts when you open localhost:3000, stops after two hours without traffic) | your Vercel |
 
 **Recommendation:** use the website with the local runner. It's the same site and the same account, but faster, with all 61 airlines, no limits, and it keeps the shared server from getting blocked. Run everything on your computer when you want to be independent of the online site entirely.
 
@@ -28,9 +28,9 @@ Every way has every feature: search, smart routes, multi city, explore, the watc
 curl -fsSL https://raw.githubusercontent.com/halvis82/FlightScout/main/scripts/install-runner.sh | sh
 ```
 
-Then open the website, go to Settings, "Where your searches run", click **Connect to my computer** and allow "local network access" when Chrome asks (once). The header shows **Your IP** when it's in use, and each search shows which source groups are done.
+Then open the website, go to Settings, "Where your searches run", click **Start / connect local server** and allow "local network access" when Chrome asks (once). The header shows **Your IP** when it's in use, and each search shows which source groups are done.
 
-- What it does: installs the `flightscout` command (and uv, a small Python installer, if needed) and registers the runner **on demand**: macOS (launchd) or Linux (systemd) listens on port 8787 and starts the runner when the website searches (1 to 2 s the first time); it exits after 10 quiet minutes. Nothing runs while you're not searching.
+- What it does: installs the `flightscout` command (and uv, a small Python installer, if needed) and registers the runner **on demand**: macOS (launchd) or Linux (systemd) listens on port 8787 and starts the runner when the website searches (1 to 2 s the first time); it exits after two quiet hours. After shutdown, the operating system holds the port for the next connection.
 - With Google Chrome installed, the browser only airlines and booking sites join in, always headless (no windows).
 - Your account, watchlist and history stay the online ones; only the searching moves to your computer.
 - Update: run the same command again. Remove: `flightscout serve --uninstall` (or `scripts/uninstall-runner.sh`).
@@ -45,7 +45,7 @@ curl -fsSL https://raw.githubusercontent.com/halvis82/FlightScout/main/scripts/i
 
 Then open http://localhost:3000 (bookmark it). That's the whole setup.
 
-- **Only runs while it's open.** Nothing stays running on your computer: the first visit to localhost:3000 starts the website and the engine (a few seconds), and a couple of minutes after you close the last FlightScout tab both stop. The operating system (launchd on macOS, systemd on Linux) just holds the port until you come back.
+- **Starts on demand.** the first visit to localhost:3000 starts the website and the engine (a few seconds), and after two hours without traffic both stop. Idle tabs do not keep them running. The operating system (launchd on macOS, systemd on Linux) just holds the port until you come back.
 - **Every feature:** accounts and login (email and password, passkeys), search with every source (plus the browser only airlines and booking sites when Google Chrome is installed, always headless), smart routes, multi city, explore, trip builder, the watchlist with price history and alerts in the page, and no rate limits. Searches use your own IP.
 - **Your data stays here:** an embedded database in the install folder, no Docker and no database server. Anyone can make an account on your copy. Your watches are checked when you open FlightScout if the last check is more than 12 hours old, and "Check now" works any time.
 - **Or share the online account:** add `--shared` (`... | sh -s -- --shared`) to log in with your usual account and see the same watchlist; the online site keeps checking your watches. It needs the online database's address in `~/.config/flightscout/local.env` as `DATABASE_URL=...`.

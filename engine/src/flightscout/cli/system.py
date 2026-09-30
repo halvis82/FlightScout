@@ -148,8 +148,7 @@ def serve(port: int = typer.Option(8787, help="Port (the website looks for 8787)
                                        help="Start on demand: the system listens on the port and starts the "
                                             "runner when the website calls it (macOS launchd, Linux systemd). "
                                             "Nothing runs while you're not searching."),
-          idle: int = typer.Option(0, "--idle", help="Exit after this many minutes without searches (0 = never). "
-                                   "--install uses 10."),
+          idle: int = typer.Option(120, "--idle", min=0, help="Exit after this many minutes without searches (default: 120; 0 = never)."),
           track: bool = typer.Option(False, "--track/--no-track",
                                      help="With --install on macOS: also check your watches at 07:05 and 19:05 "
                                           "from this Mac (a few minutes twice a day)."),
@@ -162,7 +161,7 @@ def serve(port: int = typer.Option(8787, help="Port (the website looks for 8787)
         return
     if install:
         exe = shutil.which("flightscout") or sys.argv[0]
-        mins = idle or 10
+        mins = idle
         if sys.platform == "darwin":
             where = _install_macos(exe, port, mins)
         elif sys.platform.startswith("linux") and shutil.which("systemctl"):
@@ -189,6 +188,8 @@ def serve(port: int = typer.Option(8787, help="Port (the website looks for 8787)
     os.environ["FLIGHTSCOUT_LOCAL"] = "1"
     from .. import api as api_mod
 
+    api_mod.configure_idle(idle)
+
     fd = _activated_socket()
     config = uvicorn.Config(api_mod.app, host="127.0.0.1", port=port, fd=fd, log_level="warning")
     server = uvicorn.Server(config)
@@ -197,7 +198,7 @@ def serve(port: int = typer.Option(8787, help="Port (the website looks for 8787)
         def watch_idle() -> None:
             while not server.should_exit:
                 time.sleep(15)
-                if time.time() - api_mod.last_activity() > idle * 60:
+                if api_mod.idle_expired():
                     server.should_exit = True
 
         threading.Thread(target=watch_idle, daemon=True).start()

@@ -3,11 +3,8 @@
 `flightscout local install` prepares the website from a clone of the repo and
 lets the system (launchd on macOS, systemd on Linux) listen on
 http://localhost:3000. Opening that address in a browser starts the site (and
-the engine, on 8787, when a search needs it); a minute or two after the last
-FlightScout tab is closed both stop again. Nothing runs in between.
-
-The open page pings the site every 30 s (and the engine every 60 s), so "in
-use" means "a FlightScout tab is open"."""
+the engine, on 8787, when a search needs it). Both stop after two hours of
+inactivity. Idle browser tabs do not send keep-alives."""
 
 from __future__ import annotations
 
@@ -30,9 +27,9 @@ from .common import con, out
 CONF = Path(os.environ.get("FLIGHTSCOUT_HOME", Path.home() / ".config" / "flightscout"))
 SITE_JSON = CONF / "site.json"
 SITE_PLIST = "com.flightscout.site"
-IDLE_S = 150  # the page pings every 30 s (at most once a minute in a background tab)
+IDLE_S = 2 * 60 * 60  # actual traffic; idle browser tabs no longer send keep-alives
 
-local_app = typer.Typer(help="The whole FlightScout on this computer, running only while it's open in your browser.",
+local_app = typer.Typer(help="The whole FlightScout on this computer, starting on demand and stopping after two idle hours.",
                         no_args_is_help=True)
 
 
@@ -103,7 +100,7 @@ def _build(c: dict) -> None:
 
 def _run_site(listen: socket.socket, c: dict) -> None:
     """Start the website behind `listen` and pass traffic through; stop when
-    nothing has gone through for IDLE_S (no FlightScout tab open)."""
+    nothing has gone through for IDLE_S."""
     web = Path(c["repo"]) / "web"
     node, _ = _node(c)
     s = socket.socket()
@@ -218,8 +215,8 @@ def install(repo: Path = typer.Option(..., help="Your clone of the FlightScout r
                                         "(its database address in ~/.config/flightscout/local.env)."),
             node: str = typer.Option("", help="Path to node (default: the one on PATH)."),
             port: int = typer.Option(3000, help="Port for the website.")):
-    """Set up the website on this computer: it starts when you open http://localhost:3000 and stops a couple of
-    minutes after you close it."""
+    """Set up the website on this computer: it starts when you open http://localhost:3000 and stops after two
+    hours without traffic."""
     repo = repo.expanduser().resolve()
     if not (repo / "web" / "package.json").exists():
         con.print(f"[red]{repo} is not a FlightScout clone (no web/package.json).[/red]")
@@ -236,12 +233,12 @@ def install(repo: Path = typer.Option(..., help="Your clone of the FlightScout r
     if sys.platform == "darwin" or (sys.platform.startswith("linux") and shutil.which("systemctl")):
         where = _install_socket(port)
         from .system import serve
-        serve(port=8787, install=True, idle=3, track=False, uninstall=False)  # the engine, same way
-        out.print(f"\nDone ({where}). Open http://localhost:{port} : it starts in a few seconds, and it stops a "
-                  "couple of minutes after you close the last FlightScout tab. Nothing runs in between.")
+        serve(port=8787, install=True, idle=120, track=False, uninstall=False)
+        out.print(f"\nDone ({where}). Open http://localhost:{port} : it starts in a few seconds, and it stops after "
+                  "two hours without traffic. Nothing runs in between.")
     else:
-        out.print(f"\nDone. Run `flightscout local start` and open http://localhost:{port} (it stops when you close "
-                  "the tab).")
+        out.print(f"\nDone. Run `flightscout local start` and open http://localhost:{port} (it stops after two hours "
+                  "without traffic).")
 
 
 @local_app.command()
@@ -270,8 +267,8 @@ def update():
 
 @local_app.command()
 def start(port: int = typer.Option(0, help="Port (default: the installed one, 3000).")):
-    """Run the local website now in this terminal (for Windows, or without the on demand setup). It stops by itself a
-    couple of minutes after the last FlightScout tab is closed, or with Ctrl+C."""
+    """Run the local website now in this terminal (for Windows, or without the on demand setup). It stops by itself after
+    two hours without traffic, or with Ctrl+C."""
     c = _conf()
     sock = socket.socket()
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

@@ -184,9 +184,13 @@ function SearchPage() {
       if (qs === ownUrl.current) return;
       const push = !first && Boolean(new URLSearchParams(ownUrl.current).get("from"));
       ownUrl.current = qs;
-      (push ? router.push : router.replace)(qs ? `/?${qs}` : "/", { scroll: false });
+      // Updating query parameters is synchronous and must not enqueue a
+      // navigation that can overtake the user's click on another tab.
+      if (window.location.pathname !== "/") return;
+      if (push) window.history.pushState(null, "", qs ? `/?${qs}` : "/");
+      else window.history.replaceState(null, "", qs ? `/?${qs}` : "/");
     },
-    [router],
+    [],
   );
   useEffect(() => {
     if (paramStr === ownUrl.current) return;

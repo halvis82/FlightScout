@@ -52,6 +52,18 @@ async def _bad_input(request: Request, exc: BadInput):
 # Last time anything but a health check came in: an on demand local runner
 # (`flightscout serve --install`) exits after a few quiet minutes.
 _last = [time.time()]
+_started = time.time()
+_active = 0
+_idle_minutes = 0
+
+
+def configure_idle(minutes: int) -> None:
+    global _idle_minutes
+    _idle_minutes = minutes
+
+
+def idle_expired() -> bool:
+    return bool(_idle_minutes and not _active and time.time() - _last[0] >= _idle_minutes * 60)
 
 
 def last_activity() -> float:
@@ -60,14 +72,19 @@ def last_activity() -> float:
 
 @app.middleware("http")
 async def _touch(request, call_next):
-    busy = request.url.path not in ("/health", "/api/health")
+    global _active
+    # Old browser tabs still send /alive. Neither that nor status probes or
+    # preflight requests should keep an otherwise unused process running.
+    busy = request.method != "OPTIONS" and request.url.path not in ("/health", "/api/health", "/alive")
     if busy:
+        _active += 1
         _last[0] = time.time()
     try:
         return await call_next(request)
     finally:
         if busy:
             _last[0] = time.time()
+            _active -= 1
 
 
 def auth(x_engine_key: str | None = Header(default=None)) -> None:
@@ -128,8 +145,7 @@ class ExploreResult(BaseModel):
     errors: dict[str, str]
 
 
-# The website pings this while it's open (unlike /health it counts as use), so
-# an on demand runner lives exactly as long as a FlightScout tab is open.
+# Compatibility for older tabs; this no longer counts as activity.
 @app.get("/alive")
 def alive() -> dict:
     return {"ok": True}
@@ -147,7 +163,10 @@ def health() -> dict:
     from . import __version__
 
     return {"ok": True, "local": LOCAL, "version": __version__, "api": API_LEVEL,
-            "commit": os.environ.get("VERCEL_GIT_COMMIT_SHA")}
+            "commit": os.environ.get("VERCEL_GIT_COMMIT_SHA"),
+            **({"lifecycle": {"started_at": _started, "idle_minutes": _idle_minutes,
+                              "idle_expires_at": _last[0] + _idle_minutes * 60 if _idle_minutes and not _active else None,
+                              "active_requests": _active}} if LOCAL else {})}
 
 
 @app.post("/search", dependencies=[Depends(auth)])

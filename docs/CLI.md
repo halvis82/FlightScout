@@ -375,7 +375,7 @@ browser read airlines and booking sites. Runs only while you use it.
 |---|---|---|
 | `--port` | int (default `8787`) | Port (the website looks for 8787). |
 | `--install` | flag | Start on demand: the system listens on the port and starts the runner when the website calls it (macOS launchd, Linux systemd). Nothing runs while you're not searching. |
-| `--idle` | int | Exit after this many minutes without searches (0 = never). --install uses 10. |
+| `--idle` | int range (default `120`) | Exit after this many minutes without searches (default: 120; 0 = never). |
 | `--track`, `--no-track` | flag | With --install on macOS: also check your watches at 07:05 and 19:05 from this Mac (a few minutes twice a day). |
 | `--uninstall` | flag | Remove the on demand runner and scheduled checks. |
 
@@ -411,4 +411,4 @@ Login, local runner, scheduled watch checks and browser support at a glance.
 
 ## `flightscout local`
 
-The whole FlightScout on this computer, running only while it's open in your browser.
+The whole FlightScout on this computer, starting on demand and stopping after two idle hours.

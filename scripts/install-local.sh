@@ -1,7 +1,7 @@
 #!/bin/sh
 # The whole FlightScout on your computer, running only while it's open in your
 # browser: open http://localhost:3000 and it starts (a few seconds the first
-# time), close the tab and it stops a couple of minutes later. Every feature,
+# time), it stops after two hours without traffic. Every feature,
 # accounts and login included, no limits, searches from your own IP.
 #
 #   curl -fsSL https://raw.githubusercontent.com/halvis82/FlightScout/main/scripts/install-local.sh | sh
