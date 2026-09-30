@@ -99,8 +99,8 @@ export function Shell({ children }: { children: ReactNode }) {
 function LocalRunnerPill() {
   const lr = useLocalRunner();
   const ext = useExtension();
-  const label = lr.disabled ? "Local disabled" : lr.probing ? "Connecting…" : lr.standby ? "Local idle" : lr.outdated ? "Update runner" : lr.active ? "Your IP" : ext ? "Extension" : "Local server";
-  const description = lr.active ? "Searches run on this computer. Open local server settings." : "View local server status, start it, or install it.";
+  const label = lr.disabled ? "Local disabled" : lr.probing ? "Connecting…" : lr.standby ? "Local idle" : lr.outdated ? "Update runner" : lr.active ? "Your IP" : ext ? "Your IP" : "Local server";
+  const description = lr.active ? "Searches run on this computer. Open local server settings." : ext ? "Google Flights searches use your browser through the FlightScout Helper extension. Open local server settings." : "View local server status, start it, or install it.";
   return (
     <Tip side="bottom" label={description}>
       <Link href="/settings#own-ip" aria-label={description} className={cn("inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium", lr.active ? "border-good/30 bg-good-soft text-good" : "border-border text-muted")}>
