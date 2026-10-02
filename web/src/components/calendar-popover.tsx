@@ -1,8 +1,8 @@
 "use client";
 // The two month calendar popover (react-day-picker + date-fns, ~100 KB):
 // loaded on first open, not with the page.
-import { createContext, useContext } from "react";
-import { DayPicker, type DayButtonProps } from "react-day-picker";
+import { createContext, useContext, useEffect, useRef, type KeyboardEvent } from "react";
+import { DayButton, DayPicker, type DayButtonProps } from "react-day-picker";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { addDays, dayDiff, formatDate, isoDate } from "@/lib/format";
@@ -48,6 +48,51 @@ export function CalendarPopover({
   // Prices are fixed to the trip length when the calendar opened, so the
   // numbers don't jump around while picking.
   const [len] = useState(tripLen);
+  const dialog = useRef<HTMLDivElement>(null);
+  const typed = useRef({ text: "", at: 0 });
+  const [focusDate, setFocusDate] = useState(phase === "end" && end ? end : start);
+  useEffect(() => {
+    dialog.current?.querySelector<HTMLButtonElement>(`[data-date="${focusDate}"]`)?.focus();
+  }, [focusDate]);
+
+  function typeDate(e: KeyboardEvent<HTMLDivElement>) {
+    if (e.ctrlKey || e.metaKey || e.altKey || e.nativeEvent.isComposing) return;
+    if (!/^[a-z0-9]$/i.test(e.key)) {
+      typed.current.text = "";
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    const digit = /^\d$/.test(e.key);
+    const now = Date.now();
+    const previous = typed.current;
+    const text = (now - previous.at < 1200 && /^\d/.test(previous.text) === digit ? previous.text : "") + e.key.toLowerCase();
+    typed.current = { text, at: now };
+    const focused = (document.activeElement as HTMLElement)?.dataset.date;
+    const base = toDate(focused ?? focusDate);
+    let next: Date;
+    if (digit) {
+      const day = Number(text);
+      if (day < 1 || day > new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate()) return;
+      next = new Date(base.getFullYear(), base.getMonth(), day);
+    } else {
+      const names = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+      const matches = names.map((name, i) => name.startsWith(text) ? i : -1).filter((i) => i >= 0);
+      if (matches.length !== 1) return;
+      const m = matches[0];
+      let year = base.getFullYear();
+      if (new Date(year, m + 1, 0) < toDate(minDate)) year++;
+      next = new Date(year, m, Math.min(base.getDate(), new Date(year, m + 1, 0).getDate()));
+    }
+    const date = isoDate(next);
+    if (date < minDate || (range && phase === "end" && date < start)) return;
+    setMonth(monthOf(date));
+    setFocusDate(date);
+    // Keep the active field open so multi-digit days can be typed in full.
+    if (!range) onChange(date);
+    else if (phase === "end") onChange(start, date);
+    else onChange(date, addDays(date, Math.max(len, 0)));
+  }
   const q = useMemo(() => (prices ? { ...prices, tripDays: range ? len || null : null } : null), [prices, range, len]);
   const months = useMemo(() => [month, addMonths(month, 1)], [month]);
   const data = useDatePrices(q, months);
@@ -98,6 +143,8 @@ export function CalendarPopover({
         "fixed inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-2xl",
         "sm:absolute sm:inset-x-auto sm:bottom-auto sm:left-0 lg:left-auto lg:right-0 sm:mt-2 sm:max-h-none sm:w-max sm:overflow-visible sm:rounded-2xl",
       )}
+      ref={dialog}
+      onKeyDownCapture={typeDate}
       role="dialog"
       aria-label="Choose dates"
     >
@@ -113,6 +160,7 @@ export function CalendarPopover({
           <X className="size-4" />
         </button>
       </div>
+      <p className="px-4 pt-2 text-xs text-muted">Type a month or day · Arrow keys to move · Enter to select</p>
       <div className="px-2 pt-2 sm:px-3">
         <DayPicker
           numberOfMonths={2}
@@ -197,7 +245,7 @@ function PriceDayButton(props: DayButtonProps) {
   const monthLoading = ctx.loading.has(iso.slice(0, 7)) && !mods.disabled && !mods.outside;
   const selected = mods.range_start || mods.range_end;
   return (
-    <button {...rest} className={cn(className, "flex flex-col items-center justify-center gap-1")}>
+    <DayButton {...rest} day={day} modifiers={mods} data-date={iso} className={cn(className, "flex flex-col items-center justify-center gap-1")}>
       <span className="leading-none">{day.date.getDate()}</span>
       {!mods.outside &&
         (p != null && !mods.disabled ? (
@@ -209,6 +257,6 @@ function PriceDayButton(props: DayButtonProps) {
         ) : (
           <span className="h-2.5" />
         ))}
-    </button>
+    </DayButton>
   );
 }

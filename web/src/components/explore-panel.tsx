@@ -11,6 +11,7 @@ import { addDays, dayDiff, formatDate } from "@/lib/format";
 import { priceScale } from "@/lib/price-scale";
 import type { Destination } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { matchesExploreDates } from "@/lib/explore-dates";
 
 type Sort = "price" | "date";
 
@@ -47,10 +48,10 @@ export function ExplorePanel({
   const listRef = useRef<HTMLDivElement>(null);
 
   const nights = roundTrip ? Math.max(1, dayDiff(depart, ret)) : null;
-  // Exact dates still explore a few days around them; flexibility widens it.
-  const win = Math.max(2, flex);
-  const spread = Math.max(1, flex + retFlex);
-  const key = JSON.stringify([origins, depart, nights, win, spread, currency]);
+  // The date-specific view uses exactly the flexibility chosen in the form.
+  const win = when === "mine" ? flex : Math.max(2, flex);
+  const spread = when === "mine" ? flex + retFlex : Math.max(1, flex + retFlex);
+  const key = JSON.stringify([origins, depart, nights, win, spread, currency, when, retFlex]);
 
   useEffect(() => {
     const codes = expandCodes(origins).slice(0, 2);
@@ -62,6 +63,9 @@ export function ExplorePanel({
       setFailed([]);
       const merged = new Map<string, Destination>();
       const keep = (d: Destination) => {
+        // Filter before choosing the cheapest offer for each city: an unrelated
+        // cached bargain must not displace an offer within the requested dates.
+        if (when === "mine" && !matchesExploreDates(d, depart, ret, flex, retFlex, roundTrip)) return;
         const cur = merged.get(d.destination);
         if (!cur || convert(d.price, d.currency, "USD") < convert(cur.price, cur.currency, "USD")) merged.set(d.destination, d);
       };
@@ -118,17 +122,15 @@ export function ExplorePanel({
     return ps.length ? [Math.floor(Math.min(...ps)), Math.ceil(Math.max(...ps))] : [0, 0];
   }, [all, convert]);
   const list = useMemo(() => {
-    const lo = addDays(depart, -win);
-    const hi = addDays(depart, win);
     const arr = all.filter(
       (d) =>
         (maxPrice == null || convert(d.price, d.currency) <= maxPrice) &&
-        (when === "any" || (d.departure != null && d.departure >= lo && d.departure <= hi)),
+        (when === "any" || matchesExploreDates(d, depart, ret, flex, retFlex, roundTrip)),
     );
     return arr.sort((a, b) =>
       sort === "price" ? convert(a.price, a.currency, "USD") - convert(b.price, b.currency, "USD") : (a.departure ?? "").localeCompare(b.departure ?? ""),
     );
-  }, [all, sort, convert, maxPrice, when, depart, win]);
+  }, [all, sort, convert, maxPrice, when, depart, flex, roundTrip, ret, retFlex]);
 
   const scale = useMemo(() => priceScale(list.map((d) => convert(d.price, d.currency))), [list, convert]);
   const city = (d: Destination) => d.city || airport(d.destination)?.city || d.destination;

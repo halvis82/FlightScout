@@ -214,7 +214,7 @@ export function RouteMap({
       const own = [...node.classList].filter((c) => c.startsWith("maplibregl-"));
       node.className = [
         ...own,
-        "rounded-full border font-sans text-[11px] font-semibold leading-none shadow-sm transition-transform hover:scale-110 hover:z-10",
+        "rounded-full border font-sans text-[11px] font-semibold leading-none shadow-sm hover:brightness-110 hover:z-10",
         tone === "origin" && "bg-fg text-bg border-transparent px-1.5 py-1",
         tone === "dest" && "bg-accent text-accent-fg border-transparent px-1.5 py-1",
         tone === "hub" && "bg-surface text-muted border-border px-1.5 py-1",
@@ -227,7 +227,13 @@ export function RouteMap({
       node.style.color = p.color ? "#0b0d10" : "";
       node.style.borderColor = p.color ? "transparent" : "";
       node.style.cursor = p.onClick ? "pointer" : "default";
-      node.textContent = p.label ?? p.code;
+      let label = node.firstElementChild as HTMLSpanElement | null;
+      if (!label) {
+        label = document.createElement("span");
+        node.append(label);
+      }
+      label.textContent = p.label ?? p.code;
+      node.setAttribute("aria-label", p.title ?? p.label ?? p.code);
       node.dataset.rank = String(i);
       // price markers take part in collision handling (cheaper first)
       if (p.color) node.dataset.label = "1";

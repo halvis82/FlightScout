@@ -161,7 +161,7 @@ export function SearchFormView({
     >
       <div className="mb-3 flex flex-wrap items-center gap-1.5">
         <Segmented
-          size="sm"
+          className="[&>button]:h-11 [&>button]:px-4"
           value={f.tripType}
           onChange={(tripType) =>
             set({
@@ -310,9 +310,11 @@ function FlexPick({ label, value, onChange }: { label: string; value: number; on
             type="button"
             onClick={() => onChange(n)}
             className={
-              "h-6 rounded-full px-2 tabular-nums transition-colors " +
+              "h-10 min-w-10 rounded-full px-3 text-sm tabular-nums transition-colors " +
               (value === n ? "bg-surface text-fg shadow-sm ring-1 ring-border" : "text-muted hover:text-fg")
             }
+            aria-pressed={value === n}
+            aria-label={`${label}: ${n ? `plus or minus ${n} days` : "exact date"}`}
             title={n ? `Also search ${n} day${n > 1 ? "s" : ""} before and after` : "Only this date"}
           >
             {n ? `±${n}` : "exact"}

@@ -92,6 +92,7 @@ export function DateRangeField({
       </div>
       {open && (
         <CalendarPopover
+          key={phase}
           start={start}
           end={range ? end : undefined}
           range={range}

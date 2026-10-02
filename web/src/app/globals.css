@@ -277,10 +277,25 @@ body {
   font-size: 0 !important;
   border: 1px solid rgb(255 255 255 / 0.7) !important;
 }
-.fs-dot:hover {
-  width: auto !important;
-  height: auto !important;
-  padding: 4px 6px !important;
-  font-size: 11px !important;
+.fs-dot:hover,
+.fs-dot:focus-visible {
   z-index: 20;
+}
+/* Reveal a dot's label without resizing the map anchor or its hit area. */
+.fs-dot > span {
+  display: none;
+}
+.fs-dot:hover > span,
+.fs-dot:focus-visible > span {
+  display: block;
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 6px;
+  border-radius: 9999px;
+  background: inherit;
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
 }
