@@ -42,6 +42,18 @@ booking site far below Google, Kiwi or the airline for the same flights gets a w
 Tried and rejected: blocking images, fonts and CSS in the Google browser page (both Playwright routing and Chrome's
 own URL blocking made Google's page about twice as slow).
 
+## Google in parts (2026-10-06)
+
+One Google page takes 0.9 to 2.1 s to render on Google's side; that is the floor. What used to come on top of it:
+the Chrome load of Google's page for its full Cheapest list (3 s warm, 5 to 8 s with a cold Chrome, waited for up to
+8 s) and, with flexible dates, the calendar plus three alternative date searches, all awaited together. Measured for
+SAN+LAX to DPS round trip on a local runner: 10 s before the first Google result.
+
+The website now asks Google in three parts: `google_now` (the requested dates, answered as soon as Google's pages
+are in, about 2 s), `google_list` (the Chrome Cheapest list, local runners only, merged in when it lands) and
+`google_flex` (the cheapest nearby dates, only for flexible searches). The last two count as background: the search
+reads as done without them. `google` on its own (CLI, tracker, agents) still answers with everything at once.
+
 ## A search, end to end (live site, server mode, warm)
 
 | Part | Done after | Notes |

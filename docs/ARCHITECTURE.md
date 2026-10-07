@@ -33,7 +33,7 @@ Trip      { id, tickets: Itinerary[], total_price, currency, kind: "single"|"spl
 DatePrice { origin, destination, departure, return_date?, price, currency, source, booking_url? }
 Destination { origin, destination, city?, country?, price, currency, departure?, return_date?, source, booking_url?, lat?, lon? }
 SearchQuery { origins[] (<=12), destinations[] (<=12), departure, return_date?, adults=1..9, cabin="economy", max_stops? (0..3),
-              currency="USD", sources=["google","kiwi"] (or groups: airlines, otas, otas_fast, otas_slow),
+              currency="USD", sources=["google","kiwi"] (or groups: airlines, otas, otas_fast, otas_slow; the website asks Google in parts: google_now, google_list, google_flex),
               departure_flex_days=0..10, return_flex_days=0..10, nearby_km=0..300 }
 SearchResult { query, trips: Trip[], errors: {source: message}, searched_at, google_url? }
 PlanRequest { origins[], destinations[], depart_start, depart_end, return_start?, return_end?, currency,

@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import contextvars
 import logging
+import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, timedelta
 
@@ -30,8 +32,9 @@ _ALL_RESULTS = "&tfu=EgQIABABIgA"
 _orig_page_url = _fli_flights.page_url
 _fli_flights.page_url = lambda *a, **k: _orig_page_url(*a, **k) + _ALL_RESULTS
 
-from .. import cache
+from .. import browser_fetch, cache
 from ..models import DatePrice, Itinerary, SearchQuery, Segment, Slice
+from . import _browser
 
 log = logging.getLogger(__name__)
 
@@ -217,9 +220,6 @@ def _page_rows(filters, currency: str) -> list:
     sign): load the page in the shared Chrome and read that response. In
     extension mode the server's own page load stands in for it. Empty when
     neither works (Vercel itself already gets the full list embedded)."""
-    from . import _browser
-    from .. import browser_fetch
-
     from fli.search._decoders import parse_flight_row
     from fli.search._tfs import build_tfs
     from fli.search._wire import iter_wrb_chunks
@@ -327,13 +327,54 @@ def _slice(res) -> Slice:
     return Slice(segments=segs, duration_min=res.duration)
 
 
-def search(q: SearchQuery, top_n: int = 8, wide: bool = True) -> list[Itinerary]:
+class _Deferred:
+    """A search whose Chrome Cheapest list was left running: what
+    ``cheapest_list`` needs to merge that list in once it lands."""
+
+    __slots__ = ("at", "filters", "client", "results", "future", "base")
+
+    def __init__(self, filters, client, results, future, base: dict[str, float]):
+        self.at = time.time()
+        self.filters, self.client, self.results, self.future, self.base = filters, client, results, future, base
+
+
+_deferred: dict[str, _Deferred] = {}
+_inflight: dict[str, threading.Event] = {}  # deferred searches still running: cheapest_list waits for them
+_DEFER_TTL = 10 * 60
+LIST_WAIT = 25.0  # cheapest_list: a cold Chrome plus Google's page, worst case
+
+
+def _list_key(q: SearchQuery, top_n: int) -> str:
+    # google_now and google_list name different sources for the same search
+    return f"{q.model_dump_json(exclude={'sources'})}:{top_n}"
+
+
+def search(q: SearchQuery, top_n: int = 8, wide: bool = True, defer_list: bool = False) -> list[Itinerary]:
     """``wide`` adds the sliced outbound searches that cover Google's Cheapest
     tab (8 page loads instead of 1). The planner, multi city and tracker call
-    this many times per run and pass wide=False."""
-    key = f"google:{q.model_dump_json()}:{top_n}:{wide}"
+    this many times per run and pass wide=False.
+
+    ``defer_list``: answer as soon as Google's pages are in (about 2 s) and
+    leave the Cheapest list, which needs the shared Chrome (3 to 8 s more), to
+    ``cheapest_list``: the website asks for it as a later part."""
+    key = f"google:{q.model_dump_json()}:{top_n}:{wide}:{int(defer_list)}"
     if (hit := cache.get(key)) is not None:
         return [Itinerary(**x) for x in hit]
+    # The website asks for google_now and google_list at the same time: the
+    # list part waits for this search instead of running the pages again.
+    running = defer_list and wide and not browser_fetch.active() and _browser.available()
+    if running:
+        _inflight.setdefault(_list_key(q, top_n), threading.Event())
+    try:
+        return _search(q, top_n, wide, defer_list, key)
+    finally:
+        if running:
+            ev = _inflight.pop(_list_key(q, top_n), None)
+            if ev is not None:
+                ev.set()
+
+
+def _search(q: SearchQuery, top_n: int, wide: bool, defer_list: bool, key: str) -> list[Itinerary]:
 
     segments = [
         FlightSegment(
@@ -380,7 +421,10 @@ def search(q: SearchQuery, top_n: int = 8, wide: bool = True) -> list[Itinerary]
     # JavaScript then fetches the full Cheapest list. Read that list too where
     # a real Chrome is installed (or, in extension mode, the server's page).
     obs = client.outbounds or [r for r in results if not isinstance(r, tuple)]
-    if early is not None:
+    deferred = defer_list and early is not None and not browser_fetch.active() and _browser.available()
+    if deferred:
+        page = []  # cheapest_list() merges it in when it lands
+    elif early is not None:
         try:
             # usually ready with the base search (~2.5 s); never hold the
             # search more than a few seconds for it
@@ -390,6 +434,59 @@ def search(q: SearchQuery, top_n: int = 8, wide: bool = True) -> list[Itinerary]
             page = []
     else:
         page = _page_rows(filters, q.currency) if any(o.price is None for o in obs) else []
+    out = _finish(q, filters, client, results, page)
+    if deferred:
+        now = time.time()
+        for k in [k for k, v in _deferred.items() if now - v.at > _DEFER_TTL]:
+            _deferred.pop(k, None)
+        _deferred[_list_key(q, top_n)] = _Deferred(filters, client, results, early, {i.id: i.price for i in out})
+    cache.put(key, [i.model_dump(mode="json") for i in out])
+    return out
+
+
+def cheapest_list(q: SearchQuery, top_n: int = 8) -> list[Itinerary]:
+    """The ``google_list`` source: Google's full Cheapest list (from the shared
+    Chrome) merged with the search it belongs to. Only what that list adds is
+    returned: rows the embedded page left out, and cheaper prices for rows it
+    had. Empty where there is no Chrome (the hosted engine gets the full list
+    embedded) and in extension mode (the extension hands the list over)."""
+    if browser_fetch.active() or not _browser.available():
+        return []
+    q = q.model_copy(update={"departure_flex_days": 0, "return_flex_days": 0})
+    key = f"googlelist:{_list_key(q, top_n)}"
+    if (hit := cache.get(key)) is not None:  # a repeat search: google_now answers from its cache, so does this
+        return [Itinerary(**x) for x in hit]
+    ev = _inflight.get(_list_key(q, top_n))
+    if ev is None and _list_key(q, top_n) not in _deferred:
+        time.sleep(0.5)  # both parts are sent at once: give google_now a moment to start
+        ev = _inflight.get(_list_key(q, top_n))
+    if ev is not None:
+        ev.wait(LIST_WAIT)
+    st = _deferred.pop(_list_key(q, top_n), None)
+    if st is None:
+        # not asked for in this process (a restart in between, or a CLI call): run the search now
+        search(q, top_n, True, defer_list=True)
+        st = _deferred.pop(_list_key(q, top_n), None)
+        if st is None:
+            return []
+    try:
+        page = st.future.result(timeout=LIST_WAIT)
+    except Exception as e:
+        log.info("google: page list failed: %s", e)
+        return []
+    if not page:
+        return []
+    out = _finish(q, st.filters, st.client, st.results, page)
+    added = [i for i in out if st.base.get(i.id) is None or i.price < st.base[i.id] - 0.5]
+    cache.put(key, [i.model_dump(mode="json") for i in added])
+    return added
+
+
+def _finish(q: SearchQuery, filters, client, results, page) -> list[Itinerary]:
+    """Google's embedded results plus what its Cheapest list (``page``, may be
+    empty) adds: prices for rows embedded without one, and rows only the list
+    has (one way: as flights; round trip: with the return to pick on Google)."""
+    obs = client.outbounds or [r for r in results if not isinstance(r, tuple)]
     fill: dict[tuple, float] = {}
     for f in page:
         k = _legs_key(f)
@@ -462,7 +559,6 @@ def search(q: SearchQuery, top_n: int = 8, wide: bool = True) -> list[Itinerary]
                 pending_return=q.return_date,
                 **_ranked(client, ob),
             ))
-    cache.put(key, [i.model_dump(mode="json") for i in out])
     return out
 
 

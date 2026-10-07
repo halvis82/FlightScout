@@ -37,7 +37,8 @@ from .sources import (almosafer, aviasales_browser, booking, cleartrip, edreams,
 log = logging.getLogger(__name__)
 
 SOURCES = {
-    "google": lambda q: _google(q), "kiwi": kiwi.search, "serpapi": serpapi.search, "volaris": volaris.search,
+    "google": lambda q: _google(q), "google_now": lambda q: _google_now(q), "google_flex": lambda q: _google_flex_only(q),
+    "google_list": lambda q: google.cheapest_list(q), "kiwi": kiwi.search, "serpapi": serpapi.search, "volaris": volaris.search,
     "wideroe": wideroe.search, "skyairline": skyairline.search, "norse": norse.search,
     "volotea": volotea.search, "condor": condor.search, "flair": flair.search, "kiwiweb": kiwiweb.search,
 }
@@ -138,7 +139,7 @@ def _cooling(s: str) -> float:
 
 
 def _note(s: str, err: Exception | None) -> None:
-    if s == "google":
+    if s.startswith("google"):
         return
     if err is None:
         _cool.pop(s, None)
@@ -298,9 +299,11 @@ def merge(items: list[Itinerary]) -> list[Itinerary]:
     return sorted(best.values(), key=lambda i: i.price)
 
 
-def _google_flex(q: SearchQuery) -> list[Itinerary]:
+def _google_flex(q: SearchQuery, exact: bool = True) -> list[Itinerary]:
     """Flexible dates on Google: price every date in the window from the
-    calendar, then run full searches on the 3 cheapest date combinations."""
+    calendar, then run full searches on the 3 cheapest date combinations.
+    ``exact=False`` leaves the requested dates out (the website shows those
+    first, from ``google_now``, and asks for the alternatives separately)."""
     from datetime import date as _date, timedelta
 
     df, rf = q.departure_flex_days, q.return_flex_days
@@ -322,25 +325,45 @@ def _google_flex(q: SearchQuery) -> list[Itinerary]:
     else:
         pairs = [(dp.price, dp.departure, None) for dp in google.dates(o, d, lo, hi, q.currency, cabin=q.cabin)]
     pairs.sort()
-    best = list(dict.fromkeys((p[1], p[2]) for p in pairs))[:3]
-    if (q.departure, q.return_date) not in best:
-        best.append((q.departure, q.return_date))
+    asked = (q.departure, q.return_date)
+    best = [dr for dr in dict.fromkeys((p[1], p[2]) for p in pairs) if exact or dr != asked][:3]
+    if exact and asked not in best:
+        best.append(asked)
     out: list[Itinerary] = []
     with ThreadPoolExecutor(max_workers=4) as ex:
         # the exact dates get the wide (Cheapest tab) search, alternatives a single page
         runs = [ex.submit(contextvars.copy_context().run, google.search,
                           q.model_copy(update={"departure": dr[0], "return_date": dr[1]}), 8,
-                          dr == (q.departure, q.return_date)) for dr in best]
+                          dr == asked) for dr in best]
         for res in (f.result() for f in runs):
             out.extend(res)
     return out
 
 
 def _google(q: SearchQuery) -> list[Itinerary]:
+    return _google_guarded(q, lambda: _google_flex(q) if q.departure_flex_days or q.return_flex_days else google.search(q))
+
+
+# The website asks Google in parts, fastest first, so flights are on screen
+# as soon as Google's own page is in (about 2 s):
+#   google_now   the requested dates; the Chrome Cheapest list is left running
+#   google_list  that list once it lands (local runners only: 3 to 8 s more)
+#   google_flex  the cheapest nearby dates, when the search is flexible
+# Plain "google" (CLI, tracker, agents) still does all of it in one answer.
+def _google_now(q: SearchQuery) -> list[Itinerary]:
+    q0 = q.model_copy(update={"departure_flex_days": 0, "return_flex_days": 0})
+    return _google_guarded(q0, lambda: google.search(q0, defer_list=True))
+
+
+def _google_flex_only(q: SearchQuery) -> list[Itinerary]:
+    if not (q.departure_flex_days or q.return_flex_days):
+        return []
+    return _google_guarded(q, lambda: _google_flex(q, exact=False))
+
+
+def _google_guarded(q: SearchQuery, run) -> list[Itinerary]:
     try:
-        if q.departure_flex_days or q.return_flex_days:
-            return _google_flex(q)
-        return google.search(q)
+        return run()
     except Exception as e:
         # Google refusing our IP: fall back to a paid Google Flights API when
         # one is configured (SEARCHAPI_KEY, then SERPAPI_KEY). Free otherwise.

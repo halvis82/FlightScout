@@ -22,7 +22,7 @@ let state: State = { available: false, version: null, checked: false, disabled: 
 // The runner's "api" level this website needs (engine/src/flightscout/api.py
 // API_LEVEL). An older runner answers but would reject searches, so it's
 // skipped and Settings asks for an update.
-const MIN_API = 2;
+const MIN_API = 3;
 const SERVER_STATE: State = state;
 const listeners = new Set<() => void>();
 

@@ -109,3 +109,43 @@ def test_extension_list_is_requested_then_used(monkeypatch):
     with browser_fetch.browser_pages({url: ROWS}):
         rows = google._page_rows(filters, "USD")
     assert sorted(r.price for r in rows) == sorted(parse_flight_row(r).price for r in ROWS)
+
+
+def test_deferred_list_is_answered_later_with_only_what_it_adds(monkeypatch):
+    """The website's google_now part answers without the Chrome list; the
+    google_list part then returns just the rows that list adds or makes cheaper."""
+    from concurrent.futures import Future
+
+    from flightscout.sources import _browser
+
+    rows = [parse_flight_row(r) for r in ROWS]
+    monkeypatch.setattr(google._DiverseSearch, "search", lambda self, filters, top_n, currency: rows[1:])
+    fut = Future()
+    monkeypatch.setattr(google, "_page_rows", lambda f, c: fut.result())
+    monkeypatch.setattr(_browser, "available", lambda headful=False: True)
+    monkeypatch.setenv("FLIGHTSCOUT_NO_CACHE", "1")
+    monkeypatch.setattr(cache, "put", lambda *a, **k: None)
+    google._deferred.clear()
+    q = SearchQuery(origins=["SAN"], destinations=["OSL"], departure=date(2026, 11, 10), currency="USD",
+                    sources=["google"])
+    now = google.search(q, defer_list=True)
+    assert len(now) == 2 and fut.running() is False  # answered without waiting for the list
+    assert len(google._deferred) == 1
+    fut.set_result(rows)  # the list lands: the one row only it had
+    later = google.cheapest_list(q)
+    assert [i.price for i in later] == [727.0]
+    assert not google._deferred  # consumed; a later ask would rerun the search rather than fail
+
+
+def test_google_parts_split_exact_and_nearby_dates(monkeypatch):
+    from flightscout import search as s
+
+    seen = []
+    monkeypatch.setattr(google, "search", lambda q, top_n=8, wide=True, defer_list=False: seen.append((q.departure, wide, defer_list)) or [])
+    monkeypatch.setattr(google, "dates", lambda *a, **k: [])
+    q = SearchQuery(origins=["SAN"], destinations=["OSL"], departure=date(2026, 11, 10), currency="USD",
+                    sources=["google"], departure_flex_days=2)
+    assert s.SOURCES["google_now"](q) == [] and seen == [(date(2026, 11, 10), True, True)]
+    seen.clear()
+    assert s.SOURCES["google_flex"](q) == [] and seen == []  # no cheaper nearby date known: nothing to add
+    assert s.SOURCES["google_flex"](q.model_copy(update={"departure_flex_days": 0})) == []

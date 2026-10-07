@@ -152,9 +152,10 @@ def alive() -> dict:
 
 
 # Bumped when the website starts sending something older runners reject
-# (2: source groups otas_fast and otas_slow). The website skips older runners
+# (2: source groups otas_fast and otas_slow; 3: google_now, google_flex and
+# google_list, the Google search in parts). The website skips older runners
 # and asks the user to update.
-API_LEVEL = 2
+API_LEVEL = 3
 
 
 @app.get("/health")

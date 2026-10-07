@@ -16,7 +16,7 @@ beforeEach(() => {
 afterEach(() => { vi.clearAllTimers(); vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 function health(lifecycle?: object) {
-  return { ok: true, json: async () => ({ ok: true, local: true, api: 2, lifecycle }) };
+  return { ok: true, json: async () => ({ ok: true, local: true, api: 3, lifecycle }) };
 }
 
 test("idle deadline stops status polling; a search reconnects", async () => {

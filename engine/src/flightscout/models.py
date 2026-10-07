@@ -277,7 +277,7 @@ class SearchQuery(BaseModel):
     currency: str = "USD"
     # "airlines" = every direct airline source that flies the route,
     # "otas" = every booking site / metasearch source
-    sources: list[Source | Literal["airlines", "airlines_http", "otas", "otas_fast", "otas_slow"]] = Field(default_factory=lambda: [
+    sources: list[Source | Literal["airlines", "airlines_http", "otas", "otas_fast", "otas_slow", "google_now", "google_list", "google_flex"]] = Field(default_factory=lambda: [
         "google", "kiwi", "kiwiweb", "airlines", "otas"])
     departure_flex_days: int = 0
     return_flex_days: int = 0

@@ -14,7 +14,7 @@ import { api } from "@/lib/client";
 import { DEFAULT_PLANNER } from "@/lib/defaults";
 import { extensionVersion } from "@/lib/extension";
 import { localRunnerActive } from "@/lib/local-runner";
-import { BACKGROUND_PARTS, partsFor, searchPart, type PartState } from "@/lib/live-search";
+import { BACKGROUND_PARTS, mergeResults, partsFor, searchPart, type PartState } from "@/lib/live-search";
 import { showsUnreliable } from "@/lib/sellers";
 import { airport, expandCodes, loadAirports, nearestAirport } from "@/lib/airports-client";
 import { RouteMap } from "@/components/route-map";
@@ -160,7 +160,9 @@ function useNearestAirport(needed: boolean, onFound: () => void) {
 function SearchPage() {
   const { settings, currency, places } = useApp();
   const unreliable = showsUnreliable(settings?.sellerRules ?? []);
-  const searchParts = useMemo(() => partsFor(unreliable), [unreliable]);
+  // the parts of the running search (depends on the form: flexible dates ask
+  // for nearby dates too, a local runner for Google's full list)
+  const [searchParts, setSearchParts] = useState(() => partsFor(unreliable));
   const router = useRouter();
   const params = useSearchParams();
   const fresh = params.get("new") === "1";
@@ -247,6 +249,11 @@ function SearchPage() {
       lastRun.current = JSON.stringify([f0.from, f0.to, f0.depart, f0.ret, f0.tripType, f0.flex, f0.retFlex, f0.cabin, f0.adults, f0.stops, f0.nearby, f0.smart]);
       setErr(null);
       setStale(true); // keep showing the previous results, dimmed
+      const searchParts = partsFor(unreliable, {
+        flex: f.flex > 0 || (f.tripType === "roundtrip" && f.retFlex > 0),
+        list: localRunnerActive(),
+      });
+      setSearchParts(searchParts);
       setPending(searchParts.length);
       setPlan(null);
       setBusy(true);
@@ -344,11 +351,7 @@ function SearchPage() {
               if (runSeq.current !== runId) return;
               states[part] = { state: "done", n: r.trips.length };
               if (part === 0) searchId = (r as { search_id?: number | null }).search_id ?? null;
-              if (!acc) acc = r;
-              else {
-                const seen = new Set(acc.trips.map((t) => t.id));
-                acc = { ...acc, trips: [...acc.trips, ...r.trips.filter((t) => !seen.has(t.id))], errors: { ...acc.errors, ...r.errors } };
-              }
+              acc = mergeResults(acc, r);
             })
             .catch((e) => {
               states[part] = { state: "failed", n: 0 };
@@ -420,7 +423,7 @@ function SearchPage() {
       }
       await Promise.all([searchP, planP]);
     },
-    [go, settings, currency, searchParts],
+    [go, settings, currency, unreliable],
   );
   useEffect(() => {
     if (!fresh) return;
