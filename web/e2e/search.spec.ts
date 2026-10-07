@@ -32,7 +32,10 @@ test.describe("search", () => {
     await page.getByRole("button", { name: "One flight" }).click();
     await expect(ret).toHaveCount(0);
     await page.getByRole("radio", { name: "Round trip" }).click();
-    await page.getByRole("button", { name: "±2" }).first().click();
+    // the pills are named for screen readers ("Departure: plus or minus 2 days"), the text is just ±2
+    const pm2 = page.getByRole("button", { name: /^Departure: plus or minus 2 days/ });
+    await pm2.click();
+    await expect(pm2).toHaveAttribute("aria-pressed", "true");
   });
 
   test("clicking an airport in the dropdown adds it", async ({ page }) => {
@@ -101,11 +104,16 @@ test("streams results with a clear searching and complete state", async ({ page 
   const day = String(1 + Math.floor(Math.random() * 27)).padStart(2, "0");
   const month = ["2027-01", "2027-02", "2027-03"][Math.floor(Math.random() * 3)];
   await page.goto(`/?from=SEA&to=SFO&tt=oneway&d=${month}-${day}&smart=0`);
-  await expect(page.getByText("Searching, results appear as each source answers")).toBeVisible({ timeout: 30_000 });
+  const searching = page.locator("main").getByText(/^Searching/);
+  const done = page.getByText(/^\d+ flights$/);
+  // the quick sources answer in 2 to 3 s, so the page may already read as done at the first check
+  await expect(searching.or(done).first()).toBeVisible({ timeout: 30_000 });
   const chips = page.getByLabel("Sources");
   await expect(chips.getByText("Google Flights")).toBeVisible();
   // results show before everything has answered
   await expect(page.getByText(/\d+ flights/).first()).toBeVisible({ timeout: 60_000 });
-  await expect(page.getByText(/Search complete: \d+ flights in \d+s/)).toBeVisible({ timeout: 180_000 });
-  await expect(page.getByText("Searching, results appear as each source answers")).toHaveCount(0);
+  // reads as done once the quick sources answered; slow booking sites keep filling in behind a chip
+  await expect(searching).toHaveCount(0, { timeout: 180_000 });
+  await expect(page.getByText(/^\d+ flights$/).first()).toBeVisible();
+  await expect(chips.getByText("Google Flights")).toBeVisible();
 });
