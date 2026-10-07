@@ -53,12 +53,19 @@ export function ExplorePanel({
   const spread = when === "mine" ? flex + retFlex : Math.max(1, flex + retFlex);
   const key = JSON.stringify([origins, depart, nights, win, spread, currency, when, retFlex]);
 
+  const shownFor = useRef("");
   useEffect(() => {
     const codes = expandCodes(origins).slice(0, 2);
     if (!codes.length) return;
     const ctl = new AbortController();
     const t = setTimeout(async () => {
-      setItems(new Map());
+      // Another origin, or round trip prices under a one way heading: those
+      // places don't belong here. A date or mode change keeps the current list
+      // on screen until the new one lands (the date filter below already
+      // applies to what's shown).
+      const from = codes.join(",") + (roundTrip ? " rt" : " ow");
+      if (shownFor.current !== from) setItems(new Map());
+      shownFor.current = from;
       setMaxUsd(null); // a price limit from the last search could hide every place
       setFailed([]);
       const merged = new Map<string, Destination>();

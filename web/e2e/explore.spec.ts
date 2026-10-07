@@ -31,6 +31,8 @@ test.describe("explore", () => {
     await expect.poll(() => rows.count(), { timeout: 30_000 }).toBeGreaterThan(20);
     await page.getByRole("radio", { name: /Around/ }).click();
     await page.getByRole("radio", { name: "Any dates" }).click();
+    // the list refreshes for the new mode: measure it once it is populated again
+    await expect.poll(() => rows.count(), { timeout: 30_000 }).toBeGreaterThan(20);
     const slider = page.getByRole("slider", { name: "Maximum price" }).first();
     const n = await rows.count();
     await slider.evaluate((el: HTMLInputElement) => {
