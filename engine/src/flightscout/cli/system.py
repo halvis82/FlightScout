@@ -148,7 +148,7 @@ def serve(port: int = typer.Option(8787, help="Port (the website looks for 8787)
                                        help="Start on demand: the system listens on the port and starts the "
                                             "runner when the website calls it (macOS launchd, Linux systemd). "
                                             "Nothing runs while you're not searching."),
-          idle: int = typer.Option(120, "--idle", min=0, help="Exit after this many minutes without searches (default: 120; 0 = never)."),
+          idle: int = typer.Option(10, "--idle", min=0, help="Exit after this many minutes without searches (default: 10; 0 = never)."),
           track: bool = typer.Option(False, "--track/--no-track",
                                      help="With --install on macOS: also check your watches at 07:05 and 19:05 "
                                           "from this Mac (a few minutes twice a day)."),

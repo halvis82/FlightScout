@@ -66,7 +66,8 @@ for 10 to 60 minutes instead of being retried on every search, and work from the
 |---|---|
 | Idle | no process at all (launchd / systemd holds the port) |
 | First request after idle (cold start) | 1 to 2 s |
-| Exits after | 10 minutes without searches (health checks don't count) |
+| Website exits after | 5 minutes without a visible local FlightScout tab |
+| Engine exits after | 10 minutes without searches (health checks don't count) |
 | Memory while running | about 80 MB engine, plus one headless Chrome (tabs for parallel jobs) only while browser sources run, closed after 5 idle minutes |
 
 ## Where the time goes now

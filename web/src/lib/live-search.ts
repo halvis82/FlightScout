@@ -21,6 +21,8 @@ export function partsFor(showUnreliable: boolean) {
   );
 }
 export type PartState = { state: "searching" | "done" | "failed"; n: number };
+// Parts that take 10 to 60 s: they fill in after the search already reads as done.
+export const BACKGROUND_PARTS = new Set(["kiwi", "otas_slow"]);
 
 // Google via the visitor's own browser when the FlightScout Helper extension is
 // installed (and the local runner isn't running, which already uses their IP).

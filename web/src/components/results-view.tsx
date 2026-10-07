@@ -1,5 +1,5 @@
 "use client";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ExternalLink, Info } from "lucide-react";
 import { PartySize, TripCard } from "./trip-card";
 import { RouteMap, type MapArc, type MapPoint } from "./route-map";
@@ -169,8 +169,59 @@ export function ResultsView({
     return order.map((k) => byOut.get(k)!);
   }, [list]);
 
-  const shown = grouped.slice(0, limit).map((g) => g.trip);
+  const shown = useMemo(() => grouped.slice(0, limit).map((g) => g.trip), [grouped, limit]);
   const focus = hover ?? shown[0];
+  // one function for every card, so hovering one card re-renders only that card
+  const latest = useRef({ query, trips, watch });
+  useEffect(() => {
+    latest.current = { query, trips, watch };
+  });
+  const onWatch = useCallback(
+    (trip: Trip) => {
+      const { query, trips, watch } = latest.current;
+      const out = trip.tickets.flatMap((x) => x.slices).sort((a, b) => a.departure.localeCompare(b.departure));
+      const dep = out[0].departure.slice(0, 10);
+      // the search's own trip type (a return to another airport of the same city is still a round trip)
+      const rt = query?.return_date != null || trip.route.at(-1) === trip.route[0];
+      const ret = rt ? (out.length > 1 ? out.at(-1)!.departure.slice(0, 10) : (query?.return_date ?? null)) : null;
+      const nights = ret ? dayDiff(dep, ret) : null;
+      watch.open(
+        {
+          origins: query?.origins?.length ? query.origins : [trip.route[0]],
+          destinations: query?.destinations?.length ? query.destinations : [trip.route.at(-1)!],
+          trip_type: ret ? "roundtrip" : "oneway",
+          depart_start: dep,
+          depart_end: dep,
+          nights_min: nights,
+          nights_max: nights,
+          currency: trip.currency,
+          include_split: trip.tickets.length > 1,
+          alert_below: Math.floor(trip.total_price * 0.9),
+          cabin: query?.cabin ?? "economy",
+          adults: query?.adults ?? 1,
+          max_stops: query?.max_stops ?? null,
+        },
+        trips,
+      );
+    },
+    [],
+  );
+  const perSource = useMemo(
+    () =>
+      Object.entries(
+        trips.reduce<Record<string, number>>((acc, t) => {
+          for (const tk of t.tickets) {
+            const name = SOURCE_NAMES[tk.source] ?? (tk.seller_kind === "ota" ? (tk.seller ?? tk.source) : "Airlines direct");
+            acc[name] = (acc[name] ?? 0) + 1;
+          }
+          return acc;
+        }, {}),
+      )
+        .sort((a, b) => b[1] - a[1])
+        .map(([k, v]) => `${k} ${v}`)
+        .join(" · "),
+    [trips],
+  );
 
   const { arcs, points } = useMemo(() => {
     const arcs: MapArc[] = [];
@@ -273,20 +324,7 @@ export function ResultsView({
             {grouped.length} flights{grouped.length !== trips.length ? ` (${trips.length} combinations)` : ""}
           </span>
           {blocked > 0 && <span>{blocked} hidden by your seller rules</span>}
-          <span title="Options found per source. Google includes the flights from its Cheapest tab.">
-            {Object.entries(
-              trips.reduce<Record<string, number>>((acc, t) => {
-                for (const tk of t.tickets) {
-                  const name = SOURCE_NAMES[tk.source] ?? (tk.seller_kind === "ota" ? (tk.seller ?? tk.source) : "Airlines direct");
-                  acc[name] = (acc[name] ?? 0) + 1;
-                }
-                return acc;
-              }, {}),
-            )
-              .sort((a, b) => b[1] - a[1])
-              .map(([k, v]) => `${k} ${v}`)
-              .join(" · ")}
-          </span>
+          <span title="Options found per source. Google includes the flights from its Cheapest tab.">{perSource}</span>
           {(query?.adults ?? 1) > 1 && <span>Prices are the total for all {query!.adults} travelers</span>}
           {direct && (
             <span>
@@ -357,29 +395,7 @@ export function ResultsView({
                 alts={alts}
                 highlight={hover?.id === t.id}
                 onHover={setHover}
-                onWatch={(trip) => {
-                  const out = trip.tickets.flatMap((x) => x.slices).sort((a, b) => a.departure.localeCompare(b.departure));
-                  const dep = out[0].departure.slice(0, 10);
-                  // the search's own trip type (a return to another airport of the same city is still a round trip)
-                  const rt = query?.return_date != null || trip.route.at(-1) === trip.route[0];
-                  const ret = rt ? (out.length > 1 ? out.at(-1)!.departure.slice(0, 10) : (query?.return_date ?? null)) : null;
-                  const nights = ret ? dayDiff(dep, ret) : null;
-                  watch.open({
-                    origins: query?.origins?.length ? query.origins : [trip.route[0]],
-                    destinations: query?.destinations?.length ? query.destinations : [trip.route.at(-1)!],
-                    trip_type: ret ? "roundtrip" : "oneway",
-                    depart_start: dep,
-                    depart_end: dep,
-                    nights_min: nights,
-                    nights_max: nights,
-                    currency: trip.currency,
-                    include_split: trip.tickets.length > 1,
-                    alert_below: Math.floor(trip.total_price * 0.9),
-                    cabin: query?.cabin ?? "economy",
-                    adults: query?.adults ?? 1,
-                    max_stops: query?.max_stops ?? null,
-                  }, trips);
-                }}
+                onWatch={onWatch}
               />
               </Fragment>
             ))}
@@ -391,14 +407,10 @@ export function ResultsView({
           </div>
         )}
       </div>
-      <div className="order-first lg:order-none">
+      {/* on a phone the prices come first, the map after the list */}
+      <div>
         <div className="lg:sticky lg:top-16">
           <RouteMap arcs={arcs} points={points} className="h-64 lg:h-[420px]" fitKey={shown[0]?.id} />
-          {focus && (
-            <p className="mt-2 text-xs text-muted">
-              Showing {hover ? "the hovered option" : "the top option"}. Dashed lines are self transfers. Hover a result to preview its route.
-            </p>
-          )}
         </div>
       </div>
       {watch.element}

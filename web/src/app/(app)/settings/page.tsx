@@ -168,7 +168,7 @@ function OwnIpSection() {
               )}
             </div>
             <p className="mt-1 text-xs text-muted">
-              Mac or Linux. Starts on demand and stops after two hours without searches. An open tab does not keep it running. Also powers the CLI and AI agents.
+              Mac or Linux. Starts on demand and stops after 10 minutes without searches. An open tab does not keep it running. Also powers the CLI and AI agents.
             </p>
             <pre className="mt-2 overflow-x-auto rounded-lg bg-surface-2 p-2 text-[11px] leading-relaxed">{INSTALL}</pre>
             <Button size="sm" variant="soft" onClick={async () => {
@@ -220,7 +220,7 @@ function OwnIpSection() {
         </div>
         <p className="mt-3 text-xs text-muted">
           Want it all on your computer, website included? One command installs it at http://localhost:3000, with accounts,
-          watchlist and every source. It stops after two hours without traffic:
+          watchlist and every source. It stops five minutes after the last visible tab:
         </p>
         <pre className="mt-1.5 overflow-x-auto rounded-lg bg-surface-2 p-2 text-[11px] leading-relaxed">{INSTALL_LOCAL}</pre>
         <p className="mt-1.5 text-xs text-muted">

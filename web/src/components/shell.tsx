@@ -14,6 +14,7 @@ import { GuestBanner, ImportGuestData } from "./guest-ui";
 import { openPanel, toastStore } from "./stores";
 import { PlainButton, Tip, useDismiss } from "./ui";
 import { WatchlistButton, WatchlistPanel } from "./watchlist-panel";
+import { KeepAlive } from "./keep-alive";
 
 const NAV = [
   { href: "/", label: "Search" },
@@ -32,6 +33,7 @@ export function Shell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <KeepAlive />
       <header className="sticky top-0 z-40 border-b border-border bg-surface/85 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-1 px-2 min-[400px]:px-3 sm:gap-2 sm:px-4">
           <Link href="/?new=1" className="mr-2 flex shrink-0 items-center gap-2 text-[15px] font-semibold tracking-tight">

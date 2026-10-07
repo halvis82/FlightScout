@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Check, Sparkles, X } from "lucide-react";
 import { useApp } from "@/components/app-context";
@@ -11,9 +11,10 @@ import { SearchFormView, defaultForm, formToParams, paramsToForm, type SearchFor
 import { WatchButton } from "@/components/watch-dialog";
 import { Empty, ErrorNote, Spinner } from "@/components/ui";
 import { api } from "@/lib/client";
+import { DEFAULT_PLANNER } from "@/lib/defaults";
 import { extensionVersion } from "@/lib/extension";
 import { localRunnerActive } from "@/lib/local-runner";
-import { partsFor, searchPart, type PartState } from "@/lib/live-search";
+import { BACKGROUND_PARTS, partsFor, searchPart, type PartState } from "@/lib/live-search";
 import { showsUnreliable } from "@/lib/sellers";
 import { airport, expandCodes, loadAirports, nearestAirport } from "@/lib/airports-client";
 import { RouteMap } from "@/components/route-map";
@@ -52,13 +53,37 @@ function resetSaved() {
     /* ignore */
   }
 }
+// The memory copy is immediate; the sessionStorage copy (a large JSON of every
+// result) is written once things settle, not on every streamed part.
+let persistTimer: ReturnType<typeof setTimeout> | null = null;
 function persist(next: Saved) {
   saved = next;
-  try {
-    sessionStorage.setItem(KEY, JSON.stringify(next));
-  } catch {
-    /* quota or private mode: memory copy is enough */
-  }
+  if (persistTimer) clearTimeout(persistTimer);
+  persistTimer = setTimeout(() => {
+    persistTimer = null;
+    try {
+      sessionStorage.setItem(KEY, JSON.stringify(saved));
+    } catch {
+      /* quota or private mode: memory copy is enough */
+    }
+  }, 800);
+}
+
+// The seconds counter re-renders only itself, not the result list.
+function Searching({ startedAt, children }: { startedAt: number; children?: (secs: number) => ReactNode }) {
+  const [secs, setSecs] = useState(() => Math.round((Date.now() - startedAt) / 1000));
+  useEffect(() => {
+    const t = setInterval(() => setSecs(Math.round((Date.now() - startedAt) / 1000)), 1000);
+    return () => clearInterval(t);
+  }, [startedAt]);
+  return (
+    <>
+      <span className="inline-flex items-center gap-2 text-muted">
+        <Spinner /> Searching <span className="tabular-nums text-faint">{secs}s</span>
+      </span>
+      {children?.(secs)}
+    </>
+  );
 }
 
 // Where a fresh search starts: the default chosen in Settings, else wherever
@@ -142,10 +167,12 @@ function SearchPage() {
   if (fresh) resetSaved(); // logo click: start over as if the site was just opened
   const hasQuery = Boolean(params.get("from")) || fresh;
   const [edited, setForm] = useState<SearchForm | null>(() => (hasQuery ? null : loadSaved().form));
-  // Until the user edits, the form comes from the URL (or their defaults).
+  // Until the user edits, the form comes from the URL (or their defaults). It
+  // renders at once: a shared link searches before the account check answers,
+  // and the saved default origin fills in when settings arrive.
   const [, bump] = useState(0);
-  const form = edited ?? (settings ? paramsToForm(params, defaultForm(currency, startOrigin(settings.defaultOrigins, places))) : null);
-  useNearestAirport(Boolean(settings && !edited && !hasQuery && form && !form.from.length), () => bump((x) => x + 1));
+  const form = edited ?? paramsToForm(params, defaultForm(currency, startOrigin(settings?.defaultOrigins ?? [], places)));
+  useNearestAirport(Boolean(settings && !edited && !hasQuery && !form.from.length), () => bump((x) => x + 1));
   const [result, setResult] = useState<SearchResult | null>(() => (hasQuery ? null : loadSaved().result));
   const [plan, setPlan] = useState<PlanResult | null>(() => (hasQuery ? null : loadSaved().plan));
   useEffect(() => {
@@ -154,18 +181,16 @@ function SearchPage() {
   const [busy, setBusy] = useState(false);
   const [planBusy, setPlanBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const [elapsed, setElapsed] = useState(0);
+  const [startedAt, setStartedAt] = useState(0);
   const runSeq = useRef(0);
   const [stale, setStale] = useState(false);
   const [, setPending] = useState(0);
   const [parts, setParts] = useState<PartState[]>([]);
   const [finished, setFinished] = useState<{ secs: number; failed: number } | null>(null);
   const lastRun = useRef<string | null>(null);
-  const clock = useRef<ReturnType<typeof setInterval> | null>(null);
   // the running search's late parts must not land under a form they don't belong to
   const abandon = () => {
     runSeq.current++;
-    if (clock.current) clearInterval(clock.current);
     setBusy(false);
     setPending(0);
     setPlanBusy(false);
@@ -226,18 +251,13 @@ function SearchPage() {
       setPlan(null);
       setBusy(true);
       setFinished(null);
-      setElapsed(0);
       const t0 = Date.now();
-      // one clock at a time: a new search stops the last one's
-      if (clock.current) clearInterval(clock.current);
-      const timer = setInterval(() => setElapsed(Math.round((Date.now() - t0) / 1000)), 1000);
-      clock.current = timer;
+      setStartedAt(t0);
       go(formToParams(f).toString());
       if (f.tripType === "multicity") {
         // flights must be in date order; say which one isn't instead of searching
         const bad = f.legs.findIndex((l, i) => i > 0 && l.flex !== "by" && l.date < f.legs[i - 1].date);
         if (bad > 0) {
-          clearInterval(timer);
           setBusy(false);
           setStale(false);
           setErr(`Flight ${bad + 1} leaves before flight ${bad}. Check the dates.`);
@@ -282,13 +302,11 @@ function SearchPage() {
             setStale(false);
             setBusy(false);
           });
-        clearInterval(timer);
         return;
       }
       // say what's wrong instead of searching something that can't exist
       const problem = formProblem(f.from, f.to);
       if (problem) {
-        clearInterval(timer);
         setBusy(false);
         setStale(false);
         setParts([]);
@@ -365,9 +383,9 @@ function SearchPage() {
         ),
       );
       let planP: Promise<void> = Promise.resolve();
-      if (f.smart && settings) {
+      if (f.smart) {
         setPlanBusy(true);
-        const p = settings.planner;
+        const p = settings?.planner ?? DEFAULT_PLANNER;
         planP = api<PlanResult>("/plan", {
           body: {
             origins: q.origins,
@@ -401,7 +419,6 @@ function SearchPage() {
           });
       }
       await Promise.all([searchP, planP]);
-      clearInterval(timer);
     },
     [go, settings, currency, searchParts],
   );
@@ -429,20 +446,71 @@ function SearchPage() {
       return;
     }
     if (formKey === lastRun.current) return;
-    const t = setTimeout(() => run(form), 600);
+    // a form from the address (shared link, Back, Forward) is complete: search
+    // now; one being edited waits for the next click or keystroke to settle
+    const t = setTimeout(() => run(form), edited ? 600 : 0);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formKey]);
 
-  if (!form)
-    return (
-      <div className="grid h-64 place-items-center text-muted">
-        <Spinner />
-      </div>
-    );
-
-  const trips = mergeTrips(result, plan);
+  const trips = useMemo(() => mergeTrips(result, plan), [result, plan]);
   const hasResults = result || plan;
+  // The search reads as done once the quick sources answered. ITA Matrix and
+  // the slow booking sites keep filling in quietly for up to a minute.
+  const coreBusy = busy && parts.some((p, i) => p.state === "searching" && !BACKGROUND_PARTS.has(searchParts[i]?.sources[0] ?? ""));
+  const showStatus = form.tripType !== "multicity" && parts.length > 0 && (busy || finished);
+  const formComplete =
+    form.from.length > 0 &&
+    (form.tripType === "multicity"
+      ? form.legs.length > 0 && form.legs.every((l, i) => l.to.length && (i === 0 || l.date >= form.legs[i - 1].date))
+      : form.to.length > 0);
+  const watchButton = (hasResults || formComplete) && (
+    <WatchButton
+      seed={trips}
+      watch={
+        form.tripType === "multicity"
+          ? {
+              name: [form.from.join("/"), ...form.legs.map((l) => l.to.join("/"))].join(" → "),
+              origins: form.from,
+              destinations: form.legs.at(-1)?.to ?? [],
+              trip_type: "multicity",
+              depart_start: form.legs[0]?.date ?? form.depart,
+              depart_end: form.legs.at(-1)?.date ?? form.depart,
+              nights_min: null,
+              nights_max: null,
+              legs: form.legs.map((l, i) => {
+                const by = l.flex === "by";
+                const prev = i > 0 ? form.legs[i - 1].date : null;
+                return {
+                  origins: i === 0 ? form.from : form.legs[i - 1].to,
+                  destinations: l.to,
+                  date: l.date,
+                  before: by ? (prev ? Math.max(0, dayDiff(prev, l.date)) : 14) : Number(l.flex),
+                  after: by ? 0 : Number(l.flex),
+                  arrive_by: by ? l.date : null,
+                };
+              }),
+              currency: form.currency,
+              cabin: form.cabin,
+              adults: form.adults,
+            }
+          : {
+              origins: form.from,
+              destinations: form.to,
+              trip_type: form.tripType,
+              depart_start: addDays(form.depart, -form.flex),
+              depart_end: addDays(form.depart, form.flex),
+              nights_min: form.tripType === "roundtrip" ? Math.max(0, dayDiff(form.depart, form.ret) - form.flex - form.retFlex) : null,
+              nights_max: form.tripType === "roundtrip" ? dayDiff(form.depart, form.ret) + form.flex + form.retFlex : null,
+              currency: form.currency,
+              cabin: form.cabin,
+              adults: form.adults,
+              max_stops: form.stops === "any" ? null : Number(form.stops),
+              include_split: form.smart,
+            }
+      }
+    />
+  );
 
   return (
     <div className="space-y-4">
@@ -476,7 +544,7 @@ function SearchPage() {
           }
           run(form);
         }}
-        busy={busy}
+        busy={coreBusy}
       />
       <RecentRow
         onPick={(r) => {
@@ -490,28 +558,26 @@ function SearchPage() {
           setForm(next);
         }}
       />
-      {form.tripType !== "multicity" && parts.length > 0 && (busy || finished) && (
-        <div className="space-y-1.5">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-            {busy ? (
-              <span className="inline-flex items-center gap-2 text-muted">
-                <Spinner /> Searching, results appear as each source answers
-                <span className="tabular-nums text-faint">{elapsed}s</span>
-              </span>
-            ) : (
-              finished && (
-                <span className="inline-flex items-center gap-1.5 font-medium text-good">
-                  <Check className="size-4" /> Search complete: {result?.trips.length ?? 0} flights in {finished.secs}s
-                  {finished.failed > 0 && <span className="font-normal text-faint">({finished.failed} source group{finished.failed > 1 ? "s" : ""} didn&apos;t answer)</span>}
-                </span>
-              )
-            )}
-            {busy && !extensionVersion() && !localRunnerActive() && elapsed >= 4 && (
-              <a href="/settings#own-ip" className="text-xs text-faint underline-offset-2 hover:text-fg hover:underline">
-                Faster: search from your own IP
-              </a>
-            )}
-          </div>
+      {showStatus && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm" aria-live="polite">
+          {coreBusy ? (
+            <Searching startedAt={startedAt}>
+              {(secs) =>
+                secs >= 4 && !extensionVersion() && !localRunnerActive() ? (
+                  <a href="/settings#own-ip" className="text-xs text-faint underline-offset-2 hover:text-fg hover:underline">
+                    Faster: search from your own IP
+                  </a>
+                ) : null
+              }
+            </Searching>
+          ) : (
+            <span
+              className="inline-flex items-center gap-1.5 font-medium text-good"
+              title={finished ? `${finished.secs}s${finished.failed ? `, ${finished.failed} source group${finished.failed > 1 ? "s" : ""} didn't answer` : ""}` : undefined}
+            >
+              <Check className="size-4" /> {result?.trips.length ?? 0} flights
+            </span>
+          )}
           <div className="flex flex-wrap gap-1.5" aria-label="Sources">
             {parts.map((p, i) => (
               <span
@@ -522,89 +588,46 @@ function SearchPage() {
                   p.state === "done" && "border-good/30 bg-good-soft/40 text-good",
                   p.state === "failed" && "border-border text-faint line-through",
                 )}
-                title={p.state === "failed" ? "Didn't answer this time" : undefined}
+                title={p.state === "failed" ? "Didn't answer this time" : p.state === "searching" ? "Still answering, results are added as they come" : undefined}
               >
                 {p.state === "searching" ? <Spinner className="size-3" /> : p.state === "done" ? <Check className="size-3" /> : <X className="size-3" />}
                 {searchParts[i]?.label}
                 {p.state === "done" && <span className="tabular-nums opacity-70">{p.n}</span>}
               </span>
             ))}
+            {planBusy && (
+              <span
+                className="inline-flex h-6 items-center gap-1 rounded-full border border-border px-2 text-xs text-muted"
+                title="Separate tickets, nearby gateways and stopovers. Takes up to a minute and is added to the list when found."
+              >
+                <Sparkles className="size-3 text-info" /> Cheaper combinations
+              </span>
+            )}
           </div>
+          <div className="ml-auto">{watchButton}</div>
         </div>
       )}
       {form.tripType === "multicity" && busy && (
-        <div className="flex items-center gap-2 text-sm text-muted">
-          <Spinner /> Searching every flight of the trip <span className="tabular-nums text-faint">{elapsed}s</span>
+        <div className="flex items-center gap-2 text-sm">
+          <Searching startedAt={startedAt} />
+          <span className="text-muted">every flight of the trip</span>
         </div>
       )}
       {form.tripType === "multicity" && !busy && finished && plan && (
-        <div className="inline-flex items-center gap-1.5 text-sm font-medium text-good">
-          <Check className="size-4" /> Search complete: {plan.trips.length} trips in {finished.secs}s
-        </div>
-      )}
-      {planBusy && (
-        <div className="flex items-center gap-2 text-sm text-muted">
-          <Sparkles className="size-3.5 text-info" /> Also looking for cheaper combinations (separate tickets, nearby gateways, stopovers). About a minute.
+        <div className="inline-flex items-center gap-1.5 text-sm font-medium text-good" title={`${finished.secs}s`}>
+          <Check className="size-4" /> {plan.trips.length} trips
         </div>
       )}
       {err && <ErrorNote>{err}</ErrorNote>}
       {/* Watch works before searching too: as soon as the form is complete */}
-      {(hasResults ||
-        (form.from.length > 0 &&
-          (form.tripType === "multicity"
-            ? form.legs.length > 0 && form.legs.every((l, i) => l.to.length && (i === 0 || l.date >= form.legs[i - 1].date))
-            : form.to.length > 0))) && (
+      {!showStatus && watchButton && (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="text-sm text-muted">
             {form.tripType === "multicity"
               ? [form.from.join("/"), ...form.legs.map((l) => l.to.join("/"))].join(" → ")
               : `${form.from.join("/")} to ${form.to.join("/")} · ${form.tripType === "roundtrip" ? `${dayDiff(form.depart, form.ret)} nights` : "one way"}`}
           </div>
-          <WatchButton
-            seed={trips}
-            watch={
-              form.tripType === "multicity"
-                ? {
-                    name: [form.from.join("/"), ...form.legs.map((l) => l.to.join("/"))].join(" → "),
-                    origins: form.from,
-                    destinations: form.legs.at(-1)?.to ?? [],
-                    trip_type: "multicity",
-                    depart_start: form.legs[0]?.date ?? form.depart,
-                    depart_end: form.legs.at(-1)?.date ?? form.depart,
-                    nights_min: null,
-                    nights_max: null,
-                    legs: form.legs.map((l, i) => {
-                      const by = l.flex === "by";
-                      const prev = i > 0 ? form.legs[i - 1].date : null;
-                      return {
-                        origins: i === 0 ? form.from : form.legs[i - 1].to,
-                        destinations: l.to,
-                        date: l.date,
-                        before: by ? (prev ? Math.max(0, dayDiff(prev, l.date)) : 14) : Number(l.flex),
-                        after: by ? 0 : Number(l.flex),
-                        arrive_by: by ? l.date : null,
-                      };
-                    }),
-                    currency: form.currency,
-                    cabin: form.cabin,
-                    adults: form.adults,
-                  }
-                : {
-                    origins: form.from,
-                    destinations: form.to,
-                    trip_type: form.tripType,
-                    depart_start: addDays(form.depart, -form.flex),
-                    depart_end: addDays(form.depart, form.flex),
-                    nights_min: form.tripType === "roundtrip" ? Math.max(0, dayDiff(form.depart, form.ret) - form.flex - form.retFlex) : null,
-                    nights_max: form.tripType === "roundtrip" ? dayDiff(form.depart, form.ret) + form.flex + form.retFlex : null,
-                    currency: form.currency,
-                    cabin: form.cabin,
-                    adults: form.adults,
-                    max_stops: form.stops === "any" ? null : Number(form.stops),
-                    include_split: form.smart,
-                  }
-            }
-          />
+          {watchButton}
         </div>
       )}
       {form.tripType !== "multicity" && !form.to.length && form.from.length > 0 && !hasResults && (
@@ -629,7 +652,8 @@ function SearchPage() {
         />
       )}
       {hasResults ? (
-        <div className={stale && busy ? "pointer-events-none opacity-50 transition-opacity" : "transition-opacity"}>
+        // the previous results stay readable and clickable while the new ones load
+        <div className={stale && busy ? "opacity-60 transition-opacity" : "transition-opacity"}>
         <ResultsView
           trips={trips}
           query={result?.query ?? { origins: form.from, destinations: form.to }}

@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useState } from "react";
+import { createContext, memo, useContext, useState } from "react";
 import { ArrowRight, ChevronDown, ExternalLink, Eye, Moon, TriangleAlert } from "lucide-react";
 import { Badge, Button } from "./ui";
 import { Code } from "./place";
@@ -31,7 +31,7 @@ export function sellerName(it: Itinerary) {
   return it.seller ?? SOURCE_LABEL[it.source] ?? it.source;
 }
 
-export function TripCard({
+export const TripCard = memo(function TripCard({
   trip,
   alts = [],
   onWatch,
@@ -183,7 +183,7 @@ export function TripCard({
       )}
     </div>
   );
-}
+});
 
 // Same outbound, different return flights (collapsed from the list).
 function OtherReturns({ trip, alts }: { trip: Trip; alts: Trip[] }) {
