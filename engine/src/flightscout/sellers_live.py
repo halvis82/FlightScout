@@ -12,6 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from . import cache
 from .models import Fare, Offer, Trip
+from .sources._browser import NO_AUDIO
 
 log = logging.getLogger(__name__)
 
@@ -77,7 +78,7 @@ def booking_options(url: str, page=None) -> tuple[list[Offer], str | None]:
         from playwright.sync_api import sync_playwright
 
         pw = sync_playwright().start()
-        browser = pw.chromium.launch()
+        browser = pw.chromium.launch(args=NO_AUDIO)
         ctx = browser.new_context(locale="en-US")
         # pre-accepted consent so EU IPs don't land on the consent page
         ctx.add_cookies([{"name": "SOCS", "value": "CAESEwgDEgk0ODE3Nzk3MjQaAmVuIAEaBgiA_LyaBg",
@@ -118,7 +119,7 @@ def enrich(trips: list[Trip], top: int = 5, rules: dict[str, str] | None = None)
     if not tickets:
         return
     with sync_playwright() as pw:
-        browser = pw.chromium.launch()
+        browser = pw.chromium.launch(args=NO_AUDIO)
         ctx = browser.new_context(locale="en-US")
         ctx.add_cookies([{"name": "SOCS", "value": "CAESEwgDEgk0ODE3Nzk3MjQaAmVuIAEaBgiA_LyaBg",
                           "domain": ".google.com", "path": "/"}])

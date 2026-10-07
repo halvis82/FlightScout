@@ -157,7 +157,9 @@ def expand_sources(names: list[str]) -> list[str]:
         return [s for s in dict.fromkeys(out + AIRLINES) if s not in _disabled()]
     if "airlines" in names:
         out += [s for s in AIRLINES if s not in out]
-    if ("airlines" in names or set(names) & _DIRECT) and _browser.available():
+    # "airlines_browser": only the airlines that need Chrome (20 to 45 s); the
+    # website asks for them as a background part on local runners
+    if ("airlines" in names or "airlines_browser" in names or set(names) & _DIRECT) and _browser.available():
         out += [s for s in BROWSER_SOURCES if s not in out]
     # "otas" = all booking sites; the website asks for them in two parts so the
     # fast ones (answer in 1 to 15 s) show before the slow ones (ITA Matrix,

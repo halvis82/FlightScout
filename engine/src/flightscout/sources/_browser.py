@@ -70,6 +70,10 @@ def available(headful: bool = False) -> bool:
 
 _procs: dict[subprocess.Popen, str] = {}  # live Chrome processes -> profile dir
 _PREFIX = "flightscout-chrome-"
+# Sites play sounds (bot checks build AudioContexts, promo videos autoplay). --mute-audio alone still
+# opens the Mac's output device, which makes AirPods switch over to this Mac, so audio goes to a fake
+# output instead. Pages still see working audio.
+NO_AUDIO = ["--mute-audio", "--disable-audio-output"]
 
 
 def _kill(proc: subprocess.Popen, profile: str) -> None:
@@ -118,7 +122,7 @@ class _Proc:
         args = [chrome_path(), f"--remote-debugging-port={self.port}", f"--user-data-dir={self.profile}",
                 "--no-first-run", "--no-default-browser-check", "--window-size=1440,900",
                 "--disable-background-timer-throttling", "--disable-renderer-backgrounding",
-                "--disable-backgrounding-occluded-windows", "--lang=en-US"]
+                "--disable-backgrounding-occluded-windows", "--lang=en-US", *NO_AUDIO]
         if headful:
             args.append("--window-position=-2400,-2400")
         else:

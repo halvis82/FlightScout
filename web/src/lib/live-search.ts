@@ -13,8 +13,10 @@ import type { PlanResult, SearchQuery, SearchResult } from "./types";
 // Cheapest list (the local runner's Chrome, 3 to 8 s) and the cheapest nearby
 // dates (flexible searches). Booking sites in two parts so the quick ones
 // don't wait for ITA Matrix and the polling metasearch sites.
-export const PARTS: string[][] = [["google_now"], ["google_list"], ["google_flex"], ["kiwiweb"], ["airlines"], ["kiwi"], ["otas_fast"], ["otas_slow"]];
-export const PART_LABELS = ["Google Flights", "Google, full list", "Google, nearby dates", "Kiwi.com", "Airlines direct", "Kiwi.com deals", "Booking sites", "More booking sites, ITA Matrix"];
+// Airlines likewise: the ones over plain HTTP answer in about 3 s, the ones
+// that need the local runner's Chrome take 20 to 45 s and come after.
+export const PARTS: string[][] = [["google_now"], ["google_list"], ["google_flex"], ["kiwiweb"], ["airlines_http"], ["airlines_browser"], ["kiwi"], ["otas_fast"], ["otas_slow"]];
+export const PART_LABELS = ["Google Flights", "Google, full list", "Google, nearby dates", "Kiwi.com", "Airlines direct", "More airlines", "Kiwi.com deals", "Booking sites", "More booking sites, ITA Matrix"];
 // Kiwi.com sells everything these two parts find: skipped unless Settings
 // includes less reliable booking sites (the engine would hide them anyway).
 const KIWI_PARTS = new Set(["kiwiweb", "kiwi"]);
@@ -29,13 +31,14 @@ export function partsFor(showUnreliable: boolean, opts: PartOptions = {}) {
     const s = p.sources[0];
     if (KIWI_PARTS.has(s)) return showUnreliable;
     if (s === "google_flex") return Boolean(opts.flex);
-    if (s === "google_list") return Boolean(opts.list);
+    if (s === "google_list" || s === "airlines_browser") return Boolean(opts.list);
     return true;
   });
 }
 export type PartState = { state: "searching" | "done" | "failed"; n: number };
-// Parts that take 3 to 60 s: they fill in after the search already reads as done.
-export const BACKGROUND_PARTS = new Set(["google_list", "google_flex", "kiwi", "otas_slow"]);
+// Parts that take 3 to 60 s: they fill in after the search already reads as
+// done (Google and the HTTP airlines, in about 3 s).
+export const BACKGROUND_PARTS = new Set(["google_list", "google_flex", "airlines_browser", "kiwi", "otas_fast", "otas_slow"]);
 
 // A later part's answer merged into what's on screen. The same trip from
 // two parts keeps the cheaper price (Google's full list can undercut the

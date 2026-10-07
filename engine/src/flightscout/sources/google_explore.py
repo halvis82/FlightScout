@@ -12,6 +12,7 @@ from datetime import date
 
 from .. import airports, cache
 from ..models import Destination
+from ._browser import NO_AUDIO
 
 log = logging.getLogger(__name__)
 SOCS = "CAESEwgDEgk0ODE3Nzk3MjQaAmVuIAEaBgiA_LyaBg"
@@ -93,9 +94,9 @@ def explore(origin: str, currency: str = "USD", month: str | None = None, zoom_o
     bodies: list[str] = []
     with sync_playwright() as pw:
         try:
-            browser = pw.chromium.launch(channel="chrome", headless=True)
+            browser = pw.chromium.launch(channel="chrome", headless=True, args=NO_AUDIO)
         except Exception:
-            browser = pw.chromium.launch(headless=True)
+            browser = pw.chromium.launch(headless=True, args=NO_AUDIO)
         ctx = browser.new_context(locale="en-US")
         ctx.add_cookies([{"name": "SOCS", "value": SOCS, "domain": ".google.com", "path": "/"}])
         page = ctx.new_page()
