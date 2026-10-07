@@ -46,7 +46,10 @@ _WALLED = ("403", "429", "forbidden", "security verification", "just a moment", 
            # a wall page where the site's API answers JSON (Porter, passed from home the same day)
            "unexpected token '<'",
            # the connection is reset before any answer (LEVEL on GitHub's servers, passed from home 2026-09-26)
-           "reset by server")
+           "reset by server",
+           # Southwest's shopping call and Zipair's results page answer GitHub's servers with nothing
+           # (both passed from home 2026-10-06; "no flights" is matched only for Zipair on purpose)
+           "no shopping response", "zipair_browser: no flights")
 
 
 @pytest.hookimpl(hookwrapper=True)
