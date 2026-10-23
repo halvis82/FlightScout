@@ -116,7 +116,7 @@ async function evaluateAlerts(watch: Watch, price: number, prev: number | null, 
   // Email goes out after the response, so a search never waits on delivery.
   const deliver = async () => {
     const s = await getSettings(watch.userId);
-    if (s.emailAlerts) {
+    if (s.emailAlerts && watch.emailAlerts !== false) {
       const [u] = await db.select().from(schema.user).where(eq(schema.user.id, watch.userId));
       if (u) {
         const mail = await priceAlertEmail({ user: u, watch, price, prev, reasons, bookingUrl: best.booking_url ?? null });

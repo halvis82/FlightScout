@@ -17,6 +17,7 @@ export type WatchRow = {
   includeSplit: boolean;
   alertBelow: number | null;
   alertDropPct: number | null;
+  emailAlerts?: boolean;
   active: boolean;
   lastCheckedAt: string | null;
   bestPrice: number | null;

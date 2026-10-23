@@ -21,6 +21,7 @@ export type WatchIn = Partial<{
   include_split: boolean;
   alert_below: number | null;
   alert_drop_pct: number | null;
+  email_alerts: boolean;
   active: boolean;
   notes: string | null;
 }>;
@@ -108,6 +109,7 @@ export function toColumns(p: WatchIn, partial: boolean) {
   if (p.include_split !== undefined) out.includeSplit = Boolean(p.include_split);
   if (p.alert_below !== undefined) out.alertBelow = num(p.alert_below, "alert_below", 0.01, 10_000_000);
   if (p.alert_drop_pct !== undefined) out.alertDropPct = num(p.alert_drop_pct, "alert_drop_pct", 1, 99);
+  if (p.email_alerts !== undefined) out.emailAlerts = Boolean(p.email_alerts);
   if (p.active !== undefined) out.active = Boolean(p.active);
   if (p.notes !== undefined) {
     if (p.notes !== null && (typeof p.notes !== "string" || p.notes.length > 1000)) throw new HttpError(400, "notes must be text up to 1000 characters");

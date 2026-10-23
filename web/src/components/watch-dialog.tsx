@@ -1,4 +1,5 @@
 "use client";
+import type { WatchRow } from "@/lib/watch-types";
 import { watchHref } from "@/lib/watch-slug";
 import useSWR, { mutate } from "swr";
 import Link from "next/link";
@@ -35,8 +36,33 @@ export type WatchForm = {
   include_split: boolean;
   alert_below: number | null;
   alert_drop_pct: number | null;
+  email_alerts?: boolean;
   notes?: string | null;
 };
+
+// The edit form for a stored watch.
+export function watchToForm(w: WatchRow): WatchForm {
+  return {
+    name: w.name,
+    origins: w.origins,
+    destinations: w.destinations,
+    trip_type: w.tripType,
+    depart_start: w.departStart,
+    depart_end: w.departEnd,
+    nights_min: w.nightsMin,
+    nights_max: w.nightsMax,
+    cabin: w.cabin,
+    adults: w.adults,
+    max_stops: w.maxStops,
+    currency: w.currency,
+    include_split: w.includeSplit,
+    alert_below: w.alertBelow,
+    alert_drop_pct: w.alertDropPct,
+    email_alerts: w.emailAlerts !== false,
+    notes: w.notes,
+    legs: (w.legs as WatchForm["legs"]) ?? null,
+  };
+}
 
 export function defaultWatch(currency: string, p?: Partial<WatchForm>): WatchForm {
   const start = addDays(isoDate(new Date()), 30);
@@ -96,6 +122,7 @@ function WatchFormBody({
   seedTrips?: Trip[];
 }) {
   const router = useRouter();
+  const { me, settings } = useApp();
   const [f, setF] = useState(initial);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -212,12 +239,26 @@ function WatchFormBody({
             </Select>
           </Field>
         </div>
-        <Field label={`Alert when below (${f.currency})`}>
-          <Input type="number" min={0} value={f.alert_below ?? ""} onChange={(e) => set({ alert_below: e.target.value === "" ? null : Number(e.target.value) })} placeholder="Optional" />
+        <Field label={`Alert me when it's under (${f.currency})`} hint="Leave empty to skip">
+          <Input type="number" min={0} value={f.alert_below ?? ""} onChange={(e) => set({ alert_below: e.target.value === "" ? null : Number(e.target.value) })} placeholder="e.g. 150" />
         </Field>
-        <Field label="Alert when price drops by (%)">
-          <Input type="number" min={1} max={90} value={f.alert_drop_pct ?? ""} onChange={(e) => set({ alert_drop_pct: e.target.value === "" ? null : Number(e.target.value) })} placeholder="Optional" />
+        <Field label="Or when it gets cheaper by (%)" hint="Compared with the last check">
+          <Input type="number" min={1} max={90} value={f.alert_drop_pct ?? ""} onChange={(e) => set({ alert_drop_pct: e.target.value === "" ? null : Number(e.target.value) })} placeholder="e.g. 10" />
         </Field>
+        {me?.user && me.features.email && (
+          <div className="sm:col-span-2">
+            <Switch
+              checked={f.email_alerts !== false}
+              onChange={(email_alerts) => set({ email_alerts })}
+              label={
+                <span>
+                  Email me these alerts{" "}
+                  <span className="text-muted">{settings?.emailAlerts ? `(to ${me.user.email})` : "(turn on email in Settings first)"}</span>
+                </span>
+              }
+            />
+          </div>
+        )}
         <div className="sm:col-span-2">
           <Switch
             checked={f.include_split}

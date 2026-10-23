@@ -8,8 +8,11 @@ import { useApp } from "@/components/app-context";
 import { DateHeatmap, type Cell } from "@/components/date-heatmap";
 import { PriceChart, type SeriesPoint } from "@/components/price-chart";
 import { ResultsView, mergeTrips } from "@/components/results-view";
-import { WatchDialog, type WatchForm } from "@/components/watch-dialog";
-import { Badge, Button, Card, Empty, ErrorNote, PageHeader, Segmented, Spinner } from "@/components/ui";
+import { WatchDialog, watchToForm } from "@/components/watch-dialog";
+import { DeleteWatch } from "@/components/watch-card";
+import { Badge, Button, Card, Empty, ErrorNote, PageHeader, Segmented, Spinner, Switch } from "@/components/ui";
+import { useAirports } from "@/lib/airports-client";
+import { airportsLine, alertRule, tripLine, watchTitle } from "@/lib/watch-display";
 import { api, fetcher } from "@/lib/client";
 import { addDays, dayDiff, formatDate, formatDuration, relativeTime } from "@/lib/format";
 import { useLiveSearch, type MulticityLeg } from "@/lib/live-search";
@@ -53,13 +56,16 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
   };
   const [by, setBy] = useState<"best" | "kind" | "source">("best");
   const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [checking, setChecking] = useState(false);
   const [checkErr, setCheckErr] = useState<string | null>(null);
 
   const w = data?.watch;
+  useAirports();
+  const title = w ? watchTitle(w) : "";
   useEffect(() => {
-    if (w?.name) document.title = `${w.name} · FlightScout`;
-  }, [w?.name]);
+    if (title) document.title = `${title} · FlightScout`;
+  }, [title]);
   const tripType = w?.tripType;
   const obs = useMemo(() => data?.observations ?? [], [data]);
 
@@ -186,25 +192,8 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
     );
   }
 
-  const form: WatchForm = {
-    name: w.name,
-    origins: w.origins,
-    destinations: w.destinations,
-    trip_type: w.tripType,
-    depart_start: w.departStart,
-    depart_end: w.departEnd,
-    nights_min: w.nightsMin,
-    nights_max: w.nightsMax,
-    cabin: w.cabin,
-    adults: w.adults,
-    max_stops: w.maxStops,
-    currency: w.currency,
-    include_split: w.includeSplit,
-    alert_below: w.alertBelow,
-    alert_drop_pct: w.alertDropPct,
-    notes: w.notes,
-    legs: (w.legs as WatchForm["legs"]) ?? null,
-  };
+  const form = watchToForm(w);
+
 
   async function check() {
     setChecking(true);
@@ -223,26 +212,23 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
   return (
     <div className="space-y-4">
       <PageHeader
-        title={w.name}
+        title={title}
         sub={
-          <span>
-            {w.tripType === "roundtrip" ? "Round trip" : w.tripType === "oneway" ? "One way" : "Multi city"}
-            {w.tripType !== "multicity" && ` ${w.origins.join("/")} ${w.tripType === "roundtrip" ? "⇄" : "→"} ${w.destinations.join("/")}`},{" "}
-            leaving {formatDate(w.departStart, false)}
-            {w.departEnd !== w.departStart && ` to ${formatDate(w.departEnd, false)}`}
-            {w.tripType === "roundtrip" && w.nightsMin != null && `, ${w.nightsMin}${w.nightsMax && w.nightsMax !== w.nightsMin ? ` to ${w.nightsMax}` : ""} nights`}
-            {`, ${w.cabin}, ${w.adults} adult${w.adults > 1 ? "s" : ""}. `}
-            {w.active ? checkNote(Boolean(me?.guest)) : "Paused."}
+          <span className="flex flex-col gap-0.5">
+            <span>
+              {tripLine(w)}. {w.active ? checkNote(Boolean(me?.guest)) : "Paused: prices aren't being checked."}
+            </span>
+            <span className="font-mono text-xs text-faint">{airportsLine(w)}</span>
           </span>
         }
         actions={
           <>
-            <Link href={`/?${searchParams}`} className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-surface px-3 text-sm font-medium hover:bg-surface-2">
-              <Search className="size-4" /> Search now
-            </Link>
             <Button onClick={check} loading={checking}>
               {!checking && <RefreshCw className="size-4" />} Check now
             </Button>
+            <Link href={`/?${searchParams}`} className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-surface px-3 text-sm font-medium hover:bg-surface-2">
+              <Search className="size-4" /> Search these dates
+            </Link>
             <Button onClick={() => setEditing(true)}>
               <Pencil className="size-4" /> Edit
             </Button>
@@ -255,32 +241,24 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
             >
               {w.active ? <Pause className="size-4" /> : <Play className="size-4" />} {w.active ? "Pause" : "Resume"}
             </Button>
-            <Button
-              variant="danger"
-              aria-label="Delete this watch"
-              title="Delete this watch"
-              onClick={async () => {
-                if (!confirm(`Delete "${w.name}" and its price history?`)) return;
-                await api(`/watches/${id}`, { method: "DELETE" });
-                router.push("/watches");
-              }}
-            >
-              <Trash2 className="size-4" />
+            <Button variant="danger" onClick={() => setDeleting(true)}>
+              <Trash2 className="size-4" /> Delete
             </Button>
           </>
         }
       />
+      <DeleteWatch open={deleting} onClose={() => setDeleting(false)} w={w} title={title} onDeleted={() => router.push("/watches")} />
       {checkErr && <ErrorNote>{checkErr}</ErrorNote>}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-        <Stat label="Current best" value={money(w.bestPrice, w.currency)} sub={w.currency !== currency ? `${w.bestPrice?.toFixed(0) ?? "–"} ${w.currency}` : undefined} />
+        <Stat label="Best price now" value={money(w.bestPrice, w.currency)} sub={w.currency !== currency ? `${w.bestPrice?.toFixed(0) ?? "–"} ${w.currency}` : undefined} />
         <Stat
           label="Since last check"
-          value={delta == null ? "–" : `${delta > 0 ? "+" : delta < 0 ? "−" : ""}${money(Math.abs(delta), w.currency)}`}
+          value={delta == null ? "–" : delta === 0 ? "No change" : `${delta > 0 ? "+" : "−"}${money(Math.abs(delta), w.currency)}`}
           tone={delta == null || delta === 0 ? undefined : delta < 0 ? "good" : "bad"}
         />
-        <Stat label="All time low" value={money(w.lowestPrice, w.currency)} />
-        <Stat label="Target" value={w.alertBelow != null ? money(w.alertBelow, w.currency) : w.alertDropPct != null ? `${w.alertDropPct}% drop` : "None"} />
-        <Stat label="Checks" value={String(checks)} sub={`last ${relativeTime(w.lastCheckedAt)}`} />
+        <Stat label="Lowest seen" value={money(w.lowestPrice, w.currency)} />
+        <Stat label="Alert when" value={alertRule(w, money) ?? "No alert"} />
+        <Stat label="Times checked" value={String(checks)} sub={`last ${relativeTime(w.lastCheckedAt)}`} />
       </div>
 
       <Card className="p-4">
@@ -323,8 +301,25 @@ export default function WatchDetail({ params }: { params: Promise<{ id: string }
             date, exactly like a normal search.
           </p>
           <p className="text-muted">
-            Alerts: {w.alertBelow != null ? `when it drops below ${money(w.alertBelow, w.currency)}` : w.alertDropPct != null ? `when it drops ${w.alertDropPct}% or more` : "none set"}.
+            {alertRule(w, money) ? `You get an alert when it's ${alertRule(w, money)}.` : "No price alert is set. Use Edit to add one."}
           </p>
+          {alertRule(w, money) && me?.user && me.features.email && (
+            settings?.emailAlerts ? (
+              <Switch
+                checked={w.emailAlerts !== false}
+                onChange={async (on) => {
+                  await api(`/watches/${id}`, { method: "PATCH", body: { email_alerts: on } });
+                  mutate();
+                  refreshLists();
+                }}
+                label={`Email me about this flight (${me.user.email})`}
+              />
+            ) : (
+              <p className="text-muted">
+                Emails are off. <Link href="/settings" className="text-accent hover:underline">Turn them on in Settings</Link> to get these by email.
+              </p>
+            )
+          )}
           {w.notes && <p className="text-muted">Notes: {w.notes}</p>}
         </Card>
       </div>

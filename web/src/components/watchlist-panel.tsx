@@ -1,18 +1,18 @@
 "use client";
-import { watchHref } from "@/lib/watch-slug";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import useSWR from "swr";
-import { ArrowDownRight, ArrowUpRight, Bell, Pause, Play, Plus, RefreshCw, Star, X } from "lucide-react";
+import { Bell, Plus, Star, X } from "lucide-react";
 import { useApp } from "./app-context";
-import { RouteText } from "./place";
-import { Sparkline } from "./sparkline";
+import { WatchCard } from "./watch-card";
 import { openPanel, panelStore } from "./stores";
 import { useWatchDialog } from "./watch-dialog";
-import { PlainButton, Badge, Button, Spinner } from "./ui";
+import { PlainButton, Button, Spinner } from "./ui";
 import { api, fetcher } from "@/lib/client";
-import { formatDate, relativeTime } from "@/lib/format";
+import { relativeTime } from "@/lib/format";
+import { useAirports } from "@/lib/airports-client";
 import { cn } from "@/lib/utils";
+import { readable } from "@/lib/watch-display";
 import type { WatchRow } from "@/lib/watch-types";
 import { checkNote } from "@/lib/watch-logic";
 
@@ -49,10 +49,10 @@ export function WatchlistButton() {
 export function WatchlistPanel() {
   const open = panelStore.use() === "watchlist";
   const { me } = useApp();
-  const { data, mutate, isLoading } = useWatches();
+  const { data, isLoading } = useWatches();
   const { data: alerts, mutate: mutateAlerts } = useAlerts();
   const watch = useWatchDialog();
-  const [checking, setChecking] = useState<number | null>(null);
+  useAirports();
 
   useEffect(() => {
     if (!open) return;
@@ -60,16 +60,6 @@ export function WatchlistPanel() {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
-
-  async function check(id: number) {
-    setChecking(id);
-    try {
-      await api(`/watches/${id}/check`, { body: {} });
-    } catch {}
-    setChecking(null);
-    mutate();
-    mutateAlerts();
-  }
 
   const unread = alerts?.alerts.filter((a) => !a.readAt) ?? [];
 
@@ -93,7 +83,7 @@ export function WatchlistPanel() {
             <h2 className="flex items-center gap-2 text-base font-semibold">
               <Star className="size-4 text-accent" /> Watchlist
             </h2>
-            <p className="text-xs text-muted">{checkNote(Boolean(me?.guest))} Use Watch on any search or result to add one.</p>
+            <p className="text-xs text-muted">{checkNote(Boolean(me?.guest))} Tap Watch on any search to add one.</p>
           </div>
           <div className="flex items-center gap-1">
             <Button size="sm" variant="soft" onClick={() => watch.edit()}>
@@ -132,7 +122,7 @@ export function WatchlistPanel() {
                       }}
                       className="block text-sm hover:underline"
                     >
-                      {a.message} <span className="text-xs text-faint">{relativeTime(a.createdAt)}</span>
+                      {readable(a.message)} <span className="text-xs text-faint">{relativeTime(a.createdAt)}</span>
                     </Link>
                   </li>
                 ))}
@@ -149,84 +139,18 @@ export function WatchlistPanel() {
               <div className="mx-auto mb-3 grid size-11 place-items-center rounded-full bg-accent-soft text-accent">
                 <Star className="size-5" />
               </div>
-              <div className="font-semibold">No watched routes yet</div>
+              <div className="font-semibold">You&apos;re not watching any flights yet</div>
               <p className="mx-auto mt-1 max-w-xs text-sm text-muted">
-                Use Watch this search above the results, or Watch this route on any flight, to track its price. FlightScout records every check so you can see when to book.
+                Tap Watch on any search and FlightScout keeps checking the price for you, so you know when to book.
               </p>
             </div>
           )}
           {data?.map((w) => (
-            <WatchRowCard
-              key={w.id}
-              w={w}
-              all={data}
-              checking={checking === w.id}
-              onCheck={() => check(w.id)}
-              onToggle={async () => {
-                await api(`/watches/${w.id}`, { method: "PATCH", body: { active: !w.active } });
-                mutate();
-              }}
-            />
+            <WatchCard key={w.id} w={w} all={data} compact />
           ))}
         </div>
       </aside>
       {watch.element}
     </>
-  );
-}
-
-function WatchRowCard({ w, all, onCheck, onToggle, checking }: { w: WatchRow; all?: WatchRow[]; onCheck: () => void; onToggle: () => void; checking: boolean }) {
-  const { money } = useApp();
-  const delta = w.bestPrice != null && w.prevPrice != null ? w.bestPrice - w.prevPrice : null;
-  const pct = delta != null && w.prevPrice ? (delta / w.prevPrice) * 100 : null;
-  return (
-    <div className={cn("rounded-2xl border border-border bg-surface p-3 shadow-[var(--shadow)] transition-colors hover:border-border-strong", !w.active && "opacity-60")}>
-      <Link href={watchHref(w, all)} onClick={() => openPanel(null)} className="block">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            {w.tripType === "multicity" ? (
-              <span className="text-sm font-medium">{w.name}</span>
-            ) : (
-              <RouteText codes={[w.origins[0], w.destinations[0]]} roundTrip={w.tripType === "roundtrip"} className="text-sm" />
-            )}
-            <div className="mt-0.5 text-xs text-muted">
-              {formatDate(w.departStart, false)}
-              {w.departEnd !== w.departStart && ` to ${formatDate(w.departEnd, false)}`}
-              {w.tripType === "roundtrip" && w.nightsMin != null && ` · ${w.nightsMin}${w.nightsMax && w.nightsMax !== w.nightsMin ? `–${w.nightsMax}` : ""} nights`}
-              {w.origins.length + w.destinations.length > 2 && ` · ${w.origins.length + w.destinations.length} airports`}
-            </div>
-          </div>
-          <div className="shrink-0 text-right">
-            <div className="text-lg font-semibold tabular-nums">{money(w.bestPrice, w.currency)}</div>
-            {pct != null && Math.abs(pct) >= 0.5 ? (
-              <span className={cn("inline-flex items-center text-xs font-medium", delta! < 0 ? "text-good" : "text-bad")}>
-                {delta! < 0 ? <ArrowDownRight className="size-3.5" /> : <ArrowUpRight className="size-3.5" />}
-                {Math.abs(pct).toFixed(0)}%
-              </span>
-            ) : (
-              <span className="text-xs text-faint">{w.lowestPrice != null ? `low ${money(w.lowestPrice, w.currency)}` : "not checked"}</span>
-            )}
-          </div>
-        </div>
-        <div className="mt-2 h-8">
-          <Sparkline data={(w.sparkline ?? []).map((p) => p.price)} className="h-8 w-full" />
-        </div>
-      </Link>
-      <div className="mt-2 flex items-center justify-between border-t border-border pt-2 text-xs text-muted">
-        <span className="flex items-center gap-1.5">
-          checked {relativeTime(w.lastCheckedAt)}
-          {!w.active && <Badge>Paused</Badge>}
-          {w.includeSplit && <Badge tone="info">Smart</Badge>}
-        </span>
-        <div className="flex gap-0.5">
-          <button onClick={onToggle} className="rounded-md p-1.5 hover:bg-surface-2 hover:text-fg" title={w.active ? "Pause" : "Resume"} aria-label={w.active ? "Pause" : "Resume"}>
-            {w.active ? <Pause className="size-3.5" /> : <Play className="size-3.5" />}
-          </button>
-          <button onClick={onCheck} disabled={checking} className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 hover:bg-surface-2 hover:text-fg" title="Check now">
-            {checking ? <Spinner className="size-3.5" /> : <RefreshCw className="size-3.5" />} Check now
-          </button>
-        </div>
-      </div>
-    </div>
   );
 }

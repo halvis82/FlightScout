@@ -189,6 +189,8 @@ export const watches = pgTable(
     includeSplit: boolean("include_split").notNull().default(false),
     alertBelow: doublePrecision("alert_below"),
     alertDropPct: doublePrecision("alert_drop_pct"),
+    // this watch's alerts by email too (when email alerts are on in Settings)
+    emailAlerts: boolean("email_alerts").notNull().default(true),
     active: boolean("active").notNull().default(true),
     lastCheckedAt: timestamp("last_checked_at", { withTimezone: true }),
     // current best (latest check), the one before it, and all time low, all in watch currency
