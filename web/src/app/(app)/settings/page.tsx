@@ -485,6 +485,20 @@ function AlertsSection() {
           }}
           label={`Email to ${me.user.email}`}
         />
+        {settings.emailAlerts && (
+          <Button size="sm" variant="soft" disabled={busy} onClick={async () => {
+            setErr(null);
+            setBusy(true);
+            try {
+              const r = await api<{ to: string }>("/settings/test-email", { method: "POST" });
+              toast({ text: `Test email sent to ${r.to}` });
+            } catch (e) {
+              setErr((e as Error).message);
+            } finally {
+              setBusy(false);
+            }
+          }}>Send a test email</Button>
+        )}
         {!me.features.email && <p className="text-xs text-muted">Email alerts are unavailable because email delivery has not been set up for FlightScout. Price alerts still appear under the bell.</p>}
         <p className="text-xs text-muted">
           Email alerts are off by default. Set a target price or drop percentage by editing a watch in <Link href="/watches" className="text-accent">Watchlist</Link>.

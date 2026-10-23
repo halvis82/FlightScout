@@ -4,12 +4,14 @@ import { db, schema } from "./db";
 import { HttpError } from "./api";
 
 export type EngineKind = "search" | "plan" | "explore" | "dates" | "trip" | "multicity" | "browser";
-type LimitKind = EngineKind | "check";
+type LimitKind = EngineKind | "check" | "email";
 
 // Requests per hour. Guests are limited per IP, signed in users per account.
 const LIMITS: Record<LimitKind, { guest: number; user: number }> = {
   // "Check now" on a watch: a full search (and maybe a plan) from the server
   check: { guest: 0, user: 30 },
+  // "Send a test email" in Settings: Gmail allows about 500 a day in all
+  email: { guest: 0, user: 5 },
   search: { guest: 60, user: 400 },
   plan: { guest: 12, user: 80 },
   trip: { guest: 5, user: 40 },
