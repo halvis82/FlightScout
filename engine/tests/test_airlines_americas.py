@@ -228,7 +228,8 @@ def test_porter_relevance_and_deeplink(monkeypatch):
     assert porter_browser.relevant(["YYZ"], ["LAX"])
     assert not porter_browser.relevant(["LAX"], ["EWR"])  # no US domestic
     url = porter_browser.deeplink("YTZ", "YUL", date(2026, 11, 12), date(2026, 11, 19))
-    assert "departStation=YTZ&destination=YUL&depDate=2026-11-12&rtnDate=2026-11-19" in url and "RoundTrip" in url
+    assert "/flight/tickets/Select_BAF?departStation=YTZ&destination=YUL&depDate=2026-11-12&rtnDate=2026-11-19" in url
+    assert url.endswith("trpType=Round")
 
 
 # ---- WestJet (browser) ----

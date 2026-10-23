@@ -3,7 +3,7 @@
 HTTP clients away, but headless Chrome gets through.
 
 Flow: load the home page once per session (Cloudflare), then open the search
-redirect the booking widget itself uses (/api/redirect-search-flights?...),
+link the booking widget itself uses (/en-ca/flight/tickets/Select_BAF?...),
 which starts a booking session, and make the select flight page's own two
 calls from inside the page (BuildFlightSearch, then the Navitaire
 availability JSON /flight/GetFlightAvailability). One response covers both
@@ -55,10 +55,11 @@ def relevant(origins: list[str], destinations: list[str]) -> bool:
 
 
 def deeplink(origin: str, dest: str, dep: date, ret: date | None = None, adults: int = 1) -> str:
-    return (f"{SITE}/api/redirect-search-flights?departStation={origin}&destination={dest}&depDate={dep}"
+    # the booking widget's own search link since the October 2026 site
+    # (the older /api/redirect-search-flights answers 404 now)
+    return (f"{SITE}/en-ca/flight/tickets/Select_BAF?departStation={origin}&destination={dest}&depDate={dep}"
             + (f"&rtnDate={ret}" if ret else "")
-            + f"&paxADT={adults}&paxCHD=0&paxINF=0&trpType={'RoundTrip' if ret else 'OneWay'}"
-              f"&fareClass=R&bookWithPoints=0")
+            + f"&paxADT={adults}&paxCHD=0&paxINF=0&trpType={'Round' if ret else 'OneWay'}")
 
 
 def parse(data: dict, adults: int = 1) -> list[list[dict]]:
@@ -93,7 +94,9 @@ _JS = """async ([build, dates]) => {
   const h = {'X-Requested-With': 'XMLHttpRequest'};
   const b = await fetch('/en-ca/flight/BuildFlightSearch', {method: 'POST', body: build,
     headers: {...h, 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}});
-  const crit = (await b.json()).FlightSearchCriteria[0];
+  const j = await b.json().catch(() => null);
+  const crit = j && j.FlightSearchCriteria && j.FlightSearchCriteria[0];
+  if (!crit) return null;  // no booking session for this search yet
   crit.forEach((c, i) => { c.BeginDate = c.EndDate = dates[i]; });
   const r = await fetch('/en-ca/flight/GetFlightAvailability', {method: 'POST', body: JSON.stringify(crit),
     headers: {...h, 'Content-Type': 'application/json; charset=UTF-8', 'Accept': 'application/json'}});
@@ -123,7 +126,12 @@ def _fetch(origin: str, dest: str, dep: date, ret: date | None, adults: int) -> 
             _browser.pass_cloudflare(page, 30)
         page.goto(url, wait_until="commit", timeout=45000)
         page.evaluate("window.stop()")
-        return page.evaluate(_JS, [build, dates])
+        txt = page.evaluate(_JS, [build, dates])
+        if txt is None:  # stopped before the session started: let the redirect finish, ask again
+            page.goto(url, wait_until="domcontentloaded", timeout=45000)
+            page.wait_for_timeout(1500)
+            txt = page.evaluate(_JS, [build, dates])
+        return txt or ""
 
     txt = _browser.run(job, "porter", timeout=100)
     if not txt:
