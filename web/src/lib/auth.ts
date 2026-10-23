@@ -70,6 +70,7 @@ export const auth = betterAuth({
         user.email,
         "Confirm your email for FlightScout",
         `<p>Confirm this address to finish signing in to FlightScout:</p><p><a href="${safe}">Confirm my email</a></p><p>If you didn't try to sign up, ignore this email.</p>`,
+        { alert: false },
       );
     },
   },

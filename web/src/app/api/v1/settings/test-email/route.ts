@@ -14,8 +14,8 @@ export const POST = route(async (req) => {
   const base = process.env.BETTER_AUTH_URL ?? "";
   const ok = await sendEmail(
     u.email,
-    "FlightScout test email",
-    `<p>Email alerts work. FlightScout will email you here when a watched flight reaches its target price or drops by its percentage.</p><p><a href="${base}/watches">Your watchlist</a></p>`,
+    "FlightScout: your email alerts are working",
+    `<p>Hi,</p><p>This is the test email you asked for in FlightScout Settings. Email alerts are working.</p><p>From now on FlightScout will write to you here when a flight on your watchlist reaches its target price or drops by the percentage you set. Prices are checked twice a day, and each watch emails at most once every 12 hours.</p><p><a href="${base}/watches">Open your watchlist</a></p>`,
   ).catch(() => false);
   if (!ok) throw new HttpError(502, "The email could not be sent. Try again in a minute.");
   return json({ sent: true, to: u.email });
