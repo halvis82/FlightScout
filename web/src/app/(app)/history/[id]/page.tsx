@@ -8,14 +8,19 @@ import { ResultsView } from "@/components/results-view";
 import { Badge, Card, Empty, ErrorNote, PageHeader, Spinner } from "@/components/ui";
 import { fetcher } from "@/lib/client";
 import { formatDate } from "@/lib/format";
+import { useAirports } from "@/lib/airports-client";
+import { readableSummary } from "@/lib/watch-display";
 import type { DatePrice, Destination, PlanResult, SearchQuery, SearchResult } from "@/lib/types";
 
 type Row = { id: number; kind: string; origin: string; summary: string | null; query: Record<string, unknown>; payload: unknown; createdAt: string };
+
+const KIND: Record<string, string> = { search: "Search", plan: "Smart routes", explore: "Explore", dates: "Date prices", multicity: "Multi city" };
 
 export default function HistoryDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { data, error } = useSWR<Row>(`/searches/${id}`, fetcher);
   const { money } = useApp();
+  useAirports(); // city names in the title
   if (error)
     return /not found|404|bad id/i.test((error as Error).message) ? (
       <Empty title="This search isn't in your history" action={<Link href="/history" className="text-sm font-medium text-accent hover:underline">Back to history</Link>}>
@@ -57,10 +62,10 @@ export default function HistoryDetail({ params }: { params: Promise<{ id: string
   return (
     <div>
       <PageHeader
-        title={data.summary ?? data.kind}
+        title={data.summary ? readableSummary(data.summary.replace(/^Smart routes /, "")) : (KIND[data.kind] ?? data.kind)}
         sub={
           <span className="flex items-center gap-2">
-            <Badge>{data.kind}</Badge> <Badge tone="accent">{data.origin}</Badge> {new Date(data.createdAt).toLocaleString()}
+            <Badge>{KIND[data.kind] ?? data.kind}</Badge> Searched {new Date(data.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}
           </span>
         }
         actions={

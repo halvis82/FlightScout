@@ -37,8 +37,8 @@ export function GuestBanner() {
     <div className="border-b border-border bg-accent-soft/60">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-1.5 text-xs">
         <span className="min-w-0 flex-1 text-muted">
-          You&apos;re using FlightScout as a guest. Places, watches and history are saved in this browser. Signing in adds daily background
-          price tracking, alerts, sync across devices and CLI and agent access.
+          You&apos;re using FlightScout without an account, so your airports, watchlist and history stay in this browser. A free account
+          adds price checks twice a day, emails when prices drop, and your watchlist on every device.
         </span>
         <Link href="/login" className="shrink-0 font-medium text-accent hover:underline">
           Sign in

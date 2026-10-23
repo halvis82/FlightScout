@@ -198,9 +198,9 @@ function AirlineCard({ a, route }: { a: Airline; route: { origin: string; destin
           ) : DIRECT[a.iata] === "local" ? (
             <div
               className="mt-0.5 text-[11px] font-medium text-info"
-              title="FlightScout reads this airline's own fares when searches run on your computer (local runner). Otherwise its flights come through Google Flights and the booking sites."
+              title="FlightScout checks this airline's own website when searches run on your computer (see Faster searches in Settings). Otherwise its flights come through Google Flights and the booking sites."
             >
-              Included in local FlightScout searches
+              Included with faster searches
             </div>
           ) : null}
         </div>

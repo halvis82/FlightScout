@@ -21,7 +21,7 @@ test("with the extension, Google searches run from the browser", async ({ baseUR
       if (r.url().includes("/api/v1/browser")) rounds.push((r.postData() ?? "").length);
     });
     await page.goto(`${baseURL}/?from=OSL&to=CPH&tt=oneway&d=${inDays(45)}&smart=0`);
-    await expect(page.getByText("Your IP")).toBeVisible();
+    await expect(page.getByText("Your browser")).toBeVisible();
     await expect(page.getByText(/\d+ flights/).first()).toBeVisible({ timeout: 90_000 });
     await expect.poll(() => rounds.length, { timeout: 60_000 }).toBeGreaterThanOrEqual(2); // ask, then pages
     expect(Math.max(...rounds)).toBeLessThan(4_000_000); // under Vercel's request limit

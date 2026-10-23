@@ -26,6 +26,12 @@ export function readable(text: string) {
   });
 }
 
+// A saved search summary in words: "SAN/LAX to DPS 2027-03-18 to 2027-03-25"
+// reads "San Diego/Los Angeles to Denpasar Mar 18 to Mar 25".
+export function readableSummary(text: string) {
+  return readable(text).replace(/\b\d{4}-\d{2}-\d{2}\b/g, (d) => formatDate(d, false));
+}
+
 const legsOf = (w: WatchLike) =>
   Array.isArray(w.legs) ? (w.legs as { origins: string[]; destinations: string[] }[]) : [];
 

@@ -3,7 +3,7 @@ import { createContext, memo, useContext, useState } from "react";
 import { ArrowRight, ChevronDown, ExternalLink, Eye, Moon, TriangleAlert } from "lucide-react";
 import { Badge, Button } from "./ui";
 import { Code } from "./place";
-import { airport } from "@/lib/airports-client";
+import { airport, cityOf } from "@/lib/airports-client";
 import { inCurrency, airlineByCode, airlineLink, useAirlines, type Airline } from "@/lib/airlines";
 import { useApp } from "./app-context";
 import { cn } from "@/lib/utils";
@@ -341,7 +341,9 @@ function SliceRow({ sl }: { sl: Slice }) {
             {layovers.map((l, i) => (
               <span key={i}>
                 {i > 0 && ", "}
-                {formatDuration(l.min)} {l.at}
+                <span title={l.at}>
+                  {formatDuration(l.min)} in {cityOf(l.at) ?? l.at}
+                </span>
               </span>
             ))}
           </div>
@@ -433,9 +435,9 @@ function SegmentRow({ seg }: { seg: Segment }) {
         {plus > 0 && <sup className="text-[10px] text-warn">+{plus}</sup>}
       </div>
       <div className="min-w-0">
-        <span className="font-mono font-semibold">{seg.origin}</span>
+        <span className="font-semibold">{cityOf(seg.origin) ?? seg.origin}</span> <span className="font-mono text-xs text-faint">{seg.origin}</span>
         <ArrowRight className="mx-1 inline size-3 text-faint" />
-        <span className="font-mono font-semibold">{seg.destination}</span>
+        <span className="font-semibold">{cityOf(seg.destination) ?? seg.destination}</span> <span className="font-mono text-xs text-faint">{seg.destination}</span>
         <span className="ml-2 text-muted">
           {seg.carrier_name ?? seg.carrier} {seg.carrier}
           {seg.flight_number}
@@ -458,8 +460,8 @@ function Layover({ prev, next }: { prev: Segment; next: Segment }) {
         change || min < 60 ? "border-bad text-bad" : min > 8 * 60 ? "border-warn text-warn" : "border-border text-muted",
       )}
     >
-      {formatDuration(min)} layover in {prev.destination}
-      {change && <span className="font-medium">· change to {next.origin}</span>}
+      {formatDuration(min)} layover in {cityOf(prev.destination) ? `${cityOf(prev.destination)} (${prev.destination})` : prev.destination}
+      {change && <span className="font-medium">· change airports to {next.origin}</span>}
       {overnight && (
         <span className="inline-flex items-center gap-0.5">
           · <Moon className="size-3" /> overnight
