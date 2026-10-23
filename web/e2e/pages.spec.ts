@@ -148,7 +148,7 @@ test("airlines tab marks airlines searched directly, everywhere or only locally"
   await expect(page.getByText(/\d+ airlines/)).toBeVisible();
   await page.getByText("Only airlines FlightScout searches directly").click();
   await expect(page.getByText("Included in FlightScout searches").first()).toBeVisible();
-  await expect(page.getByText("Included in local FlightScout searches").first()).toBeVisible();
+  await expect(page.getByText("Included with faster searches").first()).toBeVisible();
 });
 
 test("unknown pages get a real 404 and pages have their own titles", async ({ page }) => {
