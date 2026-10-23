@@ -6,6 +6,7 @@ import { nextCookies } from "better-auth/next-js";
 import { passkey } from "@better-auth/passkey";
 import { db, schema } from "./db";
 import { emailConfigured, sendEmail } from "./notify";
+import { confirmEmail } from "./email";
 
 const baseURL =
   process.env.BETTER_AUTH_URL ??
@@ -65,13 +66,7 @@ export const auth = betterAuth({
     sendOnSignIn: emailConfigured(),
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
-      const safe = url.replace(/"/g, "%22");
-      await sendEmail(
-        user.email,
-        "Confirm your email for FlightScout",
-        `<p>Confirm this address to finish signing in to FlightScout:</p><p><a href="${safe}">Confirm my email</a></p><p>If you didn't try to sign up, ignore this email.</p>`,
-        { alert: false },
-      );
+      await sendEmail(user.email, confirmEmail(user, url));
     },
   },
   socialProviders,

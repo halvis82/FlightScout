@@ -24,8 +24,8 @@ test("watchlist panel, settings and history open without errors", async ({ page 
   await expect(page.getByText(/checks twice a day|checked twice a day/).first()).toBeVisible();
   await page.keyboard.press("Escape");
   await page.goto("/settings");
-  await expect(page.getByText("Start searches from")).toBeVisible();
-  await expect(page.getByText("Favorite airports and cities")).toBeVisible();
+  await expect(page.getByText("Search from", { exact: true })).toBeVisible();
+  await expect(page.getByText("Your airports", { exact: true })).toBeVisible();
   await page.goto("/history");
   expect(errors).toEqual([]);
 });

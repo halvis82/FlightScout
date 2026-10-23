@@ -5,8 +5,8 @@ import { db, schema } from "./db";
 import { convertWith, getRates, hasRate } from "./fx";
 import { isDate } from "./watch-validate";
 import { sendEmail } from "./notify";
+import { priceAlertEmail } from "./email";
 import { getSettings } from "./settings";
-import { formatPrice } from "./format";
 import type { Trip, SearchQuery } from "./types";
 import { alertReasons, queryMatchesWatch, tripsForWatch, tripsToObservations, type ObservationInput } from "./watch-logic";
 
@@ -90,8 +90,6 @@ export async function alertIfTargetMet(before: Watch, after: Watch) {
   return evaluateAlerts(after, after.bestPrice, null, { booking_url: url } as ObservationInput);
 }
 
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
-
 async function evaluateAlerts(watch: Watch, price: number, prev: number | null, best: ObservationInput) {
   const reasons = alertReasons(watch, price, prev);
   if (!reasons.length) return 0;
@@ -118,17 +116,11 @@ async function evaluateAlerts(watch: Watch, price: number, prev: number | null, 
   // Email goes out after the response, so a search never waits on delivery.
   const deliver = async () => {
     const s = await getSettings(watch.userId);
-    const base = process.env.BETTER_AUTH_URL ?? "";
     if (s.emailAlerts) {
       const [u] = await db.select().from(schema.user).where(eq(schema.user.id, watch.userId));
       if (u) {
-        const history = `${base}/watches/${watch.id}`;
-        const fare = /^https?:\/\//.test(best.booking_url ?? "") ? best.booking_url! : history;
-        await sendEmail(
-          u.email,
-          `Price alert: ${watch.name} ${formatPrice(price, watch.currency)}`,
-          `<p>${esc(message)}.</p><p><a href="${esc(fare)}">Open the fare</a> · <a href="${esc(history)}">View price history</a></p>`,
-        ).catch(() => false);
+        const mail = await priceAlertEmail({ user: u, watch, price, prev, reasons, bookingUrl: best.booking_url ?? null });
+        await sendEmail(u.email, mail).catch(() => false);
       }
     }
   };

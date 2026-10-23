@@ -3,7 +3,7 @@ import { toast } from "@/components/stores";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import Link from "next/link";
-import { Check, Copy, Fingerprint, KeyRound, Plus, Trash2 } from "lucide-react";
+import { Check, ChevronRight, Copy, Fingerprint, KeyRound, Plus, Trash2 } from "lucide-react";
 import { AirportInput } from "@/components/airport-input";
 import { useApp } from "@/components/app-context";
 import { setTheme, useTheme } from "@/components/shell";
@@ -19,13 +19,51 @@ import { isSwitch, SELLER_PRESETS, SHOW_UNRELIABLE, showsUnreliable } from "@/li
 import { CURRENCIES } from "@/lib/types";
 import type { PlannerDefaults, SellerRule } from "@/lib/db/schema";
 
-function Section({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
+function Section({ title, sub, children, id }: { title: string; sub?: React.ReactNode; children: React.ReactNode; id?: string }) {
   return (
-    <Card className="p-4">
-      <h2 className="font-semibold">{title}</h2>
-      {sub && <p className="mb-3 text-sm text-muted">{sub}</p>}
-      <div className={sub ? "" : "mt-3"}>{children}</div>
+    <Card className="scroll-mt-20 p-5" id={id}>
+      <h2 className="text-base font-semibold">{title}</h2>
+      {sub && <p className="mt-0.5 text-sm text-muted">{sub}</p>}
+      <div className="mt-4">{children}</div>
     </Card>
+  );
+}
+
+// One setting: what it is on the left, the control on the right (stacked on phones).
+function Row({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-2 py-3 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+      <div className="min-w-0">
+        <div className="text-sm font-medium">{label}</div>
+        {hint && <div className="text-xs text-muted">{hint}</div>}
+      </div>
+      <div className="shrink-0 sm:w-60">{children}</div>
+    </div>
+  );
+}
+
+// Details most people don't need, folded away. Opens by itself when a link
+// points at one of `hashes`.
+function More({ summary, children, hashes = [], className }: { summary: React.ReactNode; children: React.ReactNode; hashes?: string[]; className?: string }) {
+  const [open, setOpen] = useState(false);
+  const key = hashes.join(",");
+  useEffect(() => {
+    const check = () => {
+      const h = window.location.hash.slice(1);
+      if (h && key.split(",").includes(h)) setOpen(true);
+    };
+    check();
+    window.addEventListener("hashchange", check);
+    return () => window.removeEventListener("hashchange", check);
+  }, [key]);
+  return (
+    <details open={open} onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)} className={cn("group", className)}>
+      <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-accent select-none [&::-webkit-details-marker]:hidden">
+        <ChevronRight className="size-4 transition-transform group-open:rotate-90" />
+        {summary}
+      </summary>
+      <div className="mt-3">{children}</div>
+    </details>
   );
 }
 
@@ -44,62 +82,82 @@ export default function SettingsPage() {
   if (!settings || !me) return null;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4">
-      <PageHeader title="Settings" sub={me.user ? `Signed in as ${me.user.email}` : "Guest settings are saved in this browser."} actions={saved && <Badge tone="good"><Check className="size-3" /> Saved</Badge>} />
-      <Section title="Display" sub="All prices are converted to this currency with daily ECB reference rates.">
-        <Field label="Start searches from" className="mb-3 w-72">
-          <Select
-            value={settings.defaultOrigins.join(",")}
-            onChange={(e) => patch({ defaultOrigins: e.target.value ? e.target.value.split(",") : [] })}
-          >
-            <option value="">Where I last searched from</option>
-            {places.map((p) => (
-              <option key={p.id} value={p.codes.join(",")}>
-                {p.label} ({p.codes.join(", ")})
-              </option>
-            ))}
-          </Select>
-        </Field>
-        <Field label="Theme" className="mb-3 w-40">
-          <Select value={theme} onChange={(e) => setTheme(e.target.value)}>
-            <option value="system">Like my device</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </Select>
-        </Field>
-        <Field label="Currency" className="w-40">
-          <Select value={settings.currency} onChange={(e) => patch({ currency: e.target.value })}>
-            {CURRENCIES.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </Select>
-        </Field>
+    <div className="mx-auto max-w-2xl space-y-4">
+      <PageHeader
+        title="Settings"
+        sub={me.user ? `Signed in as ${me.user.email}` : "You're using FlightScout without an account. These settings are saved in this browser."}
+        actions={saved && <Badge tone="good"><Check className="size-3" /> Saved</Badge>}
+      />
+      {me.user ? <AlertsSection /> : <GuestSection />}
+      <Section title="Preferences">
+        <div className="divide-y divide-border">
+          <Row label="Currency" hint="Prices are converted with today's exchange rates">
+            <Select className="w-full" value={settings.currency} onChange={(e) => patch({ currency: e.target.value })}>
+              {CURRENCIES.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </Select>
+          </Row>
+          <Row label="Appearance">
+            <Select className="w-full" value={theme} onChange={(e) => setTheme(e.target.value)}>
+              <option value="system">Same as my device</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </Select>
+          </Row>
+          <Row label="Search from" hint="Where new searches start">
+            <Select
+              className="w-full"
+              value={settings.defaultOrigins.join(",")}
+              onChange={(e) => patch({ defaultOrigins: e.target.value ? e.target.value.split(",") : [] })}
+            >
+              <option value="">Where I searched from last</option>
+              {places.map((p) => (
+                <option key={p.id} value={p.codes.join(",")}>
+                  {p.label} ({p.codes.join(", ")})
+                </option>
+              ))}
+            </Select>
+          </Row>
+        </div>
       </Section>
-      <OwnIpSection />
       <FavoritesSection />
-      <PlannerSection key={JSON.stringify(settings.planner)} planner={settings.planner} onSave={(planner) => patch({ planner })} />
       <SellerSection rules={settings.sellerRules} onSave={(sellerRules) => patch({ sellerRules })} />
-      {me.user ? (
-        <>
-          <AlertsSection />
-          <PasskeySection />
-          <TokensSection />
-        </>
-      ) : (
-        <Section title="Account features" sub="Sign in to unlock these. Your guest data can be imported when you do.">
-          <ul className="list-inside list-disc space-y-1 text-sm text-muted">
-            <li>Daily background price tracking for every watch</li>
-            <li>Email alerts when prices drop</li>
-            <li>Sync across devices</li>
-            <li>API tokens for the flightscout CLI, the MCP server and AI agents</li>
-            <li>Passkey sign in</li>
-          </ul>
-          <a href="/login" className="mt-3 inline-flex h-9 items-center rounded-md bg-accent px-3 text-sm font-medium text-accent-fg">
-            Sign in
-          </a>
-        </Section>
-      )}
+      {me.user && <PasskeySection />}
+      <OwnIpSection />
+      <Card className="p-5">
+        <More summary="Advanced settings" hashes={["advanced", "tokens"]}>
+          <p className="mb-4 text-sm text-muted">Limits for smart routes, and access for developer tools. Most people never need to change these.</p>
+          <div className="space-y-6">
+            <PlannerSection key={JSON.stringify(settings.planner)} planner={settings.planner} onSave={(planner) => patch({ planner })} />
+            {me.user && <TokensSection />}
+          </div>
+        </More>
+      </Card>
     </div>
+  );
+}
+
+function GuestSection() {
+  return (
+    <Section title="Get more with a free account" sub="Your searches and watchlist from this browser come with you when you sign in.">
+      <ul className="space-y-1.5 text-sm">
+        {[
+          "Emails when a flight you watch gets cheaper",
+          "Prices checked twice a day for every flight you watch",
+          "Your watchlist on all your devices",
+          "Sign in with Face ID or Touch ID",
+        ].map((t) => (
+          <li key={t} className="flex items-start gap-2">
+            <Check className="mt-0.5 size-4 shrink-0 text-good" />
+            {t}
+          </li>
+        ))}
+      </ul>
+      <Link href="/login" className="mt-4 inline-flex h-9 items-center rounded-md bg-accent px-4 text-sm font-medium text-accent-fg">
+        Sign in or create an account
+      </Link>
+    </Section>
   );
 }
 
@@ -113,19 +171,21 @@ function OwnIpSection() {
   const lr = useLocalRunner();
   const mode = lr.active ? "runner" : ext ? "extension" : "server";
   const where = {
-    server: "on FlightScout's server (shared by everyone)",
-    extension: "Google from your browser, the rest on FlightScout's server",
-    runner: "everything from your computer",
+    server: "FlightScout's shared server",
+    extension: "Your browser for Google Flights, our server for the rest",
+    runner: "Your computer",
   }[mode];
   return (
-    <div id="own-ip">
-      <Section
-        title="Where your searches run"
-        sub="The website works the same in every mode. Running searches from your own connection is faster, can't get the shared server blocked, and adds the airlines and booking sites that need a real browser."
-      >
-        <div className="mb-3 text-sm">
-          Now: <span className={mode === "server" ? "text-muted" : "font-medium text-good"}>{where}</span>
-        </div>
+    <Section
+      id="own-ip"
+      title="Faster searches"
+      sub="Optional. FlightScout can search from your own computer instead of our shared server. That's faster and adds airlines and booking sites the server can't reach. Everything works fine without it."
+    >
+      <div className="mb-4 flex items-center gap-2 text-sm">
+        <span className={cn("size-2 rounded-full", mode === "server" ? "bg-border-strong" : "bg-good")} />
+        Searching from: <span className={mode === "server" ? "text-muted" : "font-medium text-good"}>{where}</span>
+      </div>
+      <More summary="How to set it up" hashes={["own-ip"]}>
         <div className="mb-3 overflow-x-auto rounded-xl border border-border text-xs">
           <table className="w-full min-w-[520px]">
             <thead className="bg-surface-2 text-left text-muted">
@@ -232,8 +292,8 @@ function OwnIpSection() {
             Source code
           </a>
         </p>
-      </Section>
-    </div>
+      </More>
+    </Section>
   );
 }
 
@@ -299,11 +359,11 @@ function FavoritesSection() {
     refreshPlaces();
   }
   return (
-    <div id="places">
-      <Section
-        title="Favorite airports and cities"
-        sub="These show up as one click chips in From and To, and your homes prefill the search. Star any airport anywhere in the app to add it."
-      >
+    <Section
+      id="places"
+      title="Your airports"
+      sub="Saved airports show up as shortcuts when you search, and your home airport fills in From. You can also tap the star next to any airport."
+    >
         <div className="space-y-1.5">
           {places.map((p) => (
             <div key={p.id} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2">
@@ -337,7 +397,7 @@ function FavoritesSection() {
               </Button>
             </div>
           ))}
-          {!places.length && <p className="text-sm text-muted">No favorites yet. Add your home airports first.</p>}
+          {!places.length && <p className="text-sm text-muted">Nothing saved yet. Start with the airport closest to home.</p>}
           <div className="flex items-center gap-2 pt-1">
             <div className="flex-1">
               <AirportInput value={adding} onChange={setAdding} placeholder="Add an airport or city" />
@@ -347,8 +407,7 @@ function FavoritesSection() {
             </Button>
           </div>
         </div>
-      </Section>
-    </div>
+    </Section>
   );
 }
 
@@ -357,31 +416,35 @@ function PlannerSection({ planner, onSave }: { planner: PlannerDefaults; onSave:
   const num = (k: keyof PlannerDefaults) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setP({ ...p, [k]: e.target.value === "" ? null : Number(e.target.value) });
   return (
-    <Section title="Smart routes" sub="Limits for split tickets, stopovers and nested round trips. These are what you're willing to accept.">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Field label="Max stopover (days)" hint="Searches on the server use up to 2">
+    <div>
+      <h3 className="text-sm font-semibold">Smart routes</h3>
+      <p className="mb-3 text-xs text-muted">
+        Smart routes find cheaper trips by combining separate tickets or adding a stopover. These are the limits you&apos;re okay with.
+      </p>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Longest stopover (days)" hint="Searches on our server use up to 2">
           <Input type="number" min={0} max={30} value={p.max_stopover_days} onChange={num("max_stopover_days")} />
         </Field>
-        <Field label="Min self transfer (hours)" hint="Buffer between separate tickets">
+        <Field label="Time between separate tickets (hours)" hint="Time to collect bags and check in again">
           <Input type="number" min={1} max={24} step={0.5} value={p.min_connection_hours} onChange={num("min_connection_hours")} />
         </Field>
-        <Field label="Max total trip (days)" hint="Blank means no limit">
+        <Field label="Longest whole trip (days)" hint="Leave empty for no limit">
           <Input type="number" min={1} value={p.max_trip_days ?? ""} onChange={num("max_trip_days")} />
         </Field>
-        <Field label="Hubs to try" hint="More finds more, but is slower. Searches on the server use up to 6">
+        <Field label="Connecting cities to try" hint="More finds more but takes longer. Our server tries up to 6">
           <Input type="number" min={1} max={30} value={p.max_hubs} onChange={num("max_hubs")} />
         </Field>
       </div>
-      <div className="mt-3 flex flex-wrap gap-4">
-        <Switch checked={p.allow_self_transfer} onChange={(v) => setP({ ...p, allow_self_transfer: v })} label="Allow self transfers" />
-        <Switch checked={p.include_nested_roundtrips} onChange={(v) => setP({ ...p, include_nested_roundtrips: v })} label="Nested round trips (e.g. OSL⇄JFK + JFK⇄SAN)" />
+      <div className="mt-4 flex flex-col gap-3">
+        <Switch checked={p.allow_self_transfer} onChange={(v) => setP({ ...p, allow_self_transfer: v })} label="Allow separate tickets where you change planes yourself" />
+        <Switch checked={p.include_nested_roundtrips} onChange={(v) => setP({ ...p, include_nested_roundtrips: v })} label="Try two round trips through a hub city (e.g. OSL⇄JFK + JFK⇄SAN)" />
       </div>
-      <div className="mt-3 flex justify-end">
+      <div className="mt-4">
         <Button variant="primary" size="sm" onClick={() => onSave(p)}>
-          Save
+          Save limits
         </Button>
       </div>
-    </Section>
+    </div>
   );
 }
 
@@ -393,68 +456,69 @@ function SellerSection({ rules, onSave }: { rules: SellerRule[]; onSave: (r: Sel
   const add = (r: SellerRule) => onSave([...rules.filter((x) => x.seller.toLowerCase() !== r.seller.toLowerCase()), r]);
   const shown = rules.filter((r) => !isSwitch(r));
   return (
-    <Section
-      title="Sellers and travel agencies"
-      sub="Block sellers to hide their results, or flag them with a warning. Self transfers, separate tickets and agency sold tickets are always labeled."
-    >
-      <label className="mb-3 flex cursor-pointer items-start gap-2.5 rounded-lg border border-border p-3">
-        <input
-          type="checkbox"
-          className="mt-0.5 size-4 shrink-0 cursor-pointer accent-[var(--accent)]"
+    <Section title="Booking sites" sub="Choose whose fares you see. Fares that need separate tickets or come from a travel agency are always labeled.">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="text-sm font-medium">Show lesser known booking sites</div>
+          <p className="mt-0.5 text-xs text-muted">
+            Sometimes cheaper, but the price often changes at checkout and help can be hard to reach. Their fares are marked
+            &quot;Less reliable seller&quot;. When off, you see airlines, Google Flights and big sites like Expedia and Booking.com.
+          </p>
+        </div>
+        <Switch
           checked={showsUnreliable(rules)}
           // saving either way also drops the older "*unverified" switch
-          onChange={(e) => onSave(e.target.checked ? [...shown, { seller: SHOW_UNRELIABLE, mode: "warn" }] : shown)}
+          onChange={(on) => onSave(on ? [...shown, { seller: SHOW_UNRELIABLE, mode: "warn" }] : shown)}
         />
-        <span>
-          <span className="text-sm font-medium">Include less reliable booking sites</span>
-          <span className="mt-1 block text-xs text-muted">
-            Off: you only see fares from airlines, Google Flights and major booking sites (Expedia, Orbitz, Travelocity, Priceline,
-            Booking.com). On: fares from other agencies show too, marked &quot;Less reliable seller&quot;. That covers Kiwi.com, Mytrip,
-            Gotogate, eDreams, Opodo, Trip.com, EaseMyTrip, CheapOair, Skiplagged (all fares, including hidden city tickets) and small agencies listed
-            by sites like Wego and KAYAK (HolidayBreakz, Magicfares...). Their prices are often not what you pay at checkout, and
-            support can be hard to reach.
-          </span>
-        </span>
-      </label>
-      <div className="space-y-1.5">
-        {shown.map((r) => (
-          <div key={r.seller + r.mode} className="flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm">
-            <span className="font-medium">{r.seller}</span>
-            <Badge tone={r.mode === "block" ? "bad" : "warn"}>{r.mode === "block" ? "Hidden" : "Warning"}</Badge>
-            {r.note && <span className="truncate text-xs text-muted">{r.note}</span>}
-            <button className="ml-auto rounded p-1 text-muted hover:text-bad" onClick={() => onSave(rules.filter((x) => x !== r))} aria-label={`Remove the rule for ${r.seller}`}>
-              <Trash2 className="size-3.5" />
-            </button>
+      </div>
+      <More summary="Which sites are those?" className="mt-3">
+        <p className="text-xs text-muted">
+          Kiwi.com, Mytrip, Gotogate, eDreams, Opodo, Trip.com, EaseMyTrip, CheapOair, Skiplagged (all its fares, including hidden city
+          tickets) and small agencies listed by sites like Wego and KAYAK (HolidayBreakz, Magicfares...).
+        </p>
+      </More>
+      <More summary={`Hide or flag specific sites${shown.length ? ` (${shown.length})` : ""}`} className="mt-3" hashes={["sellers"]}>
+        <div className="space-y-1.5">
+          {shown.map((r) => (
+            <div key={r.seller + r.mode} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm">
+              <span className="font-medium">{r.seller}</span>
+              <Badge tone={r.mode === "block" ? "bad" : "warn"}>{r.mode === "block" ? "Hidden" : "Flagged"}</Badge>
+              {r.note && <span className="truncate text-xs text-muted">{r.note}</span>}
+              <button className="ml-auto rounded p-1 text-muted hover:text-bad" onClick={() => onSave(rules.filter((x) => x !== r))} aria-label={`Remove the rule for ${r.seller}`}>
+                <Trash2 className="size-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 flex flex-wrap items-end gap-2">
+          <Field label="Site name" className="min-w-40 flex-1">
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Gotogate" />
+          </Field>
+          <Select value={mode} onChange={(e) => setMode(e.target.value as "warn" | "block")} aria-label="What to do">
+            <option value="warn">Flag it</option>
+            <option value="block">Hide it</option>
+          </Select>
+          <Button
+            disabled={!name.trim()}
+            onClick={() => {
+              add({ seller: name.trim(), mode });
+              setName("");
+            }}
+          >
+            <Plus className="size-4" /> Add
+          </Button>
+        </div>
+        {SELLER_PRESETS.some((r) => !has(r)) && (
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+            <span className="text-xs text-muted">Quick add:</span>
+            {SELLER_PRESETS.filter((r) => !has(r)).map((r) => (
+              <button key={r.seller + r.mode} title={r.note} onClick={() => add(r)} className="rounded-full border border-border px-2 py-0.5 text-xs text-muted hover:border-accent hover:text-accent">
+                {r.mode === "block" ? "Hide" : "Flag"} {r.seller}
+              </button>
+            ))}
           </div>
-        ))}
-        {!shown.length && <p className="text-sm text-muted">No rules yet.</p>}
-      </div>
-      <div className="mt-3 flex flex-wrap items-end gap-2">
-        <Field label="Seller name" className="flex-1">
-          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Gotogate" />
-        </Field>
-        <Select value={mode} onChange={(e) => setMode(e.target.value as "warn" | "block")}>
-          <option value="warn">Warn</option>
-          <option value="block">Hide</option>
-        </Select>
-        <Button
-          disabled={!name.trim()}
-          onClick={() => {
-            add({ seller: name.trim(), mode });
-            setName("");
-          }}
-        >
-          <Plus className="size-4" /> Add rule
-        </Button>
-      </div>
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        <span className="text-xs text-muted">Presets:</span>
-        {SELLER_PRESETS.filter((r) => !has(r)).map((r) => (
-          <button key={r.seller + r.mode} title={r.note} onClick={() => add(r)} className="rounded-full border border-border px-2 py-0.5 text-xs text-muted hover:border-accent hover:text-accent">
-            {r.mode === "block" ? "Hide" : "Warn"} {r.seller}
-          </button>
-        ))}
-      </div>
+        )}
+      </More>
     </Section>
   );
 }
@@ -464,48 +528,58 @@ function AlertsSection() {
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   if (!me?.user || !settings) return null;
+  const run = async (fn: () => Promise<void>) => {
+    setErr(null);
+    setBusy(true);
+    try {
+      await fn();
+    } catch (e) {
+      setErr((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
-    <Section title="Alerts" sub="Alerts fire when a watch reaches its target price or falls by its drop percentage. They always appear under the bell.">
-      <div className="space-y-3">
+    <Section title="Price alerts" sub="We'll tell you when a flight on your watchlist gets cheaper. Alerts also show under the bell at the top.">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="text-sm font-medium">Email me when prices drop</div>
+          <div className="truncate text-xs text-muted">Sent to {me.user.email}</div>
+        </div>
         <Switch
           checked={settings.emailAlerts}
           disabled={busy || (!me.features.email && !settings.emailAlerts)}
-          onChange={async (emailAlerts) => {
-            setErr(null);
-            setBusy(true);
-            try {
+          onChange={(emailAlerts) =>
+            run(async () => {
               await api("/settings", { method: "PATCH", body: { emailAlerts } });
               await refreshMe();
-            } catch (e) {
-              setErr((e as Error).message);
-            } finally {
-              setBusy(false);
-            }
-          }}
-          label={`Email to ${me.user.email}`}
+            })
+          }
         />
-        {settings.emailAlerts && (
-          <Button size="sm" variant="soft" disabled={busy} onClick={async () => {
-            setErr(null);
-            setBusy(true);
-            try {
+      </div>
+      {!me.features.email && <p className="mt-2 text-xs text-muted">Emails aren&apos;t available right now. Alerts still show under the bell.</p>}
+      <p className="mt-3 text-xs text-muted">
+        To choose the price you want, or how big a drop counts, edit a flight in your <Link href="/watches" className="text-accent hover:underline">watchlist</Link>.
+        You only get an email when that happens, not after every price check.
+      </p>
+      {settings.emailAlerts && (
+        <Button
+          size="sm"
+          variant="soft"
+          className="mt-3"
+          disabled={busy}
+          onClick={() =>
+            run(async () => {
               const r = await api<{ to: string }>("/settings/test-email", { method: "POST" });
               toast({ text: `Test email sent to ${r.to}` });
-            } catch (e) {
-              setErr((e as Error).message);
-            } finally {
-              setBusy(false);
-            }
-          }}>Send a test email</Button>
-        )}
-        {!me.features.email && <p className="text-xs text-muted">Email alerts are unavailable because email delivery has not been set up for FlightScout. Price alerts still appear under the bell.</p>}
-        <p className="text-xs text-muted">
-          Email alerts are off by default. Set a target price or drop percentage by editing a watch in <Link href="/watches" className="text-accent">Watchlist</Link>.
-          You will only receive an email when an alert condition is met, rather than after every price check.
-        </p>
-        {err && <ErrorNote>{err}</ErrorNote>}
-      </div>
+            })
+          }
+        >
+          Send me a test email
+        </Button>
+      )}
+      {err && <div className="mt-3"><ErrorNote>{err}</ErrorNote></div>}
     </Section>
   );
 }
@@ -519,7 +593,7 @@ function PasskeySection() {
   });
   const [err, setErr] = useState<string | null>(null);
   return (
-    <Section title="Passkeys" sub="Sign in with Face ID, Touch ID or a security key instead of a password.">
+    <Section title="Sign in with Face ID or Touch ID" sub="Use your face, fingerprint or phone instead of typing your password. This is called a passkey.">
       <div className="space-y-1.5">
         {data?.map((p) => (
           <div key={p.id} className="flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm">
@@ -540,7 +614,7 @@ function PasskeySection() {
         ))}
       </div>
       <Button
-        className="mt-3"
+        className={data?.length ? "mt-3" : ""}
         onClick={async () => {
           setErr(null);
           const r = await authClient.passkey.addPasskey({ name: navigator.platform || "This device" });
@@ -548,7 +622,7 @@ function PasskeySection() {
           mutate();
         }}
       >
-        <Plus className="size-4" /> Add a passkey
+        <Plus className="size-4" /> {data?.length ? "Add another device" : "Set it up on this device"}
       </Button>
       {err && <div className="mt-2"><ErrorNote>{err}</ErrorNote></div>}
     </Section>
@@ -565,10 +639,11 @@ function TokensSection() {
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const cmd = fresh ? `flightscout login --url ${origin} --token ${fresh}` : "";
   return (
-    <Section
-      title="API tokens"
-      sub="For the flightscout CLI, the MCP server and AI agents. Results they find are saved to your History and feed your watches."
-    >
+    <div id="tokens" className="scroll-mt-20">
+      <h3 className="text-sm font-semibold">Developer access</h3>
+      <p className="mb-3 text-xs text-muted">
+        API tokens for the flightscout command line tool, the MCP server and AI agents. What they find is saved to your history and updates your watchlist.
+      </p>
       <div className="flex gap-2">
         <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Token name, e.g. MacBook CLI" />
         <Button
@@ -624,6 +699,6 @@ function TokensSection() {
           </div>
         ))}
       </div>
-    </Section>
+    </div>
   );
 }
