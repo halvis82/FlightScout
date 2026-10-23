@@ -61,7 +61,10 @@ _WALLED = ("403", "429", "forbidden", "security verification", "just a moment", 
            "reset by server",
            # Southwest's shopping call and Zipair's results page answer GitHub's servers with nothing
            # (both passed from home 2026-10-06; "no flights" is matched only for Zipair on purpose)
-           "no shopping response", "zipair_browser: no flights")
+           "no shopping response", "zipair_browser: no flights",
+           # Expedia, Orbitz and Travelocity send GitHub's servers a results page without flights
+           # (all three passed from home 2026-10-23)
+           "expedia: the results page sent no flight list")
 
 
 @pytest.hookimpl(hookwrapper=True)
