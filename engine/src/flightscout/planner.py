@@ -32,7 +32,7 @@ from pydantic import BaseModel, Field, model_validator
 
 from concurrent.futures import TimeoutError as FutureTimeout
 
-from . import airports, farememory, fx, sellers
+from . import airports, clock, farememory, fx, sellers
 from .models import Itinerary, SearchQuery, Stopover, Trip
 from .search import endpoint_note, merge, place_name, to_currency
 from .sources import google, kiwi, kiwiweb
@@ -74,7 +74,7 @@ class PlanRequest(BaseModel):
     def _sane(self) -> "PlanRequest":
         if not self.origins or not self.destinations:
             raise ValueError("pick where you fly from and to")
-        if self.depart_start < date.today() - timedelta(days=1):
+        if self.depart_start < clock.today() - timedelta(days=1):
             raise ValueError(f"the departure date {self.depart_start} is in the past")
         if self.depart_end and self.depart_end < self.depart_start:
             raise ValueError("the latest departure is before the earliest")
@@ -645,7 +645,7 @@ class TripRequest(BaseModel):
             raise ValueError("add at least one place to visit")
         if self.latest_departure and self.latest_departure < self.earliest_departure:
             raise ValueError("the latest departure is before the earliest")
-        if self.earliest_departure < date.today() - timedelta(days=1):
+        if self.earliest_departure < clock.today() - timedelta(days=1):
             raise ValueError(f"the departure date {self.earliest_departure} is in the past")
         if not 1 <= self.adults <= 9:
             raise ValueError("1 to 9 adults")

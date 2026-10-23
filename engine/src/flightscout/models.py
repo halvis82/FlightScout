@@ -285,11 +285,13 @@ class SearchQuery(BaseModel):
 
     @model_validator(mode="after")
     def _sane(self) -> "SearchQuery":
-        from datetime import date as _d, timedelta as _td
+        from datetime import timedelta as _td
+
+        from . import clock
 
         if not self.origins or not self.destinations:
             raise ValueError("pick where you fly from and to")
-        if self.departure < _d.today() - _td(days=1):
+        if self.departure < clock.today() - _td(days=1):
             raise ValueError(f"the departure date {self.departure} is in the past")
         if self.return_date and self.return_date < self.departure:
             raise ValueError("the return date is before the departure date")

@@ -21,6 +21,18 @@ def _isolated_cache(tmp_path, monkeypatch):
     monkeypatch.setattr(cache, "DIR", tmp_path / "cache")
 
 
+# The saved airline answers the offline tests parse have fixed dates (October
+# 2026), so "is this date in the past" is judged from a fixed day there. Live
+# tests ask real sites about real dates and keep the real clock.
+@pytest.fixture(autouse=True)
+def _pinned_today(request, monkeypatch):
+    if "live" in request.keywords:
+        return
+    from flightscout import clock
+
+    monkeypatch.setattr(clock, "today", lambda: date(2026, 10, 1))
+
+
 def pytest_collection_modifyitems(config, items):
     live = os.environ.get("FLIGHTSCOUT_LIVE") == "1" or "live" in (config.getoption("-m") or "")
     if live:
