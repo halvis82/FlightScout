@@ -35,6 +35,22 @@ def get(code: str) -> dict | None:
     return next((a for a in all_airlines() if a["iata"] == code), None)
 
 
+def iata_for(code: str, name: str | None = None) -> str | None:
+    """A two character airline code for a code that isn't one: an ICAO code
+    ("SWA") or a combined one Google uses ("ASHA" for Alaska and Hawaiian),
+    matched by ICAO code, then by airline name."""
+    code = (code or "").upper()
+    for a in all_airlines():
+        if a.get("icao") == code:
+            return a["iata"]
+    if name:
+        n = name.strip().lower()
+        for a in all_airlines():
+            if a["name"].lower() == n:
+                return a["iata"]
+    return None
+
+
 def find(query: str = "", region: str | None = None, category: str | None = None,
          alliance: str | None = None) -> list[dict]:
     q = query.strip().lower()

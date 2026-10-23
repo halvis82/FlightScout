@@ -52,6 +52,15 @@ class Segment(BaseModel):
     duration_min: int | None = None
     aircraft: str | None = None
 
+    @model_validator(mode="after")
+    def _two_character_carrier(self) -> "Segment":
+        # logos, airline links and seller rules all key on the IATA code
+        if len(self.carrier) != 2:
+            from .airlines import iata_for
+
+            self.carrier = iata_for(self.carrier, self.carrier_name) or self.carrier
+        return self
+
 
 class Slice(BaseModel):
     """A directional journey (outbound or inbound) made of segments."""

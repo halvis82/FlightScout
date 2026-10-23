@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from conftest import ticket
 
@@ -162,3 +162,16 @@ def test_unnamed_agency_is_hidden_by_default(dt):
     shown = sellers.apply_rules([trip], {"*unreliable": "warn"})
     assert len(shown) == 1
     assert any("unknown seller" in w for w in shown[0].tickets[0].warnings)
+
+
+def test_segment_carrier_is_always_a_two_character_code():
+    from flightscout.models import Segment
+
+    t = datetime(2026, 11, 6, 16, 45)
+    def seg(c, n=None):
+        return Segment(origin="SAN", destination="HNL", departure=t, arrival=t, carrier=c, carrier_name=n).carrier
+
+    assert seg("ASHA", "Alaska Airlines") == "AS"  # Google's code for Alaska and Hawaiian together
+    assert seg("SWA") == "WN"  # ICAO code
+    assert seg("KL") == "KL"
+    assert seg("ZZZZ", "Nobody Air") == "ZZZZ"  # unknown stays as it came
