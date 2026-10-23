@@ -2,7 +2,6 @@
 import { createContext, memo, useContext, useState } from "react";
 import { ArrowRight, ChevronDown, ExternalLink, Eye, Moon, TriangleAlert } from "lucide-react";
 import { Badge, Button } from "./ui";
-import { Code } from "./place";
 import { airport, cityOf } from "@/lib/airports-client";
 import { inCurrency, airlineByCode, airlineLink, useAirlines, type Airline } from "@/lib/airlines";
 import { useApp } from "./app-context";
@@ -89,7 +88,7 @@ export const TripCard = memo(function TripCard({
               {trip.note && <span className="text-warn">{trip.note}</span>}
               {trip.stopovers.map((s) => (
                 <span key={s.airport + s.hours}>
-                  {stayLabel(s, slices)} in <Code code={s.airport} compact />
+                  {stayLabel(s, slices)} in <span title={s.airport}>{cityOf(s.airport) ?? s.airport}</span>
                 </span>
               ))}
               {badges.length > 0 && (
@@ -363,7 +362,8 @@ function TicketBlock({ it, index }: { it: Itinerary; index?: number }) {
           {index && <span className="font-semibold">Ticket {index}</span>}
           <span className="text-muted">sold via</span>
           <span className="font-medium">{sellerName(it)}</span>
-          <Badge>{SOURCE_LABEL[it.source] ?? it.source}</Badge>
+          {/* where FlightScout found it, when that isn't the seller itself */}
+          {SOURCE_LABEL[it.source] && SOURCE_LABEL[it.source] !== sellerName(it) && <Badge>via {SOURCE_LABEL[it.source]}</Badge>}
           {badges.map((b) => (
             <Badge key={b.label} tone={b.tone} title={b.title}>
               {b.label}
