@@ -1,9 +1,9 @@
 name: Catch up deploys
 
-# Vercel's free plan allows 100 deployments a day and doesn't retry the ones
-# it skipped. Every hour: if the newest commit on main wasn't deployed because
-# of that limit, ask Vercel again through each project's deploy hook (a hook
-# deploys main). A deploy that is still building is left alone.
+# Every hour, make sure each project runs the newest change to its folder, and
+# ask Vercel again through its deploy hook (a hook deploys main) when it
+# doesn't: the free plan's 100 deployments a day skips some, and a skipped
+# build is never retried. A deploy that is still building is left alone.
 on:
   schedule:
     - cron: "23 * * * *"
@@ -30,11 +30,22 @@ jobs:
             key=$([ "$project" = flightscout ] && echo web || echo engine)
             deployed=$(echo "$live" | jq -r ".${key} // empty")
             if [ "$deployed" = "$sha" ]; then echo "$project: main is live"; continue; fi
+            # A project only rebuilds when its own folder changed, so it may run an
+            # older commit. That's fine as long as it has the newest change to its folder.
+            missing=""
+            if [ -n "$deployed" ]; then
+              last=$(gh api "repos/${{ github.repository }}/commits?sha=$sha&path=$key&per_page=1" -q '.[0].sha')
+              rel=$(gh api "repos/${{ github.repository }}/compare/$last...$deployed" -q .status 2>/dev/null || echo unknown)
+              if [ "$rel" = identical ] || [ "$rel" = ahead ]; then echo "$project: its newest change is live"; continue; fi
+              missing=1
+              echo "$project: live $deployed lacks $last ($rel)"
+            fi
             line=$(gh api "repos/${{ github.repository }}/commits/$sha/status" \
               -q "[.statuses[] | select(.context == \"Vercel – $project\")][0] | \"\(.state)|\(.description)\"")
             state=${line%%|*}; desc=${line#*|}
             echo "$project: ${state:-no status} ${desc}"
-            if [ "$state" != "success" ] && [ "$state" != "pending" ] && echo "$desc" | grep -qi "rate limit"; then
+            [ "$state" = "pending" ] && continue # still building
+            if [ -n "$missing" ] || { [ "$state" != "success" ] && echo "$desc" | grep -qi "rate limit"; }; then
               var="HOOK_${project//-/_}"
               if [ -n "${!var}" ]; then
                 curl -fsS -X POST "${!var}" > /dev/null && echo "  asked Vercel to deploy $project again"
