@@ -1,6 +1,6 @@
 import "server-only";
 import { betterAuth } from "better-auth";
-import { APIError } from "better-auth/api";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { passkey } from "@better-auth/passkey";
@@ -40,8 +40,20 @@ export const allowedSignupEmails = (process.env.ALLOWED_SIGNUP_EMAILS ?? "")
 export const INVITE_ONLY_MESSAGE =
   "Sign ups are invite only for now. You can keep using FlightScout as a guest: search, smart routes, explore and a local watchlist all work without an account.";
 
+const mayJoin = (email: unknown) => allowedSignupEmails.includes("*") || allowedSignupEmails.includes(String(email ?? "").toLowerCase());
+
 export const auth = betterAuth({
   baseURL,
+  // Turn strangers away before sign up starts: once email confirmation is on,
+  // a failed sign up answers like a successful one (so nobody can probe which
+  // addresses have accounts) and the invite only message would never show.
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path === "/sign-up/email" && !mayJoin(ctx.body?.email)) {
+        throw new APIError("FORBIDDEN", { message: INVITE_ONLY_MESSAGE });
+      }
+    }),
+  },
   secret: process.env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -77,7 +89,7 @@ export const auth = betterAuth({
       create: {
         // Enforced for every sign up path (email, OAuth, passkey).
         before: async (user) => {
-          if (!allowedSignupEmails.includes("*") && !allowedSignupEmails.includes(String(user.email ?? "").toLowerCase())) {
+          if (!mayJoin(user.email)) {
             throw new APIError("FORBIDDEN", { message: INVITE_ONLY_MESSAGE });
           }
           return { data: user };
