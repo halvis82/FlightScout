@@ -79,9 +79,11 @@ def test_weekend_preset_picks_friday_to_sunday(monkeypatch):
         return search_mod.SearchResult(query=q, trips=[])
 
     monkeypatch.setattr("flightscout.search.search", fake)
-    runner.invoke(app, ["search", "OSL", "CPH", "2026-10-06", "--preset", "weekend", "--no-save", "--json"])
+    tue = date.today() + timedelta(days=30)
+    tue += timedelta(days=(1 - tue.weekday()) % 7)
+    runner.invoke(app, ["search", "OSL", "CPH", tue.isoformat(), "--preset", "weekend", "--no-save", "--json"])
     q = seen["q"]
-    assert q.departure == date(2026, 10, 9) and q.return_date == date(2026, 10, 11)
+    assert q.departure == tue + timedelta(days=3) and q.return_date == tue + timedelta(days=5)
     assert q.departure_flex_days == 1 and q.return_flex_days == 1
 
 

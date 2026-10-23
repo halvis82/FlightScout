@@ -78,7 +78,8 @@ def test_finnair_round_trip_mixed_currency(monkeypatch):
         return ([{**one[0], "total": 51.48}], "EUR") if o == "HEL" else ([{**back[0], "total": 1000.0}], "SEK")
 
     monkeypatch.setattr(m, "_bound", fake_bound)
-    its = m.search(_q_a("HEL", "ARN", "2026-10-21", "2026-10-25"))
+    dep = date.today() + timedelta(days=30)
+    its = m.search(_q_a("HEL", "ARN", dep.isoformat(), (dep + timedelta(days=4)).isoformat()))
     assert its and its[0].currency == "EUR" and its[0].price == 151.48  # SEK return converted
     assert m.parse({}) == ([], None)  # NO_FLIGHTS_FOUND day
 
