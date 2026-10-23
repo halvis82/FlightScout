@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { clearFrom, fresh, pickAirport, watchErrors } from "./helpers";
+import { clearFrom, fresh, pickAirport, watchErrors, inDays } from "./helpers";
 
 test.describe("search", () => {
   test("picking From and To searches by itself (no Search click) and streams results", async ({ page }) => {
@@ -16,7 +16,7 @@ test.describe("search", () => {
   });
 
   test("date arrow re-searches and keeps old results visible meanwhile", async ({ page }) => {
-    await page.goto("/?from=OSL&to=CPH&tt=oneway&d=2026-11-19");
+    await page.goto(`/?from=OSL&to=CPH&tt=oneway&d=${inDays(45)}`);
     await expect(page.getByText(/\d+ flights/).first()).toBeVisible();
     const before = await page.locator("form").innerText();
     await page.locator("form button[aria-label*='later'], form button[aria-label*='Next']").first().click();
@@ -46,7 +46,7 @@ test.describe("search", () => {
   });
 
   test("logo resets and tabs keep the search", async ({ page }) => {
-    await page.goto("/?from=OSL&to=CPH&tt=oneway&d=2026-11-19");
+    await page.goto(`/?from=OSL&to=CPH&tt=oneway&d=${inDays(45)}`);
     await expect(page.getByText(/\d+ flights/).first()).toBeVisible();
     await page.getByRole("link", { name: "Airlines", exact: true }).click();
     await page.getByRole("link", { name: "Search", exact: true }).first().click();
@@ -57,10 +57,10 @@ test.describe("search", () => {
 
   test("multi-city searches in order", async ({ page }) => {
     const legs = [
-      { to: ["JFK"], date: "2026-11-03", flex: 1 },
-      { to: ["SAN"], date: "2026-11-10", flex: 1 },
+      { to: ["JFK"], date: inDays(30), flex: 1 },
+      { to: ["SAN"], date: inDays(37), flex: 1 },
     ];
-    await page.goto(`/?from=SAN&tt=multicity&d=2026-11-03&ml=${encodeURIComponent(JSON.stringify(legs))}`);
+    await page.goto(`/?from=SAN&tt=multicity&d=${inDays(30)}&ml=${encodeURIComponent(JSON.stringify(legs))}`);
     await page.getByRole("button", { name: "Search", exact: true }).click();
     await expect(page.getByText(/\$[\d,]+/).first()).toBeVisible({ timeout: 90_000 });
     await expect(page.getByText("SAN → JFK → SAN")).toBeVisible();
@@ -68,7 +68,7 @@ test.describe("search", () => {
 });
 
 test("switching currency converts every price on screen", async ({ page }) => {
-  await page.goto("/?from=OSL&to=CPH&tt=oneway&d=2026-11-19");
+  await page.goto(`/?from=OSL&to=CPH&tt=oneway&d=${inDays(45)}`);
   await expect(page.getByText(/\d+ flights/).first()).toBeVisible();
   await page.getByRole("button", { name: /^Currency:/ }).first().click();
   await page.getByRole("menuitemradio", { name: /NOK/ }).first().click();
@@ -88,7 +88,7 @@ test("keyboard only: type an airport and press Enter", async ({ page }) => {
 });
 
 test("recent searches: one click repeats a past search", async ({ page }) => {
-  await page.goto("/?from=OSL&to=CPH&tt=oneway&d=2026-11-19");
+  await page.goto(`/?from=OSL&to=CPH&tt=oneway&d=${inDays(45)}`);
   await expect(page.getByText(/\d+ flights/).first()).toBeVisible();
   await page.getByRole("link", { name: "FlightScout" }).first().click();
   await expect(page.locator("form")).not.toContainText("CPH");
@@ -101,9 +101,7 @@ test("recent searches: one click repeats a past search", async ({ page }) => {
 test("streams results with a clear searching and complete state", async ({ page }) => {
   test.setTimeout(200_000);
   // a date nobody searched in the last 20 minutes, so it isn't answered from the cache at once
-  const day = String(1 + Math.floor(Math.random() * 27)).padStart(2, "0");
-  const month = ["2027-01", "2027-02", "2027-03"][Math.floor(Math.random() * 3)];
-  await page.goto(`/?from=SEA&to=SFO&tt=oneway&d=${month}-${day}&smart=0`);
+  await page.goto(`/?from=SEA&to=SFO&tt=oneway&d=${inDays(60 + Math.floor(Math.random() * 90))}&smart=0`);
   const searching = page.locator("main").getByText(/^Searching/);
   const done = page.getByText(/^\d+ flights$/);
   // the quick sources answer in 2 to 3 s, so the page may already read as done at the first check

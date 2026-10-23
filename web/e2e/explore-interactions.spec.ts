@@ -1,11 +1,14 @@
 import { expect, test } from "@playwright/test";
+import { yearFor } from "./helpers";
+
+const Y = yearFor("10-13");
 
 test("map labels stay anchored on hover and Around honors exact dates", async ({ page }) => {
-  const offer = { origin: "SAN", destination: "CDG", city: "Paris", price: 600, currency: "USD", departure: "2027-10-15", return_date: "2027-10-22", source: "google", lat: 49, lon: 2.5 };
+  const offer = { origin: "SAN", destination: "CDG", city: "Paris", price: 600, currency: "USD", departure: `${Y}-10-15`, return_date: `${Y}-10-22`, source: "google", lat: 49, lon: 2.5 };
   await page.route("https://tiles.openfreemap.org/styles/**", (route) => route.fulfill({ json: { version: 8, sources: {}, layers: [] } }));
-  await page.route("**/explore/cached?**", (route) => route.fulfill({ json: { items: [{ ...offer, price: 100, departure: "2027-10-13" }] } }));
+  await page.route("**/explore/cached?**", (route) => route.fulfill({ json: { items: [{ ...offer, price: 100, departure: `${Y}-10-13` }] } }));
   await page.route("**/explore", (route) => route.fulfill({ json: { items: [offer, { ...offer, destination: "ORY", city: "Orly", price: 700, lon: 12.5 }] } }));
-  await page.goto("/?from=SAN&tt=roundtrip&d=2027-10-15&r=2027-10-22");
+  await page.goto(`/?from=SAN&tt=roundtrip&d=${Y}-10-15&r=${Y}-10-22`);
   await page.getByRole("radio", { name: /Around/ }).click();
   const label = page.locator('[data-label]:not(.fs-dot)').filter({ hasText: "Paris" });
   await expect(label).toHaveText("Paris $600");
@@ -28,15 +31,15 @@ test("map labels stay anchored on hover and Around honors exact dates", async ({
 test("Around uses separate departure and return windows, then restores Any dates @mobile", async ({ page }) => {
   const base = { origin: "SAN", price: 600, currency: "USD", source: "google", lat: 49, lon: 2.5 };
   const items = [
-    { ...base, destination: "CDG", city: "Paris", departure: "2027-10-15", return_date: "2027-10-22" },
-    { ...base, destination: "LHR", city: "London", departure: "2027-10-16", return_date: "2027-10-22" },
-    { ...base, destination: "FRA", city: "Frankfurt", departure: "2027-10-15", return_date: "2027-10-24" },
-    { ...base, destination: "FCO", city: "Rome", departure: "2027-10-17", return_date: "2027-10-22" },
+    { ...base, destination: "CDG", city: "Paris", departure: `${Y}-10-15`, return_date: `${Y}-10-22` },
+    { ...base, destination: "LHR", city: "London", departure: `${Y}-10-16`, return_date: `${Y}-10-22` },
+    { ...base, destination: "FRA", city: "Frankfurt", departure: `${Y}-10-15`, return_date: `${Y}-10-24` },
+    { ...base, destination: "FCO", city: "Rome", departure: `${Y}-10-17`, return_date: `${Y}-10-22` },
   ];
   await page.route("https://tiles.openfreemap.org/styles/**", (route) => route.fulfill({ json: { version: 8, sources: {}, layers: [] } }));
   await page.route("**/explore/cached?**", (route) => route.fulfill({ json: { items } }));
   await page.route("**/explore", (route) => route.fulfill({ json: { items } }));
-  await page.goto("/?from=SAN&tt=roundtrip&d=2027-10-15&r=2027-10-22");
+  await page.goto(`/?from=SAN&tt=roundtrip&d=${Y}-10-15&r=${Y}-10-22`);
   const rows = page.locator("section .cursor-pointer");
   await expect(rows).toHaveCount(4);
   await page.getByRole("radio", { name: /Around/ }).click();

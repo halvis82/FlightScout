@@ -1,21 +1,26 @@
 import { expect, test } from "@playwright/test";
+import { isLeap, yearFor } from "./helpers";
+
+// an October to January stretch, and a January before a 28 day February, always in the future
+const Y = yearFor("10-15");
+const J = yearFor("01-26", (y) => !isLeap(y));
 
 test("calendar accepts month and day typing, arrows and return editing @mobile", async ({ page }) => {
-  await page.goto("/?from=SAN&tt=roundtrip&d=2027-10-15&r=2027-10-22");
+  await page.goto(`/?from=SAN&tt=roundtrip&d=${Y}-10-15&r=${Y}-10-22`);
   await page.getByRole("button", { name: /^Departure:.*Open calendar/ }).click();
   const dialog = page.getByRole("dialog", { name: "Choose dates" });
   await expect(dialog).toBeVisible();
-  await expect(dialog.locator('[data-date="2027-10-15"]')).toBeFocused();
+  await expect(dialog.locator(`[data-date="${Y}-10-15"]`)).toBeFocused();
   await page.keyboard.type("dec");
   await expect(page.getByRole("button", { name: /^Departure:.*Dec 15.*Open calendar/ })).toBeVisible();
   await page.keyboard.type("23");
-  await expect(dialog.locator('[data-date="2027-12-23"]')).toBeFocused();
+  await expect(dialog.locator(`[data-date="${Y}-12-23"]`)).toBeFocused();
   await page.keyboard.press("ArrowRight");
-  await expect(dialog.locator('[data-date="2027-12-24"]')).toBeFocused();
+  await expect(dialog.locator(`[data-date="${Y}-12-24"]`)).toBeFocused();
   await page.keyboard.press("ArrowDown");
-  await expect(dialog.locator('[data-date="2027-12-31"]')).toBeFocused();
+  await expect(dialog.locator(`[data-date="${Y}-12-31"]`)).toBeFocused();
   await page.keyboard.press("ArrowRight");
-  await expect(dialog.locator('[data-date="2028-01-01"]')).toBeFocused();
+  await expect(dialog.locator(`[data-date="${Y + 1}-01-01"]`)).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(dialog.getByText("Pick return", { exact: true })).toBeVisible();
   await page.keyboard.type("19");
@@ -25,26 +30,26 @@ test("calendar accepts month and day typing, arrows and return editing @mobile",
 });
 
 test("one-way typing handles full month names, invalid days and all arrow directions @mobile", async ({ page }) => {
-  await page.goto("/?from=SAN&tt=oneway&d=2027-01-31");
+  await page.goto(`/?from=SAN&tt=oneway&d=${J}-01-31`);
   await page.getByRole("button", { name: /^Departure:.*Open calendar/ }).click();
   const dialog = page.getByRole("dialog", { name: "Choose dates" });
-  await expect(dialog.locator('[data-date="2027-01-31"]')).toBeFocused();
+  await expect(dialog.locator(`[data-date="${J}-01-31"]`)).toBeFocused();
   await expect(dialog.getByRole("textbox")).toHaveCount(0);
   await page.keyboard.type("february");
-  await expect(dialog.locator('[data-date="2027-02-28"]')).toBeFocused();
+  await expect(dialog.locator(`[data-date="${J}-02-28"]`)).toBeFocused();
   await page.keyboard.type("31");
   await expect(page.getByRole("button", { name: /^Departure:.*Feb 3.*Open calendar/ })).toBeVisible();
   await page.keyboard.press("ArrowLeft");
-  await expect(dialog.locator('[data-date="2027-02-02"]')).toBeFocused();
+  await expect(dialog.locator(`[data-date="${J}-02-02"]`)).toBeFocused();
   await page.keyboard.press("ArrowUp");
-  await expect(dialog.locator('[data-date="2027-01-26"]')).toBeFocused();
+  await expect(dialog.locator(`[data-date="${J}-01-26"]`)).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(dialog).not.toBeVisible();
   await expect(page.getByRole("button", { name: /^Departure:.*Jan 26.*Open calendar/ })).toBeVisible();
 });
 
 test("trip and flexibility controls have larger hit targets without mobile overflow @mobile", async ({ page }) => {
-  await page.goto("/?from=SAN&tt=roundtrip&d=2027-10-15&r=2027-10-22");
+  await page.goto(`/?from=SAN&tt=roundtrip&d=${Y}-10-15&r=${Y}-10-22`);
   for (const name of ["Round trip", "One way", "Multi-city"]) {
     const button = page.getByRole("radio", { name, exact: true });
     await expect(button).toBeVisible();

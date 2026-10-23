@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { clearFrom, fresh, pickAirport } from "./helpers";
+import { clearFrom, fresh, pickAirport, inDays } from "./helpers";
 
 test.describe("explore", () => {
   test("appears with only a From, fills fast, and a map dot searches that city", async ({ page }) => {
@@ -26,7 +26,7 @@ test.describe("explore", () => {
   });
 
   test("price slider and date toggle filter the list", async ({ page }) => {
-    await page.goto("/?from=SAN&tt=roundtrip&d=2026-11-06&r=2026-11-13");
+    await page.goto(`/?from=SAN&tt=roundtrip&d=${inDays(33)}&r=${inDays(40)}`);
     const rows = page.locator("section .cursor-pointer");
     await expect.poll(() => rows.count(), { timeout: 30_000 }).toBeGreaterThan(20);
     await page.getByRole("radio", { name: /Around/ }).click();
@@ -44,7 +44,7 @@ test.describe("explore", () => {
   });
 
   test("clearing the destination returns to explore @mobile", async ({ page }) => {
-    await page.goto("/?from=OSL&to=CPH&tt=oneway&d=2026-11-19");
+    await page.goto(`/?from=OSL&to=CPH&tt=oneway&d=${inDays(45)}`);
     await expect(page.getByText(/\d+ flights/).first()).toBeVisible();
     await page.getByRole("button", { name: "Remove CPH" }).click();
     await expect(page.getByText(/Cheapest places from/)).toBeVisible();
