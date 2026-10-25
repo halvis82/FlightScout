@@ -10,6 +10,11 @@ on:
   schedule:
     - cron: "40 7 * * *"
   workflow_dispatch:
+    inputs:
+      only:
+        description: "Run only the live engine tests matching this pytest -k expression (skips the site tests)"
+        required: false
+        default: ""
 
 jobs:
   engine-live:
@@ -34,15 +39,18 @@ jobs:
         env:
           FLIGHTSCOUT_LIVE: "1"
           FLIGHTSCOUT_LIVE_STATE: .live-failures.json
-        run: uv run --extra browser pytest -q -m live --reruns 1 --reruns-delay 30
+          ONLY: ${{ inputs.only }}
+        run: uv run --extra browser pytest -q -m live --reruns 1 --reruns-delay 30 ${ONLY:+-k "$ONLY"}
+      # a run of only some tests would forget the others' failures
       - name: Save this run's live failures
-        if: always()
+        if: always() && !inputs.only
         uses: actions/cache/save@v6
         with:
           path: engine/.live-failures.json
           key: live-failures-${{ github.run_id }}-${{ github.run_attempt }}
 
   site:
+    if: ${{ !inputs.only }}
     runs-on: ubuntu-24.04
     defaults:
       run:
