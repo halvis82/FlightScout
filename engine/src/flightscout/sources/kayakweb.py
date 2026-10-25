@@ -13,10 +13,14 @@ exactly what the results page shows.
 
 The market (and currency) comes from the domain: kayak.com prices in USD,
 kayak.no in NOK and so on (see BRANDS). Other currencies use the .com site
-and search() converts. Unofficial: fails soft."""
+and search() converts. When the bot check turns the plain client away
+(BOT_CAPTCHA_REDIRECT, seen from home and Vercel since October 2026), the
+same polls run inside the shared Chrome, which it lets through.
+Unofficial: fails soft."""
 
 from __future__ import annotations
 
+import json
 import re
 import threading
 import time
@@ -26,6 +30,7 @@ from curl_cffi import requests as cr
 
 from .. import cache
 from ..models import Fare, Itinerary, Offer, SearchQuery, Segment, Slice
+from . import _browser
 
 POLL = "/i/api/search/dynamic/flights/poll"
 BRANDS: dict[str, dict] = {
@@ -94,32 +99,71 @@ def _body(o: str, d: str, dep: date, ret: date | None, adults: int, cabin: str, 
             "searchMetaData": {"pageNumber": 1, "searchTypes": [], "skipResultsInSecondPhase": True}}
 
 
+class _Turned(RuntimeError):
+    """The bot check turned the plain client away."""
+
+
 def _fetch(brand: str, host: str, o: str, d: str, dep: date, ret: date | None, adults: int, cabin: str) -> dict:
     key = f"kayakweb:{host}:{o}:{d}:{dep}:{ret}:{adults}:{cabin}"
     if (hit := cache.get(key, ttl=20 * 60)) is not None:
         return hit
     s = _session(brand)
     page = search_url(brand, host, o, d, dep, ret, adults, cabin)
-    r = s.get(page, timeout=30)
-    m = re.search(r'"formtoken":"([^"]+)"', r.text)
-    if r.status_code != 200 or not m:
-        raise RuntimeError(f"{brand}: results page HTTP {r.status_code}, no form token (bot check?)")
-    hdr = {"Origin": f"https://{host}", "Referer": page, "Accept": "application/json", "X-CSRF": m.group(1)}
+
+    def post(token: str, body: dict) -> tuple[int, str]:
+        hdr = {"Origin": f"https://{host}", "Referer": page, "Accept": "application/json", "X-CSRF": token}
+        r = s.post(f"https://{host}{POLL}", json=body, headers=hdr, timeout=30)
+        return r.status_code, r.text
+
+    try:
+        r = s.get(page, timeout=30)
+        m = re.search(r'"formtoken":"([^"]+)"', r.text)
+        if r.status_code != 200 or not m:
+            raise _Turned(f"{brand}: results page HTTP {r.status_code}, no form token (bot check?)")
+        data = _poll(brand, lambda body: post(m.group(1), body), o, d, dep, ret, adults, cabin)
+    except _Turned:
+        if not _browser.available():
+            raise
+        data = _browser_fetch(brand, page, o, d, dep, ret, adults, cabin)
+    if data.get("status") == "complete":  # a partial answer is shown, not remembered
+        cache.put(key, data)
+    return data
+
+
+def _poll(brand: str, post, o: str, d: str, dep: date, ret: date | None, adults: int, cabin: str) -> dict:
     sid, data, end = None, {}, time.time() + 45
     while time.time() < end:
-        r = s.post(f"https://{host}{POLL}", json=_body(o, d, dep, ret, adults, cabin, sid), headers=hdr, timeout=30)
-        if r.status_code != 200:
-            raise RuntimeError(f"{brand}: poll HTTP {r.status_code} {r.text[:150]!r}")
-        data = r.json()
+        status, text = post(_body(o, d, dep, ret, adults, cabin, sid))
+        if status != 200:
+            err = _Turned if "BOT_CAPTCHA" in text or status in (403, 429) else RuntimeError
+            raise err(f"{brand}: poll HTTP {status} {text[:150]!r}")
+        data = json.loads(text)
         sid = data.get("searchId") or sid
         if data.get("status") == "complete":
             break
         time.sleep(2.5)
     if data.get("status") != "complete" and not data.get("results"):
         raise RuntimeError(f"{brand}: search did not complete")
-    if data.get("status") == "complete":  # a partial answer is shown, not remembered
-        cache.put(key, data)
     return data
+
+
+def _browser_fetch(brand: str, url: str, o: str, d: str, dep: date, ret: date | None, adults: int,
+                   cabin: str) -> dict:
+    def job(page) -> dict:
+        page.goto(url, wait_until="domcontentloaded", timeout=45000)
+        m = re.search(r'"formtoken":"([^"]+)"', page.content())
+        if not m:
+            raise RuntimeError(f"{brand}: no form token in the browser either (captcha?)")
+
+        def post(body: dict) -> tuple[int, str]:
+            return page.evaluate("""async ([u, token, body]) => {
+                const r = await fetch(u, {method: 'POST', body: JSON.stringify(body), headers: {
+                    'content-type': 'application/json', accept: 'application/json', 'x-csrf': token}});
+                return [r.status, await r.text()]; }""", [POLL, m.group(1), body])
+
+        return _poll(brand, post, o, d, dep, ret, adults, cabin)
+
+    return _browser.run(job, brand, timeout=120)
 
 
 def _slice(leg_id: str, data: dict) -> Slice:
