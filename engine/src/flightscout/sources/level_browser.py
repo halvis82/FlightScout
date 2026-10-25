@@ -5,8 +5,8 @@ open but only has one "from" price per day); headless Chrome solves it by
 itself in a second or two.
 
 We open the site's own flight selection URL (/Flight/Select?o1=..&d1=..) and
-read the Remix loader data embedded in the server rendered page
-(``window.__remixContext``): every journey with every fare family and its
+read the route's loader data from the running page (React Router since
+October 2026, Remix before): every journey with every fare family and its
 ``totalPrice`` (fare plus taxes and fees, all passengers). The page shows the
 price rounded up to the euro (295.04 -> "€296"). Round trips come from one
 page (r=true): LEVEL prices each direction on it, cheaper than two one ways.
@@ -19,9 +19,8 @@ the euro like the page shows it."""
 
 from __future__ import annotations
 
-import json
 import logging
-import re
+import time
 from datetime import date
 
 from .. import cache, fx
@@ -44,7 +43,14 @@ FEEDERS = {
     "SDR", "SID", "SPC", "SPU", "STR", "SVQ", "SXB", "TFN", "TNG", "TOS", "TRN", "TUN", "VCE", "VGO", "VIE", "VLC",
     "VLL", "XRY", "ZRH",
 }
-_CTX = re.compile(r"window\.__remixContext = (\{.*?\});</script>", re.S)
+# The flight selection route's loader data in the running app (React Router
+# since October 2026, Remix before).
+_LOADER = """() => {
+  const r = window.__reactRouterDataRouter || window.__remixRouter;
+  const ld = r && r.state && r.state.loaderData;
+  const k = ld && Object.keys(ld).find(k => k.startsWith("routes/Flight.Select"));
+  return k && ld[k] && ld[k].flights ? ld[k] : null;
+}"""
 _CABIN = {"economy": "Economy", "premium": "PremiumEconomy"}
 
 
@@ -76,15 +82,6 @@ def deeplink(origin: str, dest: str, dep: date, ret: date | None = None, adults:
     q += (f"&ADT={adults}&CHD=0&INL=0&r={'true' if ret else 'false'}&mm=false"
           f"&forcedCurrency={currency}&forcedCulture=en-US&newecom=true")
     return f"{SITE}/Flight/Select?{q}"
-
-
-def loader(html: str) -> dict:
-    """The flight selection route's Remix loader data from the page HTML."""
-    m = _CTX.search(html)
-    if not m:
-        raise ValueError("no __remixContext in the page")
-    ld = json.loads(m.group(1))["state"]["loaderData"]
-    return next(v for k, v in ld.items() if k.startswith("routes/Flight.Select"))
 
 
 def _journeys(js: list[dict] | None, cabin: str) -> list[dict]:
@@ -119,30 +116,27 @@ def parse(data: dict, cabin: str = "economy") -> tuple[list[dict], list[dict] | 
 
 
 def _fetch(url: str) -> dict:
-    def job(page) -> str:
-        got = _browser.capture(page, lambda: page.goto(url, wait_until="commit", timeout=60000),
-                               lambda u: u.startswith(f"{SITE}/Flight/Select?"), timeout=50,
-                               body=lambda t: "window.__remixContext = " in t)
-        if got:
-            return got[-1][1]
-        # since 2026-09 the page after the bot check often isn't a response we
-        # can read (the challenge reloads it): take the rendered page instead
-        try:
-            page.wait_for_function("() => window.__remixContext && window.__remixContext.state", timeout=15000)
-        except Exception:
-            return ""
-        return page.content() if page.url.startswith(f"{SITE}/Flight/Select?") else ""
+    def job(page) -> dict | None:
+        page.goto(url, wait_until="commit", timeout=60000)
+        end = time.time() + 50
+        while time.time() < end:
+            try:
+                if data := page.evaluate(_LOADER):
+                    return data
+            except Exception:  # the bot check reloads the page once or twice
+                pass
+            page.wait_for_timeout(500)
+        return None
 
     try:
-        html = _browser.run(job, "level", timeout=120)
+        data = _browser.run(job, "level", timeout=120)
     except Exception as e:  # the challenge now and then closes the tab: once more on a fresh one
         log.info("level: retrying after %s", e)
-        html = ""
-    if not html:
-        html = _browser.run(job, "level", timeout=120)
-    if not html:
+        data = None
+    if not data:
+        data = _browser.run(job, "level", timeout=120)
+    if not data:
         raise RuntimeError("level: no flight page (Akamai challenge not passed?)")
-    data = loader(html)
     routes = (data.get("routes") or {}).get("originsWithDestinations")
     if routes:
         cache.put("level:routes", {o: sorted(x["code"] for x in v) for o, v in routes.items()})
