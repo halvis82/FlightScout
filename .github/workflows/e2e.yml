@@ -61,7 +61,8 @@ jobs:
           E2E_BASE_URL: ${{ secrets.FLIGHTSCOUT_API_URL }}
         run: npx playwright test
       - uses: actions/upload-artifact@v7
-        if: failure()
+        if: always()  # also the traces of flaky tests (a failed first try that passed on retry)
         with:
           name: playwright-traces
           path: /tmp/flightscout-e2e  # playwright.config.ts outputDir (os.tmpdir())
+          if-no-files-found: ignore
