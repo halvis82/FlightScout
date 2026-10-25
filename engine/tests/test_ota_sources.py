@@ -58,6 +58,26 @@ def test_booking_search_dedupes_sorts(monkeypatch):
     assert calls == ["CHEAPEST", "BEST"] and len(its) == 3  # same offers on both pages, merged
 
 
+
+class _Resp:
+    def __init__(self, status, text="", ctype="application/json"):
+        self.status_code, self.text, self.headers = status, text, {"content-type": ctype}
+
+    def json(self):
+        return json.loads(self.text)
+
+
+def test_booking_waf_challenge_runs_in_the_browser(monkeypatch):
+    """Plain clients get 429 "Rate limit exceeded" behind Booking's AWS WAF:
+    the same request then runs in the shared Chrome."""
+    monkeypatch.setattr(booking, "_session", lambda: type("S", (), {"get": lambda *a, **k: _Resp(429, "{}")})())
+    monkeypatch.setattr(_browser, "available", lambda headful=False: True)
+    asked = []
+    monkeypatch.setattr(booking, "_browser_fetch", lambda p: asked.append(p["sort"]) or load("booking_lax_jfk.json"))
+    p = booking._params("LAX", "JFK", date(2026, 11, 6), None, 1, "economy", "USD")
+    assert booking._fetch(p)["flightOffers"] and asked == ["CHEAPEST"]
+
+
 # KAYAK family
 
 def test_kayak_parse_cheapest_provider_and_offers():
@@ -151,3 +171,17 @@ def test_live_tripcom():
     its = tripcom_browser.search(q("LAX", "JFK", str(D)))
     assert its and all(i.source == "tripcom" and i.price > 0 for i in its)
     assert all(i.slices[0].origin == "LAX" and i.slices[0].destination == "JFK" for i in its)
+
+
+def test_kayak_bot_check_runs_in_the_browser(monkeypatch):
+    page = _Resp(200, '<script>{"formtoken":"T"}</script>', "text/html")
+    wall = _Resp(403, '{"errors":[{"code":"BOT_CAPTCHA_REDIRECT"}]}')
+    monkeypatch.setattr(kayakweb, "_session", lambda brand: type("S", (), {
+        "get": lambda *a, **k: page, "post": lambda *a, **k: wall})())
+    monkeypatch.setattr(_browser, "available", lambda headful=False: True)
+    monkeypatch.setattr(kayakweb, "_browser_fetch", lambda brand, url, *a: {"status": "complete", "url": url})
+    got = kayakweb._fetch("momondo", "www.momondo.com", "LAX", "JFK", date(2026, 11, 6), None, 1, "economy")
+    assert got["url"].startswith("https://www.momondo.com/flight-search/LAX-JFK/2026-11-06")
+    monkeypatch.setattr(_browser, "available", lambda headful=False: False)
+    with pytest.raises(RuntimeError, match="BOT_CAPTCHA"):
+        kayakweb._fetch("kayakweb", "www.kayak.com", "LAX", "JFK", date(2026, 11, 7), None, 1, "economy")

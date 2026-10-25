@@ -9,10 +9,16 @@ with its flight number and UTC offsets, and included baggage. We ask for the
 cheapest page and the "best" page (2 requests per route), 0.5 to 15 seconds
 each. The market follows the ``currency`` parameter (USD, EUR, NOK, ...).
 
+Since October 2026 an AWS WAF challenge sometimes answers plain clients
+(HTTP 202 pages, 429 "Rate limit exceeded" from the API). Then the same
+requests run inside the shared Chrome, which passes the challenge in a few
+seconds and keeps its token for the next searches.
+
 Unofficial: the schema can change without notice; everything fails soft."""
 
 from __future__ import annotations
 
+import json
 import threading
 import time
 from datetime import date, datetime
@@ -22,6 +28,7 @@ from curl_cffi import requests as cr
 
 from .. import cache
 from ..models import Itinerary, SearchQuery, Segment, Slice
+from . import _browser
 
 SITE = "https://flights.booking.com"
 API = SITE + "/api/flights/"
@@ -139,6 +146,9 @@ def _fetch(params: dict) -> dict:
     for attempt in range(2):
         r = _session().get(API, params=params, timeout=45, headers={
             "Accept": "application/json", "Referer": f"{SITE}/flights/{params['from']}-{params['to']}/"})
+        if r.status_code == 429 and _browser.available():
+            d = _browser_fetch(params)  # the WAF challenge: a real browser passes it
+            break
         if r.status_code in (429, 500, 502, 503, 504):
             last = f"HTTP {r.status_code}"
             time.sleep(1.5)
@@ -146,11 +156,39 @@ def _fetch(params: dict) -> dict:
         if r.status_code != 200 or "json" not in r.headers.get("content-type", ""):
             raise RuntimeError(f"booking: HTTP {r.status_code} {r.text[:120]!r}")
         d = r.json()
-        if d.get("error") or ("flightOffers" not in d and d.get("code")):
-            raise RuntimeError(f"booking: {str(d)[:200]}")
-        cache.put(key, d)
-        return d
-    raise RuntimeError(f"booking: no response ({last})")
+        break
+    else:
+        raise RuntimeError(f"booking: no response ({last})")
+    if d.get("error") or ("flightOffers" not in d and d.get("code")):
+        raise RuntimeError(f"booking: {str(d)[:200]}")
+    cache.put(key, d)
+    return d
+
+
+def _browser_fetch(params: dict) -> dict:
+    api = API + "?" + urlencode(params)
+
+    def job(page) -> tuple[int, str]:
+        fresh = False
+        while True:
+            if fresh or not page.url.startswith(SITE):
+                # the results page runs the challenge, then calls the API itself
+                got = _browser.capture(page, lambda: page.goto(
+                    f"{SITE}/flights/{params['from']}-{params['to']}/?" + urlencode(params),
+                    wait_until="domcontentloaded", timeout=45000), lambda u: "/api/flights/" in u, timeout=40)
+                if not got:
+                    raise RuntimeError("booking: the browser check was not passed")
+                fresh = True
+            status, text = page.evaluate("""async (u) => { const r = await fetch(u, {headers: {accept: 'application/json'}});
+                                            return [r.status, await r.text()]; }""", api)
+            if status == 200 or fresh:
+                return status, text
+            fresh = True  # the token ran out: load the page again
+
+    status, text = _browser.run(job, "booking", timeout=90)
+    if status != 200:
+        raise RuntimeError(f"booking: HTTP {status} in the browser too {text[:120]!r}")
+    return json.loads(text)
 
 
 def search(q: SearchQuery) -> list[Itinerary]:
