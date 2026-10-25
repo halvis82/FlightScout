@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { matchesExploreDates } from "@/lib/explore-dates";
+import { fitsTripLength, matchesExploreDates } from "@/lib/explore-dates";
 
 describe("explore date flexibility", () => {
   const matches = (departure: string | null, return_date: string | null, flex = 0, retFlex = 0, roundTrip = true) =>
@@ -19,5 +19,14 @@ describe("explore date flexibility", () => {
     expect(matches(null, null)).toBe(false);
     expect(matches("2027-01-02", null)).toBe(false);
     expect(matches("2027-01-02", null, 0, 0, false)).toBe(true);
+  });
+});
+
+describe("explore trip length", () => {
+  it("keeps only trips of the asked length, whatever the dates", () => {
+    expect(fitsTripLength({ departure: "2027-01-08", return_date: "2027-01-10" }, 1, 4)).toBe(true);
+    expect(fitsTripLength({ departure: "2027-01-08", return_date: "2027-01-15" }, 1, 4)).toBe(false); // the tracker's week long trips
+    expect(fitsTripLength({ departure: "2027-01-08", return_date: null }, 1, 4)).toBe(false);
+    expect(fitsTripLength({ departure: "2027-01-08", return_date: null }, null, null)).toBe(true); // one way
   });
 });

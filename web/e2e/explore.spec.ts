@@ -25,6 +25,15 @@ test.describe("explore", () => {
     await expect(page.getByText(/[1-9]\d* flights/).first()).toBeVisible({ timeout: 60_000 });
   });
 
+  test("any dates keeps the trip length: a weekend lists no week long trips", async ({ page }) => {
+    await page.goto(`/?from=SAN&tt=roundtrip&d=${inDays(33)}&r=${inDays(35)}`);
+    const rows = page.locator("section .cursor-pointer");
+    await expect.poll(() => rows.count(), { timeout: 30_000 }).toBeGreaterThan(5);
+    await page.getByRole("radio", { name: "Any dates" }).click();
+    const nights = await rows.evaluateAll((els) => els.map((e) => Number(/(\d+) nights/.exec(e.textContent ?? "")?.[1] ?? 0)));
+    expect(nights.filter((n) => n > 3), "trips longer than 2 nights ± 1").toEqual([]);
+  });
+
   test("price slider and date toggle filter the list", async ({ page }) => {
     await page.goto(`/?from=SAN&tt=roundtrip&d=${inDays(33)}&r=${inDays(40)}`);
     const rows = page.locator("section .cursor-pointer");

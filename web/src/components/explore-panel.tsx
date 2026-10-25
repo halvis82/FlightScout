@@ -11,7 +11,7 @@ import { addDays, dayDiff, formatDate } from "@/lib/format";
 import { priceScale } from "@/lib/price-scale";
 import type { Destination } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { matchesExploreDates } from "@/lib/explore-dates";
+import { fitsTripLength, matchesExploreDates } from "@/lib/explore-dates";
 
 type Sort = "price" | "date";
 
@@ -51,6 +51,8 @@ export function ExplorePanel({
   // The date-specific view uses exactly the flexibility chosen in the form.
   const win = when === "mine" ? flex : Math.max(2, flex);
   const spread = when === "mine" ? flex + retFlex : Math.max(1, flex + retFlex);
+  const nightsMin = nights ? Math.max(1, nights - spread) : null;
+  const nightsMax = nights ? nights + spread : null;
   const key = JSON.stringify([origins, depart, nights, win, spread, currency, when, retFlex]);
 
   const shownFor = useRef("");
@@ -73,6 +75,7 @@ export function ExplorePanel({
         // Filter before choosing the cheapest offer for each city: an unrelated
         // cached bargain must not displace an offer within the requested dates.
         if (when === "mine" && !matchesExploreDates(d, depart, ret, flex, retFlex, roundTrip)) return;
+        if (!fitsTripLength(d, nightsMin, nightsMax)) return;
         const cur = merged.get(d.destination);
         if (!cur || convert(d.price, d.currency, "USD") < convert(cur.price, cur.currency, "USD")) merged.set(d.destination, d);
       };
@@ -90,8 +93,8 @@ export function ExplorePanel({
         start: addDays(depart, -win),
         end: addDays(depart, win),
         currency,
-        nights_min: nights ? Math.max(1, nights - spread) : null,
-        nights_max: nights ? nights + spread : null,
+        nights_min: nightsMin,
+        nights_max: nightsMax,
         batch,
         quiet: true, // suggestions shown by themselves, not searches to keep in history
       });
@@ -132,12 +135,14 @@ export function ExplorePanel({
     const arr = all.filter(
       (d) =>
         (maxPrice == null || convert(d.price, d.currency) <= maxPrice) &&
-        (when === "any" || matchesExploreDates(d, depart, ret, flex, retFlex, roundTrip)),
+        (when === "any" || matchesExploreDates(d, depart, ret, flex, retFlex, roundTrip)) &&
+        // the list from the last trip length stays up until the new one lands: hide what no longer fits
+        fitsTripLength(d, nightsMin, nightsMax),
     );
     return arr.sort((a, b) =>
       sort === "price" ? convert(a.price, a.currency, "USD") - convert(b.price, b.currency, "USD") : (a.departure ?? "").localeCompare(b.departure ?? ""),
     );
-  }, [all, sort, convert, maxPrice, when, depart, flex, roundTrip, ret, retFlex]);
+  }, [all, sort, convert, maxPrice, when, depart, flex, roundTrip, ret, retFlex, nightsMin, nightsMax]);
 
   const scale = useMemo(() => priceScale(list.map((d) => convert(d.price, d.currency))), [list, convert]);
   const city = (d: Destination) => d.city || airport(d.destination)?.city || d.destination;
