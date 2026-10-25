@@ -31,6 +31,10 @@ export async function pickAirport(page: Page, placeholder: RegExp | string, text
 
 export async function clearFrom(page: Page) {
   const form = page.locator("form");
+  // a first visit looks up the airport nearest the visitor's IP and fills it in
+  // a moment later (GitHub's runners: QRO); let that land before clearing
+  await page.waitForFunction(() => localStorage.getItem("fs.geoFrom") !== null, null, { timeout: 10_000 }).catch(() => {});
+  await page.waitForTimeout(300);
   while (await form.getByRole("button", { name: /^Remove / }).count()) {
     await form.getByRole("button", { name: /^Remove / }).first().click();
   }

@@ -22,7 +22,7 @@ test("with the extension, Google searches run from the browser", async ({ baseUR
     });
     await page.goto(`${baseURL}/?from=OSL&to=CPH&tt=oneway&d=${inDays(45)}&smart=0`);
     await expect(page.getByText("Your browser", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText(/\d+ flights/).first()).toBeVisible({ timeout: 90_000 });
+    await expect(page.getByText(/[1-9]\d* flights/).first()).toBeVisible({ timeout: 90_000 });
     await expect.poll(() => rounds.length, { timeout: 60_000 }).toBeGreaterThanOrEqual(2); // ask, then pages
     expect(Math.max(...rounds)).toBeLessThan(4_000_000); // under Vercel's request limit
   } finally {
@@ -47,7 +47,7 @@ test("with the extension, a round trip mirrors Google's Best and Cheapest tabs",
       if (r.url().includes("/api/v1/browser")) bodies.push(r.postData() ?? "");
     });
     await page.goto(`${baseURL}/?from=LAX&to=DPS&d=${inDays(90)}&r=${inDays(101)}&smart=0`);
-    await expect(page.getByText(/\d+ flights/).first()).toBeVisible({ timeout: 120_000 });
+    await expect(page.getByText(/[1-9]\d* flights/).first()).toBeVisible({ timeout: 120_000 });
     await expect.poll(() => bodies.some((b) => b.includes('"list:https://www.google.com/travel/flights')), { timeout: 90_000 }).toBe(true);
     expect(Math.max(...bodies.map((b) => b.length))).toBeLessThan(4_000_000);
     await expect(page.getByRole("radio", { name: /Cheapest from/ })).toBeVisible();

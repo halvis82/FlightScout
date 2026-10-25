@@ -9,7 +9,7 @@ test.describe("search", () => {
     await pickAirport(page, /Where from|Add airport/, "lax", "LAX");
     await pickAirport(page, "Anywhere (explore)", "denpasar", "Denpasar");
     // step count: two picks, zero clicks on Search
-    await expect(page.getByText(/\d+ flights/).first()).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByText(/[1-9]\d* flights/).first()).toBeVisible({ timeout: 60_000 });
     const logos = await page.locator("img[alt]").evaluateAll((els) => new Set(els.map((e) => (e as HTMLImageElement).alt)).size);
     expect(logos, "several airlines in results").toBeGreaterThan(3);
     expect(errors).toEqual([]);
@@ -17,10 +17,10 @@ test.describe("search", () => {
 
   test("date arrow re-searches and keeps old results visible meanwhile", async ({ page }) => {
     await page.goto(`/?from=OSL&to=CPH&tt=oneway&d=${inDays(45)}`);
-    await expect(page.getByText(/\d+ flights/).first()).toBeVisible();
+    await expect(page.getByText(/[1-9]\d* flights/).first()).toBeVisible();
     const before = await page.locator("form").innerText();
     await page.locator("form button[aria-label*='later'], form button[aria-label*='Next']").first().click();
-    await expect(page.getByText(/\d+ flights/).first()).toBeVisible(); // never blank
+    await expect(page.getByText(/[1-9]\d* flights/).first()).toBeVisible(); // never blank
     expect(await page.locator("form").innerText()).not.toEqual(before);
   });
 
@@ -47,7 +47,7 @@ test.describe("search", () => {
 
   test("logo resets and tabs keep the search", async ({ page }) => {
     await page.goto(`/?from=OSL&to=CPH&tt=oneway&d=${inDays(45)}`);
-    await expect(page.getByText(/\d+ flights/).first()).toBeVisible();
+    await expect(page.getByText(/[1-9]\d* flights/).first()).toBeVisible();
     await page.getByRole("link", { name: "Airlines", exact: true }).click();
     await page.getByRole("link", { name: "Search", exact: true }).first().click();
     await expect(page.locator("form")).toContainText("CPH");
@@ -69,7 +69,7 @@ test.describe("search", () => {
 
 test("switching currency converts every price on screen", async ({ page }) => {
   await page.goto(`/?from=OSL&to=CPH&tt=oneway&d=${inDays(45)}`);
-  await expect(page.getByText(/\d+ flights/).first()).toBeVisible();
+  await expect(page.getByText(/[1-9]\d* flights/).first()).toBeVisible();
   await page.getByRole("button", { name: /^Currency:/ }).first().click();
   await page.getByRole("menuitemradio", { name: /NOK/ }).first().click();
   await expect(page.locator("main").getByText(/NOK\s?[\d,]+|kr\s?[\d,]+|[\d,]+\s?kr/).first()).toBeVisible();
@@ -89,12 +89,12 @@ test("keyboard only: type an airport and press Enter", async ({ page }) => {
 
 test("recent searches: one click repeats a past search", async ({ page }) => {
   await page.goto(`/?from=OSL&to=CPH&tt=oneway&d=${inDays(45)}`);
-  await expect(page.getByText(/\d+ flights/).first()).toBeVisible();
+  await expect(page.getByText(/[1-9]\d* flights/).first()).toBeVisible();
   await page.getByRole("link", { name: "FlightScout" }).first().click();
   await expect(page.locator("form")).not.toContainText("CPH");
   await page.getByRole("button", { name: /Oslo → Copenhagen/ }).first().click();
   await expect(page.locator("form")).toContainText("CPH");
-  await expect(page.getByText(/\d+ flights/).first()).toBeVisible(); // searched by itself
+  await expect(page.getByText(/[1-9]\d* flights/).first()).toBeVisible(); // searched by itself
   await expect(page.getByRole("link", { name: "All history" })).toBeVisible();
 });
 
@@ -109,7 +109,7 @@ test("streams results with a clear searching and complete state", async ({ page 
   const chips = page.getByLabel("Sources");
   await expect(chips.getByText("Google Flights")).toBeVisible();
   // results show before everything has answered
-  await expect(page.getByText(/\d+ flights/).first()).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText(/[1-9]\d* flights/).first()).toBeVisible({ timeout: 60_000 });
   // reads as done once the quick sources answered; slow booking sites keep filling in behind a chip
   await expect(searching).toHaveCount(0, { timeout: 180_000 });
   await expect(page.getByText(/^\d+ flights$/).first()).toBeVisible();
