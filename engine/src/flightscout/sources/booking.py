@@ -177,7 +177,7 @@ def _browser_fetch(params: dict) -> dict:
                     f"{SITE}/flights/{params['from']}-{params['to']}/?" + urlencode(params),
                     wait_until="domcontentloaded", timeout=45000), lambda u: "/api/flights/" in u, timeout=40)
                 if not got:
-                    raise RuntimeError("booking: the browser check was not passed")
+                    raise RuntimeError("booking: blocked, the browser check was not passed")
                 fresh = True
             status, text = page.evaluate("""async (u) => { const r = await fetch(u, {headers: {accept: 'application/json'}});
                                             return [r.status, await r.text()]; }""", api)
