@@ -41,7 +41,8 @@ test("Around uses separate departure and return windows, then restores Any dates
   await page.route("**/explore", (route) => route.fulfill({ json: { items } }));
   await page.goto(`/?from=SAN&tt=roundtrip&d=${Y}-10-15&r=${Y}-10-22`);
   const rows = page.locator("section .cursor-pointer");
-  await expect(rows).toHaveCount(4);
+  // Any dates keeps the trip length: 7 nights ± 1 leaves out Frankfurt (9) and Rome (5)
+  await expect(rows).toHaveCount(2);
   await page.getByRole("radio", { name: /Around/ }).click();
   await expect(rows).toHaveCount(1);
   await page.getByRole("button", { name: "Departure: plus or minus 1 days", exact: true }).click();
@@ -52,5 +53,5 @@ test("Around uses separate departure and return windows, then restores Any dates
   await expect(rows.filter({ hasText: "Frankfurt" })).toBeVisible();
   await expect(rows.filter({ hasText: "Rome" })).toHaveCount(0);
   await page.getByRole("radio", { name: "Any dates", exact: true }).click();
-  await expect(rows).toHaveCount(4);
+  await expect(rows).toHaveCount(4); // the wider flexibility (± 3 nights) now fits all four
 });
