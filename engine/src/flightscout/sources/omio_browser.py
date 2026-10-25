@@ -80,7 +80,14 @@ def _fetch(o: str, d: str, day: date, adults: int, currency: str) -> tuple[dict,
             page.goto(SITE + "/", wait_until="domcontentloaded", timeout=60000)
         if not _browser.pass_cloudflare(page, 30):
             raise RuntimeError("omio: Cloudflare challenge did not clear")
-        page.wait_for_selector("#lpsFerret", state="attached", timeout=30000)
+        try:
+            page.wait_for_selector("#lpsFerret", state="attached", timeout=30000)
+        except Exception:
+            try:
+                seen = f"{page.title()!r}: {page.inner_text('body', timeout=3000)[:150]!r}"
+            except Exception:
+                seen = page.url[:80]
+            raise RuntimeError(f"omio: no search form on the home page ({seen})") from None
         dep = page.evaluate(_LOOKUP_JS, _city(o))
         arr = page.evaluate(_LOOKUP_JS, _city(d))
         if not dep or not arr:
