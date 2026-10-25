@@ -83,12 +83,16 @@ def parse(data: dict, adults: int = 1, url: str = "") -> list[Itinerary]:
 
 
 def _fetch(url: str) -> dict:
-    def job(page) -> str:
+    def job(page) -> tuple[str, bool]:
         got = _browser.capture(page, lambda: page.goto(url, wait_until="commit", timeout=45000),
                                lambda u: "/api/v2/flight/search/initial" in u, timeout=45)
-        return got[-1][1] if got else ""
+        if got:
+            return got[-1][1], False
+        return "", any("captcha-delivery.com" in f.url for f in page.frames)
 
-    txt = _browser.run(job, "traveloka", timeout=120)
+    txt, walled = _browser.run(job, "traveloka", timeout=120)
+    if walled:  # DataDome's "Access is temporarily restricted ... your device or network"
+        raise RuntimeError("traveloka: no search response, DataDome blocked this network")
     if not txt:
         raise RuntimeError("traveloka: no search response")
     return json.loads(txt)

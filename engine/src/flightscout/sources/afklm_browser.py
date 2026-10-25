@@ -113,12 +113,18 @@ def _slice(j: dict) -> Slice:
 
 
 def _fetch(url: str) -> dict:
-    def job(page) -> tuple[str, str]:
+    def job(page) -> tuple[str, str, bool]:
+        denied = []
+        page.on("response", lambda r: r.status == 403 and "/gql/" in r.url and denied.append(1))
         got = _browser.capture(page, lambda: page.goto(url, wait_until="commit", timeout=45000),
                                lambda u: "operationName=SearchResultAvailableOffersQuery" in u, timeout=45)
-        return (got[-1][1], "") if got else ("", page.url)
+        return (got[-1][1], "", False) if got else ("", page.url, bool(denied))
 
-    txt, where = _browser.run(job, "afklm", timeout=150)
+    txt, where, denied = _browser.run(job, "afklm", timeout=150)
+    if denied and not txt:
+        # Akamai's "Access Denied" on the search calls: this network is flagged
+        # (seen from home after many test runs in a row, October 2026)
+        raise RuntimeError("afklm: no availability response, Akamai answered Access Denied")
     if not txt:
         raise RuntimeError(f"afklm: no availability response (ended on {where[:80]})")
     d = json.loads(txt)
