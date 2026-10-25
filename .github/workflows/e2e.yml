@@ -40,7 +40,7 @@ jobs:
           FLIGHTSCOUT_LIVE: "1"
           FLIGHTSCOUT_LIVE_STATE: .live-failures.json
           ONLY: ${{ inputs.only }}
-        run: uv run --extra browser pytest -q -m live --reruns 1 --reruns-delay 30 ${ONLY:+-k "$ONLY"}
+        run: uv run --extra browser pytest -q -rs -m live --reruns 1 --reruns-delay 30 ${ONLY:+-k "$ONLY"}
       # a run of only some tests would forget the others' failures
       - name: Save this run's live failures
         if: always() && !inputs.only
