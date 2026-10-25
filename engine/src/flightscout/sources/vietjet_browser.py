@@ -117,9 +117,27 @@ def _fetch(origin: str, dest: str, day: date, adults: int) -> dict:
                                                     {"timezoneId": "Asia/Ho_Chi_Minh"})
         except Exception as e:
             log.debug("timezone override failed: %s", e)
-        got = _browser.capture(page, lambda: page.goto(url, wait_until="commit", timeout=60000),
-                               lambda u: "/booking/api/v1/search-flight" in u, timeout=150,
-                               body=lambda t: marker in t or '"travelOption":{}' in t)
+        denied: list[int] = []
+
+        def doc(r):
+            if r.request.resource_type == "document" and r.status == 403:
+                denied.append(1)
+
+        page.on("response", doc)
+        try:
+            # about one load in three the page itself is answered with an S3
+            # style AccessDenied; it loads fine a moment later
+            for attempt in range(3):
+                denied.clear()
+                got = _browser.capture(page, lambda: page.goto(url, wait_until="commit", timeout=60000),
+                                       lambda u: "/booking/api/v1/search-flight" in u, timeout=150,
+                                       body=lambda t: marker in t or '"travelOption":{}' in t, stop=lambda: bool(denied))
+                if got or not denied:
+                    break
+                log.info("vietjet: the page answered AccessDenied, loading it again")
+                page.wait_for_timeout(2000)
+        finally:
+            page.remove_listener("response", doc)
         return got[-1][1] if got else ""
 
     txt = _browser.run(job, "vietjet", timeout=240)
