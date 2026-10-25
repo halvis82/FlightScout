@@ -149,3 +149,24 @@ def test_google_parts_split_exact_and_nearby_dates(monkeypatch):
     seen.clear()
     assert s.SOURCES["google_flex"](q) == [] and seen == []  # no cheaper nearby date known: nothing to add
     assert s.SOURCES["google_flex"](q.model_copy(update={"departure_flex_days": 0})) == []
+
+
+def test_page_refusals_pause_the_browser_page(monkeypatch):
+    """Google answers its own page with error 13 from GitHub's runners: after
+    three refusals in a row the step stops loading the page for a while."""
+    from fli.search.exceptions import SearchRejectedError
+
+    from flightscout.sources import _browser
+
+    def refused(body):
+        raise SearchRejectedError("Google Flights declined the request with error 13")
+
+    runs = []
+    monkeypatch.setattr("fli.search._tfs.build_tfs", lambda f: "T")
+    monkeypatch.setattr("fli.search._wire.iter_wrb_chunks", refused)
+    monkeypatch.setattr(_browser, "available", lambda headful=False: True)
+    monkeypatch.setattr(_browser, "run", lambda job, key, timeout=0: runs.append(1) or ["refused"])
+    monkeypatch.setattr(google, "_page_refused", [0, 0.0])
+    for _ in range(5):
+        assert google._page_rows(object(), "USD") == []
+    assert len(runs) == 3

@@ -211,6 +211,21 @@ def _legs_key(f) -> tuple:
     return tuple((leg.airline.name, leg.flight_number, leg.departure_datetime) for leg in f.legs)
 
 
+# Keeps the text of each GetShoppingResults answer inside the page. Reading it
+# through the network events failed about one load in five ("No data found
+# for resource": Chrome had already dropped the body).
+_KEEP_SHOPPING = """(() => {
+  window.__fsShopping = [];
+  const f = window.fetch;
+  window.fetch = async function (input) {
+    const r = await f.apply(this, arguments);
+    if (String(typeof input === "string" ? input : input.url).includes("GetShoppingResults"))
+      r.clone().text().then(t => window.__fsShopping.push(t), () => {});
+    return r;
+  };
+})()"""
+_page_refused = [0, 0.0]  # refusals in a row, skip the page until this time
+
 _SOCS = {"name": "SOCS", "value": "CAESEwgDEgk0ODE3Nzk3MjQaAmVuIAEaBgiA_LyaBg", "domain": ".google.com", "path": "/"}
 
 
@@ -223,6 +238,7 @@ def _page_rows(filters, currency: str) -> list:
     from fli.search._decoders import parse_flight_row
     from fli.search._tfs import build_tfs
     from fli.search._wire import iter_wrb_chunks
+    from fli.search.exceptions import SearchRejectedError
 
     url = _fli_flights.page_url(build_tfs(filters), currency)
     if browser_fetch.active():
@@ -245,32 +261,57 @@ def _page_rows(filters, currency: str) -> list:
             log.info("google: server page unavailable: %s", e)
             return []
         return _priced(rows, parse_flight_row)
-    if not _browser.available():
+    if not _browser.available() or time.time() < _page_refused[1]:
         return []
 
-    def job(page) -> str:
+    def job(page) -> list[str]:
         # A fresh context each time: in the long lived shared profile Google
         # answered with a different (pricier, $840 vs $727 SAN-OSL) fare set.
         ctx = page.context.browser.new_context(locale="en-US")
         try:
             ctx.add_cookies([_SOCS])
             # (blocking images/CSS was tried: it made Google's page twice as slow)
+            ctx.add_init_script(_KEEP_SHOPPING)
             pg = ctx.new_page()
-            got = _browser.capture(pg, lambda: pg.goto(url, wait_until="commit", timeout=30000),
-                                   lambda u: "GetShoppingResults" in u, timeout=12)
-            return got[-1][1] if got else ""
+            pg.goto(url, wait_until="commit", timeout=30000)
+            end = time.time() + 12
+            while time.time() < end:
+                try:
+                    if got := pg.evaluate("window.__fsShopping || []"):
+                        return got
+                except Exception:  # the page is still navigating
+                    pass
+                pg.wait_for_timeout(200)
+            return []
         finally:
             ctx.close()
 
+    rows, refused = [], None
     try:
-        # streamed: the first chunk is the airports, flight rows come later
-        rows = [r for inner in iter_wrb_chunks(_browser.run(job, "google", timeout=60))
-                if isinstance(inner, list) and len(inner) > 3
-                for i in (2, 3) if isinstance(inner[i], list) and inner[i] and isinstance(inner[i][0], list)
-                for r in inner[i][0]]
+        for body in _browser.run(job, "google", timeout=60):
+            try:
+                # streamed: the first chunk is the airports, flight rows come later
+                rows += [r for inner in iter_wrb_chunks(body)
+                         if isinstance(inner, list) and len(inner) > 3
+                         for i in (2, 3) if isinstance(inner[i], list) and inner[i] and isinstance(inner[i][0], list)
+                         for r in inner[i][0]]
+            except SearchRejectedError as e:
+                refused = e
     except Exception as e:
         log.info("google: browser page unavailable: %s", e)
         return []
+    if rows or not refused:
+        _page_refused[0] = 0
+    else:
+        # Google refuses its own page from datacenter IPs (GitHub's runners)
+        # and, for a while, from an IP that loaded it many times in a row.
+        # After a few refusals in a row, stop asking for a quarter hour.
+        _page_refused[0] += 1
+        if _page_refused[0] >= 3:
+            _page_refused[:] = [0, time.time() + 900]
+            log.info("google: Google refuses its results page here, skipping it for 15 minutes")
+        else:
+            log.info("google: browser page refused: %s", str(refused)[:120])
     return _priced(rows, parse_flight_row)
 
 
