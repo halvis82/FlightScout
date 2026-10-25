@@ -64,7 +64,10 @@ _WALLED = ("403", "429", "forbidden", "security verification", "just a moment", 
            "no shopping response", "zipair_browser: no flights",
            # Expedia, Orbitz and Travelocity send GitHub's servers a results page without flights
            # (all three passed from home 2026-10-23)
-           "expedia: the results page sent no flight list")
+           "expedia: the results page sent no flight list",
+           # Omio finishes the search for GitHub's servers with no results of any kind (77 flights from home
+           # on 2026-10-24)
+           "omio: the finished search sent no results at all")
 
 
 @pytest.hookimpl(hookwrapper=True)

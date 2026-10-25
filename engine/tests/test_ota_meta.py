@@ -134,11 +134,4 @@ def test_live_omio(monkeypatch):
         pytest.skip("needs Playwright + Google Chrome")
     monkeypatch.setenv("FLIGHTSCOUT_OMIO_UNVERIFIED", "1")
     its = omio_browser.search(q("BER", "BCN", str(D)))
-    if not its:  # say what the finished search held instead
-        from collections import Counter
-
-        data, url = omio_browser._fetch("BER", "BCN", D, 1, "USD")
-        cards = ((data.get("data") or {}).get("outbounds") or {}).get("cards") or {}
-        kinds = Counter((c.get("travelMode"), c.get("isBookable"), c.get("status")) for c in cards.values())
-        pytest.fail(f"omio: no flights from a finished search ({url[:90]}): cards {dict(kinds)}")
-    assert all(i.source == "omio" and i.price > 0 for i in its)
+    assert its and all(i.source == "omio" and i.price > 0 for i in its)

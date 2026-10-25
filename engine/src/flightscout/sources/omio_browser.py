@@ -104,7 +104,11 @@ def _fetch(o: str, d: str, day: date, adults: int, currency: str) -> tuple[dict,
     txt, url = _browser.run(job, "omio", timeout=150)
     if not txt:
         raise RuntimeError(f"omio: no results (ended on {url[:80]})")
-    return json.loads(txt), url
+    data = json.loads(txt)
+    if not ((data.get("data") or {}).get("outbounds") or {}).get("cards"):
+        # not even a train or bus: what GitHub's servers get since October 2026
+        raise RuntimeError("omio: the finished search sent no results at all")
+    return data, url
 
 
 def _flight(tid: str, company: str | None) -> tuple[str, str | None]:
