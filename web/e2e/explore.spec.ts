@@ -33,8 +33,10 @@ test.describe("explore", () => {
     await page.getByRole("radio", { name: "Any dates" }).click();
     // the list refreshes for the new mode: measure it once it is populated again
     await expect.poll(() => rows.count(), { timeout: 30_000 }).toBeGreaterThan(20);
+    // more places keep streaming in (36, then 124 on GitHub): measure once the list stops growing
+    let n = 0;
+    await expect.poll(async () => n === (n = await rows.count()), { timeout: 90_000, intervals: [3_000] }).toBe(true);
     const slider = page.getByRole("slider", { name: "Maximum price" }).first();
-    const n = await rows.count();
     await slider.evaluate((el: HTMLInputElement) => {
       const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
       set.call(el, String(Math.round((Number(el.min) + Number(el.max)) / 4)));
